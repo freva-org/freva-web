@@ -1,0 +1,29 @@
+{% extends "_layouts/menu.html" %}
+
+{% block page_title %}Your Site - Home{% endblock %}
+{% block page_class %}home-page{% endblock %}
+{% block content %}
+<!-- This code is taken from http://twitter.github.com/bootstrap/examples/hero.html -->
+
+
+
+    <div class="container">
+      <!-- Example row of columns -->
+      <div class="row">
+        <div class="col-md-12">
+          <h2>Plugins</h2>
+          	
+          	<div class="list-group">
+		    {% for key, value in tool_list.items %}
+			  <a href="{% url 'plugins:detail' key %}" class="list-group-item">
+			    <h4 class="list-group-item-heading">{{ value.name }}</h4>
+			    <p class="list-group-item-text">{{ value.description }}</p>
+			  </a>
+		    {% endfor %}
+			</div>  
+
+        </div>
+
+      </div>
+ 
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends "_layouts/menu.html" %}
+
+{% block page_title %}Your Site - Home{% endblock %}
+{% block page_class %}home-page{% endblock %}
+{% block content %}
+<!-- This code is taken from http://twitter.github.com/bootstrap/examples/hero.html -->
+
+       
+
+
+    <div class="container">
+      <!-- Example row of columns -->
+      <div class="row">
+	      <div class="col-md-12">
+	      	<h1>{{ history_object.name }}</h1>
+	      </div>
+      </div>
+      
+      {% if file_content %}
+      <script>
+      function doUpdate() {
+		  var tailServiceUrl = '{% url 'history:tailFile' 10%}';
+		  $.ajax({type: "GET", url : tailServiceUrl,
+		          success: function (data) {
+		             if (data.length > 0)
+		             {
+		                var output = '';
+		                console.log(data)
+		                $.each(data, function(index,value){
+		                	output += value;
+		                });
+		                $("#logOutputDiv").append(output);
+		                $('#logOutputDiv').stop().animate({
+						  scrollTop: $("#logOutputDiv")[0].scrollHeight
+						}, 800);
+		             }
+		             setTimeout("doUpdate()", 2000);
+		           }});
+		}
+		setTimeout("doUpdate()", 2000);
+		</script>
+      
+	      <div class="row">
+	        <div class="col-md-12">
+	        	<p>The tool is still running. Here you can see the output:</p>
+		        <div id="logOutputDiv" class="well well-lg" style="height:450px; overflow-y:scroll; overflow-x: hidden;">
+	
+		        {% for line in file_content %}
+		        
+		        	{{line}}<br>
+		        
+		        {%endfor%}
+		        
+		        </div>
+	        </div>
+	      </div>
+	      
+	  {%else%}
+	 	 <div class="row">
+	        <div class="col-md-3">
+	        	<a rel="gallery1" class="thumbnail fancybox" href="{{ STATIC_URL }}img/test/1_msss_master.png" title="Singapore from the air (Andrew Tan 2011)">
+					<img src="{{ STATIC_URL }}img/test/1_msss_master.png" alt="" />
+				</a>
+			</div>
+			<div class="col-md-3">
+				<a rel="gallery1" class="thumbnail fancybox" href="{{ STATIC_URL }}img/test/1_correlation_master.png" title="forest mood (halina-anna)">
+					<img src="{{ STATIC_URL }}img/test/1_correlation_master.png" alt="" />
+				</a>
+			</div>
+			<div class="col-md-3">
+				<a rel="gallery1" class="thumbnail fancybox" href="{{ STATIC_URL }}img/test/9_correlation_master.png" title="311111 AUTUMN AT OSBORNE (THE ANCIENT MATELOT)">
+					<img src="{{ STATIC_URL }}img/test/9_correlation_master.png" alt="" />
+				</a>
+			</div>
+			<div class="col-md-3">
+				<a rel="gallery1" class="thumbnail fancybox" href="{{ STATIC_URL }}img/test/9_msss_master.png" title="Lake Shirakawako (白川湖) [Explored] (Yukimomiji@もみぢ)">
+					<img src="{{ STATIC_URL }}img/test/9_msss_master.png" alt="" />
+				</a>
+			</div>
+
+	     </div>
+	        
+	  
+	  	<script>
+		$(document).ready(function() {
+			$(".fancybox").fancybox({
+				openEffect	: 'none',
+				closeEffect	: 'none'
+			});
+		});
+		</script>
+
+	  {%endif%}
+
+
+
+
+
+{% endblock %}

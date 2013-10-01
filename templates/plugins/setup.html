@@ -1,0 +1,157 @@
+{% extends "_layouts/menu.html" %}
+
+{% block page_title %}Your Site - Home{% endblock %}
+{% block page_class %}home-page{% endblock %}
+{% block content %}
+
+<script src="{{ STATIC_URL }}js/solr_search.js"></script>
+
+{% load bootstrap3 %}
+
+{# Load CSS and JavaScript #}
+
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+       
+
+
+    <div class="container">
+      <!-- Example row of columns -->
+      <div class="row">
+        <div class="col-md-12">
+        	<h1>{{tool.name}}</h1>
+          <p>{{tool.short_description}}</p>
+          <form action="" method="post">{% csrf_token %}		
+			
+			{% bootstrap_form form %}
+	        {% bootstrap_form_buttons %}
+	                <button type="submit" class="btn-lg btn-primary btn-block">
+	                        Run
+	                </button>
+	        {% end_bootstrap_form_buttons %}
+		  </form>
+        </div>
+      </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">Select a file</h4>
+        </div>
+        <div class="modal-body" id="browsefield">
+          ...
+        </div>
+        <div class="modal-footer">
+          <input type="hidden" name="senderField" id="senderField" value="">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Select file</button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+  
+  
+  <!-- Modal Solr_search-->
+  <div class="modal fade" id="myModal_solr" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">Search database</h4>
+        </div>
+        <div class="modal-body">
+          <div class="visual_search"></div>
+		
+			<table class="task_bar">
+			<tr><td style="width: 100px;">
+			<input type="button" class="button" id="select_all" value="Select all" />
+			</td><td style="width: 60px;">
+			<input type="button" class="button" id="done" value="Done" />
+	        </td><td style="width: 60px;">
+	        <input type="button" class="button" id="cancel" value="Cancel" />
+			</td><td>
+			<span id="count" />
+			</td><td style="width: 60px;">
+			<input type="button" class="button" id="all" value="Get all" disabled/>
+			</td><td style="width: 200px;">
+			<span id="selection"/>
+			</td></tr>
+			</table>
+		
+			<div class="files"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Done</button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+  
+
+
+<script>
+
+$(document).ready(function(){
+
+	$('#browsefield').fileTree({
+		root : '/home/illing',
+        script: '{% url 'plugins:dirlist' %}',
+        expandSpeed: 100,
+        collapseSpeed: 100,
+        multiFolder: false
+    }, function(file) {
+        console.log(file);
+		var sender = $('#senderField').val();
+		$('#'+sender).val(file);
+        $('#myModal').modal('hide');
+
+    });
+
+});
+
+
+$(document).ajaxSend(function(event, xhr, settings) {
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    function sameOrigin(url) {
+        // url could be relative or scheme relative or absolute
+        var host = document.location.host; // host + port
+        var protocol = document.location.protocol;
+        var sr_origin = '//' + host;
+        var origin = protocol + sr_origin;
+        // Allow absolute or scheme relative URLs to same origin
+        return (url == origin || url.slice(0, origin.length + 1) == origin + '/') ||
+            (url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') ||
+            // or any other URL that isn't scheme relative or absolute i.e relative.
+            !(/^(\/\/|http:|https:).*/.test(url));
+    }
+    function safeMethod(method) {
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    if (!safeMethod(settings.type) && sameOrigin(settings.url)) {
+        xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+    }
+});
+
+</script>
+
+
+{% endblock %}

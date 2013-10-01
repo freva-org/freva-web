@@ -1,0 +1,29 @@
+
+<div class="input-group">
+	<div class="input-group-btn ">
+		<button type="button" class="btn btn-primary" id="{{id}}_browse">Browse home</button>
+		<button type="button" class="btn btn-primary" id="{{id}}_solr">Search file</button>
+	</div>
+	<input type="text" class="form-control" value="{% if value %}{{ value }}{%endif%}" id="{{ id }}" placeholder="{{name}}" name="{{name}}">
+
+</div>
+
+<div style="margin-top:10px;">
+  
+  
+</div>
+
+<script>
+$(document).ready(function(){
+	$('#{{id}}_browse').on('click', function(e){
+		var sender = $(e.target).attr('id').replace('_browse','');
+		$('#senderField').val(sender);
+		$('#myModal').modal('show');
+	});
+	
+	$('#{{id}}_solr').on('click', function(e){
+		$('#myModal_solr').modal('show');
+	});
+	
+});
+</script>

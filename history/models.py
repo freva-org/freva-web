@@ -1,5 +1,7 @@
 from django.db import models
 
+import json
+
 class History(models.Model):
     """
     The class belongs to a table containing all processes, which were started with analyze.
@@ -19,6 +21,35 @@ class History(models.Model):
     #: Status (scheduled, running, finished, cancelled)
     status          = models.IntegerField(max_length=1)
 
+    
+    def __init__(self, *args, **kwargs):
+        """
+        Creates a dictionary for projectStatus
+        """
+        self.status_dict = dict()
+        public_props = (name for name in dir(self.processStatus) if not name.startswith('_'))
+        for name in public_props:
+            self.status_dict[getattr(self.processStatus,name)] = name
+        
+        super(History, self).__init__(*args, **kwargs)
+        
+        
+        
+
+    def config_dict(self):
+        """
+        Converts the configuration to a dictionary
+        """
+        return json.loads(self.configuration)
+
+    def status_name(self):
+        """
+        Returns status as string
+        """    
+        return self.status_dict[self.status]
+
+        
+
     class processStatus:
         """
         The allowed statuses
@@ -29,6 +60,9 @@ class History(models.Model):
         broken             - an exception occurred
         """
         finished, finished_no_output, scheduled, running, broken = range(5)
+        
+        
+            
 
 class Result(models.Model):
     """

@@ -10,6 +10,7 @@ def home(request):
     
     from history.models import History
     
+    print request.POST.keys
     
     h = History.objects.create(tool='pca',
                                timestamp=datetime.now(),

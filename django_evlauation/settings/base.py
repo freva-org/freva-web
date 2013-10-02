@@ -13,6 +13,15 @@ import ldap
 from django.core.exceptions import ImproperlyConfigured
 from django_auth_ldap.config import LDAPSearch
 
+
+def get_env_setting(setting):
+    """ Get the environment setting or return exception """
+    try:
+        return os.environ[setting]
+    except KeyError:
+        error_msg = "Set the %s env variable" % setting
+        raise ImproperlyConfigured(error_msg)
+
 # The server for LDAP configuration
 AUTH_LDAP_SERVER_URI = "ldaps://dsp1.dkrz.de, ldaps://dsp2.dkrz.de"
 
@@ -26,14 +35,24 @@ AUTHENTICATION_BACKENDS = (
 )
 
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'db/development.sqlite3',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+        #'OPTIONS': {
+        #    'init_command': 'SET storage_engine=InnoDB',
+        #    'charset' : 'utf8',
+        #    'use_unicode' : True,
+        #},
+        #'TEST_CHARSET': 'utf8',
+        #'TEST_COLLATION': 'utf8_general_ci',
+    },
+}
 
-def get_env_setting(setting):
-    """ Get the environment setting or return exception """
-    try:
-        return os.environ[setting]
-    except KeyError:
-        error_msg = "Set the %s env variable" % setting
-        raise ImproperlyConfigured(error_msg)
 
 
 # Your project root

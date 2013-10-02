@@ -10,10 +10,17 @@ from models import History
 
 def history(request):
     
-    user = User('illing')
+    
+    try: 
+        request.GET['uid']
+        user = request.GET['uid']
+    except KeyError:
+        user = 'illing'    
+    
+    #old database
     #history = pm.getHistory(user=user)
     
-    history = History.objects.filter(uid='illing')
+    history = History.objects.filter(uid=user)
     
     
     return render(request, 'history/history.html', {'history': history})
@@ -23,8 +30,10 @@ def results(request, id):
     
     #get history object
     history_object = {'user': 'illing', 'status': 'finished', 'name': 'Tool name'}
+   
+    history_object = History.objects.get(id=id)
     
-    if history_object['status'] == 'running':
+    if history_object.status == History.processStatus.running:
         file_name = '/home/illing/kunze_groups.txt'
         with open(file_name) as f:
             file_content = f.readlines()

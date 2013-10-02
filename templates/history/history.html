@@ -16,21 +16,40 @@
           <table class="table table-hover" id="dataTable">
           	<thead >
           	<tr>
-          		<th>Row Id</th><th>Tool</th><th>Version</th><th>Timestamp</th><th>&nbsp;</th>
+          		<th>Row Id</th><th>Tool</th><th>Version</th><th>Timestamp</th><th>Status</th><th>&nbsp;</th>
           	</tr>
           	</thead>
           	<tbody>
           {% for h_item in history %}
-          	
           	<tr>   		
           			<td>{{h_item.id}}</td>
           			<td>{{h_item.tool}}</td>
           			<td>{{h_item.version}}</td>
           			<td>{{h_item.timestamp}}</td>
+          			<td>{{ h_item.status_name }}</td>
           			<td>
+          			{% if h_item.status == h_item.processStatus.finished %}
 	          			<a class="btn btn-success btn-sm" href="{% url 'history:results' h_item.id %}">Show Results</a>
 	          			<a class="btn btn-success btn-sm" href="#">Run again</a>
 	          			<a class="btn btn-success btn-sm" href="{% url 'plugins:setup' h_item.tool%}">Edit Config</a>
+	          		{% endif %}
+	          		{% if h_item.status == h_item.processStatus.running %}
+	          			<a class="btn btn-success btn-sm" href="{% url 'history:results' h_item.id %}">Show Progress</a>
+	          		{% endif %}
+	          		{% if h_item.status == h_item.processStatus.scheduled %}
+	          			<a class="btn btn-success btn-sm" href="#">Run again</a>
+	          			<a class="btn btn-success btn-sm" href="{% url 'plugins:setup' h_item.tool%}">Edit Config</a>
+	          		{% endif %}
+	          		{% if h_item.status == h_item.processStatus.broken %}
+	          			<a class="btn btn-success btn-sm" href="{% url 'history:results' h_item.id %}">Show Report</a>
+	          			<a class="btn btn-success btn-sm" href="#">Run again</a>
+	          			<a class="btn btn-success btn-sm" href="{% url 'plugins:setup' h_item.tool%}">Edit Config</a>
+	          		{% endif %}
+	          		{% if h_item.status == h_item.processStatus.finished_no_output %}
+	          			<a class="btn btn-success btn-sm" href="{% url 'history:results' h_item.id %}">Show Report</a>
+	          			<a class="btn btn-success btn-sm" href="#">Run again</a>
+	          			<a class="btn btn-success btn-sm" href="{% url 'plugins:setup' h_item.tool%}">Edit Config</a>
+	          		{% endif %}
           			</td>
           	</tr>
           	

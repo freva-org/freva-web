@@ -6,9 +6,25 @@ repo. If you need to override a setting locally, use local.py
 import os
 import logging
 
+import ldap
+
 # Normally you should not import ANYTHING from Django directly
 # into your settings, but ImproperlyConfigured is an exception.
 from django.core.exceptions import ImproperlyConfigured
+from django_auth_ldap.config import LDAPSearch
+
+# The server for LDAP configuration
+AUTH_LDAP_SERVER_URI = "ldaps://dsp1.dkrz.de, ldaps://dsp2.dkrz.de"
+
+# Verify the user by bind to LDAP
+AUTH_LDAP_USER_DN_TEMPLATE = "uid=%(user)s,ou=People,o=ldap,o=root"
+
+# register the LDAP authentication backend 
+AUTHENTICATION_BACKENDS = (
+    'django_auth_ldap.backend.LDAPBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
 
 
 def get_env_setting(setting):

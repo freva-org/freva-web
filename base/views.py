@@ -10,8 +10,8 @@ def home(request):
     
     from history.models import History
     
-    print request.POST.keys
-    
+    keys = request.POST.keys
+        
     h = History.objects.create(tool='pca',
                                timestamp=datetime.now(),
                                status=History.processStatus.broken,
@@ -23,4 +23,4 @@ def home(request):
 
     
     
-    return render(request, 'base/home.html',{'h':h})
+    return render(request, 'base/home.html',{'h':h, 'k':keys})

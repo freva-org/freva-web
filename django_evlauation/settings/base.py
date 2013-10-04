@@ -22,18 +22,41 @@ def get_env_setting(setting):
         error_msg = "Set the %s env variable" % setting
         raise ImproperlyConfigured(error_msg)
 
+
 # The server for LDAP configuration
 AUTH_LDAP_SERVER_URI = "ldaps://dsp1.dkrz.de, ldaps://dsp2.dkrz.de"
 
+# The directory with SSL certificates
+CA_CERT_DIR = '/etc/openldap/cacerts/'
+
+# the only allowd group
+ALLOWED_GROUP = 'miklip'
+
+# Require a ca certificate
+AUTH_LDAP_GLOBAL_OPTIONS = {
+    ldap.OPT_X_TLS_REQUIRE_CERT: ldap.OPT_X_TLS_DEMAND,
+    ldap.OPT_X_TLS_CACERTDIR: CA_CERT_DIR,
+}
+
+
 # Verify the user by bind to LDAP
 AUTH_LDAP_USER_DN_TEMPLATE = "uid=%(user)s,ou=People,o=ldap,o=root"
+
+# keep the authenticated user for group search
+AUTH_LDAP_BIND_AS_AUTHENTICATING_USER=True
+
+# find only users from group miklip
+AUTH_LDAP_USER_SEARCH = LDAPSearch("ou=netgroup,o=ldap,o=root",
+    ldap.SCOPE_SUBTREE,
+    '&((cn=%s)(nisNetgroupTriple=\(,%%(user)s,\)))' % ALLOWED_GROUP )
+
+#AUTH_LDAP_GROUP_TYPE = LDAPGroupType(name_attr="cn")
 
 # register the LDAP authentication backend 
 AUTHENTICATION_BACKENDS = (
     'django_auth_ldap.backend.LDAPBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
-
 
 # Your project root
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__) + "../../../")

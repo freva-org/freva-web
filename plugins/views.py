@@ -80,10 +80,11 @@ def solr_search(request):
     metadata = None
     #return HttpResponse(json.dumps(dict(args)))
     if facets:
+        args.pop('facet')
         if facets == '*':
             #means select all, 
             facets = None
-        results = SolrFindFiles.facets(facets=facets)
+        results = SolrFindFiles.facets(facets=facets. **args)
     else:
         #return HttpResponse(json.dumps(dict(hallo='was')))
         results = SolrFindFiles.search( _retrieve_metadata = True, **args)

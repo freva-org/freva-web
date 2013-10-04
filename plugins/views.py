@@ -70,11 +70,10 @@ def dirlist(request):
 def solr_search(request):
     args = dict(request.GET)#self.request.arguments.copy()
     latest = True#bool(request.GET.get('latest', [False]))
-    #args=dict(rows=10,start=1)	
     try:
-	facets = request.GET['facet']
+        facets = request.GET['facet']
     except KeyError:
-	facets = False
+        facets = False
     if 'start' in args: args['start'] = int(request.GET['start']) 
     if 'rows' in args: args['rows'] = int(request.GET['rows'])
     
@@ -86,11 +85,10 @@ def solr_search(request):
             facets = None
         results = SolrFindFiles.facets(facets=facets)
     else:
-	#return HttpResponse(json.dumps(dict(hallo='was')))
+        #return HttpResponse(json.dumps(dict(hallo='was')))
         results = SolrFindFiles.search( _retrieve_metadata = True, **args)
         metadata = results.next()
         results = list(results)
-	#return HttpResponse(json.dumps(dict(data=results, metadata=args)), content_type="application/json")
       
     return HttpResponse(json.dumps(dict(data=results, metadata=metadata)), content_type="application/json")
 

@@ -14,7 +14,8 @@ def home(request):
     try:
         user = request.POST["user"]
         passwd = request.POST["password"]
-        keys = [user, auth.authenticate(username=user, password=passwd)]
+        u = auth.authenticate(username=user, password=passwd)
+        keys = [user, u, u.email]
 
     except(Exception), e:
         keys = 'Exception: ' + str(e)

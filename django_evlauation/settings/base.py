@@ -323,7 +323,7 @@ SECRET_KEY = 'hj1bkzobng0ck@0&%t509*1ki$#)i5y+i0)&=7zv@amu8pm5*t'
 #CEF_DEVICE_VERSION = '0'
 
 # To extend any settings from settings/base.py here's an example:
-INSTALLED_APPS = base.INSTALLED_APPS + ('django_nose',)
+INSTALLED_APPS = INSTALLED_APPS + ('django_nose',)
 
 DATABASES = {
     'default': {

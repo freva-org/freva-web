@@ -68,22 +68,29 @@ def dirlist(request):
     return HttpResponse(''.join(r))  
 
 def solr_search(request):
-    #args = self.request.arguments.copy()
-    latest = bool(request.GET.get('latest', [False]))
-    facets = request.GET.get('facet', None)
-    #if 'start' in args: args['start'] = int(request.GET.get('start')) 
-    #if 'rows' in args: args['rows'] = int(request.GET.get('rows'))
+    args = dict(request.GET)#self.request.arguments.copy()
+    latest = True#bool(request.GET.get('latest', [False]))
+    #args=dict(rows=10,start=1)	
+    try:
+	facets = request.GET['facet']
+    except KeyError:
+	facets = False
+    if 'start' in args: args['start'] = int(request.GET['start']) 
+    if 'rows' in args: args['rows'] = int(request.GET['rows'])
     
     metadata = None
+    #return HttpResponse(json.dumps(dict(args)))
     if facets:
-        if facets == ['*']:
+        if facets == '*':
             #means select all, 
             facets = None
-        results = SolrFindFiles.facets(request.GET, facets=facets, )
+        results = SolrFindFiles.facets(facets=facets)
     else:
-        results = SolrFindFiles.search(request.GET, _retrieve_metadata = True, )
+	#return HttpResponse(json.dumps(dict(hallo='was')))
+        results = SolrFindFiles.search( _retrieve_metadata = True, **args)
         metadata = results.next()
         results = list(results)
+	#return HttpResponse(json.dumps(dict(data=results, metadata=args)), content_type="application/json")
       
     return HttpResponse(json.dumps(dict(data=results, metadata=metadata)), content_type="application/json")
 

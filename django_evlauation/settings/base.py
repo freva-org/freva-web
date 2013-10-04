@@ -50,6 +50,10 @@ AUTH_LDAP_USER_SEARCH = LDAPSearch("ou=netgroup,o=ldap,o=root",
     ldap.SCOPE_SUBTREE,
     '&((cn=%s)(nisNetgroupTriple=\(,%%(user)s,\)))' % ALLOWED_GROUP )
 
+# Populate the Django user from the LDAP directory.
+AUTH_LDAP_USER_ATTR_MAP = {
+    "email": "mail",
+}
 #AUTH_LDAP_GROUP_TYPE = LDAPGroupType(name_attr="cn")
 
 # register the LDAP authentication backend 

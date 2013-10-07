@@ -58,8 +58,8 @@ AUTH_LDAP_USER_ATTR_MAP = {
 
 # register the LDAP authentication backend 
 AUTHENTICATION_BACKENDS = (
-    'django_auth_ldap.backend.LDAPBackend',
     'django.contrib.auth.backends.ModelBackend',
+    'django_auth_ldap.backend.LDAPBackend',
 )
 
 # Your project root

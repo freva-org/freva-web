@@ -3,32 +3,29 @@
 from django.shortcuts import render
 import django.contrib.auth as auth
 
-from datetime import datetime 
 
 def home(request):
-    """ Default view for the root """
-    
-    
-    from history.models import History
-    
-    try:
-        user = request.POST["user"]
-        passwd = request.POST["password"]
-        u = auth.authenticate(username=user, password=passwd)
-        keys = [user, u, u.email]
-
-    except(Exception), e:
-        keys = 'Exception: ' + str(e)
+    """ Default view for the root """    
         
-    h = History.objects.create(tool='pca',
-                               timestamp=datetime.now(),
-                               status=History.processStatus.broken,
-                               configuration= {},
-                               uid = 'illing')
+    keys = ""
     
-    h = History.objects.get(id=1)
+    if not request.user.is_authenticated():
+        try:
+            user = request.POST["user"]
+            passwd = request.POST["password"]
+            u = auth.authenticate(username=user, password=passwd)
+            keys = [user, u, u.email]
+        
+            if u:
+                auth.login(request, u)
 
+        except(Exception), e:
+            keys = 'Exception: ' + str(e)
+            
+        
+    return render(request, 'base/home.html',{'k':keys})
 
+def logout(request):
+    auth.logout(request)
     
-    
-    return render(request, 'base/home.html',{'h':h, 'k':keys})
+    return render(request, 'base/home.html',{'k':'logged out'})

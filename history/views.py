@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse 
+from django.contrib.auth.decorators import login_required
 
 import json
 
@@ -8,6 +9,7 @@ from evaluation_system.model.user import User
 
 from models import History
 
+@login_required()
 def history(request):
     
     
@@ -15,7 +17,7 @@ def history(request):
         request.GET['uid']
         user = request.GET['uid']
     except KeyError:
-        user = 'illing'    
+        user = request.user
     
     #old database
     #history = pm.getHistory(user=user)
@@ -25,12 +27,10 @@ def history(request):
     
     return render(request, 'history/history.html', {'history': history})
 
-
+@login_required()
 def results(request, id):
     
     #get history object
-    history_object = {'user': 'illing', 'status': 'finished', 'name': 'Tool name'}
-   
     history_object = History.objects.get(id=id)
     
     if history_object.status == History.processStatus.running:
@@ -44,7 +44,7 @@ def results(request, id):
         return render(request, 'history/results.html', {'history_object': history_object})
         
         
-
+@login_required()
 def tailFile(request, id):
     
     from pygtail import Pygtail

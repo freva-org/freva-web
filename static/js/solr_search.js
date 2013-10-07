@@ -140,29 +140,22 @@ solr = new function() {
     }
 
     this.hide_dialog = function(files) {
-        if (files && files.length > 0) {
-            if (files.length + this.result['files'].length > this.max_files) {
-                alert("Sorry, you may select at most " + this.max_files + " file(s).")
-                return;
-            } else {
-                $.merge(this.result['files'], files);
-                var file_entries = [];
-                //get the variable id from the container
-                var variable_id = this.target_container.attr('id').substring(6);
-                this.result['files'].each(function(i, f){
-                    file_entries.push(
-                         $('<tr/>').append([
-                                $('<td/>', {name:'selected_file', html:f}).append(
-                                               $('<input/>', {
-                                            	   name:variable_id,
-                                            	   type:'hidden',
-                                                   value:f})),
-                                $('<td/>').append($('<a/>', {html:'Del',href:'#'}).click(remove_file_from_list))
-                                        ])
-                               )});
-                this.target_container.empty().append(
-                        $('<table/>', {'class': 'alternate'}).append(file_entries));
-            }
+        if (files && files.length > 0) {    
+            var variable_id = this.target_container.attr('id').substring(6);
+            console.log(variable_id)
+            this.result['files'].each(function(i, f){
+                file_entries.push(
+                     $('<tr/>').append([
+                            $('<td/>', {name:'selected_file', html:f}).append(
+                                           $('<input/>', {
+                                        	   name:variable_id,
+                                        	   type:'hidden',
+                                               value:f})),
+                            $('<td/>').append($('<a/>', {html:'Del',href:'#'}).click(remove_file_from_list))
+                                    ])
+                           )});
+            this.target_container.empty().append(
+                    $('<table/>', {'class': 'alternate'}).append(file_entries));
         }
     }
 

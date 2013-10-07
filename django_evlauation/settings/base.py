@@ -259,27 +259,6 @@ FILE_UPLOAD_PERMISSIONS = 0664
 # The WSGI Application to use for runserver
 WSGI_APPLICATION = 'django_evlauation.wsgi.application'
 
-# Define your database connections
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.',
-        'NAME': '',
-        'USER': '',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '',
-        #'OPTIONS': {
-        #    'init_command': 'SET storage_engine=InnoDB',
-        #    'charset' : 'utf8',
-        #    'use_unicode' : True,
-        #},
-        #'TEST_CHARSET': 'utf8',
-        #'TEST_COLLATION': 'utf8_general_ci',
-    },
-    # 'slave': {
-    #     ...
-    # },
-}
 
 # Uncomment this and set to all slave DBs in use on the site.
 # SLAVE_DATABASES = ['slave']

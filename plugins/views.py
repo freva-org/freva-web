@@ -52,7 +52,7 @@ def setup(request, plugin_name):
             config_dict = form.data
             with open(full_path, 'w') as fp:
                 plugin.writeSlurmFile(fp, config_dict=config_dict)    
-            plugin.call('sudo -u %s sbatch %s' %(request.user.username, full_path))
+            plugin.call('sbatch --uid=%s %s' %(request.user.username, full_path))
             return redirect('history:history') #should be changed to result page 
             
     else:   

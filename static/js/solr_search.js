@@ -141,21 +141,9 @@ solr = new function() {
 
     this.hide_dialog = function(files) {
         if (files && files.length > 0) {    
-            var variable_id = this.target_container.attr('id').substring(6);
-            console.log(variable_id)
-            this.result['files'].each(function(i, f){
-                file_entries.push(
-                     $('<tr/>').append([
-                            $('<td/>', {name:'selected_file', html:f}).append(
-                                           $('<input/>', {
-                                        	   name:variable_id,
-                                        	   type:'hidden',
-                                               value:f})),
-                            $('<td/>').append($('<a/>', {html:'Del',href:'#'}).click(remove_file_from_list))
-                                    ])
-                           )});
-            this.target_container.empty().append(
-                    $('<table/>', {'class': 'alternate'}).append(file_entries));
+
+            this.target_container.val(files[0]);
+	    $('#myModal_solr').modal('hide');		
         }
     }
 

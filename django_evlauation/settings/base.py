@@ -29,6 +29,10 @@ AUTH_LDAP_SERVER_URI = "ldaps://dsp1.dkrz.de, ldaps://dsp2.dkrz.de"
 # The directory with SSL certificates
 CA_CERT_DIR = '/etc/openldap/cacerts/'
 
+#path where slurm files are created
+SLURM_DIR = '/usr/local/evaluation_system/slurm/'
+
+
 # the only allowd group
 ALLOWED_GROUP = 'miklip'
 
@@ -357,7 +361,7 @@ INSTALLED_APPS = INSTALLED_APPS + ('django_nose',)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'db/development.sqlite3',
+        'NAME': '/usr/local/evaluation_system/database/db.db',
         'USER': '',
         'PASSWORD': '',
         'HOST': '',

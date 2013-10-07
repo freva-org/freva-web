@@ -176,7 +176,7 @@ $(document).ready(function() {
     });
     
     //init the search so we have something to display immediately after the user click on find more
-    solr.get_files(0, 10);
+    //solr.get_files(0, 10);
 
 
     //Find More functionallity 

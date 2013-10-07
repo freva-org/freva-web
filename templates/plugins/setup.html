@@ -4,7 +4,7 @@
 {% block page_class %}home-page{% endblock %}
 {% block content %}
 
-<script src="{{ STATIC_URL }}js/solr_search.js"></script>
+<script src="{{ STATIC_URL }}js/solr_search.js?{% now "U" %}"></script>
 
 {% load bootstrap3 %}
 

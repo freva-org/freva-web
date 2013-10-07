@@ -1,10 +1,10 @@
 """ Views for the base application """
 
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, Http404
 from django.template import RequestContext, loader
 from django.contrib.auth.decorators import login_required
-
+from django.conf import settings
 
 import evaluation_system.api.plugin_manager as pm
 from evaluation_system.model.user import User
@@ -43,8 +43,18 @@ def setup(request, plugin_name):
     if request.method == 'POST':
         form = PluginForm(request.POST, tool=plugin)
         if form.is_valid():
-            #start plugin
-            pass
+            # FIRST ATTEMPT FOR SLURM
+            # create the output directory if necessary
+            d = os.path.join(settings.SLURM_DIR, request.user.username)
+            if not os.path.exists(d):
+                os.makedirs(d)
+            full_path = os.path.join(d, plugin.suggestSlurmFileName())
+            config_dict = form.data
+            with open(full_path, 'w') as fp:
+                plugin.writeSlurmFile(fp, config_dict=config_dict)    
+            plugin.call('sudo -u %s sbatch %s' %(request.user.username, full_path))
+            return redirect('history:history') #should be changed to result page 
+            
     else:   
         config_dict = plugin.setupConfiguration(check_cfg=False, substitute=False)      
         form = PluginForm(initial=config_dict,tool=plugin)

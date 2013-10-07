@@ -3,6 +3,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse, Http404
 from django.template import RequestContext, loader
+from django.contrib.auth.decorators import login_required
+
 
 import evaluation_system.api.plugin_manager as pm
 from evaluation_system.model.user import User
@@ -14,24 +16,29 @@ from plugins.models import PluginForm, PluginWeb
 import urllib, os
 import json
 
+@login_required()
 def home(request):
     """ Default view for the root """
     
     tools = pm.getPlugins()    
     return render(request, 'plugins/home.html', {'tool_list': tools})
 
-
+@login_required()
 def detail(request, plugin_name):
     
     plugin = get_plugin_or_404(plugin_name)
     plugin_web = PluginWeb(plugin)
     
     return render(request, 'plugins/detail.html', {'plugin':plugin_web})
-    
+  
+@login_required()    
 def setup(request, plugin_name):
     
     plugin = get_plugin_or_404(plugin_name)
     plugin_web = PluginWeb(plugin)
+    
+    user = User(request.user.username)
+    home_dir = user.getUserHome()
     
     if request.method == 'POST':
         form = PluginForm(request.POST, tool=plugin)
@@ -43,15 +50,16 @@ def setup(request, plugin_name):
         form = PluginForm(initial=config_dict,tool=plugin)
     
     
-    return render(request, 'plugins/setup.html', {'tool' : plugin_web, 'form': form})
+    return render(request, 'plugins/setup.html', {'tool' : plugin_web, 'form': form,
+                                                  'user_home': home_dir})
   
-  
+@login_required()  
 def dirlist(request):
     r=['<ul class="jqueryFileTree" style="display: none;">']
     files = list()
     try:
         r=['<ul class="jqueryFileTree" style="display: none;">']
-        d=urllib.unquote(request.POST.get('dir','/home/illing'))
+        d=urllib.unquote(request.POST.get('dir'))
         for f in sorted(os.listdir(d)):
             if f[0] != '.':
                 ff=os.path.join(d,f)
@@ -67,6 +75,7 @@ def dirlist(request):
         r.append('</ul>')
     return HttpResponse(''.join(r))  
 
+@login_required()
 def solr_search(request):
     args = dict(request.GET)#self.request.arguments.copy()
     latest = True#bool(request.GET.get('latest', [False]))

@@ -31,7 +31,10 @@
 	            <button type="submit" class="btn btn-success">Sign in</button>
 	          </form>
 	          {% else %}
-	          <p class="form-group">Welcome,  (<a href="{% url 'base:logout' %}">logout</a>)</p>
+	           <ul class="nav navbar-nav navbar-right">
+	               <li>  <a href="{% url 'base:logout' %}">logout ({{ request.user.username }})</a></li>
+	          </ul>
+	          
 	          {% endif %}
 	        </div><!--/.navbar-collapse -->
 	      </div>

@@ -4,7 +4,7 @@
 {% block page_class %}home-page{% endblock %}
 {% block content %}
 
-<script src="{{ STATIC_URL }}js/solr_search.js"></script>
+<script src="{{ STATIC_URL }}js/solr_search.js?{% now "U" %}"></script>
 
 {% load bootstrap3 %}
 
@@ -65,23 +65,8 @@
         <div class="modal-body">
           <div class="visual_search"></div>
 		
-			<table class="task_bar">
-			<tr><td style="width: 100px;">
-			<input type="button" class="button" id="select_all" value="Select all" />
-			</td><td style="width: 60px;">
-			<input type="button" class="button" id="done" value="Done" />
-	        </td><td style="width: 60px;">
-	        <input type="button" class="button" id="cancel" value="Cancel" />
-			</td><td>
-			<span id="count" />
-			</td><td style="width: 60px;">
-			<input type="button" class="button" id="all" value="Get all" disabled/>
-			</td><td style="width: 200px;">
-			<span id="selection"/>
-			</td></tr>
-			</table>
-		
 			<div class="files"></div>
+			
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>

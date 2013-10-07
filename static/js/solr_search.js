@@ -118,7 +118,7 @@ solr = new function() {
                 var items = [];
                 
                 $.each(response['data'], function(pos, path) {
-                    items.push('<tr><td><input class="file" type="checkbox" name="file" value="' + path + '"> ' + path + '</input></td></tr>');
+                    items.push('<tr><td><input class="file" type="radio" name="file" value="' + path + '"> ' + path + '</input></td></tr>');
                 });
                 
                 $('div.files').empty().append(
@@ -135,38 +135,10 @@ solr = new function() {
                 } else {
                     $('#all').attr('disabled', '')
                 }
-                //remove all selection
-                $('input:checkbox').each(function(i){ this.checked = false});
-                $('#select_all:button').val('Select all')   
-                $('#select_all:button').val('Select all')
             }
         });
     }
-    
-    this.show_dialog = function() {
-        //init 
-        this.init()
-        
-        var maskHeight = $(document).height();
-        var maskWidth = $(window).width();
-        //Set heigth and width to mask to fill up the whole screen
-        $('#mask').css({'width':maskWidth,'height':maskHeight});
-        
-        //transition effect     
-        $('#mask').fadeIn(1000);    
-        $('#mask').fadeTo("slow",0.8);
-        
-        //Get the window height and width
-        var winH = $(window).height();
-        var winW = $(window).width();
-        
-        //Set the popup window to center
-        $('#dialog').css('top',  winH/2-$('#dialog').height()/2);
-        $('#dialog').css('left', winW/2-$('#dialog').width()/2);
-        
-        //transition effect
-        $('#dialog').fadeIn(2000); 
-    }
+
     this.hide_dialog = function(files) {
         if (files && files.length > 0) {
             if (files.length + this.result['files'].length > this.max_files) {
@@ -191,14 +163,7 @@ solr = new function() {
                 this.target_container.empty().append(
                         $('<table/>', {'class': 'alternate'}).append(file_entries));
             }
-            
-            //check if max number of files was reached (container name is files_<name>)
-            var button = $('#find_' + this.target_container.attr('id').substring(6));
-            check_find_more_status(button);
         }
-        //transition effect
-        $('#dialog').fadeOut(1000);
-        $('#mask').fadeOut(1000);
     }
 
 }
@@ -220,42 +185,17 @@ $(document).ready(function() {
         }
       }
     });
-    
-    //Select all functionality
-    $('#select_all:button').click(function(){
-        if ( $(this).val() == 'Select all') {
-            $('input:checkbox').each(function(i){ this.checked = true});
-            $(this).val('Deselect all')
-        } else {
-            $('input:checkbox').each(function(i){ this.checked = false});
-            $(this).val('Select all')           
-        }
-    });
 
     //solr done functionallity
-    $('#done:button').click(function(){
+    $('#solr_select_file').click(function(){
         //check if this is valid
         var files = $('.file:checked').map(function(i, t){return t.value});
+        console.log(files);
         solr.hide_dialog(files);
-    });
-    //solr Get all files functionallity
-    $('#all').click(function(){
-    	// we are going to retrieve the maximum number of files from a direct query
-    	var url = solr.url + 'start=' + 0 + '&rows=' + solr.max_files + '&' + solr.get_search_query();
-        $.ajax(url, {
-            dataType: 'json',
-            success: function(response){
-            	solr.hide_dialog(response['data']);
-            }
-        });
-    });
-    //solr cancel 
-    $('#cancel:button').click(function(){
-    	solr.hide_dialog();
     });
     
     //init the search so we have something to display immediately after the user click on find more
-    //solr.get_files(0, 10);
+    solr.get_files(0, 10);
 
 
     //Find More functionallity 
@@ -273,9 +213,7 @@ $(document).ready(function() {
     	//show find mask
     	solr.show_dialog();
    	});
-    $('.button[id^=find_]').each(function(){
-    	check_find_more_status($(this));
-    });
+
 
     
 
@@ -288,31 +226,4 @@ $(document).ready(function() {
 });
 
 
-
-  
-function check_find_more_status(button) {
-    var max_files = parseInt($(button).attr('data-amount'));
-    var container =$('#files_' + $(button).attr('id').substring(5));
-    var current_count = $('td[name=selected_file]', container).map(function(i, td){return $(td).text()}).length;
-    if (current_count >= max_files) {
-        $(button).attr('disabled', '');
-    } else {
-    	$(button).removeAttr('disabled');
-    }
-	
-}
-  
-
-
-function send() {
-    $.each($("input"), function(index, input_elem) {
-        if (input_elem.value == "") {
-            tmp += input_elem.name + ", ";
-        }
-    });
-    if (validate()) {
-        alert(tmp);
-    };
-    
-};
 

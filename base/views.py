@@ -7,25 +7,29 @@ import django.contrib.auth as auth
 def home(request):
     """ Default view for the root """    
         
-    keys = ""
+    login_failed = False
+    
     
     if not request.user.is_authenticated():
         try:
             user = request.POST["user"]
             passwd = request.POST["password"]
             u = auth.authenticate(username=user, password=passwd)
-            keys = [user, u, u.email]
         
             if u:
                 auth.login(request, u)
+            else:
+                login_failed = True
 
-        except(Exception), e:
-            keys = 'Exception: ' + str(e)
-            
+        except(Exception):
+            pass
         
-    return render(request, 'base/home.html',{'k':keys})
+    return render(request, 'base/home.html',{'login_failed':login_failed})
 
 def logout(request):
+    """
+    Logout view.
+    """
     auth.logout(request)
     
     return render(request, 'base/home.html',{'k':'logged out'})

@@ -22,11 +22,14 @@ def home(request):
                 login_failed = True
 
         except(Exception):
-            login_failed = True     
+            pass
         
     return render(request, 'base/home.html',{'login_failed':login_failed})
 
 def logout(request):
+    """
+    Logout view.
+    """
     auth.logout(request)
     
     return render(request, 'base/home.html',{'k':'logged out'})

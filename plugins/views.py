@@ -37,7 +37,7 @@ def setup(request, plugin_name):
     plugin = get_plugin_or_404(plugin_name)
     plugin_web = PluginWeb(plugin)
     
-    user = User(request.user.username)
+    user = User(request.user.username, request.user.email)
     home_dir = user.getUserHome()
     
     if request.method == 'POST':
@@ -51,7 +51,7 @@ def setup(request, plugin_name):
             full_path = os.path.join(d, plugin.suggestSlurmFileName())
             config_dict = form.data
             with open(full_path, 'w') as fp:
-                plugin.writeSlurmFile(fp, config_dict=config_dict)    
+                plugin.writeSlurmFile(fp, config_dict=config_dict, user=user)    
             plugin.call('sbatch --uid=%s %s' %(request.user.username, full_path))
             return redirect('history:history') #should be changed to result page 
             

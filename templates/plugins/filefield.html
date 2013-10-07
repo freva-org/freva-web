@@ -22,6 +22,8 @@ $(document).ready(function(){
 	});
 	
 	$('#{{id}}_solr').on('click', function(e){
+		solr.target_container =  $('#{{ id }}');
+		console.log(solr.target_container);
 		$('#myModal_solr').modal('show');
 	});
 	

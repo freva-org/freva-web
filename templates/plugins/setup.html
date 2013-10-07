@@ -4,7 +4,7 @@
 {% block page_class %}home-page{% endblock %}
 {% block content %}
 
-<script src="{{ STATIC_URL }}js/solr_search.js"></script>
+<script src="{{ STATIC_URL }}js/solr_search.js?{% now "U" %}"></script>
 
 {% load bootstrap3 %}
 
@@ -70,7 +70,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Done</button>
+          <button type="button" class="btn btn-primary" id="solr_select_file">Select file</button>
         </div>
       </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->

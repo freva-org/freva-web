@@ -77,7 +77,7 @@ def setup(request, plugin_name):
 
 
             # create the slurm output directory, when necessary
-            if not os.path.exists(user.getUserSlurmDir):
+            if not os.path.exists(user.getUserSlurmDir()):
                 os.makedirs(user.getUserSlurmDir())
     
             

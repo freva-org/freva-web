@@ -77,7 +77,8 @@ def dirlist(request):
                     r.append('<li class="directory collapsed"><a href="#" rel="%s/">%s</a></li>' % (ff,f))
                 else:
                     e=os.path.splitext(f)[1][1:] # get .ext and remove dot
-                    files.append('<li class="file ext_%s"><a href="#" rel="%s">%s</a></li>' % (e,ff,f))
+                    if e == 'nc':
+                        files.append('<li class="file ext_%s"><a href="#" rel="%s">%s</a></li>' % (e,ff,f))
         r = r+files
         r.append('</ul>')
     except Exception,e:

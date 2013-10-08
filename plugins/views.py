@@ -12,9 +12,11 @@ from evaluation_system.model.solr import SolrFindFiles
 
 from plugins.utils import get_plugin_or_404
 from plugins.models import PluginForm, PluginWeb
+from history.models import History
 
 import urllib, os
 import json
+from evaluation_system.model.slurm import slurm_file
 
 @login_required()
 def home(request):
@@ -50,9 +52,30 @@ def setup(request, plugin_name):
                 os.makedirs(d)
             full_path = os.path.join(d, plugin.suggestSlurmFileName())
             config_dict = form.data
+
+            # write the database entry
+            row_id = user.getUserDB().storeHistory(plugin_name,
+                                                   config_dict,
+                                                   user.getName(),
+                                                   History.processStatus.scheduled,
+                                                   "",
+                                                   "")
+
+            
             with open(full_path, 'w') as fp:
                 plugin.writeSlurmFile(fp, config_dict=config_dict, user=user)    
-            plugin.call('sbatch --uid=%s %s' %(request.user.username, full_path))
+            out = plugin.call('sbatch --uid=%s %s' %(request.user.username, full_path))[0]
+            out_first_line = out.split('\n')[0]
+            
+            # read the id from stdout
+            if out_first_line.split(' ')[0] == 'Submitted':
+                slurm_id = int(out_first_line.split(' ')[-1])
+            else:
+                raise ValueError
+            
+            slurm_out = os.path.join(user.getUserSlurmDir(), 'slurm-%i.out' % slurm_id)
+            
+                
             return redirect('history:history') #should be changed to result page 
             
     else:   

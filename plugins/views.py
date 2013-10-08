@@ -57,13 +57,21 @@ def setup(request, plugin_name):
             row_id = user.getUserDB().storeHistory(plugin,
                                                    config_dict,
                                                    user.getName(),
-                                                   History.processStatus.scheduled,
+                                                   History.processStatus.not_scheduled,
                                                    "",
                                                    "")
 
             
             with open(full_path, 'w') as fp:
-                plugin.writeSlurmFile(fp, config_dict=config_dict, user=user)    
+                plugin.writeSlurmFile(fp, scheduled_id = row_id, user=user)   
+
+
+            # create the slurm output directory, when necessary
+            if not os.path.exists(user.getUserSlurmDir):
+                os.makedirs(user.getUserSlurmDir())
+    
+            
+            # start the scheduler vie sbatch     
             (out,err) = plugin.call('sbatch --uid=%s %s' %(request.user.username, full_path))
             out_first_line = out.split('\n')[0]
             
@@ -71,9 +79,19 @@ def setup(request, plugin_name):
             if out_first_line.split(' ')[0] == 'Submitted':
                 slurm_id = int(out_first_line.split(' ')[-1])
             else:
-                raise Http404, "%s, %s" % (out,err)
+                raise Http404, "Unexpected scheduler output:\n[%s]\n[%s]" % (out, err)
             
-            slurm_out = os.path.join(user.getUserSlurmDir(), 'slurm-%i.out' % slurm_id)
+            slurm_out = os.path.join(user.getUserSlurmDir(),
+                                     'slurm-%i.out' % slurm_id)
+            
+                    
+            # before we write the database entry, we check if the slurm file exists
+            if not os.path.exists(slurm_out):
+                raise Http404, "SLURM file not found: %s" % (slurm_out)
+                
+            
+            # set the slurm output file 
+            user.getUserDB().scheduleEntry(row_id, user.getName(), slurm_out)
             
                 
             return redirect('history:history') #should be changed to result page 

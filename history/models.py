@@ -58,8 +58,9 @@ class History(models.Model):
         scheduled          - the job was send to slurm
         running            - the job is executed
         broken             - an exception occurred
+        not_scheduled      - an error occurred during scheduling
         """
-        finished, finished_no_output, scheduled, running, broken = range(5)
+        finished, finished_no_output, broken, running, scheduled, not_scheduled = range(6)
         
         
             

@@ -13,7 +13,7 @@
           <h2>{{ plugin.name }}</h2>
           <p>{{ plugin.short_description }}</p>
           <a href="{% url 'plugins:setup' plugin.name.lower %}" class="btn btn-primary">Start analysis</a>
-		  <a href="{% url 'history:history' %}" class="btn btn-primary">Show history</a>
+		  <a href="{% url 'history:history' %}?plugin={{plugin.name.lower}}" class="btn btn-primary">Show history</a>
         </div>
       </div>
 

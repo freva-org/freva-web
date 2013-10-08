@@ -18,13 +18,13 @@ def history(request):
         user = request.GET['uid']
     except KeyError:
         user = request.user
-    
-    #old database
-    #history = pm.getHistory(user=user)
-    
-    history = History.objects.filter(uid=user)
-    
-    
+        
+    try:
+        tool = request.GET['plugin']
+        history = History.objects.filter(uid=user).filter(tool=tool)
+    except KeyError:
+        history = History.objects.filter(uid=user)
+
     return render(request, 'history/history.html', {'history': history})
 
 @login_required()

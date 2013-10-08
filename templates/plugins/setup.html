@@ -83,7 +83,7 @@
 $(document).ready(function(){
 
 	$('#browsefield').fileTree({
-		root : '/home/illing',
+		root : '{{user_home}}',
         script: '{% url 'plugins:dirlist' %}',
         expandSpeed: 100,
         collapseSpeed: 100,

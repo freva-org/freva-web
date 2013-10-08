@@ -9,6 +9,7 @@ from django.conf import settings
 import evaluation_system.api.plugin_manager as pm
 from evaluation_system.model.user import User
 from evaluation_system.model.solr import SolrFindFiles
+from evaluation_system.model.slurm import slurm_file
 
 from plugins.utils import get_plugin_or_404
 from plugins.models import PluginForm, PluginWeb
@@ -16,7 +17,8 @@ from history.models import History
 
 import urllib, os
 import json
-from evaluation_system.model.slurm import slurm_file
+
+import datetime
 
 @login_required()
 def home(request):
@@ -54,10 +56,18 @@ def setup(request, plugin_name):
             config_dict = form.data
 
             # write the database entry
+#            history_entry = History.objects.create(tool=plugin_name,
+#                                                   version = plugin.__version__,
+#                                                   configuration = config_dict,
+#                                                   uid = user.getName(),
+#                                                   status = History.processStatus.not_scheduled,
+#                                                   timestamp = datetime.datetime.now()
+#                                                   )
+            
             row_id = user.getUserDB().storeHistory(plugin,
                                                    config_dict,
                                                    user.getName(),
-                                                   History.processStatus.scheduled,
+                                                   History.processStatus.not_scheduled,
                                                    "",
                                                    "")
 
@@ -71,12 +81,13 @@ def setup(request, plugin_name):
             if out_first_line.split(' ')[0] == 'Submitted':
                 slurm_id = int(out_first_line.split(' ')[-1])
             else:
-                raise Http404, "%s, %s" % (out,err)
+                slurm_id = 0
+                #raise Http404, "%s, %s" % (out,err)
             
             slurm_out = os.path.join(user.getUserSlurmDir(), 'slurm-%i.out' % slurm_id)
             
                 
-            return redirect('history:history') #should be changed to result page 
+            return redirect('history:results', id=row_id) #should be changed to result page 
             
     else:   
         config_dict = plugin.setupConfiguration(check_cfg=False, substitute=False)      

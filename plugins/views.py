@@ -54,7 +54,7 @@ def setup(request, plugin_name):
             config_dict = form.data
 
             # write the database entry
-            row_id = user.getUserDB().storeHistory(plugin_name,
+            row_id = user.getUserDB().storeHistory(plugin,
                                                    config_dict,
                                                    user.getName(),
                                                    History.processStatus.scheduled,
@@ -64,14 +64,14 @@ def setup(request, plugin_name):
             
             with open(full_path, 'w') as fp:
                 plugin.writeSlurmFile(fp, config_dict=config_dict, user=user)    
-            out = plugin.call('sbatch --uid=%s %s' %(request.user.username, full_path))[0]
+            (out,err) = plugin.call('sbatch --uid=%s %s' %(request.user.username, full_path))
             out_first_line = out.split('\n')[0]
             
             # read the id from stdout
             if out_first_line.split(' ')[0] == 'Submitted':
                 slurm_id = int(out_first_line.split(' ')[-1])
             else:
-                raise ValueError
+                raise Http404, "%s, %s" % (out,err)
             
             slurm_out = os.path.join(user.getUserSlurmDir(), 'slurm-%i.out' % slurm_id)
             

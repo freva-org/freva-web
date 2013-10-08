@@ -1,6 +1,6 @@
 {% extends "_layouts/menu.html" %}
 
-{% block page_title %}Your Site - Home{% endblock %}
+{% block page_title %}{{tool.name}} setup - Evaluation System{% endblock %}
 {% block page_class %}home-page{% endblock %}
 {% block content %}
 
@@ -83,7 +83,7 @@
 $(document).ready(function(){
 
 	$('#browsefield').fileTree({
-		root : '/home/illing',
+		root : '{{user_home}}',
         script: '{% url 'plugins:dirlist' %}',
         expandSpeed: 100,
         collapseSpeed: 100,

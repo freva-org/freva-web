@@ -15,6 +15,8 @@ from plugins.utils import get_plugin_or_404
 from plugins.models import PluginForm, PluginWeb
 from history.models import History
 
+import logging
+
 import urllib, os
 import json
 
@@ -77,12 +79,12 @@ def setup(request, plugin_name):
 
 
             # create the slurm output directory, when necessary
-            if not os.path.exists(user.getUserSlurmDir):
+            if not os.path.exists(user.getUserSlurmDir()):
                 os.makedirs(user.getUserSlurmDir())
     
             
             # start the scheduler vie sbatch     
-            (out,err) = plugin.call('sbatch --uid=%s %s' %(request.user.username, full_path))
+            (out,err) = plugin.call('sbatch --uid=%s %s\n' %(request.user.username, full_path))
             out_first_line = out.split('\n')[0]
             
             # read the id from stdout
@@ -90,15 +92,17 @@ def setup(request, plugin_name):
                 slurm_id = int(out_first_line.split(' ')[-1])
             else:
                 slurm_id = 0
-#                 raise Http404, "Unexpected scheduler output:\n[%s]\n[%s]" % (out, err)
-#             
+                raise Http404, "Unexpected scheduler output:\n[%s]\n[%s]" % (out, err)
+             
             slurm_out = os.path.join(user.getUserSlurmDir(),
                                      'slurm-%i.out' % slurm_id)
-#             
-#                     
-#             # before we write the database entry, we check if the slurm file exists
-#             if not os.path.exists(slurm_out):
-#                 raise Http404, "SLURM file not found: %s" % (slurm_out)
+             
+                     
+            # before we write the database entry,
+            # we check if the slurm file exists
+            # for debugging reasons we commented these lines
+            # if not os.path.isfile(slurm_out):
+            #     raise Http404, "SLURM file not found: %s" % (slurm_out)
                 
             
             # set the slurm output file 

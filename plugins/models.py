@@ -56,6 +56,8 @@ class PluginFileField(forms.Field):
 
 class PluginForm(forms.Form):
 
+    password_hidden = forms.CharField(widget=forms.HiddenInput)
+
     def __init__(self, *args, **kwargs):
         tool = kwargs.pop('tool')
         

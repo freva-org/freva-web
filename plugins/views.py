@@ -11,11 +11,12 @@ from evaluation_system.model.user import User
 from evaluation_system.model.solr import SolrFindFiles
 from evaluation_system.model.slurm import slurm_file
 
-from plugins.utils import get_plugin_or_404
+from plugins.utils import get_plugin_or_404, ssh_call
 from plugins.models import PluginForm, PluginWeb
 from history.models import History
 
 import logging
+import paramiko # this is the ssh client
 
 import urllib, os
 import json
@@ -83,8 +84,18 @@ def setup(request, plugin_name):
                 os.makedirs(user.getUserSlurmDir())
     
             
-            # start the scheduler vie sbatch     
-            (out,err) = plugin.call('sbatch --uid=%s %s\n' %(request.user.username, full_path))
+            # start the scheduler vie sbatc
+            username = request.user.username
+            command  = 'sbatch --uid=%s %s\n' %(username, full_path)
+            password = request.POST['password_hidden']
+            stdout = plugin.utils.ssh_call(username=username,
+                                           password=password,
+                                           command=command)
+            
+            # get the text form stdout
+            out=stdout[1].getlines()
+            
+            # get the very first line only
             out_first_line = out.split('\n')[0]
             
             # read the id from stdout

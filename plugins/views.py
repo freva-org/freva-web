@@ -15,6 +15,8 @@ from plugins.utils import get_plugin_or_404
 from plugins.models import PluginForm, PluginWeb
 from history.models import History
 
+import logging
+
 import urllib, os
 import json
 
@@ -82,7 +84,7 @@ def setup(request, plugin_name):
     
             
             # start the scheduler vie sbatch     
-            (out,err) = plugin.call('sbatch --uid=%s %s' %(request.user.username, full_path))
+            (out,err) = plugin.call('sbatch --uid=%s %s\n' %(request.user.username, full_path))
             out_first_line = out.split('\n')[0]
             
             # read the id from stdout
@@ -96,9 +98,11 @@ def setup(request, plugin_name):
                                      'slurm-%i.out' % slurm_id)
              
                      
-            # before we write the database entry, we check if the slurm file exists
-            if not os.path.exists(slurm_out):
-                raise Http404, "SLURM file not found: %s" % (slurm_out)
+            # before we write the database entry,
+            # we check if the slurm file exists
+            # for debugging reasons we commented these lines
+            # if not os.path.isfile(slurm_out):
+            #     raise Http404, "SLURM file not found: %s" % (slurm_out)
                 
             
             # set the slurm output file 
@@ -116,6 +120,7 @@ def setup(request, plugin_name):
                                                   'user_home': home_dir})
   
 @login_required()  
+def dirlist(request):
     r=['<ul class="jqueryFileTree" style="display: none;">']
     files = list()
     try:

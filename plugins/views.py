@@ -90,15 +90,15 @@ def setup(request, plugin_name):
                 slurm_id = int(out_first_line.split(' ')[-1])
             else:
                 slurm_id = 0
-#                 raise Http404, "Unexpected scheduler output:\n[%s]\n[%s]" % (out, err)
-#             
+                raise Http404, "Unexpected scheduler output:\n[%s]\n[%s]" % (out, err)
+             
             slurm_out = os.path.join(user.getUserSlurmDir(),
                                      'slurm-%i.out' % slurm_id)
-#             
-#                     
-#             # before we write the database entry, we check if the slurm file exists
-#             if not os.path.exists(slurm_out):
-#                 raise Http404, "SLURM file not found: %s" % (slurm_out)
+             
+                     
+            # before we write the database entry, we check if the slurm file exists
+            if not os.path.exists(slurm_out):
+                raise Http404, "SLURM file not found: %s" % (slurm_out)
                 
             
             # set the slurm output file 
@@ -116,7 +116,6 @@ def setup(request, plugin_name):
                                                   'user_home': home_dir})
   
 @login_required()  
-def dirlist(request):
     r=['<ul class="jqueryFileTree" style="display: none;">']
     files = list()
     try:

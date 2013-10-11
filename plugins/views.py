@@ -14,6 +14,7 @@ from evaluation_system.model.slurm import slurm_file
 from plugins.utils import get_plugin_or_404, ssh_call
 from plugins.models import PluginForm, PluginWeb
 from history.models import History
+from django_evlauation import settings
 
 import logging
 import paramiko # this is the ssh client
@@ -81,19 +82,28 @@ def setup(request, plugin_name):
             
             # start the scheduler vie sbatc
             username = request.user.username
+
             # the first command creates the output directory
             command  = 'mkdir -p ' + user.getUserSlurmDir() + ";"
-            command  += 'sbatch --uid=%s %s\n' %(username, full_path)
+            command  += '%s --uid=%s %s\n' % (settings.SLURM_SBATCH_COMMAND, username, full_path)
+            
             password = request.POST['password_hidden']
-            stdout = plugin.utils.ssh_call(username=username,
-                                           password=password,
-                                           command=command)
+            hostname = settings.SLURM_SBATCH_HOST
+            
+            # execute sbatch
+            stdout = ssh_call(username=username,
+                              password=password,
+                              command=command,
+                              hostname=hostname)
             
             # get the text form stdout
-            out=stdout[0].getlines()
+            out=stdout[1].readlines()
+            err=stdout[2].readlines()
+
+            logging.debug(out)
             
             # get the very first line only
-            out_first_line = out[0].split('\n')
+            out_first_line = out[0]
             
             # read the id from stdout
             if out_first_line.split(' ')[0] == 'Submitted':

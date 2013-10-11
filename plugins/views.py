@@ -58,7 +58,8 @@ def setup(request, plugin_name):
             if not os.path.exists(d):
                 os.makedirs(d)
             full_path = os.path.join(d, plugin.suggestSlurmFileName())
-            config_dict = form.data
+            config_dict = dict(form.data)
+            del config_dict['password_hidden'], config_dict['csrfmiddlewaretoken']
 
             # write the database entry
 #            history_entry = History.objects.create(tool=plugin_name,

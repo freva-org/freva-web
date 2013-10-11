@@ -86,17 +86,19 @@ def setup(request, plugin_name):
             
             # start the scheduler vie sbatc
             username = request.user.username
-            command  = 'sbatch --uid=%s %s\n' %(username, full_path)
+            command  = '/client/bin/sbatch %s' % full_path
             password = request.POST['password_hidden']
-            stdout = plugin.utils.ssh_call(username=username,
-                                           password=password,
-                                           command=command)
+            stdout = ssh_call(username=username,
+                              password=password,
+                              command=command)
             
             # get the text form stdout
-            out=stdout[1].getlines()
+            out=stdout[1].readlines()
+
+            logging.debug(out)
             
             # get the very first line only
-            out_first_line = out.split('\n')[0]
+            out_first_line = out[0]
             
             # read the id from stdout
             if out_first_line.split(' ')[0] == 'Submitted':

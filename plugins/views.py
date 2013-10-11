@@ -78,25 +78,22 @@ def setup(request, plugin_name):
             with open(full_path, 'w') as fp:
                 plugin.writeSlurmFile(fp, scheduled_id = row_id, user=user)   
 
-
-            # create the slurm output directory, when necessary
-            if not os.path.exists(user.getUserSlurmDir()):
-                os.makedirs(user.getUserSlurmDir())
-    
             
             # start the scheduler vie sbatc
             username = request.user.username
-            command  = 'sbatch --uid=%s %s\n' %(username, full_path)
+            # the first command creates the output directory
+            command  = 'mkdir -p ' + user.getUserSlurmDir() + ";"
+            command  += 'sbatch --uid=%s %s\n' %(username, full_path)
             password = request.POST['password_hidden']
             stdout = plugin.utils.ssh_call(username=username,
                                            password=password,
                                            command=command)
             
             # get the text form stdout
-            out=stdout[1].getlines()
+            out=stdout[0].getlines()
             
             # get the very first line only
-            out_first_line = out.split('\n')[0]
+            out_first_line = out[0].split('\n')
             
             # read the id from stdout
             if out_first_line.split(' ')[0] == 'Submitted':

@@ -68,6 +68,14 @@ AUTHENTICATION_BACKENDS = (
 
 LOGIN_URL = '/?login_required=1'
 
+# Settings for the SLURM job
+# full command of sbatch
+SLURM_SBATCH_COMMAND='/client/bin/sbatch'
+
+# where to login for executing the sbatch command
+SLURM_SBATCH_HOST='127.0.0.1'
+
+
 # Your project root
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__) + "../../../")
 

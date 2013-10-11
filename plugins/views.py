@@ -10,6 +10,7 @@ import evaluation_system.api.plugin_manager as pm
 from evaluation_system.model.user import User
 from evaluation_system.model.solr import SolrFindFiles
 from evaluation_system.model.slurm import slurm_file
+from evaluation_system.misc import config
 
 from plugins.utils import get_plugin_or_404, ssh_call
 from plugins.models import PluginForm, PluginWeb
@@ -83,12 +84,32 @@ def setup(request, plugin_name):
             # start the scheduler vie sbatc
             username = request.user.username
 
-            # the first command creates the output directory
-            command  = 'mkdir -p ' + user.getUserSlurmDir() + ";"
-            command  += '%s --uid=%s %s\n' % (settings.SLURM_SBATCH_COMMAND, username, full_path)
-            
+            # set the SLURM output directory
+            slurmoutdir = config.get(config.SLURM_WORK_DIR, "")
+
+            # if no directory is specified in the config file,
+            # get it from the user object
+            if not slurmoutdir:
+                slurmoutdir = user.getUserSlurmDir()
+
             password = request.POST['password_hidden']
+            hostname = settings.SLURM_OUTPUT_HOST
+
+            # the first command creates the output directory
+            command  = 'mkdir -p %s; ' % slurmoutdir
+
+            # create the directories when necessary
+            stdout = ssh_call(username=username,
+                              password=password,
+                              command=command,
+                              hostname=hostname)
+            
+            # now, execute the SLURM job
             hostname = settings.SLURM_SBATCH_HOST
+            
+            command  = '%s --uid=%s %s\n' % (settings.SLURM_SBATCH_COMMAND,
+                                              username,
+                                              full_path)
             
             # execute sbatch
             stdout = ssh_call(username=username,
@@ -100,7 +121,8 @@ def setup(request, plugin_name):
             out=stdout[1].readlines()
             err=stdout[2].readlines()
 
-            logging.debug(out)
+            logging.debug("OUT:" + str(out))
+            logging.debug("ERR:" + str(err))
             
             # get the very first line only
             out_first_line = out[0]

@@ -32,6 +32,6 @@ def ssh_call(username, password, command, hostname='127.0.0.1'):
     (stdin, stdout, stderr) = ssh.exec_command(command=command)
     
     # close the connection
-    #    ssh.close()
+    ssh.close()
     
     return (stdin, stdout, stderr)

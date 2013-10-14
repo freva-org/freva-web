@@ -1,7 +1,8 @@
 """ Basic models, such as user profile """
 from django import forms
+import django.contrib.auth as auth
 from django.forms import ValidationError
-from django.core import validators
+from django.core import validators, exceptions
 from django.forms.widgets import Input
 from django.shortcuts import render_to_response
 
@@ -51,15 +52,28 @@ class PluginFileField(forms.Field):
         if value != 'A':
             raise ValidationError(self.error_messages['invalid'])
 
+class PasswordField(forms.CharField):
+    def __init__(self, *args, **kwargs):
+        forms.CharField.__init__(widget=kwargs.get('widget', forms.HiddenInput))
         
-    
+        self._user = kwargs.pop('user')
+
+    def validate(self, value):
+        u = auth.authenticate(username=self._user, password=value)
+        
+        if not u:
+            raise exceptions.ValidationError(_('Invalid password'), code='invalid_password')
+
 
 class PluginForm(forms.Form):
-
-    password_hidden = forms.CharField(widget=forms.HiddenInput)
+    
+                
 
     def __init__(self, *args, **kwargs):
         tool = kwargs.pop('tool')
+        user = kwargs.pop('user')
+                
+        self.password_hidden = PasswordField(user=user)
         
         super(PluginForm, self).__init__(*args, **kwargs)
         

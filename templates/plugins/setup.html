@@ -103,10 +103,12 @@
 
 <script>
 
-$('#myModalPw').on('shown', function () {
+// Script for the password modal
+// set focus to pw-field
+$('#myModalPw').on('shown.bs.modal', function () {
     $('#password_temp').focus();
 })
-​
+
 $(document).ready(function(){
 
 	$('#browsefield').fileTree({

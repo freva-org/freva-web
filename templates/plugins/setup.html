@@ -103,6 +103,10 @@
 
 <script>
 
+$('#myModalPw').on('shown', function () {
+    $('#password_temp').focus();
+})
+​
 $(document).ready(function(){
 
 	$('#browsefield').fileTree({

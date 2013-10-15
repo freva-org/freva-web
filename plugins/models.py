@@ -54,29 +54,29 @@ class PluginFileField(forms.Field):
 
 class PasswordField(forms.CharField):
     def __init__(self, *args, **kwargs):
-        forms.CharField.__init__(widget=kwargs.get('widget', forms.HiddenInput))
-        
-        self._user = kwargs.pop('user')
+        widget = kwargs.get('widget', forms.HiddenInput)
+        super(PasswordField, self).__init__(widget=widget)
+
+        self._user = kwargs.pop('uid')
 
     def validate(self, value):
         u = auth.authenticate(username=self._user, password=value)
         
         if not u:
-            raise exceptions.ValidationError(_('Invalid password'), code='invalid_password')
+            raise exceptions.ValidationError('Invalid password', code='invalid_password')
 
+        super(PasswordField, self).validate(value)
 
 class PluginForm(forms.Form):
     
-                
-
     def __init__(self, *args, **kwargs):
         tool = kwargs.pop('tool')
-        user = kwargs.pop('user')
-                
-        self.password_hidden = PasswordField(user=user)
+        uid = kwargs.pop('uid')
         
         super(PluginForm, self).__init__(*args, **kwargs)
         
+        # set the password field
+        self.fields['password_hidden'] = PasswordField(uid=uid)
         
         for key in tool.__parameters__:
             

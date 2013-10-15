@@ -50,7 +50,7 @@ def setup(request, plugin_name):
     home_dir = user.getUserHome()
     
     if request.method == 'POST':
-        form = PluginForm(request.POST, tool=plugin, user=user)
+        form = PluginForm(request.POST, tool=plugin, uid=user.getName())
         if form.is_valid():
             # FIRST ATTEMPT FOR SLURM
             # create the output directory if necessary
@@ -154,7 +154,7 @@ def setup(request, plugin_name):
             
     else:   
         config_dict = plugin.setupConfiguration(check_cfg=False, substitute=False)      
-        form = PluginForm(initial=config_dict,tool=plugin)
+        form = PluginForm(initial=config_dict,tool=plugin, uid=user.getName())
     
     
     return render(request, 'plugins/setup.html', {'tool' : plugin_web, 'form': form,

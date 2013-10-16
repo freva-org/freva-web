@@ -45,7 +45,6 @@ def setup(request, plugin_name):
     
     plugin = get_plugin_or_404(plugin_name)
     plugin_web = PluginWeb(plugin)
-    
     user = User(request.user.username, request.user.email)
     home_dir = user.getUserHome()
     

@@ -49,106 +49,46 @@ def setup(request, plugin_name):
     user = User(request.user.username, request.user.email)
     home_dir = user.getUserHome()
     
+    # this row_id will be used to show the history
+    row_id = 0
+    
     if request.method == 'POST':
         form = PluginForm(request.POST, tool=plugin, uid=user.getName())
         if form.is_valid():
-            # FIRST ATTEMPT FOR SLURM
-            # create the output directory if necessary
-            d = os.path.join(settings.SLURM_DIR, request.user.username)
-            if not os.path.exists(d):
-                os.makedirs(d)
-            full_path = os.path.join(d, plugin.suggestSlurmFileName())
+            # read the configuration
             config_dict = dict(form.data)
             del config_dict['password_hidden'], config_dict['csrfmiddlewaretoken']
 
-            # write the database entry
-#            history_entry = History.objects.create(tool=plugin_name,
-#                                                   version = plugin.__version__,
-#                                                   configuration = config_dict,
-#                                                   uid = user.getName(),
-#                                                   status = History.processStatus.not_scheduled,
-#                                                   timestamp = datetime.datetime.now()
-#                                                   )
-            
-            row_id = user.getUserDB().storeHistory(plugin,
-                                                   config_dict,
-                                                   user.getName(),
-                                                   History.processStatus.not_scheduled,
-                                                   "",
-                                                   "")
-
-            
-            with open(full_path, 'w') as fp:
-                plugin.writeSlurmFile(fp, scheduled_id = row_id, user=user)   
-
-            
             # start the scheduler vie sbatc
             username = request.user.username
-
-            # set the SLURM output directory
-            slurmoutdir = config.get(config.SLURM_WORK_DIR, "")
-
-            # if no directory is specified in the config file,
-            # get it from the user object
-            if not slurmoutdir:
-                slurmoutdir = user.getUserSlurmDir()
-
             password = request.POST['password_hidden']
-            hostname = settings.SLURM_OUTPUT_HOST
+            hostname = settings.SCHEDULER_HOST
 
-            # the first command creates the output directory
-            command  = 'mkdir -p %s; ' % slurmoutdir
+            # compose the plugin command
+            command = plugin.composeCommand(config_dict, batchmode=True)
 
             # create the directories when necessary
             stdout = ssh_call(username=username,
                               password=password,
                               command=command,
                               hostname=hostname)
-            
-            # now, execute the SLURM job
-            hostname = settings.SLURM_SBATCH_HOST
-            
-            command  = '%s --uid=%s %s\n' % (settings.SLURM_SBATCH_COMMAND,
-                                              username,
-                                              full_path)
-            
-            # execute sbatch
-            stdout = ssh_call(username=username,
-                              password=password,
-                              command=command,
-                              hostname=hostname)
-            
+                        
             # get the text form stdout
             out=stdout[1].readlines()
             err=stdout[2].readlines()
 
-            logging.debug("OUT:" + str(out))
-            logging.debug("ERR:" + str(err))
+            logging.debug("output of analyze:" + str(out))
+            logging.debug("errors of analyze:" + str(err))
             
             # get the very first line only
             out_first_line = out[0]
             
             # read the id from stdout
-            if out_first_line.split(' ')[0] == 'Submitted':
-                slurm_id = int(out_first_line.split(' ')[-1])
+            if out_first_line.split(' ')[0] == 'Scheduled':
+                row_id = int(out_first_line.split(' ')[-1])
             else:
-                slurm_id = 0
-                raise Http404, "Unexpected scheduler output:\n[%s]\n[%s]" % (out, err)
-             
-            slurm_out = os.path.join(user.getUserSlurmDir(),
-                                     'slurm-%i.out' % slurm_id)
-             
-                     
-            # before we write the database entry,
-            # we check if the slurm file exists
-            # for debugging reasons we commented these lines
-            # if not os.path.isfile(slurm_out):
-            #     raise Http404, "SLURM file not found: %s" % (slurm_out)
-                
-            
-            # set the slurm output file 
-            user.getUserDB().scheduleEntry(row_id, user.getName(), slurm_out)
-            
+                row_id = 0
+                raise Http404, "Unexpected output of analyze:\n[%s]\n[%s]" % (out, err)            
                 
             return redirect('history:results', id=row_id) #should be changed to result page 
             

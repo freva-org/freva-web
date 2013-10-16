@@ -13,7 +13,10 @@
 
    ========================================================================== */
 
-@import url('bootstrap.css');
-@import url('bootstrap-responsive.css');
+@import url('bootstrap_test.css');
+@import url('style_test.css');
+
+@import url('slider.css');
+@import url('brown.css');
 @import url('app.css');
 

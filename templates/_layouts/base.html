@@ -63,24 +63,27 @@
   <script src="{{ STATIC_URL }}jqueryfiletree/jqueryFileTree.js"></script>
   
   <script src="{{ STATIC_URL }}fancybox/jquery.fancybox.js"></script>
+  
+  <script src="{{ STATIC_URL }}js/jquery.cslider.js"></script>
   {% endcompress %}
   <!-- end scripts -->
   
 </head>
-<body class="{% block body_class %}{% endblock %}">
+<body class="body" >
 {% block body %}
   <!-- Prompt IE 6 users to install Chrome Frame. Remove this if you support IE 6.
        chromium.org/developers/how-tos/chrome-frame-getting-started -->
   <!--[if lt IE 7]>
     <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
   <![endif]-->
-  <header>
 
-  </header>
 
   <div role="main">
   	{% block menu %}{% endblock %}
-    {% block content %}{% endblock %}
+    
+    <div id="maincontent">{% block content %}{% endblock %}</div>
+    
+    {% block footer %}{% endblock %}
   </div>
 
 

@@ -2,43 +2,123 @@
 
 {% block menu %}
 
- 		<div class="navbar navbar-inverse navbar-fixed-top">
-	      <div class="container">
-	        <div class="navbar-header">
+
+
+<!-- Header starts -->
+
+<header style="padding-top:0px;">
+   <div class="container">
+      <div class="row">
+         <div class="col-md-4 col-sm-4">
+            <!-- Logo and site link -->
+            <div class="logo">
+               <h1><a href="{% url 'base:home' %}"><img src="{{ STATIC_URL }}img/miklip-logo.png" style="width:100%;"/></a></h1>
+            </div>
+         </div>
+      </div>
+   </div>
+</header>
+
+<!-- Header ends -->
+
+<!-- Navigation Starts -->
+
+<!-- Note down the syntax before editing. It is the default twitter bootstrap navigation -->
+
+    <div class="navbar bs-docs-nav" role="banner">
+      
+        <div class="container">
+          <div class="navbar-header">
 	          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
 	            <span class="icon-bar"></span>
 	            <span class="icon-bar"></span>
 	            <span class="icon-bar"></span>
 	          </button>
-	          <a class="navbar-brand" href="{% url 'base:home' %}">MiKlip Evaluation System</a>
-	        </div>
-	        <div class="navbar-collapse collapse">
+		  </div>
+          <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
+            <!-- Navigation links starts here -->
 	          <ul class="nav navbar-nav">
 	            <li><a href="{% url 'plugins:home' %}">Plugins</a></li>
 	            <li><a href="{% url 'history:history' %}">History</a></li>
 	             <li><a href="https://code.zmaw.de/projects/miklip-d-integration/issues/new" target="_blank">Contact</a></li>
 	             <li><a href="https://code.zmaw.de/projects/miklip-d-integration/wiki" target="_blank">Wiki</a>
 	          </ul>
-	          {% if not request.user.is_authenticated %}
+
+ 
+             {% if not request.user.is_authenticated %}
 			  <form class="navbar-form navbar-right" method="post" action="{% url 'base:home' %}">
- {% csrf_token %}
+ 				{% csrf_token %}
 	            <div class="form-group">
 	              <input name="user" type="text" placeholder="Username" class="form-control">
 	            </div>
 	            <div class="form-group">
 	              <input name="password" type="password" placeholder="Password" class="form-control">
 	            </div>
-	            <button type="submit" class="btn btn-success">Sign in</button>
+	            <button type="submit" class="btn btn-primary">Sign in</button>
 	          </form>
 	          {% else %}
 	           <ul class="nav navbar-nav navbar-right">
 	               <li>  <a href="{% url 'base:logout' %}">logout ({{ request.user.username }})</a></li>
 	          </ul>
 	          
-	          {% endif %}
-	        </div><!--/.navbar-collapse -->
-	      </div>
-	    </div>
+	          {% endif %} 
+          </nav>
+        </div>
+      </div>
+   
+    
+<!-- Navigation Ends --> 
 
 	    
+{% endblock %}
+
+
+{% block footer %}
+
+<!-- Footer -->
+<footer>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-4">
+         <!-- Widget 1 -->
+         <div class="widget">
+            <h4>About Us</h4>
+
+         </div>
+      </div>
+      <div class="col-md-4">
+         <!-- widget 2 -->
+         <div class="widget">
+            <h4>Contact</h4>
+			<ul>
+				<li>christopher.kadow@met.fu-berlin.de</li>
+				<li>sebastian.illing@met.fu-berlin.de</li>
+				<li>oliver.kunst@met.fu-berlin.de</li>
+			</ul>
+			
+         </div>
+      </div>
+      <div class="col-md-4">
+         <!-- Widget 3 -->
+         <div class="widget">
+            <h4>Imprint</h4>
+			<ul>
+				<li>MiKlip - INTEGRATION</li>
+				<li>Institut für Meteorologie</li>
+				<li>Carl-Heinrich-Becker-Weg 6-10
+				<li>12165 Berlin</li>
+			
+			</ul>
+
+         </div>
+      </div>
+	 </div>
+	 <div class="row">
+      <hr />
+      <div class="col-md-12"><p class="copy pull-left">
+               Copyright &copy; <a href="{% url 'base:home'%}">www-miklip.dkrz.de</a> | Created by <a href="https://code.zmaw.de/projects/miklip-d-integration" target="_blank">INTEGRATION</a></p></div>
+    </div>
+  </div>
+</footer>
+
 {% endblock %}

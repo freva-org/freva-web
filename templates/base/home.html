@@ -28,56 +28,82 @@
 	</div>
 </div>
 {% endif %}
+<div class="container">
+<!-- Slider (Parallax Slider) -->
+       <div class="row">
+         <div class="col-md-12">     
+            <div id="da-slider" class="da-slider">
+				<div class="da-slide">
+					<h2>Start analyses</h2>
+					<p>You can easily start all analysis in the evaluation system online. Just fill out the form a click "Run".</p>
+					<div class="da-img"><img src="{{ STATIC_URL }}img/parallax/1.png" alt="image01" /></div>
+				</div>
+				<div class="da-slide">
+					<h2>View results</h2>
+					<p>When the results are ready, you can click through the plots directly on the webpage. </p>
+					<div class="da-img"><img src="{{ STATIC_URL }}img/parallax/2.png" alt="image01" /></div>
+				</div>
+				<div class="da-slide">
+					<h2>View history</h2>
+					<p>In the history section you can see all analysis you have done. You can also view and edit the configuration.</p>
+					<div class="da-img"><img src="{{ STATIC_URL }}img/parallax/3.png" alt="image01" /></div>
+				</div>
 
-
-<!-- Main jumbotron for a primary marketing message or call to action -->
-    <div class="jumbotron">
-      <div class="container">
-        <h1><img src="{{ STATIC_URL }}img/miklip-logo.jpg"/></h1>
-        <p>Welcome to the BETA version of the web interface to the MiKlip Evaluation System developed by INTEGRATION</p>
-        <p><a href="https://code.zmaw.de/projects/miklip-d-integration/wiki" target="_blank" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
-      </div>
-    </div>
-
-    <div class="container">
-      <!-- Example row of columns -->
-      <div class="row">
-      
-      <div class="col-lg-4">
-          <h2>MiKlip</h2>
-          <p>
-          	The German research project "MiKlip - Decadal Predictions" aims to develop a system for climate predictions for up to a decade ahead.
-          	The system is based on the MPI-M Earth System Model (MPI-ESM) from the Max Planck Institute for Meteorology in Hamburg.	
-          </p>
-          <p><a class="btn btn-default" href="http://fona-miklip.de/en" target="_blank">View details &raquo;</a></p>
-       </div>
-       
-        <div class="col-lg-4">
-          <h2>INTEGRATION</h2>
-          <p>
-          	The INTEGRATION project provides a standardized data and evaluation system for application within the MiKlip system. 
-			The evaluation system provides efficient and comprehensive access to the model data base as well as to evaluation data sets. 
-			The application system is developed as an easy to use low-end application minimizing technical requirements for users 
-			within MiKlip and potential end users outside of MiKlip.
-		  </p>
-          <p><a href="http://fona-miklip.de/en/332.php" target="_blank" class="btn btn-default">View details &raquo;</a></p>
+				<nav class="da-arrows">
+					<span class="da-arrows-prev"></span>
+					<span class="da-arrows-next"></span>
+				</nav>
+			</div>
         </div>
-        
-        <div class="col-lg-4">
-          <h2>Imprint</h2>
-          <p>
-          	MiKlip - INTEGRATION<br/>
-          	Institut für Meteorologie<br/>
-			Carl-Heinrich-Becker-Weg 6-10<br/>
-			12165 Berlin<br/>
-			Contact:<br/>
-			christopher.kadow@met.fu-berlin.de<br/>
-			sebastian.illing@met.fu-berlin.de<br/>
-			oliver.kunst@met.fu-berlin.de<br/>
-		</p>
-        </div>
-      </div>
+        </div>  
+            <!-- Slider ends -->
+	<div class="bor"></div>
+	
+	<!-- Service starts -->
+            
+            <div class="services">
+                  <div class="row">
+                     <div class="col-md-6">
+                     
+                        <!-- Service #1 -->
+                        <div class="service">
+                           <!-- Icon & title. Font Awesome icon used. -->
+                           <h5><span><i class="glyphicon glyphicon-search"></i> MiKlip</span></h5>
+                           <p>The German research project "MiKlip - Decadal Predictions" aims to develop a system for climate predictions for up to a decade ahead.
+          	The system is based on the MPI-M Earth System Model (MPI-ESM) from the Max Planck Institute for Meteorology in Hamburg.</p>
+                        </div>
+                        
+                     </div>
+                     <div class="col-md-6">
+                     
+                        <!-- Service #2 -->
+                        <div class="service">
+                           <!-- Icon & title. Font Awesome icon used. -->
+                           <h5><span><i class="glyphicon glyphicon-search"></i> INTEGRATION</span></h5>
+                           <p>The INTEGRATION project provides a standardized data and evaluation system for application within the MiKlip system. 
+								The evaluation system provides efficient and comprehensive access to the model data base as well as to evaluation data sets. 
+								The application system is developed as an easy to use low-end application minimizing technical requirements for users 
+								within MiKlip and potential end users outside of MiKlip.
+							</p>
+                        </div>                     
+                        
+                     </div>
 
-      <hr>
+                  </div>
+            </div>
+            
+            <!-- Serivce ends -->
 
+
+  </div>
+<script type="text/javascript">
+			$(function() {
+				console.log('test');
+				$('#da-slider').cslider({
+					autoplay	: true,
+					interval : 6000
+				});
+			
+			});
+		</script>	
 {% endblock %}

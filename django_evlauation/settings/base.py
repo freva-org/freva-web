@@ -29,9 +29,6 @@ AUTH_LDAP_SERVER_URI = "ldaps://dsp1.dkrz.de, ldaps://dsp2.dkrz.de"
 # The directory with SSL certificates
 CA_CERT_DIR = '/etc/openldap/cacerts/'
 
-#path where slurm files are created
-SLURM_DIR = '/usr/local/evaluation_system/slurm/'
-
 
 # the only allowd group
 ALLOWED_GROUP = 'miklip'
@@ -66,15 +63,10 @@ AUTHENTICATION_BACKENDS = (
     'django_auth_ldap.backend.LDAPBackend',
 )
 
+# the host to start the scheduler
+SCHEDULER_HOST='127.0.0.1'
+
 LOGIN_URL = '/?login_required=1'
-
-# Settings for the SLURM job
-# full command of sbatch
-SLURM_SBATCH_COMMAND='/client/bin/sbatch'
-
-# where to login for executing the sbatch command
-SLURM_SBATCH_HOST='127.0.0.1'
-
 
 # Your project root
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__) + "../../../")

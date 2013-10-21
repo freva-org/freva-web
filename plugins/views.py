@@ -56,6 +56,8 @@ def setup(request, plugin_name):
         if form.is_valid():
             # read the configuration
             config_dict = dict(form.data)
+            config_dict = dict([(str(k), str(v[0])) for k, v in config_dict.items()])
+            logging.debug(config_dict)
             del config_dict['password_hidden'], config_dict['csrfmiddlewaretoken']
 
             # start the scheduler vie sbatc
@@ -64,14 +66,16 @@ def setup(request, plugin_name):
             hostname = settings.SCHEDULER_HOST
 
             # compose the plugin command
+            dirtyhack = 'export PYTHONPATH=/home/zmaw/u290038/git/evaluation_system/src;/home/zmaw/u290038/git/evaluation_system/bin/'
             command = plugin.composeCommand(config_dict,
                                             batchmode='web',
                                             email=user.getEmail())
 
+            logging.debug("Calling command:" + command)
             # create the directories when necessary
             stdout = ssh_call(username=username,
                               password=password,
-                              command=command,
+                              command=dirtyhack + command,
                               hostname=hostname)
                         
             # get the text form stdout

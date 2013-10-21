@@ -64,7 +64,9 @@ def setup(request, plugin_name):
             hostname = settings.SCHEDULER_HOST
 
             # compose the plugin command
-            command = plugin.composeCommand(config_dict, batchmode=True)
+            command = plugin.composeCommand(config_dict,
+                                            batchmode='web',
+                                            email=user.getEmail())
 
             # create the directories when necessary
             stdout = ssh_call(username=username,

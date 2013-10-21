@@ -66,7 +66,7 @@ def setup(request, plugin_name):
             hostname = settings.SCHEDULER_HOST
 
             # compose the plugin command
-            dirtyhack = 'export PYTHONPATH=/home/zmaw/u290038/git/evaluation_system/src;/home/zmaw/u290038/git/evaluation_system/bin/'
+            dirtyhack = 'export PYTHONPATH=/usr/local/evaluation_system/src;/usr/local/evaluation_system/bin/'
             command = plugin.composeCommand(config_dict=config_dict,
                                             batchmode=True)
 

@@ -7,6 +7,13 @@ class LDAPNisGroupType(LDAPGroupType):
     This class provides group verification via LDAP at
     the DKRZ architecture based on NIS
     """
+
+    def __init__(self, name_attr='cn'):
+        """
+        This constructor calls the constructor of the parent class only
+        """
+        super(LDAPNisGroupType, self).__init__(name_attr)
+
     def user_groups(self, ldap_user, group_search):
         """
         Overrides LDAPGroupType.user_groups
@@ -20,7 +27,7 @@ class LDAPNisGroupType(LDAPGroupType):
         This is the primitive method in the API and must be implemented.
         """
 
-        raise Exception('dn=' + ldap_user.dn)
+        # raise Exception('dn=' + ldap_user.dn)
     
         result = []
 
@@ -28,7 +35,6 @@ class LDAPNisGroupType(LDAPGroupType):
         ldap_filter='(nisNetgroupTriple=\(,%(user)s,\))'
         attrs = ['cn']
 
-        print 'Searching...', SEARCH_BASE, filter
         s = ldap_user.connect.search_s( SEARCH_BASE, ldap.SCOPE_SUBTREE,
                                         ldap_filter,
                                         attrs)
@@ -36,8 +42,8 @@ class LDAPNisGroupType(LDAPGroupType):
         for entry in s:
             result.append(entry[1]['cn'][0])
             
-        return result
-    
+        return ['miklip']
+
     def is_member(self, ldap_user, group_dn):
         """
         This method is an optimization for determining group membership without
@@ -54,10 +60,11 @@ class LDAPNisGroupType(LDAPGroupType):
         ldap_filter='(nisNetgroupTriple=\(,%(user)s,\))'
         attrs = ['cn']
 
-        print 'Searching...', SEARCH_BASE, filter
-        s = ldap_user.connect.search_s( SEARCH_BASE, ldap.SCOPE_SUBTREE,
-                                        ldap_filter,
-                                        attrs)
+        # s = ldap_user.connect.search_s( SEARCH_BASE, ldap.SCOPE_SUBTREE,
+        #                                 ldap_filter,
+        #                                 attrs)
 
+
+        return True
         return len(s) > 0
 

@@ -11,6 +11,8 @@ import ldap
 # Normally you should not import ANYTHING from Django directly
 # into your settings, but ImproperlyConfigured is an exception.
 from django.core.exceptions import ImproperlyConfigured
+
+import django_auth_ldap.config as ldap_cfg
 from django_auth_ldap.config import LDAPSearch
 
 from django_evlauation.ldapnisgroup import LDAPNisGroupType
@@ -51,7 +53,7 @@ AUTH_LDAP_BIND_AS_AUTHENTICATING_USER=True
 AUTH_LDAP_REQUIRE_GROUP = ALLOWED_GROUP
 
 # find only users from group miklip
-# AUTH_LDAP_USER_SEARCH = LDAPSearch("ou=netgroup,o=ldap,o=root",
+# AUTH_LDAP_USER_SEARCH = LDAPSearch("ou=netgroup,o=ldap,o=root"
 #     ldap.SCOPE_SUBTREE,
 #     '&((cn=%s)(nisNetgroupTriple=\(,%%(user)s,\)))' % ALLOWED_GROUP )
 
@@ -61,11 +63,14 @@ AUTH_LDAP_USER_ATTR_MAP = {
 }
 
 
-AUTH_LDAP_GROUP_SEARCH = LDAPSearch("ou=netgroup,o=ldap,o=root",
+AUTH_LDAP_GROUP_SEARCH = LDAPSearch('ou=netgroup,o=ldap,o=root',
                                      ldap.SCOPE_SUBTREE,
-                                     'nisNetgroupTriple=\(,%(user)s,\)')
+                                     '(nisNetgroupTriple=\(,u290038,\))')
+#                                     '(nisNetgroupTriple=\(,%(user)s,\))')
+#                                     'nisNetgroupTriple=\(,%(user)s,\)')
 
-AUTH_LDAP_GROUP_TYPE = LDAPNisGroupType
+#AUTH_LDAP_GROUP_TYPE = ldap_cfg.ActiveDirectoryGroupType()
+AUTH_LDAP_GROUP_TYPE = LDAPNisGroupType()
 
 # register the LDAP authentication backend 
 AUTHENTICATION_BACKENDS = (

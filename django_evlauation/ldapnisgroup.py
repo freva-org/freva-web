@@ -1,5 +1,6 @@
 import ldap
 
+from django.http import Http404
 from django_auth_ldap.config import LDAPGroupType
 
 class LDAPNisGroupType(LDAPGroupType):
@@ -27,8 +28,6 @@ class LDAPNisGroupType(LDAPGroupType):
         This is the primitive method in the API and must be implemented.
         """
 
-        # raise Exception('dn=' + ldap_user.dn)
-    
         result = []
 
         SEARCH_BASE = 'ou=netgroup,o=ldap,o=root'
@@ -42,7 +41,7 @@ class LDAPNisGroupType(LDAPGroupType):
         for entry in s:
             result.append(entry[1]['cn'][0])
             
-        return ['miklip']
+        return result
 
     def is_member(self, ldap_user, group_dn):
         """
@@ -57,14 +56,17 @@ class LDAPNisGroupType(LDAPGroupType):
         """
                 
         SEARCH_BASE = 'ou=netgroup,o=ldap,o=root'
-        ldap_filter='(nisNetgroupTriple=\(,%(user)s,\))'
+        uid = str(ldap_user.attrs['uid'][0])
+        ldap_filter='(&(nisNetgroupTriple=\(,%s,\))(cn=%s))' % (uid, group_dn)
         attrs = ['cn']
 
-        # s = ldap_user.connect.search_s( SEARCH_BASE, ldap.SCOPE_SUBTREE,
-        #                                 ldap_filter,
-        #                                 attrs)
+        try:
+            s = ldap_user.connection.search_s( SEARCH_BASE,
+                                               ldap.SCOPE_SUBTREE,
+                                               ldap_filter,
+                                               attrs)
+        except Exception, e:
+            raise Http404, str(e)
 
-
-        return True
         return len(s) > 0
 

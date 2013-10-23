@@ -23,9 +23,8 @@ def home(request):
             else:
                 login_failed = True
 
-            raise Http404, str(u.ldap_user.group_names())
         except Exception, e:
-            raise Http404, str(e)
+            logging.debug(str(e))
         
     return render(request, 'base/home.html',{'login_failed':login_failed})
 

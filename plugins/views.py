@@ -41,16 +41,13 @@ def detail(request, plugin_name):
     return render(request, 'plugins/detail.html', {'plugin':plugin_web})
   
 @login_required()    
-def setup(request, plugin_name):
+def setup(request, plugin_name, row_id = None):
     
     plugin = get_plugin_or_404(plugin_name)
     plugin_web = PluginWeb(plugin)
     user = User(request.user.username, request.user.email)
     home_dir = user.getUserHome()
-    
-    # this row_id will be used to show the history
-    row_id = 0
-    
+        
     if request.method == 'POST':
         form = PluginForm(request.POST, tool=plugin, uid=user.getName())
         if form.is_valid():
@@ -97,8 +94,15 @@ def setup(request, plugin_name):
                 
             return redirect('history:results', id=row_id) #should be changed to result page 
             
-    else:   
-        config_dict = plugin.setupConfiguration(check_cfg=False, substitute=False)      
+    else:
+        config_dict = None
+        
+        if row_id:
+            h = History.objects.get(pk=row_id)
+            config_dict = h.config_dict
+        else:
+            config_dict = plugin.setupConfiguration(check_cfg=False, substitute=False)
+                  
         form = PluginForm(initial=config_dict,tool=plugin, uid=user.getName())
     
     

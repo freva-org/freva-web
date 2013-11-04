@@ -53,7 +53,7 @@ def setup(request, plugin_name, row_id = None):
         if form.is_valid():
             # read the configuration
             config_dict = dict(form.data)
-            config_dict = dict([(str(k), str(v[0])) for k, v in config_dict.items()])
+            config_dict = dict([(str(k), "'%s'" % str(v[0])) for k, v in config_dict.items()])
             logging.debug(config_dict)
             del config_dict['password_hidden'], config_dict['csrfmiddlewaretoken']
 
@@ -103,7 +103,7 @@ def setup(request, plugin_name, row_id = None):
             h = History.objects.get(pk=row_id)
             config_dict = h.config_dict()
         else:
-            config_dict = plugin.setupConfiguration(check_cfg=False, substitute=False)
+            config_dict = plugin.setupConfiguration(check_cfg=False, substitute=True)
                   
         form = PluginForm(initial=config_dict,tool=plugin, uid=user.getName())
     

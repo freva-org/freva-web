@@ -97,9 +97,10 @@ def setup(request, plugin_name, row_id = None):
     else:
         config_dict = None
         
+        # load data into form, when a row id is given.
         if row_id:
             h = History.objects.get(pk=row_id)
-            config_dict = h.config_dict
+            config_dict = h.config_dict()
         else:
             config_dict = plugin.setupConfiguration(check_cfg=False, substitute=False)
                   

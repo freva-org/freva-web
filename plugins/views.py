@@ -57,13 +57,14 @@ def setup(request, plugin_name, row_id = None):
             logging.debug(config_dict)
             del config_dict['password_hidden'], config_dict['csrfmiddlewaretoken']
 
-            # start the scheduler vie sbatc
+            # start the scheduler vie sbatch
             username = request.user.username
             password = request.POST['password_hidden']
             hostname = settings.SCHEDULER_HOST
 
             # compose the plugin command
             dirtyhack = 'export PYTHONPATH=/home/zmaw/u290038/git/evaluation_system/src;/home/zmaw/u290038/git/evaluation_system/bin/'
+            dirtyhack = 'module load /home/zmaw/u290038/git/evaluation_system/module/evaluation_system/0.1;'
             command = plugin.composeCommand(config_dict,
                                             batchmode='web',
                                             email=user.getEmail())

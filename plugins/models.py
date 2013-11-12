@@ -26,31 +26,13 @@ class PluginWeb(object):
     
 
 class PluginFileFieldWidget(Input):
-
-    def __init__(self, attrs):
-        super(PluginFileFieldWidget, self).__init__(attrs)
-        
     def render(self, name, value, attrs=None):
-        
-        #return '<input type="text" class="form-control" value="%s" id="%s" placeholder="%s" name="%s">' %(value, attrs['id'], name, name)
         return loader.render_to_string('plugins/filefield.html', {'name': name, 'value': value, 'id':attrs['id']})
-        
-        
-class PluginFileField(forms.Field):
+
+class PluginRangeFieldWidget(Input):
+    def render(self, name, value, attrs=None):
+        return loader.render_to_string('plugins/rangefield.html', {'name': name, 'value': value, 'id':attrs['id']})
     
-    default_error_message = {'invalid': 'This is not a valid path.'}
-    
-    def to_python(self, value):
-        
-        if value in validators.EMPTY_VALUES:
-            return None
-        
-        return value
-        
-    def validate(self, value):
-        
-        if value != 'A':
-            raise ValidationError(self.error_messages['invalid'])
 
 class PasswordField(forms.CharField):
     def __init__(self, *args, **kwargs):
@@ -92,6 +74,8 @@ class PluginForm(forms.Form):
             
             if isinstance(param, parameters.Bool):
                 self.fields[key] = forms.BooleanField(required=required, help_text=help_str)
+            elif isinstance(param, parameters.Range):
+                self.fields[key] = forms.CharField(required=required, help_text=help_str, widget=PluginRangeFieldWidget({}))
             elif param_subtype == int:
                 self.fields[key] = forms.IntegerField(required=required, help_text=help_str)
             elif isinstance(param, parameters.File):

@@ -18,6 +18,7 @@ urlpatterns = patterns('',
     
     url(r'^plugins/', include('plugins.urls', namespace='plugins')),
     url(r'^history/', include('history.urls', namespace='history')),
+    url(r'^solr/', include('solr.urls', namespace='solr')),
     
     #url(r'^', include('debug_toolbar_user_panel.urls')),
     url(r'^bad/$', bad),

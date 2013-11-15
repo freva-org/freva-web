@@ -1,4 +1,4 @@
-""" Views for the base application """
+""" Views for the plugins application """
 
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, Http404
@@ -43,10 +43,12 @@ def detail(request, plugin_name):
 @login_required()    
 def setup(request, plugin_name, row_id = None):
     
-    plugin = get_plugin_or_404(plugin_name)
-    plugin_web = PluginWeb(plugin)
     user = User(request.user.username, request.user.email)
     home_dir = user.getUserHome()
+    plugin = get_plugin_or_404(plugin_name, user=user)
+    plugin_web = PluginWeb(plugin)
+    user = User(request.user.username, request.user.email)
+    
         
     if request.method == 'POST':
         form = PluginForm(request.POST, tool=plugin, uid=user.getName())
@@ -133,32 +135,7 @@ def dirlist(request):
         r.append('</ul>')
     return HttpResponse(''.join(r))  
 
-@login_required()
-def solr_search(request):
-    args = dict(request.GET)#self.request.arguments.copy()
-    latest = True#bool(request.GET.get('latest', [False]))
-    try:
-        facets = request.GET['facet']
-    except KeyError:
-        facets = False
-    if 'start' in args: args['start'] = int(request.GET['start']) 
-    if 'rows' in args: args['rows'] = int(request.GET['rows'])
-    
-    metadata = None
-    #return HttpResponse(json.dumps(dict(args)))
-    if facets:
-        args.pop('facet')
-        if facets == '*':
-            #means select all, 
-            facets = None
-        results = SolrFindFiles.facets(facets=facets, **args)
-    else:
-        #return HttpResponse(json.dumps(dict(hallo='was')))
-        results = SolrFindFiles.search( _retrieve_metadata = True, **args)
-        metadata = results.next()
-        results = list(results)
-      
-    return HttpResponse(json.dumps(dict(data=results, metadata=metadata)), content_type="application/json")
+
 
 
 

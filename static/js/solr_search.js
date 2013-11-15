@@ -5,7 +5,7 @@ var cache = {};
 var solr;
 
 solr = new function() {
-    this.url = '/plugins/solr-search/';
+    this.url = '/solr/solr-search/';
     
     //maximum number of files that will be allowed to be selected
     //should be setup before displaying the find window

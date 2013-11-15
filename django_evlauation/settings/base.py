@@ -126,6 +126,7 @@ INSTALLED_APPS = (
     'base',
     'plugins',
     'history',
+    'solr',
 
     # Local apps, referenced via appname
 )

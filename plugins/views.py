@@ -65,7 +65,8 @@ def setup(request, plugin_name, row_id = None):
             hostname = settings.SCHEDULER_HOST
 
             # compose the plugin command
-            dirtyhack = 'export PYTHONPATH=/home/zmaw/u290038/git/evaluation_system/src;/home/zmaw/u290038/git/evaluation_system/bin/'
+            dirtyhack = 'export PYTHONPATH=/miklip/integration/evaluation_system/src;/miklip/integration/evaluation_system/bin/'
+            # module_load = 'module load evaluation_system;'
             command = plugin.composeCommand(config_dict,
                                             batchmode='web',
                                             email=user.getEmail())

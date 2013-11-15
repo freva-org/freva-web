@@ -21,9 +21,9 @@ def history(request):
         
     try:
         tool = request.GET['plugin']
-        history = History.objects.filter(uid=user).filter(tool=tool)
+        history = History.objects.filter(uid=user).filter(tool=tool).order_by('id')
     except KeyError:
-        history = History.objects.filter(uid=user)
+        history = History.objects.order_by('id').filter(uid=user)
 
     return render(request, 'history/history.html', {'history': history})
 

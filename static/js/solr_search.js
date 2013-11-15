@@ -171,7 +171,6 @@ $(document).ready(function() {
     $('#solr_select_file').click(function(){
         //check if this is valid
         var files = $('.file:checked').map(function(i, t){return t.value});
-        console.log(files);
         solr.hide_dialog(files);
     });
     
@@ -194,16 +193,27 @@ $(document).ready(function() {
     	//show find mask
     	solr.show_dialog();
    	});
-
-
-    
-
-    				
+			
     //some cosmetics
-    $('input:text').each(function(){this.style.width='90%';})
+    //$('input:text').each(function(){this.style.width='90%';})
     
 
-    
+    visualSearch = VS.init({
+      container : $('.visual_search_facet'),
+      query     : '',
+      callbacks : {
+        search       : function(query, searchCollection) {},
+        facetMatches : function(callback) {
+        callback([
+      'account', 'filter', 'access', 'title',
+      { label: 'city',    category: 'location' },
+      { label: 'address', category: 'location' },
+      { label: 'country', category: 'location' },
+      { label: 'state',   category: 'location' },
+    ]);},
+        valueMatches : function(facet, searchTerm, callback) {}
+      }
+    });
 });
 
 

@@ -1,0 +1,39 @@
+
+<input type="hidden" class="col-md-12" id="{{ attrs.id }}" name="{{name}}" style="margin:0px; padding:0px;">
+
+<script>
+$(document).ready(function() { 
+	$("#{{ attrs.id }}").select2({
+		placeholder: "Select a {{ facet }}",
+		allowClear: true,
+		
+		ajax: { // instead of writing the function to execute the request we use Select2's convenient helper
+				url: "/solr/solr-search",
+				dataType: 'json',
+				data: function (term, page) {
+					return {
+						facets : '{{facet}}',
+						q: term, // search term
+						page_limit: 10,
+					};
+				},
+				results: function (data, page) { // parse the results into the format expected by Select2.
+					
+					var res_data = [];
+					$.each(data['data']['{{facet}}'], function(index,value){
+						console.log(index+':'+value);
+						if(index%2 == 0){
+						var tmp = {'id':index,'text':value};
+						res_data.push(tmp);
+						}	
+					});
+					console.log(res_data);
+					return {results: res_data};
+				}
+			  },
+	});
+	
+
+
+});
+</script>

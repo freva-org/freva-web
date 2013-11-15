@@ -3,10 +3,10 @@ from django.http import Http404
 
 import paramiko
 
-def get_plugin_or_404(plugin_name):
+def get_plugin_or_404(plugin_name,user=None):
     
     try:
-        return pm.getPluginInstance(plugin_name)
+        return pm.getPluginInstance(plugin_name,user)
     except:
         raise Http404
     

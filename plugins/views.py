@@ -1,4 +1,4 @@
-""" Views for the base application """
+""" Views for the plugins application """
 
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, Http404
@@ -43,10 +43,12 @@ def detail(request, plugin_name):
 @login_required()    
 def setup(request, plugin_name, row_id = None):
     
-    plugin = get_plugin_or_404(plugin_name)
-    plugin_web = PluginWeb(plugin)
     user = User(request.user.username, request.user.email)
     home_dir = user.getUserHome()
+    plugin = get_plugin_or_404(plugin_name, user=user)
+    plugin_web = PluginWeb(plugin)
+    user = User(request.user.username, request.user.email)
+    
         
     if request.method == 'POST':
         form = PluginForm(request.POST, tool=plugin, uid=user.getName())

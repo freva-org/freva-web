@@ -24,7 +24,8 @@ def solr_search(request):
     if 'rows' in args: args['rows'] = int(request.GET['rows'])
     
     metadata = None
-    #return HttpResponse(json.dumps(dict(args)))
+    
+    return HttpResponse(json.dumps({"data": {"product": ["baseline0", 10, "baseline1", 10, "output", 1129, "output1", 1834]}, "metadata": None}))
     if facets:
         args.pop('facet')
         if facets == '*':

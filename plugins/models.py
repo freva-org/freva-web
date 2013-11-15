@@ -3,13 +3,14 @@ from django import forms
 import django.contrib.auth as auth
 from django.forms import ValidationError
 from django.core import validators, exceptions
-from django.forms.widgets import Input
+from django.forms.widgets import Input, Select
 from django.shortcuts import render_to_response
 
 from django.template import loader
 
 import evaluation_system.api.plugin_manager as pm
 import evaluation_system.api.parameters as parameters
+
 
 
 class PluginNotFoundError(Exception):
@@ -28,6 +29,15 @@ class PluginWeb(object):
 class PluginFileFieldWidget(Input):
     def render(self, name, value, attrs=None):
         return loader.render_to_string('plugins/filefield.html', {'name': name, 'value': value, 'id':attrs['id']})
+
+class SolrFieldWidget(Select):
+    def __init__(self, *args, **kwargs):
+        self.facet = kwargs.pop('facet')
+        super(SolrFieldWidget,self).__init__(*args,**kwargs)
+        
+    def render(self, name, value, attrs=None, choices=()):
+        return loader.render_to_string('plugins/solrfield.html', {'name': name, 'value': value, 'attrs':attrs, 
+                                                                  'choices':self.choices, 'facet':self.facet})
 
 class PluginRangeFieldWidget(Input):
     def render(self, name, value, attrs=None):
@@ -76,6 +86,9 @@ class PluginForm(forms.Form):
                 self.fields[key] = forms.BooleanField(required=required, help_text=help_str)
             elif isinstance(param, parameters.Range):
                 self.fields[key] = forms.CharField(required=required, help_text=help_str, widget=PluginRangeFieldWidget({}))
+            elif isinstance(param, parameters.SolrField):
+                self.fields[key] = forms.ChoiceField(required=required, help_text=help_str, 
+                                                     choices=(('1','2'),('3','4')), widget=SolrFieldWidget(facet=param.facet))
             elif param_subtype == int:
                 self.fields[key] = forms.IntegerField(required=required, help_text=help_str)
             elif isinstance(param, parameters.File):

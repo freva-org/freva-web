@@ -33,11 +33,12 @@ class PluginFileFieldWidget(Input):
 class SolrFieldWidget(Select):
     def __init__(self, *args, **kwargs):
         self.facet = kwargs.pop('facet')
+	self.group = kwargs.pop('group')
         super(SolrFieldWidget,self).__init__(*args,**kwargs)
         
     def render(self, name, value, attrs=None, choices=()):
         return loader.render_to_string('plugins/solrfield.html', {'name': name, 'value': value, 'attrs':attrs, 
-                                                                  'choices':self.choices, 'facet':self.facet})
+                                                                  'choices':self.choices, 'facet':self.facet, 'group':self.group})
 
 class PluginRangeFieldWidget(Input):
     def render(self, name, value, attrs=None):
@@ -88,7 +89,7 @@ class PluginForm(forms.Form):
                 self.fields[key] = forms.CharField(required=required, help_text=help_str, widget=PluginRangeFieldWidget({}))
             elif isinstance(param, parameters.SolrField):
                 self.fields[key] = forms.ChoiceField(required=required, help_text=help_str, 
-                                                     choices=(('1','2'),('3','4')), widget=SolrFieldWidget(facet=param.facet))
+                                                     choices=(('1','2'),('3','4')), widget=SolrFieldWidget(facet=param.facet,group=param.group))
             elif param_subtype == int:
                 self.fields[key] = forms.IntegerField(required=required, help_text=help_str)
             elif isinstance(param, parameters.File):

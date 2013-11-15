@@ -103,6 +103,31 @@
 
 <script>
 
+//Script for serializing the solr form values
+function getActiveFacets(facet_to_look,facet_group)
+{
+    	//var form = $('#plugin_form');
+	//console.log(form.serialize());
+	
+	var solr_fields = $('input[data-group="'+facet_group+'"]');
+	var search = {};
+	$.each(solr_fields, function(index,value){
+		var val = $(value).val();
+		var facet = $(value).attr('data-facet');
+		console.log(val);
+		console.log(value);
+		if(val!='' && facet != facet_to_look)
+		{
+			search[facet]=val;
+		}
+	});
+	console.log(search);
+
+	return search;
+
+}
+
+
 // Script for the password modal
 // set focus to pw-field
 $('#myModalPw').on('shown.bs.modal', function () {
@@ -118,6 +143,7 @@ $('#password_temp').keypress(function (e) {
 });
 
 $(document).ready(function(){
+	getActiveFacets();	
 
 	$('#browsefield').fileTree({
 		root : '{{user_home}}',

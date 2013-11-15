@@ -1,5 +1,5 @@
 
-<input type="hidden" class="col-md-12" id="{{ attrs.id }}" name="{{name}}" style="margin:0px; padding:0px;">
+<input type="hidden" class="col-md-12" value="{% if value %}{{ value }}{%endif%}" id="{{ attrs.id }}" name="{{name}}" style="margin:0px; padding:0px;" data-facet="{{facet}}" data-group="{{group}}">
 
 <script>
 $(document).ready(function() { 
@@ -11,29 +11,36 @@ $(document).ready(function() {
 				url: "/solr/solr-search",
 				dataType: 'json',
 				data: function (term, page) {
-					return {
-						facets : '{{facet}}',
-						q: term, // search term
+					
+					tmp_data = {
+						facet : '{{facet}}',
+						{{facet}}: term+'*', // search term
 						page_limit: 10,
+						
 					};
+					tmp_data2 = getActiveFacets('{{facet}}','{{group}}');
+					$.extend(tmp_data,tmp_data2);
+					console.log(tmp_data);
+					//tmp_data.push({model:"mpi-esm-lr"});
+					return tmp_data;
 				},
 				results: function (data, page) { // parse the results into the format expected by Select2.
 					
 					var res_data = [];
 					$.each(data['data']['{{facet}}'], function(index,value){
-						console.log(index+':'+value);
+						//console.log(index+':'+value);
 						if(index%2 == 0){
-						var tmp = {'id':index,'text':value};
+						var tmp = {'id':value,'text':value};
 						res_data.push(tmp);
 						}	
 					});
-					console.log(res_data);
+					//console.log(res_data);
 					return {results: res_data};
 				}
 			  },
 	});
 	
-
+	//console.log($('input[data-facet]'));
 
 });
 </script>

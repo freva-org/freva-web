@@ -64,8 +64,8 @@ def setup(request, plugin_name, row_id = None):
             config_dict = tmp_dict
                     
             config_dict = tmp_dict
-            logging.debug(config_dict)
             del config_dict['password_hidden'], config_dict['csrfmiddlewaretoken']
+            logging.debug(config_dict)
 
             # start the scheduler vie sbatch
             username = request.user.username

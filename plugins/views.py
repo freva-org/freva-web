@@ -58,8 +58,8 @@ def setup(request, plugin_name, row_id = None):
             # config_dict = dict([(str(k), "'%s'" % str(v[0])) for k, v in config_dict.items()])
             tmp_dict = dict()
             for k, v in config_dict.items():
-                if not v[0] is None:
-                    tmp_dict[k]=str(v[0])
+                if v[0]:
+                    tmp_dict[str(k)]='\'%s\'' % str(v[0])
                     
             config_dict = tmp_dict
                     

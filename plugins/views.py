@@ -23,8 +23,6 @@ import paramiko # this is the ssh client
 import urllib, os
 import json
 
-import datetime
-
 @login_required()
 def home(request):
     """ Default view for the root """
@@ -55,7 +53,17 @@ def setup(request, plugin_name, row_id = None):
         if form.is_valid():
             # read the configuration
             config_dict = dict(form.data)
-            config_dict = dict([(str(k), "'%s'" % str(v[0])) for k, v in config_dict.items()])
+
+            # empty values in the form will not be added to the dictionary.
+            # as a consequence we can not submit intentionally blank fields.
+            tmp_dict = dict()
+            for k, v in config_dict.items():
+                if v[0]:
+                    tmp_dict[str(k)]='\'%s\'' % str(v[0])
+                    
+            config_dict = tmp_dict
+                    
+            config_dict = tmp_dict
             logging.debug(config_dict)
             del config_dict['password_hidden'], config_dict['csrfmiddlewaretoken']
 
@@ -82,6 +90,7 @@ def setup(request, plugin_name, row_id = None):
             out=stdout[1].readlines()
             err=stdout[2].readlines()
 
+            logging.debug("command:" + str(command))
             logging.debug("output of analyze:" + str(out))
             logging.debug("errors of analyze:" + str(err))
             

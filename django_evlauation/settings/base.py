@@ -356,7 +356,7 @@ INSTALLED_APPS = INSTALLED_APPS + ('django_nose',)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': '/usr/local/evaluation_system/database/db.db',
+        'NAME': '/miklip/integration/evaluation_system/database/db.db',
         'USER': '',
         'PASSWORD': '',
         'HOST': '',

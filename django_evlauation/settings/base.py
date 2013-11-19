@@ -83,6 +83,9 @@ SCHEDULER_HOST='127.0.0.1'
 
 LOGIN_URL = '/?login_required=1'
 
+# temporary directory for tailed scheduler files
+TAIL_TMP_DIR = '/tmp/tail_offset/'
+
 # Your project root
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__) + "../../../")
 

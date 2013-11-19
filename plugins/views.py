@@ -55,7 +55,15 @@ def setup(request, plugin_name, row_id = None):
         if form.is_valid():
             # read the configuration
             config_dict = dict(form.data)
-            config_dict = dict([(str(k), "'%s'" % str(v[0])) for k, v in config_dict.items()])
+            # config_dict = dict([(str(k), "'%s'" % str(v[0])) for k, v in config_dict.items()])
+            tmp_dict = dict()
+            for k, v in config_dict.items():
+                if not v[0] is None:
+                    tmp_dict[k]=str(v[0])
+                    
+            config_dict = tmp_dict
+                    
+            config_dict = tmp_dict
             logging.debug(config_dict)
             del config_dict['password_hidden'], config_dict['csrfmiddlewaretoken']
 
@@ -82,6 +90,7 @@ def setup(request, plugin_name, row_id = None):
             out=stdout[1].readlines()
             err=stdout[2].readlines()
 
+            logging.debug("command:" + str(command))
             logging.debug("output of analyze:" + str(out))
             logging.debug("errors of analyze:" + str(err))
             

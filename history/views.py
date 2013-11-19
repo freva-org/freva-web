@@ -34,7 +34,8 @@ def results(request, id):
     history_object = History.objects.get(id=id)
     
     if history_object.status == History.processStatus.running:
-        file_name = '/home/illing/kunze_groups.txt'
+        history_object = History.objects.get(id=id)
+        file_name = history_object.slurm_output
         with open(file_name) as f:
             file_content = f.readlines()
         
@@ -48,7 +49,6 @@ def results(request, id):
 def tailFile(request, id):
     
     from pygtail import Pygtail
-    file_name = '/home/illing/kunze_groups.txt'
 
     history_object = History.objects.get(id=id)
     file_name = history_object.slurm_output

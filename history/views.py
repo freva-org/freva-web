@@ -3,11 +3,14 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 
 import json
+import os
 
 import evaluation_system.api.plugin_manager as pm
 from evaluation_system.model.user import User
+from evaluation_system.misc import utils
 
 from models import History
+from django_evlauation import settings
 
 @login_required()
 def history(request):
@@ -51,10 +54,23 @@ def tailFile(request, id):
     from pygtail import Pygtail
 
     history_object = History.objects.get(id=id)
-    file_name = history_object.slurm_output
+    full_file_name = history_object.slurm_output
     
     new_lines = list()
-    for lines in Pygtail(file_name):
+    
+    # path for the offset file
+    utils.supermakedirs(settings.TAIL_TMP_DIR, 0777)
+    
+    file_name = os.path.basename(full_file_name)
+    
+    # offset file
+    offset_file_name = os.path.join(settings.TAIL_TMP_DIR, file_name)
+    offset_file_name = offset_file_name + '.offset'
+    
+    
+    
+    
+    for lines in Pygtail(full_file_name, offset_file=offset_file_name):
         line = lines.replace('\n', '<br/>');
         new_lines.append(line)
     

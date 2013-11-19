@@ -20,7 +20,7 @@
       {% if file_content %}
       <script>
       function doUpdate() {
-		  var tailServiceUrl = '{% url 'history:tailFile' 10%}';
+		  var tailServiceUrl = '{% url 'history:tailFile' history_object.id}';
 		  $.ajax({type: "GET", url : tailServiceUrl,
 		          success: function (data) {
 		             if (data.length > 0)

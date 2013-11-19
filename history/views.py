@@ -49,6 +49,9 @@ def tailFile(request, id):
     
     from pygtail import Pygtail
     file_name = '/home/illing/kunze_groups.txt'
+
+    history_object = History.objects.get(id=id)
+    file_name = history_object.slurm_output
     
     new_lines = list()
     for lines in Pygtail(file_name):

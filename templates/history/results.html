@@ -20,14 +20,15 @@
       {% if file_content %}
       <script>
       function doUpdate() {
-          console.log(history_object.status)
-          {% if history_object.status < 2 %}
-                 window.location.reload(true)
-          {% endif %}
       
 		  var tailServiceUrl = '{% url 'history:tailFile' history_object.id %}';
 		  $.ajax({type: "GET", url : tailServiceUrl,
 		          success: function (data) {
+		             if (!data)
+		             {
+		                console.log(data)
+                        window.location.reload(true)
+                     }
 		             if (data.length > 0)
 		             {
 		                var output = '';

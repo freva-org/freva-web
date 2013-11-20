@@ -73,6 +73,9 @@ def tailFile(request, id):
     for lines in Pygtail(full_file_name, offset_file=offset_file_name):
         line = lines.replace('\n', '<br/>');
         new_lines.append(line)
+        
+    if history_object.status < 2:
+        new_lines = False
     
     return HttpResponse(json.dumps(new_lines), content_type="application/json")
     

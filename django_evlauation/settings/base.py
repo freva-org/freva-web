@@ -172,6 +172,13 @@ STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
 # Example: "http://media.example.com/static/"
 STATIC_URL = '/static/'
 
+# Absolute path to the preview directory, should match
+# the entry in config.py of the evaluation system
+PREVIEW_ROOT = os.path.join(STATIC_ROOT, 'preview')
+
+# URL for preview files
+PREVIEW_URL = '/static/preview/'
+
 # Additional locations of static files
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".

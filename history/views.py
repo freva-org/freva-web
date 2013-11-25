@@ -46,7 +46,7 @@ def results(request, id):
     
     else:
         result_object = Result.objects.order_by('id').filter(history_id = id)
-        return render(request, 'history/results.html', {'history_object': history_object, 'result_object' : result_object })
+        return render(request, 'history/results.html', {'history_object': history_object, 'result_object' : result_object, 'PREVIEW_URL' : settings.PREVIEW_URL })
         
         
 @login_required()

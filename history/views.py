@@ -9,7 +9,7 @@ import evaluation_system.api.plugin_manager as pm
 from evaluation_system.model.user import User
 from evaluation_system.misc import utils
 
-from models import History
+from models import History, Result
 from django_evlauation import settings
 
 @login_required()
@@ -45,7 +45,8 @@ def results(request, id):
         return render(request, 'history/results.html', {'file_content':file_content, 'history_object': history_object})
     
     else:
-        return render(request, 'history/results.html', {'history_object': history_object})
+        result_object = Result.objects.order_by('id').filter(history_id = id)
+        return render(request, 'history/results.html', {'history_object': history_object, 'result_object' : result_object })
         
         
 @login_required()

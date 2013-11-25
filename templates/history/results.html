@@ -20,9 +20,15 @@
       {% if file_content %}
       <script>
       function doUpdate() {
-		  var tailServiceUrl = '{% url 'history:tailFile' 10%}';
+      
+		  var tailServiceUrl = '{% url 'history:tailFile' history_object.id %}';
 		  $.ajax({type: "GET", url : tailServiceUrl,
 		          success: function (data) {
+		             if (!data)
+		             {
+		                console.log(data)
+                        window.location.reload(true)
+                     }
 		             if (data.length > 0)
 		             {
 		                var output = '';
@@ -75,66 +81,13 @@
 	 	 	<div class="col-md-12">
 	 	 		<h2>Results</h2>
 	 	 	</div>
-	        <div class="col-md-3">
-	        	<a rel="gallery1" class="thumbnail fancybox" href="{{ STATIC_URL }}images/6_9_BASELINE0_MPI-ESM-LR_output1_conditional_bias.nc_masked.eps.png" title="6_9_BASELINE0_MPI-ESM-LR_output1_conditional_bias.nc_masked.eps.png">
-					<img src="{{ STATIC_URL }}images/6_9_BASELINE0_MPI-ESM-LR_output1_conditional_bias.nc_masked.eps.png" alt="" />
-				</a>
-			</div>
-			<div class="col-md-3">
-				<a rel="gallery1" class="thumbnail fancybox" href="{{ STATIC_URL }}images/6_9_BASELINE0_MPI-ESM-LR_output1_correlation.nc_masked.eps.png" title="6_9_BASELINE0_MPI-ESM-LR_output1_correlation.nc_masked.eps.png">
-					<img src="{{ STATIC_URL }}images/6_9_BASELINE0_MPI-ESM-LR_output1_correlation.nc_masked.eps.png" alt="" />
-				</a>
-			</div>
-			<div class="col-md-3">
-				<a rel="gallery1" class="thumbnail fancybox" href="{{ STATIC_URL }}images/6_9_BASELINE0_MPI-ESM-LR_output1_msss.nc_masked.eps.png" title="6_9_BASELINE0_MPI-ESM-LR_output1_msss.nc_masked.eps.png">
-					<img src="{{ STATIC_URL }}images/6_9_BASELINE0_MPI-ESM-LR_output1_msss.nc_masked.eps.png" alt="" />
-				</a>
-			</div>
-			<div class="col-md-3">
-				<a rel="gallery1" class="thumbnail fancybox" href="{{ STATIC_URL }}images/6_9_BASELINE0_MPI-ESM-LR_output1_rmss.nc_masked.eps.png" title="6_9_BASELINE0_MPI-ESM-LR_output1_rmss.nc_masked.eps.png">
-					<img src="{{ STATIC_URL }}images/6_9_BASELINE0_MPI-ESM-LR_output1_rmss.nc_masked.eps.png" alt="" />
-				</a>
-			</div>
-			<div class="col-md-3">
-				<a rel="gallery1" class="thumbnail fancybox" href="{{ STATIC_URL }}images/6_9_BASELINE1_MPI-ESM-LR_output_conditional_bias.nc_masked.eps.png" title="6_9_BASELINE1_MPI-ESM-LR_output_conditional_bias.nc_masked.eps.png">
-					<img src="{{ STATIC_URL }}images/6_9_BASELINE1_MPI-ESM-LR_output_conditional_bias.nc_masked.eps.png" alt="" />
-				</a>
-			</div>
-			<div class="col-md-3">
-				<a rel="gallery1" class="thumbnail fancybox" href="{{ STATIC_URL }}images/6_9_BASELINE1_MPI-ESM-LR_output_correlation.nc_masked.eps.png" title="6_9_BASELINE1_MPI-ESM-LR_output_correlation.nc_masked.eps.png">
-					<img src="{{ STATIC_URL }}images/6_9_BASELINE1_MPI-ESM-LR_output_correlation.nc_masked.eps.png" alt="" />
-				</a>
-			</div>
-			<div class="col-md-3">
-				<a rel="gallery1" class="thumbnail fancybox" href="{{ STATIC_URL }}images/6_9_BASELINE1_MPI-ESM-LR_output_msss.nc_masked.eps.png" title="6_9_BASELINE1_MPI-ESM-LR_output_msss.nc_masked.eps.png">
-					<img src="{{ STATIC_URL }}images/6_9_BASELINE1_MPI-ESM-LR_output_msss.nc_masked.eps.png" alt="" />
-				</a>
-			</div>
-			<div class="col-md-3">
-				<a rel="gallery1" class="thumbnail fancybox" href="{{ STATIC_URL }}images/6_9_BASELINE1_MPI-ESM-LR_output_rmss.nc_masked.eps.png" title="6_9_BASELINE1_MPI-ESM-LR_output_rmss.nc_masked.eps.png">
-					<img src="{{ STATIC_URL }}images/6_9_BASELINE1_MPI-ESM-LR_output_rmss.nc_masked.eps.png" alt="" />
-				</a>
-			</div>
-			<div class="col-md-3">
-				<a rel="gallery1" class="thumbnail fancybox" href="{{ STATIC_URL }}images/6_9BASELINE1_MPI-ESM-LR_outputvsBASELINE0_MPI-ESM-LR_output1_conditional_bias.nc_masked.eps.png" title="6_9BASELINE1_MPI-ESM-LR_outputvsBASELINE0_MPI-ESM-LR_output1_conditional_bias.nc_masked.eps.png">
-					<img src="{{ STATIC_URL }}images/6_9BASELINE1_MPI-ESM-LR_outputvsBASELINE0_MPI-ESM-LR_output1_conditional_bias.nc_masked.eps.png" alt="" />
-				</a>
-			</div>
-			<div class="col-md-3">
-				<a rel="gallery1" class="thumbnail fancybox" href="{{ STATIC_URL }}images/6_9BASELINE1_MPI-ESM-LR_outputvsBASELINE0_MPI-ESM-LR_output1_correlation.nc_masked.eps.png" title="6_9BASELINE1_MPI-ESM-LR_outputvsBASELINE0_MPI-ESM-LR_output1_correlation.nc_masked.eps.png">
-					<img src="{{ STATIC_URL }}images/6_9BASELINE1_MPI-ESM-LR_outputvsBASELINE0_MPI-ESM-LR_output1_correlation.nc_masked.eps.png" alt="" />
-				</a>
-			</div>
-			<div class="col-md-3">
-				<a rel="gallery1" class="thumbnail fancybox" href="{{ STATIC_URL }}images/6_9BASELINE1_MPI-ESM-LR_outputvsBASELINE0_MPI-ESM-LR_output1_msss.nc_masked.eps.png" title="6_9BASELINE1_MPI-ESM-LR_outputvsBASELINE0_MPI-ESM-LR_output1_msss.nc_masked.eps.png">
-					<img src="{{ STATIC_URL }}images/6_9BASELINE1_MPI-ESM-LR_outputvsBASELINE0_MPI-ESM-LR_output1_msss.nc_masked.eps.png" alt="" />
-				</a>
-			</div>
-			<div class="col-md-3">
-				<a rel="gallery1" class="thumbnail fancybox" href="{{ STATIC_URL }}images/6_9_BASELINE1_output_vs_BASELINE0_output1_rmss.nc_masked.eps.png" title="6_9_BASELINE1_output_vs_BASELINE0_output1_rmss.nc_masked.eps.png">
-					<img src="{{ STATIC_URL }}images/6_9_BASELINE1_output_vs_BASELINE0_output1_rmss.nc_masked.eps.png" alt="" />
-				</a>
-			</div>
+	 	 	{% for r_item in result_object %}
+		        <div class="col-md-3">
+		        	<a rel="gallery1" class="thumbnail fancybox" href="{{ PREVIEW_URL }}{{r_item.output_file}}">
+						<img src="{{ PREVIEW_URL }}{{r_item.output_file}}" alt="" />
+					</a>
+				</div>
+	 	 	{% endfor %}
 
 	     </div>
 	  </div>       

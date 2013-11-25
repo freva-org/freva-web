@@ -83,6 +83,9 @@ SCHEDULER_HOST='127.0.0.1'
 
 LOGIN_URL = '/?login_required=1'
 
+# temporary directory for tailed scheduler files
+TAIL_TMP_DIR = '/tmp/tail_offset/'
+
 # Your project root
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__) + "../../../")
 
@@ -168,6 +171,13 @@ STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
 # URL prefix for static files.
 # Example: "http://media.example.com/static/"
 STATIC_URL = '/static/'
+
+# Absolute path to the preview directory, should match
+# the entry in config.py of the evaluation system
+PREVIEW_ROOT = os.path.join(STATIC_ROOT, 'preview')
+
+# URL for preview files
+PREVIEW_URL = '/static/preview/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
@@ -356,7 +366,7 @@ INSTALLED_APPS = INSTALLED_APPS + ('django_nose',)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': '/usr/local/evaluation_system/database/db.db',
+        'NAME': '/miklip/integration/evaluation_system/database/db.db',
         'USER': '',
         'PASSWORD': '',
         'HOST': '',

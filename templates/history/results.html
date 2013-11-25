@@ -83,8 +83,8 @@
 	 	 	</div>
 	 	 	{% for r_item in result_object %}
 		        <div class="col-md-3">
-		        	<a rel="gallery1" class="thumbnail fancybox" href="{{ STATIC_URL }}{{r_item.file_name}}>
-						<img src="{{ STATIC_URL }}{{r_item.file_name}}" alt="" />
+		        	<a rel="gallery1" class="thumbnail fancybox" href="{{ PREVIEW_URL }}{{r_item.output_file}}">
+						<img src="{{ PREVIEW_URL }}{{r_item.output_file}}" alt="" />
 					</a>
 				</div>
 	 	 	{% endfor %}

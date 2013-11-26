@@ -37,7 +37,7 @@ def results(request, id):
     #get history object
     history_object = History.objects.get(id=id)
     
-    if history_object.status == History.processStatus.running:
+    if history_object.status in [History.processStatus.running, History.processStatus.scheduled]:
         history_object = History.objects.get(id=id)
         file_name = history_object.slurm_output
         with open(file_name) as f:

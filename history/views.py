@@ -41,13 +41,16 @@ def results(request, id):
     #get history object
     history_object = History.objects.get(id=id)
     
-    if history_object.status in [History.processStatus.running, History.processStatus.scheduled]:
+    if history_object.status in [History.processStatus.running, History.processStatus.scheduled, History.processStatus.broken]:
         history_object = History.objects.get(id=id)
         file_name = history_object.slurm_output
-        with open(file_name) as f:
-            file_content = f.readlines()
+        try:
+            with open(file_name) as f:
+                file_content = f.readlines()
+        except IOError:
+            file_content = None
         
-        return render(request, 'history/results.html', {'file_content':file_content, 'history_object': history_object})
+        return render(request, 'history/results.html', {'file_content':file_content, 'history_object': history_object, 'result_object' : -1})
     
     else:
         #result_object = Result.objects.order_by('id').filter(history_id = id).filter(file_type = _result_preview)

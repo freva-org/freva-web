@@ -46,7 +46,8 @@ def results(request, id):
         return render(request, 'history/results.html', {'file_content':file_content, 'history_object': history_object})
     
     else:
-        result_object = Result.objects.order_by('id').filter(history_id = id).filter(file_type = _result_preview)
+        #result_object = Result.objects.order_by('id').filter(history_id = id).filter(file_type = _result_preview)
+        result_object = history_object.result_set.filter(file_type = _result_preview)
         return render(request, 'history/results.html', {'history_object': history_object, 'result_object' : result_object, 'PREVIEW_URL' : settings.PREVIEW_URL })
         
         

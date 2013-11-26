@@ -37,16 +37,16 @@ def history(request):
 
 @login_required()
 def results(request, id):
+    from history.utils import pygtailwrapper
     
     #get history object
     history_object = History.objects.get(id=id)
     
     if history_object.status in [History.processStatus.running, History.processStatus.scheduled, History.processStatus.broken]:
         history_object = History.objects.get(id=id)
-        file_name = history_object.slurm_output
+
         try:
-            with open(file_name) as f:
-                file_content = f.readlines()
+            file_content = pygtailwrapper(id)
         except IOError:
             file_content = None
         
@@ -60,27 +60,12 @@ def results(request, id):
         
 @login_required()
 def tailFile(request, id):
-    
-    from pygtail import Pygtail
+    from history.utils import pygtailwrapper
 
     history_object = History.objects.get(id=id)
-    full_file_name = history_object.slurm_output
-    
     new_lines = list()
-    
-    # path for the offset file
-    utils.supermakedirs(settings.TAIL_TMP_DIR, 0777)
-    
-    file_name = os.path.basename(full_file_name)
-    
-    # offset file
-    offset_file_name = os.path.join(settings.TAIL_TMP_DIR, file_name)
-    offset_file_name = offset_file_name + '.offset'
-    
-    
-    
-    
-    for lines in Pygtail(full_file_name, offset_file=offset_file_name):
+     
+    for lines in pygtailwrapper(id):
         line = lines.replace('\n', '<br/>');
         new_lines.append(line)
         

@@ -46,7 +46,7 @@ def results(request, id):
         history_object = History.objects.get(id=id)
 
         try:
-            file_content = pygtailwrapper(id)
+            file_content = pygtailwrapper(id, restart=True)
         except IOError:
             file_content = None
         

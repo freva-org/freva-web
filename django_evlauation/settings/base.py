@@ -172,18 +172,15 @@ STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
 # Example: "http://media.example.com/static/"
 STATIC_URL = '/static/'
 
-# Absolute path to the preview directory, should match
-# the entry in config.py of the evaluation system
-PREVIEW_ROOT = os.path.join(STATIC_ROOT, 'preview')
-
 # URL for preview files
-PREVIEW_URL = '/static/preview/'
+PREVIEW_URL = STATIC_URL + 'preview/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
+    ('preview', '/miklip/integration/evaluation_system/database/preview'),
 )
 
 # If you set this to False, Django will make some optimizations so as not
@@ -202,7 +199,7 @@ USE_TZ = True
 # although not all choices may be available on all operating systems.
 # If running in a Windows environment this must be set to the same as your
 # system time zone.
-TIME_ZONE = 'America/Los_Angeles'
+TIME_ZONE = 'Europe/Berlin'
 
 # List of finder classes that know how to find static files in
 # various locations.

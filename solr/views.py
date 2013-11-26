@@ -11,6 +11,7 @@ from django.http import HttpResponse
 from evaluation_system.model.solr import SolrFindFiles
 
 import json
+import logging
 
 @login_required()
 def solr_search(request):
@@ -35,6 +36,9 @@ def solr_search(request):
     
     #return HttpResponse(json.dumps({"data": {"product": ["baseline0", 10, "baseline1", 10, "output", 1129, "output1", 1834]}, "metadata": None}))
     if facets:
+	args['facet.limit']=-1
+	logging.debug(args)
+	#return HttpResponse(json.dumps(args))
         args.pop('facet')
         if facets == '*':
             #means select all, 

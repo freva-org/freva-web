@@ -11,6 +11,7 @@ from django.template import loader
 import evaluation_system.api.plugin_manager as pm
 import evaluation_system.api.parameters as parameters
 
+from evaluation_system.misc.utils import PrintableList
 
 
 class PluginNotFoundError(Exception):
@@ -42,6 +43,8 @@ class SolrFieldWidget(Input):
 
 class PluginRangeFieldWidget(Input):
     def render(self, name, value, attrs=None):
+	if value is not None and type(value) == list:
+		value = PrintableList(value)
         return loader.render_to_string('plugins/rangefield.html', {'name': name, 'value': value, 'id':attrs['id']})
     
 

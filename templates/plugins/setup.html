@@ -109,19 +109,36 @@ function getActiveFacets(facet_to_look,facet_group)
     	//var form = $('#plugin_form');
 	//console.log(form.serialize());
 	
-	var solr_fields = $('input[data-group="'+facet_group+'"]');
-	var search = {};
+	//console.log(facet_group);
+	if(facet_group=='global'){
+		var solr_fields = $('input[data-group]');
+		var solr_fields_global = {};
+	}else{
+		var solr_fields = $('input[data-group="'+facet_group+'"]');
+		var solr_fields_global = $('input[data-group="global"]');
+		//var solr_fields = $.extend(solr_fields1, solr_fields2);
+	}
+	//console.log(solr_fields);
+	var search = '';
 	$.each(solr_fields, function(index,value){
 		var val = $(value).val();
 		var facet = $(value).attr('data-facet');
-		console.log(val);
-		console.log(value);
+		//console.log(val);
+		//console.log(value);
 		if(val!='' && facet != facet_to_look)
 		{
-			search[facet]=val;
+			//search[facet]=val;
+			search += facet+'='+val+'&';
 		}
 	});
-	console.log(search);
+	$.each(solr_fields_global, function(index,value){
+		var val = $(value).val();
+		var facet = $(value).attr('data-facet');
+		if(val!='' && facet!= facet_to_look)
+			search += facet+'='+val+'&';
+		
+	});
+	//console.log(search);
 
 	return search;
 

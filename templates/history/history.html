@@ -30,24 +30,20 @@
           			<td>
           			{% if h_item.status == h_item.processStatus.finished %}
 	          			<a class="btn btn-success btn-sm" href="{% url 'history:results' h_item.id %}">Show Results</a>
-	          			<a class="btn btn-success btn-sm" href="#">Run again</a>
 	          			<a class="btn btn-success btn-sm" href="{% url 'plugins:setup' h_item.tool h_item.id%}">Edit Config</a>
 	          		{% endif %}
 	          		{% if h_item.status == h_item.processStatus.running %}
 	          			<a class="btn btn-success btn-sm" href="{% url 'history:results' h_item.id %}">Show Progress</a>
 	          		{% endif %}
 	          		{% if h_item.status == h_item.processStatus.scheduled %}
-	          			<a class="btn btn-success btn-sm" href="#">Run again</a>
 	          			<a class="btn btn-success btn-sm" href="{% url 'plugins:setup' h_item.tool h_item.id%}">Edit Config</a>
 	          		{% endif %}
 	          		{% if h_item.status == h_item.processStatus.broken %}
-	          			<a class="btn btn-success btn-sm" href="{% url 'history:tailFile' h_item.id %}">Show Report</a>
-	          			<a class="btn btn-success btn-sm" href="#">Run again</a>
+	          			<a class="btn btn-success btn-sm" href="{% url 'history:results' h_item.id %}">Show Report</a>
 	          			<a class="btn btn-success btn-sm" href="{% url 'plugins:setup' h_item.tool h_item.id%}">Edit Config</a>
 	          		{% endif %}
 	          		{% if h_item.status == h_item.processStatus.finished_no_output %}
 	          			<a class="btn btn-success btn-sm" href="{% url 'history:results' h_item.id %}">Show Report</a>
-	          			<a class="btn btn-success btn-sm" href="#">Run again</a>
 	          			<a class="btn btn-success btn-sm" href="{% url 'plugins:setup' h_item.tool h_item.id%}">Edit Config</a>
 	          		{% endif %}
           			</td>

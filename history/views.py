@@ -13,6 +13,10 @@ from evaluation_system.misc import utils
 from models import History, Result
 from django_evlauation import settings
 
+
+import logging
+
+
 @login_required()
 def history(request):
     

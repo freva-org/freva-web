@@ -61,9 +61,9 @@
 		        </div>
 	        </div>
 	      </div>
-	      
+	  
 	  {%else%}
-	 	 <div class="row">
+	  	  <div class="row">
 	 	 	<div class="col-md-12">
 	 	 		<a class="btn btn-primary" onClick="toogleConfig('config_table');" id="config_button">Show configuration</a>
 	 	 		<a class="btn btn-primary" href="{% url 'plugins:setup' history_object.tool history_object.id%}" id="config_button">Edit configuration</a>
@@ -78,56 +78,64 @@
 		 	 	{% endfor %}
 		 	 	</table>
 	 	 	</div>
-	 	 	
-	 	 	<div class="col-md-12">
-	 	 		<h2>Results</h2>
-	 	 	</div>
-	 	 	
-	 	 	{% if history_object.status == history_object.processStatus.finished_no_output %}
-	 	 		<div class="col-md-3">
-	 	 			<p>There was no output produced!</p>
-	 	 		</div>
-	 	 	{%elif result_object.count == 0 %}
-	 	 		<div class="col-md-3">
-	 	 			<p>{{history_object.tool}} produced no plots.</p>
-	 	 		</div>
-	 	 	{%else%}
-		 	 	{% for r_item in result_object %}
-			        <div class="col-md-3">
-			        	<a rel="gallery1" class="thumbnail fancybox" href="{{ PREVIEW_URL }}{{r_item.output_file}}">
-							<img src="{{ PREVIEW_URL }}{{r_item.output_file}}" alt="" />
-						</a>
-					</div>
-		 	 	{% endfor %}
-		 	{%endif%}
-
-	     </div>
-	  </div>       
 	  
-	  	<script>
-	  	function toogleConfig(id){
-	  		
-	  		if($('#'+id).is(":hidden")){
-	  			$('#'+id).show();
-	  			$('#config_button').html('Hide configuration');
-	  		}else{
-	  		  	$('#'+id).hide();
-	  		  	$('#config_button').html('Show configuration');
-	  		}
-	  	}
-	  	
-		$(document).ready(function() {
-			$(".fancybox").fancybox({
-				openEffect	: 'none',
-				closeEffect	: 'none'
-			});
-		});
-		</script>
-
+	      
+	 	 {%if result_object  >= 0 %}
+		 	 	
+		 	 	<div class="col-md-12">
+		 	 		<h2>Results</h2>
+		 	 	</div>
+		 	 	
+		 	 	{% if history_object.status == history_object.processStatus.finished_no_output %}
+		 	 		<div class="col-md-3">
+		 	 			<p>There was no output produced!</p>
+		 	 		</div>
+		 	 	{%elif result_object.count == 0 %}
+		 	 		<div class="col-md-3">
+		 	 			<p>{{history_object.tool}} produced no plots.</p>
+		 	 		</div>
+		 	 	{%else%}
+			 	 	{% for r_item in result_object %}
+				        <div class="col-md-3">
+				        	<a rel="gallery1" class="thumbnail fancybox" href="{{ PREVIEW_URL }}{{r_item.output_file}}">
+								<img src="{{ PREVIEW_URL }}{{r_item.output_file}}" alt="" />
+							</a>
+						</div>
+			 	 	{% endfor %}
+			 	{%endif%}
+	
+		     </div>
+	      
+	      {%else%}
+	      </div>
+	      <div class="row">
+	      	 <div class="col-md-12">
+	      	 	<p>Process status is <strong>{{ history_object.status_name }}</strong><br/>Because you did not use batchmode we can't display any information</p>
+	      	 </div>
+	        
+	  	  {%endif%}
+		</div> 
 	  {%endif%}
 
 
-
-
+<script>
+  	function toogleConfig(id){
+  		
+  		if($('#'+id).is(":hidden")){
+  			$('#'+id).show();
+  			$('#config_button').html('Hide configuration');
+  		}else{
+  		  	$('#'+id).hide();
+  		  	$('#config_button').html('Show configuration');
+  		}
+  	}
+  	
+	$(document).ready(function() {
+		$(".fancybox").fancybox({
+			openEffect	: 'none',
+			closeEffect	: 'none'
+		});
+	});
+</script>
 
 {% endblock %}

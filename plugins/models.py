@@ -87,7 +87,7 @@ class PluginForm(forms.Form):
             help_str = param.help
             
             if isinstance(param, parameters.Bool):
-                self.fields[key] = forms.BooleanField(required=required, help_text=help_str)
+                self.fields[key] = forms.BooleanField(required=required, help_text=help_str, widget=forms.RadioSelect(choices=(('False', 'False'), ('True', 'True'))))
             elif isinstance(param, parameters.Range):
                 self.fields[key] = forms.CharField(required=required, help_text=help_str, widget=PluginRangeFieldWidget({}))
             elif isinstance(param, parameters.SolrField):

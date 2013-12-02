@@ -48,11 +48,20 @@ $(document).ready(function() {
 					});
 					//console.log(res_data);
 					return {results: res_data};
-				}
-			  },
+				},
+},
+				//Allow manually entered text in drop down.
+       createSearchChoice:function(term, data) {
+         if ( $(data).filter( function() {
+           return this.text.localeCompare(term)===0;
+         }).length===0) {
+           return {id:term, text:term};
+         }
+       },
+//			  },
 	});
 	
 	//console.log($('input[data-group="1"]'));
 
 });
-</script>
+</script>	

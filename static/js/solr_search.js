@@ -29,7 +29,7 @@ solr = new function() {
     };
     this.get_search_query= function() {
         var query = [];
-	console.log(visualSearch.searchQuery.facets());
+	//console.log(visualSearch.searchQuery.facets());
         $.each(visualSearch.searchQuery.facets(), function(pos, obj) {
             for (var k in obj){
                 if (obj[k]){

@@ -33,7 +33,23 @@ def solr_search(request):
     if 'rows' in args: args['rows'] = int(request.GET['rows'])
     
     metadata = None
-    
+   
+    def removeYear(d):
+	tmp = [] 
+	for i,val in enumerate(d):
+		try:
+			if i%2 == 0:	
+				int(val[-4:])
+				tmp_val = val[:-4]
+				if tmp_val not in tmp:
+					tmp.append(tmp_val)
+					tmp.append(d[i+1])
+		except:
+			tmp.append(val)
+			tmp.append(d[i+1])
+	return tmp
+		
+ 
     #return HttpResponse(json.dumps({"data": {"product": ["baseline0", 10, "baseline1", 10, "output", 1129, "output1", 1834]}, "metadata": None}))
     if facets:
 	args['facet.limit']=-1
@@ -43,7 +59,14 @@ def solr_search(request):
         if facets == '*':
             #means select all, 
             facets = None
-        results = SolrFindFiles.facets(facets=facets, **args)
+        if facets == 'experiment_prefix':
+		args['experiment'] = args.pop('experiment_prefix')
+	  	results = SolrFindFiles.facets(facets='experiment', **args)
+		results['experiment_prefix'] = removeYear(results.pop('experiment'))
+		#results = {"experiment_prefix": ["baseline0", 10, "baseline1", 10, "output", 1129, "output1", 1834]}
+	else:
+		if 'experiment_prefix' in args: args['experiment'] = args.pop('experiment_prefix')[0]+'*'
+		results = SolrFindFiles.facets(facets=facets, **args)
     else:
         #return HttpResponse(json.dumps(dict(hallo='was')))
         results = SolrFindFiles.search( _retrieve_metadata = True, **args)

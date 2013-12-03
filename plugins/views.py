@@ -5,6 +5,7 @@ from django.http import HttpResponse, Http404
 from django.template import RequestContext, loader
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
+from django.views.decorators.debug import sensitive_variables, sensitive_post_parameters
 
 import evaluation_system.api.plugin_manager as pm
 from evaluation_system.model.user import User
@@ -38,6 +39,8 @@ def detail(request, plugin_name):
     
     return render(request, 'plugins/detail.html', {'plugin':plugin_web})
   
+@sensitive_post_parameters('password_hidden')
+@sensitive_variables('password')
 @login_required()    
 def setup(request, plugin_name, row_id = None):
     

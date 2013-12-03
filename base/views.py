@@ -5,8 +5,10 @@ import logging
 from django.http import Http404
 from django.shortcuts import render
 import django.contrib.auth as auth
+from django.views.decorators.debug import sensitive_variables, sensitive_post_parameters
 
-
+@sensitive_variables('passwd')
+@sensitive_post_parameters('password')
 def home(request):
     """ Default view for the root """    
         

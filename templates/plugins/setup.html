@@ -121,21 +121,11 @@ function getActiveFacets(facet_to_look,facet_group)
 	//console.log(solr_fields);
 	var search = '';
 	$.each(solr_fields, function(index,value){
-		var val = $(value).val();
-		var facet = $(value).attr('data-facet');
-		//console.log(val);
-		//console.log(value);
-		if(val!='' && facet != facet_to_look)
-		{
-			//search[facet]=val;
-			search += facet+'='+val+'&';
-		}
+		search += facetToQuery(index,value, facet_to_look);	
 	});
 	$.each(solr_fields_global, function(index,value){
-		var val = $(value).val();
-		var facet = $(value).attr('data-facet');
-		if(val!='' && facet!= facet_to_look)
-			search += facet+'='+val+'&';
+			
+		search += facetToQuery(index,value, facet_to_look);
 		
 	});
 	//console.log(search);
@@ -144,6 +134,28 @@ function getActiveFacets(facet_to_look,facet_group)
 
 }
 
+function facetToQuery(index, value, facet_to_look)
+{
+		var val = $(value).val();
+                var facet = $(value).attr('data-facet');
+                var multiple = $(value).attr('data-multiple');
+                if(val!='' && facet!= facet_to_look)
+                {
+                        if(multiple=='True')
+                        {	
+				var search = '';
+                                var values = val.split(',');
+                                $.each(values, function(i,v){
+                                        search += facet+'='+v+'&';
+                                });            
+				return search; 
+                        }else{  
+                                return facet+'='+val+'&';
+                        }
+                }
+		return '';
+
+}
 
 // Script for the password modal
 // set focus to pw-field

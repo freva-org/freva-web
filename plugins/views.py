@@ -76,7 +76,7 @@ def setup(request, plugin_name, row_id = None):
             hostname = settings.SCHEDULER_HOST
 
             # compose the plugin command
-            dirtyhack = 'export PYTHONPATH=/miklip/integration/evaluation_system/src;/miklip/integration/evaluation_system/bin/'
+            dirtyhack = 'export PYTHONPATH=/miklip/integration/evaluation_system/src;/sw/centos58-x64/python/python-2.7-ve0-gccsys/bin/python /miklip/integration/evaluation_system/bin/'
             # module_load = 'module load evaluation_system;'
             command = plugin.composeCommand(config_dict,
                                             batchmode='web',
@@ -86,7 +86,7 @@ def setup(request, plugin_name, row_id = None):
             # create the directories when necessary
             stdout = ssh_call(username=username,
                               password=password,
-                              command=dirtyhack + command,
+                              command='bash -c "%s"' % (dirtyhack + command),
                               hostname=hostname)
                         
             # get the text form stdout

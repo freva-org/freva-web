@@ -29,6 +29,7 @@ solr = new function() {
     };
     this.get_search_query= function() {
         var query = [];
+	//console.log(visualSearch.searchQuery.facets());
         $.each(visualSearch.searchQuery.facets(), function(pos, obj) {
             for (var k in obj){
                 if (obj[k]){
@@ -198,22 +199,7 @@ $(document).ready(function() {
     //$('input:text').each(function(){this.style.width='90%';})
     
 
-    visualSearch = VS.init({
-      container : $('.visual_search_facet'),
-      query     : '',
-      callbacks : {
-        search       : function(query, searchCollection) {},
-        facetMatches : function(callback) {
-        callback([
-      'account', 'filter', 'access', 'title',
-      { label: 'city',    category: 'location' },
-      { label: 'address', category: 'location' },
-      { label: 'country', category: 'location' },
-      { label: 'state',   category: 'location' },
-    ]);},
-        valueMatches : function(facet, searchTerm, callback) {}
-      }
-    });
+
 });
 
 

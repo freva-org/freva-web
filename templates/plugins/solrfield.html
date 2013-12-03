@@ -1,5 +1,5 @@
 
-<input type="hidden" class="col-md-12" value="{% if value %}{{ value }}{%endif%}" id="{{ attrs.id }}" name="{{name}}" style="margin:0px; padding:0px;" data-facet="{{facet}}" data-group="{{group}}">
+<input type="hidden" class="col-md-12"  value="{% if value %}{{ value }}{%endif%}" id="{{ attrs.id }}" name="{{name}}" style="margin:0px; padding:0px;" data-facet="{{facet}}" data-group="{{group}}" data-multiple="{{multiple}}">
 
 <script>
 $(document).ready(function() { 
@@ -10,6 +10,9 @@ $(document).ready(function() {
      		   	var data = {id: element.val(), text: element.val()};
         		callback(data);
     			},
+		{% if multiple %}
+		multiple:true,
+		{%endif%}
 		ajax: { // instead of writing the function to execute the request we use Select2's convenient helper
 				//url: "/solr/solr-search",
 				dataType: 'json',
@@ -45,11 +48,20 @@ $(document).ready(function() {
 					});
 					//console.log(res_data);
 					return {results: res_data};
-				}
-			  },
+				},
+},
+				//Allow manually entered text in drop down.
+       createSearchChoice:function(term, data) {
+         if ( $(data).filter( function() {
+           return this.text.localeCompare(term)===0;
+         }).length===0) {
+           return {id:term, text:term};
+         }
+       },
+//			  },
 	});
 	
 	//console.log($('input[data-group="1"]'));
 
 });
-</script>
+</script>	

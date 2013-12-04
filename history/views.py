@@ -48,7 +48,7 @@ def results(request, id):
         try:
             file_content = pygtailwrapper(id, restart=True)
         except IOError:
-            file_content =  'WARNING:\n'
+            file_content =  'WARNING:\n' +
                             'This is not the content of the file \'' + history_object.slurm_output + '\'.\n' +
                             'Probably, your home directory denies read access to the file.\n' +
                             'In this case the results will be shown after the tool has finished.\n' +

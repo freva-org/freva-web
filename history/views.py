@@ -55,7 +55,7 @@ def results(request, id):
                                 'Probably, your home directory denies read access to the file.',
                                 'In this case the results will be shown after the tool has finished.',
                                 'You can view the tool\'s progress in a terminal with the command',
-                                'tail - f ' + history_object.slurm_output]
+                                'tail -f ' + history_object.slurm_output]
         
         return render(request, 'history/results.html', {'file_content':file_content, 'history_object': history_object, 'result_object' : -1})
     

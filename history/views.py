@@ -44,16 +44,18 @@ def results(request, id):
     
     if history_object.status in [History.processStatus.running, History.processStatus.scheduled, History.processStatus.broken]:
         history_object = History.objects.get(id=id)
+        file_content = []
 
         try:
-            file_content = pygtailwrapper(id, restart=True)
+            for line in pygtailwrapper(id):
+                file_content.append(line)
         except IOError:
-            file_content =  'WARNING:\n' +
-                            'This is not the content of the file \'' + history_object.slurm_output + '\'.\n' +
-                            'Probably, your home directory denies read access to the file.\n' +
-                            'In this case the results will be shown after the tool has finished.\n' +
-                            'You can view the tool\'s progress in a terminal with the command\n' +
-                            'tail - f ' + history_object.slurm_output
+            file_content =  [ 'WARNING:',
+                               'This is not the content of the file \'' + history_object.slurm_output + '\'.',
+                                'Probably, your home directory denies read access to the file.',
+                                'In this case the results will be shown after the tool has finished.',
+                                'You can view the tool\'s progress in a terminal with the command',
+                                'tail - f ' + history_object.slurm_output]
         
         return render(request, 'history/results.html', {'file_content':file_content, 'history_object': history_object, 'result_object' : -1})
     

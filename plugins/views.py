@@ -77,8 +77,7 @@ def setup(request, plugin_name, row_id = None):
 
             # compose the plugin command
             # dirtyhack = 'export PYTHONPATH=/miklip/integration/evaluation_system/src;/sw/centos58-x64/python/python-2.7-ve0-gccsys/bin/python /miklip/integration/evaluation_system/bin/'
-            load_module = "source /client/etc/profile.miklip;module load evaluation_system;"
-            # module_load = 'module load evaluation_system;'
+            load_module = "source /client/etc/profile.miklip > /dev/null;module load evaluation_system > /dev/null;"
             command = plugin.composeCommand(config_dict,
                                             batchmode='web',
                                             email=user.getEmail())
@@ -87,7 +86,7 @@ def setup(request, plugin_name, row_id = None):
             # create the directories when necessary
             stdout = ssh_call(username=username,
                               password=password,
-                              command= load_module + command,
+                              command='bash -c "%s"' % (load_module + command),
 #                              command='bash -c "%s"' % (dirtyhack + command),
                               hostname=hostname)
                         

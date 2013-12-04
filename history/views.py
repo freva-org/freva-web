@@ -48,7 +48,11 @@ def results(request, id):
         try:
             file_content = pygtailwrapper(id, restart=True)
         except IOError:
-            file_content = None
+            file_content =  'This is not the content of the file \'' + history_object.slurm_output + '\'.\n' +
+                            'Probably, your home directory denies read access to the file.\n' +
+                            'In this case the results will be shown after the tool has finished.\n' +
+                            'You can view the tool\'s progress in a terminal with the command\n' +
+                            'tail - f ' + history_object.slurm_output
         
         return render(request, 'history/results.html', {'file_content':file_content, 'history_object': history_object, 'result_object' : -1})
     
@@ -64,10 +68,13 @@ def tailFile(request, id):
 
     history_object = History.objects.get(id=id)
     new_lines = list()
-     
-    for lines in pygtailwrapper(id):
-        line = lines.replace('\n', '<br/>');
-        new_lines.append(line)
+    
+    try: 
+        for lines in pygtailwrapper(id):
+            line = lines.replace('\n', '<br/>');
+            new_lines.append(line)
+    except IOError:
+        pass
         
     if history_object.status < 2:
         new_lines = False

@@ -43,7 +43,7 @@
 	          		{% if h_item.status == h_item.processStatus.broken %}
 	          			<a class="btn btn-success btn-sm" href="{% url 'history:results' h_item.id %}">Show Report</a>
 	          			<a class="btn btn-success btn-sm" href="{% url 'plugins:setup' h_item.tool h_item.id%}">Edit Config</a>
-	          			<a class="btn btn-danger btn-sm" id="cancelButton" href="{% url 'history:results' h_item.id %}">Cancel job</a>
+	          			<a class="btn btn-danger btn-sm" id="cancelButton">Cancel job</a>
 	          		{% endif %}
 	          		{% if h_item.status == h_item.processStatus.finished_no_output %}
 	          			<a class="btn btn-success btn-sm" href="{% url 'history:results' h_item.id %}">Show Report</a>

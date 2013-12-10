@@ -32,8 +32,7 @@
 		 	 	</table>
 	 	 	</div>
 	  </div>
-      {% if file_content %}
-      file_content {{ file_content }}
+      {% if file_content and history_object.id in [2, 3]%}
       <script>
       function doUpdate() {
       

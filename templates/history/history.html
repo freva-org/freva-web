@@ -49,7 +49,8 @@
 	          			<a class="btn btn-success btn-sm" href="{% url 'history:results' h_item.id %}">Show Report</a>
 	          			<a class="btn btn-success btn-sm" href="{% url 'plugins:setup' h_item.tool h_item.id%}">Edit Config</a>
 	          		{% endif %}
-          			</td>
+	          		<a class="btn btn-success btn-sm" href="{% url 'history:jobinfo' h_item.tool h_item.id%}">Info</a>
+	          		</td>
           	</tr>
           	
           {% endfor %}	  

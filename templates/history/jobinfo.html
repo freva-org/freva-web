@@ -32,7 +32,7 @@
 		 	 	</table>
 	 	 	</div>
 	  </div>
-      {% if file_content and history_object.id in [2, 3]%}
+      {% if history_object.status > 2 %}
       <script>
       function doUpdate() {
       
@@ -61,10 +61,14 @@
 		}
 		setTimeout("doUpdate()", 2000);
 		</script>
-      
+              {% endif %}
 	      <div class="row">
 	        <div class="col-md-12">
-	        	<p>The tool is still running. Here you can see the output:</p>
+                        {% ifnotequal history_object.slurm_output '0'%}
+	        	<p>Contents of file  {{history_object.slurm_output}}:</p>
+                        {%else%}
+                        <p>Status:</p>
+                        {%endifnotequal%}
 		        <div id="logOutputDiv" class="well well-lg" style="height:450px; overflow-y:scroll; overflow-x: hidden;">
 	
 		        {% for line in file_content %}
@@ -76,7 +80,6 @@
 		        </div>
 	        </div>
 	      </div>
-	  {%endif%}
 
 
 <script>

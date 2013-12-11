@@ -57,7 +57,11 @@
 	          			<a class="btn btn-success btn-sm" href="{% url 'history:results' h_item.id %}">Show Report</a>
 	          			<a class="btn btn-success btn-sm" href="{% url 'plugins:setup' h_item.tool h_item.id%}">Edit Config</a>
 	          		{% endif %}
-	          		<a class="btn btn-success btn-sm" href="{% url 'history:jobinfo' h_item.id%}">Info</a>
+	          		{%ifnotequal h_item.slurm_output '0'%}
+	          		<a class="btn btn-primary btn-sm" href="{% url 'history:jobinfo' h_item.id%}" title="Information to scheduled job">Info</a>
+                                {%else%}
+	          		<a class="btn btn-info btn-sm" href="{% url 'history:jobinfo' h_item.id%}" title="Restricted information to manually started job">info</a>
+                                {%endifnotequal%}
 	          		</td>
           	</tr>
           	

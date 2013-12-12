@@ -42,16 +42,16 @@
 	          		{% endif %}
 	          		{% if h_item.status == h_item.processStatus.running %}
 	          			<a class="btn btn-success btn-sm" href="{% url 'history:results' h_item.id %}">Show Progress</a>
-	          			<a class="btn btn-danger btn-sm" id="cancelButton">Cancel job</a>
+	          			<a class="btn btn-danger btn-sm mybtn-cancel" id="cancelButton_{{h_item.id}}">Cancel job</a>
 	          		{% endif %}
 	          		{% if h_item.status == h_item.processStatus.scheduled %}
 	          			<a class="btn btn-success btn-sm" href="{% url 'plugins:setup' h_item.tool h_item.id%}">Edit Config</a>
-	          			<a class="btn btn-danger btn-sm" id="cancelButton">Cancel job</a>
+	          			<a class="btn btn-danger btn-sm mybtn-cancel" id="cancelButton_{{h_item.id}}">Cancel job</a>
 	          		{% endif %}
 	          		{% if h_item.status == h_item.processStatus.broken %}
 	          			<a class="btn btn-success btn-sm" href="{% url 'history:results' h_item.id %}">Show Report</a>
 	          			<a class="btn btn-success btn-sm" href="{% url 'plugins:setup' h_item.tool h_item.id%}">Edit Config</a>
-	          			<a class="btn btn-danger btn-sm" id="cancelButton">Cancel job</a>
+	          			<a class="btn btn-danger btn-sm mybtn-cancel" id="cancelButton_{{h_item.id}}">Cancel job</a>
 	          		{% endif %}
 	          		{% if h_item.status == h_item.processStatus.finished_no_output %}
 	          			<a class="btn btn-success btn-sm" href="{% url 'history:results' h_item.id %}">Show Report</a>
@@ -88,6 +88,7 @@
         	<div class="form-group">
         		<p class="help-block">To schedule the analysis you have to re-enter your password</p>
 				<input id="password_temp" class="form-control" type="password" name="password_temp" style="width: 90%;">
+				<input id="button_id" class="form-control" type="hidden" name="button_id" style="width: 90%;">
 			</div>
         </div>
         <div class="modal-footer">
@@ -106,7 +107,8 @@ $(document).ready(function() {
     	"aaSorting": [[0,'desc']]
     });
     
-    $('#cancelButton').on('click', function(e){
+    $('.mybtn-cancel').on('click', function(e){
+        print this.id
     	$('#myModalPw').modal('show');
     });  
 

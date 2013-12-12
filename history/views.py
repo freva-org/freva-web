@@ -52,7 +52,7 @@ def jobinfo(request, id, show_results = False):
     else:
         # for a read-protected directory this will fail
         try:
-            for line in pygtailwrapper(id):
+            for line in pygtailwrapper(id, restart=True):
                 file_content.append(line)
         except IOError:
             file_content =  [ 'WARNING:',
@@ -94,7 +94,7 @@ def results(request, id):
         else:
             # for a read-protected directory this will fail
             try:
-                for line in pygtailwrapper(id):
+                for line in pygtailwrapper(id, restart=True):
                     file_content.append(line)
             except IOError:
                 file_content =  [ 'WARNING:',

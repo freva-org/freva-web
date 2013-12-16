@@ -149,8 +149,9 @@ def dirlist(request):
         r.append('</ul>')
     return HttpResponse(''.join(r))  
 
-
-
+@login_required()
+def listDocu(request):
+    return render(request, 'plugins/list-docu.html')
 
 
     

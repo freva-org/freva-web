@@ -6,6 +6,7 @@ from django.template import RequestContext, loader
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.views.decorators.debug import sensitive_variables, sensitive_post_parameters
+from django.contrib.flatpages.models import FlatPage
 
 import evaluation_system.api.plugin_manager as pm
 from evaluation_system.model.user import User
@@ -26,8 +27,7 @@ import json
 
 @login_required()
 def home(request):
-    """ Default view for the root """
-    
+    """ Default view for the root """    
     tools = pm.getPlugins()    
     return render(request, 'plugins/home.html', {'tool_list': tools})
 
@@ -37,7 +37,12 @@ def detail(request, plugin_name):
     plugin = get_plugin_or_404(plugin_name)
     plugin_web = PluginWeb(plugin)
     
-    return render(request, 'plugins/detail.html', {'plugin':plugin_web})
+    try:
+        docu_flatpage = FlatPage.objects.get(title__iexact=plugin_name)
+    except FlatPage.DoesNotExist:
+        docu_flatpage = None
+    
+    return render(request, 'plugins/detail.html', {'plugin':plugin_web, 'docu': docu_flatpage})
   
 @sensitive_post_parameters('password_hidden')
 @sensitive_variables('password')

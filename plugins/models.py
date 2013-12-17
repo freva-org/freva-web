@@ -34,18 +34,18 @@ class PluginFileFieldWidget(Input):
 class SolrFieldWidget(Input):
     def __init__(self, *args, **kwargs):
         self.facet = kwargs.pop('facet')
-	self.group = kwargs.pop('group')
-	self.multiple = kwargs.pop('multiple')
+        self.group = kwargs.pop('group')
+        self.multiple = kwargs.pop('multiple')
         super(SolrFieldWidget,self).__init__(*args,**kwargs)
         
     def render(self, name, value, attrs=None, choices=()):
         return loader.render_to_string('plugins/solrfield.html', {'name': name, 'value': value, 'attrs':attrs, 
-                                                                  'facet':self.facet, 'group':self.group, 'multiple':self.multiple})
+                                                                  'facet':self.facet, 'group':self.group})
 
 class PluginRangeFieldWidget(Input):
     def render(self, name, value, attrs=None):
-	if value is not None and type(value) == list:
-		value = PrintableList(value)
+        if value is not None and type(value) == list:
+            value = PrintableList(value)
         return loader.render_to_string('plugins/rangefield.html', {'name': name, 'value': value, 'id':attrs['id']})
     
 

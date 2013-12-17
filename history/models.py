@@ -74,6 +74,8 @@ class Result(models.Model):
     history_id      = models.ForeignKey(History)
     #: path to the output file
     output_file     = models.TextField()
+    #: path to preview file
+    preview_file    = models.TextField(default='')
     #: specification of a file type 
     file_type       = models.IntegerField(max_length=2)
     

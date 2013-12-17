@@ -14,6 +14,10 @@
           <p>{{ plugin.short_description }}</p>
           <a href="{% url 'plugins:setup' plugin.name.lower %}" class="btn btn-primary">Start analysis</a>
 		  <a href="{% url 'history:history' %}?plugin={{plugin.name.lower}}" class="btn btn-primary">Show history</a>
+		  {% if docu %}
+		  <a href="{{docu.url}}" class="btn btn-primary">Documentation</a>	
+		  {% endif %}
+		  
         </div>
       </div>
  	</div>

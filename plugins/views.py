@@ -29,7 +29,7 @@ import json
 def home(request):
     """ Default view for the root """    
     tools = pm.getPlugins()    
-    return render(request, 'plugins/home.html', {'tool_list': tools})
+    return render(request, 'plugins/home.html', {'tool_list': sorted(tools.iteritems())})
 
 @login_required()
 def detail(request, plugin_name):

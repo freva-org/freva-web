@@ -14,7 +14,7 @@
           <h2>Plugins</h2>
           	
           	<div class="list-group">
-		    {% for key, value in tool_list.items %}
+		    {% for key, value in tool_list %}
 			  <a href="{% url 'plugins:detail' key %}" class="list-group-item">
 			    <h4 class="list-group-item-heading">{{ value.name }}</h4>
 			    <p class="list-group-item-text">{{ value.description }}</p>

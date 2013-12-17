@@ -40,7 +40,7 @@ class SolrFieldWidget(Input):
         
     def render(self, name, value, attrs=None, choices=()):
         return loader.render_to_string('plugins/solrfield.html', {'name': name, 'value': value, 'attrs':attrs, 
-                                                                  'facet':self.facet, 'group':self.group})
+                                                                  'facet':self.facet, 'group':self.group, 'multiple':self.multiple})
 
 class PluginRangeFieldWidget(Input):
     def render(self, name, value, attrs=None):

@@ -40,6 +40,7 @@
 					else
 						$('#wrongPw').hide();
 					$('#password_temp').val('');
+					$('#password_temp').focus();
 					$('#waitingCancel').hide();
 					$('#browsefield').show();
 					$('#submitCancelBtn').button('reset');
@@ -76,4 +77,11 @@
 		
 	});    
 
+	// simulate click on submit when enter is pressed
+	$('#password_temp').keypress(function (e) {
+		if (e.which == 13) {
+			$('#submitCancelBtn').click();
+			return false;
+	  	}
+	});
 </script>

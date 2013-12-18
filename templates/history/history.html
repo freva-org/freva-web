@@ -6,11 +6,10 @@
 {% block content %}
 
 {% load bootstrap3 %}
+{% load dialogtags %}
 
 {# Load CSS and JavaScript #}
-
-
-{% bootstrap_javascript %}
+{% bootstrap_javascript %}  
 
 <link rel="stylesheet" type="text/css" href="https://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/css/jquery.dataTables.css">
 <script type="text/javascript" charset="utf8" src="https://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/jquery.dataTables.min.js"></script>
@@ -74,6 +73,9 @@
 
       <hr>
 	 </div>
+
+{# Render a Bootstrap password/cancel dialog #}
+{% cancel_dialog %}
 	 
 <!-- Modal Passwort Dialog-->
   <div class="modal fade" id="myModalPw" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -117,6 +119,11 @@ $(document).ready(function() {
 $('#myModalPw').on('shown.bs.modal', function () {
     $('#password_temp').focus();
 })
+
+$('.mybtn-cancel').on('click', function(){
+	var id = this.id;
+	cancelDialog.show(id.split('cancelButton_')[1]);
+});
 
 
 </script>

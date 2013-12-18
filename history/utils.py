@@ -5,7 +5,6 @@ from models import History
 from django_evlauation import settings
 
 
-
 def pygtailwrapper(id, restart = False):
     """
     This function return the pygtail result for the slurm file

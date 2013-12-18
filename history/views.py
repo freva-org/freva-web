@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse 
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+from django.views.decorators.debug import sensitive_post_parameters
 
 import json
 import os
@@ -139,7 +140,20 @@ def tailFile(request, id):
     
     return HttpResponse(json.dumps(new_lines), content_type="application/json")
     
+@sensitive_post_parameters('password')
+@login_required()
+def cancelSlurmjob(request):
+    from paramiko import AuthenticationException
+    history_item = History.objects.get(pk=request.POST['id'])
+    if history_item.status < 3:
+        return HttpResponse(json.dumps('Job already finished'), content_type="application/json")
     
+    slurm_id = history_item.slurmId()
+    try:
+        result = ssh_call(request.user.username, request.POST['password'], 'scancel %s' % (slurm_id,), settings.SCHEDULER_HOST)
+        return HttpResponse(json.dumps(result[1]), content_type="application/json")
+    except AuthenticationException:
+        return HttpResponse(json.dumps('wrong password'), content_type="application/json")    
     
     
     

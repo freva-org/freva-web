@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse 
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.debug import sensitive_post_parameters
+from django.db.models import Q
 
 import json
 import os
@@ -13,7 +13,7 @@ from evaluation_system.misc import utils
 
 from models import History, Result
 from django_evlauation import settings
-from plugins.utils import ssh_call
+
 
 import logging
 
@@ -115,8 +115,8 @@ def results(request, id):
         return render(request, 'history/results.html', {'file_content':file_content, 'history_object': history_object, 'result_object' : -1})
     
     else:
-        #result_object = Result.objects.order_by('id').filter(history_id = id).filter(file_type = _result_preview)
-        result_object = history_object.result_set.filter(file_type = _result_preview)
+        # result_object = Result.objects.order_by('id').filter(history_id = id).filter(preview_file_ne='')
+        result_object = history_object.result_set.filter(~Q(preview_file = '')).order_by('preview_file')
         return render(request, 'history/results.html', {'history_object': history_object, 'result_object' : result_object, 'PREVIEW_URL' : settings.PREVIEW_URL })
         
         
@@ -138,21 +138,6 @@ def tailFile(request, id):
         new_lines = False
     
     return HttpResponse(json.dumps(new_lines), content_type="application/json")
-
-@sensitive_post_parameters('password')
-@login_required()
-def cancelSlurmjob(request):
-    from paramiko import AuthenticationException
-    history_item = History.objects.get(pk=request.POST['id'])
-    if history_item.status < 3:
-        return HttpResponse(json.dumps('Job already finished'), content_type="application/json")
-    
-    slurm_id = history_item.slurmId()
-    try:
-        result = ssh_call(request.user.username, request.POST['password'], 'scancel %s' % (slurm_id,), settings.SCHEDULER_HOST)
-        return HttpResponse(json.dumps(result[1]), content_type="application/json")
-    except AuthenticationException:
-        return HttpResponse(json.dumps('wrong password'), content_type="application/json")
     
     
     

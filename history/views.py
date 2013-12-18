@@ -115,7 +115,7 @@ def results(request, id):
     
     else:
         #result_object = Result.objects.order_by('id').filter(history_id = id).filter(file_type = _result_preview)
-        result_object = history_object.result_set.filter(file_type = _result_preview)
+        result_object = history_object.result_set.filter(preview_file != '').order_by('preview_file')
         return render(request, 'history/results.html', {'history_object': history_object, 'result_object' : result_object, 'PREVIEW_URL' : settings.PREVIEW_URL })
         
         

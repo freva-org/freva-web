@@ -43,13 +43,13 @@
 	          			<a class="btn btn-success btn-sm" href="{% url 'history:results' h_item.id %}">Show Progress</a>
 	          			{% ifnotequal h_item.slurm_output '0' %}
 	          				<a class="btn btn-danger btn-sm mybtn-cancel" id="cancelButton_{{h_item.id}}">Cancel job</a>
-	          			{%endif%}
+	          			{%endifnotequal%}
 	          		{% endif %}
 	          		{% if h_item.status == h_item.processStatus.scheduled %}
 	          			<a class="btn btn-success btn-sm" href="{% url 'plugins:setup' h_item.tool h_item.id%}">Edit Config</a>
 	          			{% ifnotequal h_item.slurm_output '0' %}
 	          				<a class="btn btn-danger btn-sm mybtn-cancel" id="cancelButton_{{h_item.id}}">Cancel job</a>
-	          			{%endif%}
+	          			{%endifnotequal%}
 	          		{% endif %}
 	          		{% if h_item.status == h_item.processStatus.broken %}
 	          			<a class="btn btn-success btn-sm" href="{% url 'history:results' h_item.id %}">Show Report</a>

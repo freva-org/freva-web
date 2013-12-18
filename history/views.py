@@ -14,7 +14,7 @@ from evaluation_system.misc import utils
 
 from models import History, Result
 from django_evlauation import settings
-
+from plugins.utils import ssh_call
 
 import logging
 

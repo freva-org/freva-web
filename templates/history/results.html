@@ -98,7 +98,7 @@
 		 	 	{%else%}
 			 	 	{% for r_item in result_object %}
 				        <div class="col-md-3">
-				        	<a rel="gallery1" class="thumbnail fancybox" href="{{ PREVIEW_URL }}{{r_item.output_file}}">
+				        	<a rel="gallery1" class="thumbnail fancybox" href="{{ PREVIEW_URL }}{{r_item.preview_file}}" title="{{r_item.output_file}}">
 								<img src="{{ PREVIEW_URL }}{{r_item.output_file}}" alt="" />
 							</a>
 						</div>

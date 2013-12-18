@@ -143,15 +143,20 @@ def tailFile(request, id):
 @sensitive_post_parameters('password')
 @login_required()
 def cancelSlurmjob(request):
+
     from paramiko import AuthenticationException
     history_item = History.objects.get(pk=request.POST['id'])
     if history_item.status < 3:
         return HttpResponse(json.dumps('Job already finished'), content_type="application/json")
     
-    slurm_id = history_item.slurmId()
+    slurm_id = history_item.slurmId() 
+    #slurm_id=2151
     try:
-        result = ssh_call(request.user.username, request.POST['password'], 'scancel %s' % (slurm_id,), settings.SCHEDULER_HOST)
-        return HttpResponse(json.dumps(result[1]), content_type="application/json")
+	result = ssh_call(username=request.user.username, password=request.POST['password'], command='bash -c "source /client/etc/profile.miklip > /dev/null; scancel  %s"' % (slurm_id,), hostname=settings.SCHEDULER_HOST)
+        #logging.debug(result[1].readlines())
+	history_item.status=2
+	history_item.save()
+	return HttpResponse(json.dumps(result[2].readlines()), content_type="application/json")
     except AuthenticationException:
         return HttpResponse(json.dumps('wrong password'), content_type="application/json")    
     

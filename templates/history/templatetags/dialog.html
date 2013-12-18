@@ -55,10 +55,11 @@
 					var url = '{% url 'history:cancelSlurmjob' %}';
 					var self = this;
 					$.post(url, data, function(resp){
-						if(resp = 'wrong password'){
+						if(resp == 'wrong password'){
 							self.show(jobId,true);
 						}else{
-							console.log(resp);
+							 $('#myModalPw').modal('hide');
+							 window.location.href=window.location.href;
 						}
 					});
 		        },

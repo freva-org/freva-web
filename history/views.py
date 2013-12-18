@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse 
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 
 import json
 import os
@@ -114,8 +115,8 @@ def results(request, id):
         return render(request, 'history/results.html', {'file_content':file_content, 'history_object': history_object, 'result_object' : -1})
     
     else:
-        #result_object = Result.objects.order_by('id').filter(history_id = id).filter(file_type = _result_preview)
-        result_object = history_object.result_set.filter(preview_file != '').order_by('preview_file')
+        # result_object = Result.objects.order_by('id').filter(history_id = id).filter(preview_file_ne='')
+        result_object = history_object.result_set.filter(~Q(preview_file = '')).order_by('preview_file')
         return render(request, 'history/results.html', {'history_object': history_object, 'result_object' : result_object, 'PREVIEW_URL' : settings.PREVIEW_URL })
         
         

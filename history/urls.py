@@ -5,4 +5,5 @@ urlpatterns = patterns('history.views',
     url(r'^(?P<id>\w+)/results/$', 'results', name='results'),
     url(r'^(?P<id>\w+)/jobinfo/$', 'jobinfo', name='jobinfo'),
     url(r'^(?P<id>\w+)/tail-file/$', 'tailFile', name='tailFile'),
+    url(r'^cancel-slurmjob/$', 'cancelSlurmjob', name='cancelSlurmjob')
 )

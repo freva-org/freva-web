@@ -33,7 +33,13 @@ class History(models.Model):
         
         super(History, self).__init__(*args, **kwargs)
         
-        
+    def slurmId(self):
+        import string
+        alle = string.maketrans('','')
+        nodigs = alle.translate(alle, string.digits)
+        slurm_file = str(self.slurm_output)
+        #slurm_file = '12312aasdas'
+        return slurm_file.translate(alle, nodigs)    
         
 
     def config_dict(self):

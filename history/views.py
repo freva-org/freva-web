@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse 
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+from django.views.decorators.debug import sensitive_post_parameters
 
 import json
 import os
@@ -13,7 +14,7 @@ from evaluation_system.misc import utils
 
 from models import History, Result
 from django_evlauation import settings
-
+from plugins.utils import ssh_call
 
 import logging
 
@@ -116,7 +117,7 @@ def results(request, id):
     
     else:
         # result_object = Result.objects.order_by('id').filter(history_id = id).filter(preview_file_ne='')
-        result_object = history_object.result_set.filter(~Q(preview_file = '')).order_by('preview_file')
+        result_object = history_object.result_set.filter(~Q(preview_file = '')).order_by('output_file')
         return render(request, 'history/results.html', {'history_object': history_object, 'result_object' : result_object, 'PREVIEW_URL' : settings.PREVIEW_URL })
         
         
@@ -139,7 +140,25 @@ def tailFile(request, id):
     
     return HttpResponse(json.dumps(new_lines), content_type="application/json")
     
+@sensitive_post_parameters('password')
+@login_required()
+def cancelSlurmjob(request):
+
+    from paramiko import AuthenticationException
+    history_item = History.objects.get(pk=request.POST['id'])
+    if history_item.status < 3:
+        return HttpResponse(json.dumps('Job already finished'), content_type="application/json")
     
+    slurm_id = history_item.slurmId() 
+    #slurm_id=2151
+    try:
+	result = ssh_call(username=request.user.username, password=request.POST['password'], command='bash -c "source /client/etc/profile.miklip > /dev/null; scancel  %s"' % (slurm_id,), hostname=settings.SCHEDULER_HOST)
+        #logging.debug(result[1].readlines())
+	history_item.status=2
+	history_item.save()
+	return HttpResponse(json.dumps(result[2].readlines()), content_type="application/json")
+    except AuthenticationException:
+        return HttpResponse(json.dumps('wrong password'), content_type="application/json")    
     
     
     

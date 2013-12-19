@@ -5,7 +5,11 @@
 {% block content %}
 <!-- This code is taken from http://twitter.github.com/bootstrap/examples/hero.html -->
 
-       
+{% load bootstrap3 %}
+{% load dialogtags %}
+
+{# Load CSS and JavaScript #}
+{% bootstrap_javascript %}       
 
 
     <div class="container">
@@ -20,6 +24,15 @@
 	 	 	<div class="col-md-12">
 	 	 		<a class="btn btn-primary" onClick="toogleConfig('config_table');" id="config_button">Show configuration</a>
 	 	 		<a class="btn btn-primary" href="{% url 'plugins:setup' history_object.tool history_object.id%}" id="config_button">Edit configuration</a>
+	 	 		{% if history_object.status > 2 and history_object.slurm_output != 0%}
+	 	 			
+	 	 			<a class="btn btn-danger mybtn-cancel" id="cancelButton_{{h_item.id}}" onClick="cancelDialog.show({{history_object.id}})">Cancel job</a>
+	 				{# Render a Bootstrap password/cancel dialog #}
+	 	 			{% cancel_dialog %}
+	 	 		
+	 	 		{%endif%}
+	 	 	
+	 	 	
 	 	 	</div>
 	 	 	<div class="col-md-12">
 		 	 	<table class="table col-md-12" id="config_table" style="display:none; margin-top:10px;">
@@ -101,6 +114,9 @@
 		});
 		$('#logOutputDiv').scrollTop($("#logOutputDiv")[0].scrollHeight);
 	});
+	
+	
+	
 </script>
 
 {% endblock %}

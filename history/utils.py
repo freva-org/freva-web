@@ -6,7 +6,6 @@ from django_evlauation import settings
 from contrib.comments.views.moderation import delete
 
 
-
 def pygtailwrapper(id, restart = False):
     """
     This function return the pygtail result for the slurm file

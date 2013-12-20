@@ -124,9 +124,9 @@ def results(request, id):
         # build the file structure
         fd = FileDict()
         
-        for result in result_object:
-            fd.add_file(result.output_file, result.previe_file)
-            
+        for r in result_object:
+            fd.add_file(r.output_file, r.preview_file)
+    
         file_tree = fd.compressed_copy()
         
         file_list = file_tree.get_list()

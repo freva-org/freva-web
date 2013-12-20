@@ -82,4 +82,17 @@ class FileDict(dict):
             else:
                 fdcopy[k] = fdict
         return fdcopy
+    
+    def get_list(self):
+        """
+        Returns a nested list of the tree object. 
+        """
+        ret =[]
+        
+        for item in self.items():
+            ret.append(item[0])
+            if isinstance(item[1], FileDict):
+                ret.append(item[1].get_list())
+        
+        return ret
         

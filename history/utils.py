@@ -3,7 +3,7 @@ import os
 from evaluation_system.misc import utils
 from models import History
 from django_evlauation import settings
-from contrib.comments.views.moderation import delete
+# from contrib.comments.views.moderation import delete
 
 
 def pygtailwrapper(id, restart = False):
@@ -57,8 +57,14 @@ class FileDict(dict):
         split_path = []
         # create a list of directories      
         while str_to_file:
-            (str_to_file, head) = os.path.split(str_to_file)              
-            split_path.append(head)
+            (str_to_file, head) = os.path.split(str_to_file)
+            last_char = ''
+            if not head:
+                last_char = str_to_file[-1]
+                (str_to_file, head) = os.path.split(str_to_file[:-1])
+
+            split_path.append(head + last_char)
+
         self._add_file(split_path[::-1], value)
         
     def compressed_copy(self):

@@ -16,6 +16,8 @@ from models import History, Result
 from django_evlauation import settings
 from plugins.utils import ssh_call
 
+from history.utils import FileDict
+
 import logging
 
 
@@ -118,7 +120,21 @@ def results(request, id):
     else:
         # result_object = Result.objects.order_by('id').filter(history_id = id).filter(preview_file_ne='')
         result_object = history_object.result_set.filter(~Q(preview_file = '')).order_by('output_file')
-        return render(request, 'history/results.html', {'history_object': history_object, 'result_object' : result_object, 'PREVIEW_URL' : settings.PREVIEW_URL })
+        
+        # build the file structure
+        fd = FileDict()
+        
+        for result in result_object:
+            fd.add_file(result.output_file, result.previe_file)
+            
+        file_tree = fd.compressed_copy()
+        
+        file_list = file_tree.get_list()
+        
+        return render(request, 'history/results.html', {'history_object': history_object,
+                                                        'result_object' : result_object,
+                                                        'PREVIEW_URL' : settings.PREVIEW_URL,
+                                                        'file_list' : file_list })
         
         
 @login_required()

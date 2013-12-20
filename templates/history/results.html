@@ -32,6 +32,12 @@
 		 	 	</table>
 	 	 	</div>
 	  </div>
+	  <div>
+	  <h1>Files created:</h1>
+	  <ul>
+	  {{ file_list|unordered_list }}
+	  </ul>
+	  </div>
       {% if file_content %}
       <script>
       function doUpdate() {

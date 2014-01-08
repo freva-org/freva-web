@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.views.decorators.debug import sensitive_post_parameters
+from django.contrib.flatpages.models import FlatPage
 
 import json
 import os
@@ -86,7 +87,10 @@ def results(request, id):
     
     #get history object
     history_object = History.objects.get(id=id)
-    
+    try:
+        documentation = FlatPage.objects.get(title__iexact=history_object.tool)
+    except FlatPage.DoesNotExist:
+        documentation = None
     if history_object.status in [History.processStatus.running, History.processStatus.scheduled, History.processStatus.broken]:
         history_object = History.objects.get(id=id)
         file_content = []
@@ -115,7 +119,10 @@ def results(request, id):
                 except IOError:
                     pass
         
-        return render(request, 'history/results.html', {'file_content':file_content, 'history_object': history_object, 'result_object' : -1})
+        return render(request, 'history/results.html', {'file_content':file_content, 
+                                                        'history_object': history_object, 
+                                                        'result_object' : -1,
+                                                        'documentation' : documentation})
     
     else:
         # result_object = Result.objects.order_by('id').filter(history_id = id).filter(preview_file_ne='')
@@ -134,7 +141,8 @@ def results(request, id):
         return render(request, 'history/results.html', {'history_object': history_object,
                                                         'result_object' : result_object,
                                                         'PREVIEW_URL' : settings.PREVIEW_URL,
-                                                        'file_list' : file_list })
+                                                        'file_list' : file_tree ,
+                                                        'documentation' : documentation})
         
         
 @login_required()

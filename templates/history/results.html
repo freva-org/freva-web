@@ -1,18 +1,18 @@
 {% extends "_layouts/menu.html" %}
 
-{% block page_title %}{{ history_object.tool }} results - Evaluation System{% endblock %}
+{% block page_title %}{{ history_object.tool|title }} results - Evaluation System{% endblock %}
 {% block page_class %}home-page{% endblock %}
 {% block content %}
 <!-- This code is taken from http://twitter.github.com/bootstrap/examples/hero.html -->
 
-       
+{% load resulttags %}       
 
 
     <div class="container">
       <!-- Example row of columns -->
       <div class="row">
 	      <div class="col-md-12">
-	      	<h1>{{ history_object.tool }}</h1>
+	      	<h1>{{ history_object.tool|capfirst }}</h1>
 	      	<p>Analysis from {{ history_object.timestamp|date:"d.m.y H:i:s" }} done by <a href="{% url 'history:history' %}?uid={{history_object.uid}}">{{history_object.uid}}</a></p>
 	      </div>
       </div>
@@ -20,6 +20,9 @@
 	 	 	<div class="col-md-12">
 	 	 		<a class="btn btn-primary" onClick="toogleConfig('config_table');" id="config_button">Show configuration</a>
 	 	 		<a class="btn btn-primary" href="{% url 'plugins:setup' history_object.tool history_object.id%}" id="config_button">Edit configuration</a>
+	 	 		{% if documentation %}
+	 	 			<a class="btn btn-success" href="{{documentation.url}}">Documentation</a>
+	 	 		{%endif%}
 	 	 	</div>
 	 	 	<div class="col-md-12">
 		 	 	<table class="table col-md-12" id="config_table" style="display:none; margin-top:10px;">
@@ -98,11 +101,12 @@
 
 	  <div class="col-md-12">
 	  <h2><br>Files created:</h2>
-	  <ul>
+	  <ul >
 	  {{ file_list|unordered_list }}
 	  </ul>
 	  </div>
 		 	 	{%else%}
+		 	 	<!--
 			 	 	{% for r_item in result_object %}
 				        <div class="col-md-3">
 				        	<a rel="gallery1" class="thumbnail fancybox" href="{{ PREVIEW_URL }}{{r_item.preview_file}}" title="{{r_item.output_file}}">
@@ -110,13 +114,15 @@
 							</a>
 						</div>
 			 	 	{% endfor %}
-	
+				-->
 		     </div>
-	      
+	   
+
+	  <div class="row">
 	  <div class="col-md-12">
-	  <h2><br>Files created:</h2>
-	  <ul>
-	  {{ file_list|unordered_list }}
+
+	  <ul class="jqueryFileTree">
+	  {{ file_list|preview_tree }}
 	  </ul>
 	  </div>
 			 	{%endif%}
@@ -131,7 +137,7 @@
 		</div> 
 	  {%endif%}
 
-
+</div>
 <script>
   	function toogleConfig(id){
   		
@@ -145,10 +151,28 @@
   	}
   	
 	$(document).ready(function() {
+		
+	
+		$('.jqueryFileTree a').on('click', function(target){
+			var list_el = $(target.target).parent();
+			list_el.toggleClass("expanded");
+			list_el.toggleClass("collapsed");
+			//activate fancybox link
+			if(list_el.hasClass('fancybox'))
+				return true;
+			
+			//toogle all child elements	
+			var next_list = $(target.target).next();	
+			$(next_list.children()).toggle();			
+
+			return false; //don't activate the link
+		});	
+		
 		$(".fancybox").fancybox({
 			openEffect	: 'none',
 			closeEffect	: 'none'
 		});
+
 	});
 </script>
 

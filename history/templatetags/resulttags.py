@@ -47,14 +47,8 @@ def preview_tree(value, autoescape=None):
                     subdict = '\n<div class="row" >%s</div>\n' % (subdict,)
 
             #next lines define css-sytles of listitems
-            if depth > 1:
-                visible = 'style="display:none;"'
-            else:
-                visible = ''
-            if depth > 0:
-                folder_image = 'directory collapsed'
-            else:
-                folder_image = 'directory expanded'
+            visible = 'style="display:none;"' if depth > 1 else ''
+            folder_image = 'directory collapsed' if depth >0 else 'directory expanded'
 
             if not subdict_item:
                 output.append(render_to_string('history/templatetags/preview-img.html', {'imgname':key, 'preview':value, 'PREVIEW_URL':settings.PREVIEW_URL}))

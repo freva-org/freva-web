@@ -37,25 +37,25 @@
 		  </div>
           <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
             <!-- Navigation links starts here -->
-	          <ul class="nav navbar-nav">
+	          <ul class="nav navbar-nav ">
 	            <li><a href="{% url 'plugins:home' %}">Plugins</a></li>
 	            <li><a href="{% url 'history:history' %}">History</a></li>
-	            <li><a href="{% url 'plugins:about' %}">Documentation</a></li>
+	            <li><a href="{% url 'plugins:about' %}">Docu</a></li>
 	             <li><a href="https://code.zmaw.de/projects/miklip-d-integration/issues/new" target="_blank">Contact</a></li>
 	             <li><a href="https://code.zmaw.de/projects/miklip-d-integration/wiki" target="_blank">Wiki</a>
 	          </ul>
 
  
              {% if not request.user.is_authenticated %}
-			  <form class="navbar-form navbar-right" method="post" action="{% url 'base:home' %}">
+			  <form class="navbar-form navbar-right  navbar-nav" method="post" action="{% url 'base:home' %}">
  				{% csrf_token %}
-	            <div class="form-group">
+	            <div class="form-group col-md-5">
 	              <input name="user" type="text" placeholder="Username" class="form-control">
 	            </div>
-	            <div class="form-group">
+	            <div class="form-group col-md-5">
 	              <input name="password" type="password" placeholder="Password" class="form-control">
 	            </div>
-	            <button type="submit" class="btn btn-primary">Sign in</button>
+	            <button type="submit" class="col-md-2 btn btn-primary">Sign in</button>
 	          </form>
 	          {% else %}
 	           <ul class="nav navbar-nav navbar-right">

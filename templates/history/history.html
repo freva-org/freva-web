@@ -6,11 +6,10 @@
 {% block content %}
 
 {% load bootstrap3 %}
+{% load dialogtags %}
 
 {# Load CSS and JavaScript #}
-
-
-{% bootstrap_javascript %}
+{% bootstrap_javascript %}  
 
 <link rel="stylesheet" type="text/css" href="https://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/css/jquery.dataTables.css">
 <script type="text/javascript" charset="utf8" src="https://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.9.4/jquery.dataTables.min.js"></script>
@@ -42,16 +41,20 @@
 	          		{% endif %}
 	          		{% if h_item.status == h_item.processStatus.running %}
 	          			<a class="btn btn-success btn-sm" href="{% url 'history:results' h_item.id %}">Show Progress</a>
-	          			<a class="btn btn-danger btn-sm mybtn-cancel" id="cancelButton_{{h_item.id}}">Cancel job</a>
+	          			{% ifnotequal h_item.slurm_output '0' %}
+	          				<a class="btn btn-danger btn-sm mybtn-cancel" id="cancelButton_{{h_item.id}}">Cancel job</a>
+	          			{%endifnotequal%}
 	          		{% endif %}
 	          		{% if h_item.status == h_item.processStatus.scheduled %}
 	          			<a class="btn btn-success btn-sm" href="{% url 'plugins:setup' h_item.tool h_item.id%}">Edit Config</a>
-	          			<a class="btn btn-danger btn-sm mybtn-cancel" id="cancelButton_{{h_item.id}}">Cancel job</a>
+	          			{% ifnotequal h_item.slurm_output '0' %}
+	          				<a class="btn btn-danger btn-sm mybtn-cancel" id="cancelButton_{{h_item.id}}">Cancel job</a>
+	          			{%endifnotequal%}
 	          		{% endif %}
 	          		{% if h_item.status == h_item.processStatus.broken %}
 	          			<a class="btn btn-success btn-sm" href="{% url 'history:results' h_item.id %}">Show Report</a>
 	          			<a class="btn btn-success btn-sm" href="{% url 'plugins:setup' h_item.tool h_item.id%}">Edit Config</a>
-	          			<a class="btn btn-danger btn-sm mybtn-cancel" id="cancelButton_{{h_item.id}}">Cancel job</a>
+
 	          		{% endif %}
 	          		{% if h_item.status == h_item.processStatus.finished_no_output %}
 	          			<a class="btn btn-success btn-sm" href="{% url 'history:results' h_item.id %}">Show Report</a>
@@ -74,6 +77,9 @@
 
       <hr>
 	 </div>
+
+{# Render a Bootstrap password/cancel dialog #}
+{% cancel_dialog %}
 	 
 <!-- Modal Passwort Dialog-->
   <div class="modal fade" id="myModalPw" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -107,10 +113,6 @@ $(document).ready(function() {
     	"aaSorting": [[0,'desc']]
     });
     
-    $('.mybtn-cancel').on('click', function(e){
-        print this.id
-    	$('#myModalPw').modal('show');
-    });  
 
 	$('.ttbtn').tooltip();	
     
@@ -121,6 +123,11 @@ $(document).ready(function() {
 $('#myModalPw').on('shown.bs.modal', function () {
     $('#password_temp').focus();
 })
+
+$('.mybtn-cancel').on('click', function(){
+	var id = this.id;
+	cancelDialog.show(id.split('cancelButton_')[1]);
+});
 
 
 </script>

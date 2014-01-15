@@ -2,6 +2,8 @@ from django.shortcuts import render
 from django.http import HttpResponse 
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
+from django.views.decorators.debug import sensitive_post_parameters
+from django.contrib.flatpages.models import FlatPage
 
 import json
 import os
@@ -13,7 +15,9 @@ from evaluation_system.misc import utils
 
 from models import History, Result
 from django_evlauation import settings
+from plugins.utils import ssh_call
 
+from history.utils import FileDict
 
 import logging
 
@@ -83,7 +87,10 @@ def results(request, id):
     
     #get history object
     history_object = History.objects.get(id=id)
-    
+    try:
+        documentation = FlatPage.objects.get(title__iexact=history_object.tool)
+    except FlatPage.DoesNotExist:
+        documentation = None
     if history_object.status in [History.processStatus.running, History.processStatus.scheduled, History.processStatus.broken]:
         history_object = History.objects.get(id=id)
         file_content = []
@@ -112,12 +119,30 @@ def results(request, id):
                 except IOError:
                     pass
         
-        return render(request, 'history/results.html', {'file_content':file_content, 'history_object': history_object, 'result_object' : -1})
+        return render(request, 'history/results.html', {'file_content':file_content, 
+                                                        'history_object': history_object, 
+                                                        'result_object' : -1,
+                                                        'documentation' : documentation})
     
     else:
         # result_object = Result.objects.order_by('id').filter(history_id = id).filter(preview_file_ne='')
-        result_object = history_object.result_set.filter(~Q(preview_file = '')).order_by('preview_file')
-        return render(request, 'history/results.html', {'history_object': history_object, 'result_object' : result_object, 'PREVIEW_URL' : settings.PREVIEW_URL })
+        result_object = history_object.result_set.filter(~Q(preview_file = '')).order_by('output_file')
+        
+        # build the file structure
+        fd = FileDict()
+        
+        for r in result_object:
+            fd.add_file(r.output_file, r.preview_file)
+    
+        file_tree = fd.compressed_copy()
+        
+        file_list = file_tree.get_list()
+        
+        return render(request, 'history/results.html', {'history_object': history_object,
+                                                        'result_object' : result_object,
+                                                        'PREVIEW_URL' : settings.PREVIEW_URL,
+                                                        'file_list' : file_tree ,
+                                                        'documentation' : documentation})
         
         
 @login_required()
@@ -139,7 +164,25 @@ def tailFile(request, id):
     
     return HttpResponse(json.dumps(new_lines), content_type="application/json")
     
+@sensitive_post_parameters('password')
+@login_required()
+def cancelSlurmjob(request):
+
+    from paramiko import AuthenticationException
+    history_item = History.objects.get(pk=request.POST['id'])
+    if history_item.status < 3:
+        return HttpResponse(json.dumps('Job already finished'), content_type="application/json")
     
+    slurm_id = history_item.slurmId() 
+    #slurm_id=2151
+    try:
+	result = ssh_call(username=request.user.username, password=request.POST['password'], command='bash -c "source /client/etc/profile.miklip > /dev/null; scancel  %s 2>&1;exit 0"' % (slurm_id,), hostname=settings.SCHEDULER_HOST)
+        #logging.debug(result[1].readlines())
+	history_item.status=2
+	history_item.save()
+	return HttpResponse(json.dumps(result[2].readlines()), content_type="application/json")
+    except AuthenticationException:
+        return HttpResponse(json.dumps('wrong password'), content_type="application/json")    
     
     
     

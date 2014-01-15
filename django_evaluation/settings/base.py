@@ -15,7 +15,7 @@ from django.core.exceptions import ImproperlyConfigured
 import django_auth_ldap.config as ldap_cfg
 from django_auth_ldap.config import LDAPSearch
 
-from django_evlauation.ldapnisgroup import LDAPNisGroupType
+from django_evaluation.ldapnisgroup import LDAPNisGroupType
 
 def get_env_setting(setting):
     """ Get the environment setting or return exception """
@@ -98,7 +98,7 @@ LANGUAGE_CODE = 'en-us'
 SITE_ID = 1
 
 # Defines the views served for root URLs.
-ROOT_URLCONF = 'django_evlauation.urls'
+ROOT_URLCONF = 'django_evaluation.urls'
 
 # Application definition
 INSTALLED_APPS = (
@@ -282,7 +282,7 @@ DEBUG_TOOLBAR_PANELS = (
 FILE_UPLOAD_PERMISSIONS = 0664
 
 # The WSGI Application to use for runserver
-WSGI_APPLICATION = 'django_evlauation.wsgi.application'
+WSGI_APPLICATION = 'django_evaluation.wsgi.application'
 
 
 # Uncomment this and set to all slave DBs in use on the site.
@@ -334,19 +334,19 @@ INTERNAL_IPS = ('127.0.0.1')
 
 SERVER_EMAIL = "webmaster@example.com"
 DEFAULT_FROM_EMAIL = "webmaster@example.com"
-SYSTEM_EMAIL_PREFIX = "[django_evlauation]"
+SYSTEM_EMAIL_PREFIX = "[django_evaluation]"
 
 ## Log settings
 
 LOG_LEVEL = logging.INFO
 HAS_SYSLOG = True
-SYSLOG_TAG = "http_app_django_evlauation"  # Make this unique to your project.
+SYSLOG_TAG = "http_app_django_evaluation"  # Make this unique to your project.
 # Remove this configuration variable to use your custom logging configuration
 LOGGING_CONFIG = None
 LOGGING = {
     'version': 1,
     'loggers': {
-        'django_evlauation': {
+        'django_evaluation': {
             'level': "DEBUG"
         }
     }
@@ -354,7 +354,7 @@ LOGGING = {
 
 SECRET_KEY = 'hj1bkzobng0ck@0&%t509*1ki$#)i5y+i0)&=7zv@amu8pm5*t'
 # Common Event Format logging parameters
-#CEF_PRODUCT = 'django_evlauation'
+#CEF_PRODUCT = 'django_evaluation'
 #CEF_VENDOR = 'Your Company'
 #CEF_VERSION = '0'
 #CEF_DEVICE_VERSION = '0'
@@ -431,7 +431,7 @@ LOGGING_CONFIG = None
 LOGGING = {
     'version': 1,
     'loggers': {
-        'django_evlauation': {
+        'django_evaluation': {
             'level': "DEBUG"
         }
     }

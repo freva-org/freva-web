@@ -1,5 +1,5 @@
 """
-WSGI config for django_evlauation project.
+WSGI config for django_evaluation project.
 
 This module contains the WSGI application used by Django's development server
 and any production WSGI deployments. It should expose a module-level variable
@@ -52,7 +52,7 @@ sys.path.append(PROJECT_ROOT)
 print sys.path
 
 os.environ['CELERY_LOADER'] = 'django'
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "django_evlauation.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "django_evaluation.settings")
 
 # This application object is used by any WSGI server configured to use this
 # file. This includes Django's development server, if the WSGI_APPLICATION

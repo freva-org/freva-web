@@ -292,14 +292,6 @@ ADMINS = (
 )
 MANAGERS = ADMINS
 
-# SECURITY WARNING: don't run with debug turned on in production!
-# Debugging displays nice error messages, but leaks memory. Set this to False
-# on all server instances and True only for development.
-DEBUG = TEMPLATE_DEBUG = False
-
-# Is this a development instance? Set this to True on development/master
-# instances and False on stage/prod.
-DEV = False
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
@@ -330,9 +322,14 @@ INTERNAL_IPS = ('127.0.0.1')
 # Set this to true if you use a proxy that sets X-Forwarded-Host
 #USE_X_FORWARDED_HOST = False
 
-SERVER_EMAIL = "webmaster@example.com"
-DEFAULT_FROM_EMAIL = "webmaster@example.com"
+SERVER_EMAIL = "www-miklip@outlook.com"
+DEFAULT_FROM_EMAIL = "www-miklip@outlook.com"
 SYSTEM_EMAIL_PREFIX = "[django_evaluation]"
+
+EMAIL_HOST='smtp-mail.outlook.com'
+EMAIL_HOST_USER='www-miklip@outlook.com'
+EMAIL_HOST_PASSWORD='2e73d7ee68d0f8f'
+EMAIL_USE_TLS=True
 
 ## Log settings
 
@@ -383,6 +380,8 @@ DATABASES = {
 
 # Recipients of traceback emails and other notifications.
 ADMINS = (
+    ('Sebastian Illing', 'sebastian.illing@met.fu-berlin.de'),
+    ('Oliver Kunst','oliver.kunst@met.fu-berlin.de'),
     # ('Your Name', 'your_email@domain.com'),
 )
 MANAGERS = ADMINS
@@ -398,7 +397,7 @@ CACHES = {
 # SECURITY WARNING: don't run with debug turned on in production!
 # Debugging displays nice error messages, but leaks memory. Set this to False
 # on all server instances and True only for development.
-DEBUG = TEMPLATE_DEBUG = True
+DEBUG = TEMPLATE_DEBUG = False
 
 # Is this a development instance? Set this to True on development/master
 # instances and False on stage/prod.
@@ -406,7 +405,7 @@ DEV = True
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['www-miklip.dkrz.de', 'wwwdev-miklip.dkrz.de']
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # Hardcoded values can leak through source control. Consider loading

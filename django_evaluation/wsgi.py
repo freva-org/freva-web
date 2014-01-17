@@ -49,8 +49,6 @@ sys.path[:0] = new_sys_path
 # Add the app code to the path
 sys.path.append(PROJECT_ROOT)
 
-print sys.path
-
 os.environ['CELERY_LOADER'] = 'django'
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "django_evaluation.settings")
 

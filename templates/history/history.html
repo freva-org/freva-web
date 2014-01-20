@@ -61,9 +61,9 @@
 	          			<a class="btn btn-success btn-sm" href="{% url 'plugins:setup' h_item.tool h_item.id%}">Edit Config</a>
 	          		{% endif %}
 	          		{%ifnotequal h_item.slurm_output '0'%}
-	          		<a class="btn btn-primary btn-sm ttbtn" href="{% url 'history:jobinfo' h_item.id%}" data-toggle="tooltip" title="Information to scheduled job">Info</a>
+	          		<a class="btn btn-primary btn-sm ttbtn" href="{% url 'history:jobinfo' h_item.id%}" data-toggle="tooltip" data-placement="auto right" title="Information to scheduled job&#10;&#10;Configuration:&#10;{{h_item.config_dict}}">Info</a>
                                 {%else%}
-	          		<a class="btn btn-info btn-sm ttbtn" href="{% url 'history:jobinfo' h_item.id%}" data-toggle="tooltip"  title="Restricted information to manually started job">info</a>
+	          		<a class="btn btn-info btn-sm ttbtn" href="{% url 'history:jobinfo' h_item.id%}" data-toggle="tooltip" data-placement="auto right"  title="Restricted information to manually started job&#10;&#10;Configuration:&#10;{{h_item.config_dict}}">info</a>
                                 {%endifnotequal%}
 	          		</td>
           	</tr>

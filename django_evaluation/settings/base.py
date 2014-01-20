@@ -12,6 +12,8 @@ import ldap
 # into your settings, but ImproperlyConfigured is an exception.
 from django.core.exceptions import ImproperlyConfigured
 
+import django.utils
+
 import django_auth_ldap.config as ldap_cfg
 from django_auth_ldap.config import LDAPSearch
 
@@ -322,14 +324,15 @@ INTERNAL_IPS = ('127.0.0.1')
 # Set this to true if you use a proxy that sets X-Forwarded-Host
 #USE_X_FORWARDED_HOST = False
 
-SERVER_EMAIL = "www-miklip@outlook.com"
-DEFAULT_FROM_EMAIL = "www-miklip@outlook.com"
+SERVER_EMAIL = "www-miklip@outlook.de"
+DEFAULT_FROM_EMAIL = "www-miklip@outlook.de"
 SYSTEM_EMAIL_PREFIX = "[django_evaluation]"
 
 EMAIL_HOST='smtp-mail.outlook.com'
-EMAIL_HOST_USER='www-miklip@outlook.com'
+EMAIL_HOST_USER='www-miklip@outlook.de'
 EMAIL_HOST_PASSWORD='2e73d7ee68d0f8f'
 EMAIL_USE_TLS=True
+EMAIL_PORT=587
 
 ## Log settings
 
@@ -337,15 +340,15 @@ LOG_LEVEL = logging.INFO
 HAS_SYSLOG = True
 SYSLOG_TAG = "http_app_django_evaluation"  # Make this unique to your project.
 # Remove this configuration variable to use your custom logging configuration
-LOGGING_CONFIG = None
-LOGGING = {
-    'version': 1,
-    'loggers': {
-        'django_evaluation': {
-            'level': "DEBUG"
-        }
-    }
-}
+# LOGGING_CONFIG = None
+# LOGGING = {
+#     'version': 1,
+#     'loggers': {
+#         'django_evaluation': {
+#             'level': "DEBUG"
+#         }
+#     }
+# }
 
 SECRET_KEY = 'hj1bkzobng0ck@0&%t509*1ki$#)i5y+i0)&=7zv@amu8pm5*t'
 # Common Event Format logging parameters
@@ -401,7 +404,7 @@ DEBUG = TEMPLATE_DEBUG = False
 
 # Is this a development instance? Set this to True on development/master
 # instances and False on stage/prod.
-DEV = True
+DEV = False
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
@@ -425,11 +428,75 @@ SECRET_KEY = 'hj1bkzobng0ck@0&%t509*1ki$#)i5y+i0)&=7zv@amu8pm5*t'
 
 # Remove this configuration variable to use your custom logging configuration
 LOGGING_CONFIG = None
-LOGGING = {
+# LOGGING = {
+#     'version': 1,
+#     'disable_existing_loggers': True,
+#     'handlers': {
+#         'mail_admins': {
+#             'level': 'DEBUG',
+#             'class': 'django.utils.log.AdminEmailHandler',
+#         }
+#     },
+#     'loggers': {
+#         'django_evaluation': {
+#             'level': "INFO"
+#         },
+#         'django.request': {
+#             'handlers': ['mail_admins'],
+#             'level': 'DEBUG',
+#             'propagate': True,
+#         },
+#     }
+# }
+
+OGGING = {
     'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'filters': {
+        'special': {
+            '()': 'project.logging.SpecialFilter',
+            'foo': 'bar',
+        }
+    },
+    'handlers': {
+        'null': {
+            'level': 'DEBUG',
+            'class': 'logging.NullHandler',
+        },
+        'console':{
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'mail_admins': {
+            'level': 'DEBUG',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'filters': ['special']
+        }
+    },
     'loggers': {
-        'django_evaluation': {
-            'level': "DEBUG"
+        'django': {
+            'handlers': ['null'],
+            'propagate': True,
+            'level': 'INFO',
+        },
+        'django.request': {
+            'handlers': ['mail_admins'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'myproject.custom': {
+            'handlers': ['console', 'mail_admins'],
+            'level': 'INFO',
+            'filters': ['special']
         }
     }
 }

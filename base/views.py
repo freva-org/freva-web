@@ -30,6 +30,12 @@ def home(request):
         
     return render(request, 'base/home.html',{'login_failed':login_failed})
 
+def wiki(request):
+    """
+    View rendering the iFrame for the wiki page.
+    """
+    return render(request, 'base/wiki.html')
+
 def logout(request):
     """
     Logout view.

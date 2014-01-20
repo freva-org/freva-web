@@ -67,9 +67,7 @@ AUTH_LDAP_USER_ATTR_MAP = {
 
 AUTH_LDAP_GROUP_SEARCH = LDAPSearch('ou=netgroup,o=ldap,o=root',
                                      ldap.SCOPE_SUBTREE,
-                                     '(nisNetgroupTriple=\(,u290038,\))')
-#                                     '(nisNetgroupTriple=\(,%(user)s,\))')
-#                                     'nisNetgroupTriple=\(,%(user)s,\)')
+                                     '(nisNetgroupTriple=\(,%(user)s,\))')
 
 #AUTH_LDAP_GROUP_TYPE = ldap_cfg.ActiveDirectoryGroupType()
 AUTH_LDAP_GROUP_TYPE = LDAPNisGroupType()

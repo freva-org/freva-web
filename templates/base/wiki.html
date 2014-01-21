@@ -5,12 +5,18 @@
 {% block content %}
 
 
+<div class="container">
+<div class="row">
+<div class="col-md-12">
 <!-- Show the wiki page in an iFrame -->
-<iframe src="https://code.zmaw.de/projects/miklip-d-integration/wiki"  id="iframe" width="100%" height='100px'>
+<iframe  class="col-md-12" style="height:1000px;border:none;padding:0" src="https://code.zmaw.de/projects/miklip-d-integration/wiki"  id="iframe">
 Your browser does not support embedded frames.
 
 Click <a href="https://code.zmaw.de/projects/miklip-d-integration/wiki">here</a> to open the wiki. 
 </iframe>
+</div>
+</div>
+</div>
 
 <script>
 // resize iframe to display area
@@ -19,8 +25,8 @@ Click <a href="https://code.zmaw.de/projects/miklip-d-integration/wiki">here</a>
      var h = $("#maincontent").height();
      $("#iframe").height(h);
    }
-   window.updateIframe();
-   window.resizeTo(window.updateIframe);
+//   window.updateIframe();
+//   window.resizeTo(window.updateIframe);
  });
  </script>
 

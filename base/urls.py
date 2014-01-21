@@ -7,4 +7,5 @@ urlpatterns = patterns('base.views',
     url(r'^$', 'home', name='home'),
     url(r'^logout', 'logout', name='logout'),
     url(r'^wiki', 'wiki', name='wiki'),
+    url(r'^contact', 'contact', name='contact'),
 )

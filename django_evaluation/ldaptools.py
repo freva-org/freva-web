@@ -36,6 +36,7 @@ class LdapUserInformation(object):
         while SERVER:
             try:
                 con = ldap.initialize(SERVER)
+                con.start_tls_s()
                 connected_to = SERVER
                 SERVER = None
             except:
@@ -175,32 +176,41 @@ class MiklipUserInformation(LdapUserInformation):
         con = self.connection
         res = con.search_s(settings.LDAP_GROUP_BASE,
                           ldap.SCOPE_SUBTREE,
-                          attrlist=['memberUid'],
+                          attrlist=['member'],
                           filterstr=settings.LDAP_MIKLIP_GROUP_FILTER)
         self.miklip_user = []
         user_info = []
-        user_list = res[0][1]['memberUid']
+        # test print of the first search
+        #return res
+        #print res
+        #print res[0]
+
+        user_list = res[0][1]['member']
              
         # fill the users list
         for user in user_list:
             # look up the user entries in the LDAP System
+            # print to see the structure of the user
+            #print(user)
+            user=user.split(",")[0]
             res = con.search_s(settings.LDAP_USER_BASE,
                               ldap.SCOPE_SUBTREE,
                               attrlist=self.ldap_keys,
-                              filterstr='uid=%s' % user)
+                              filterstr='%s' % user)
             
             if len(res) > 0:
                 
                 mail = res[0][1].get('mail', None)
                 forward = res[0][1].get('mailForwardingAddress', None)
-            
+                user_id = user.split("=")[-1]
+                # user info needs elements user_id, first_name, last_name, email
                 if forward:
-                    user_info.append((user,
+                    user_info.append((user_id,
                                       ' '.join(res[0][1].get('sn','')),
                                       ' '.join(res[0][1].get('givenName', '')),
                                       forward[-1],))
                 elif mail:
-                    user_info.append((user,
+                    user_info.append((user_id,
                                       ' '.join(res[0][1].get('sn','')),
                                       ' '.join(res[0][1].get('givenName', '')),
                                       mail[-1],))

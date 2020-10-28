@@ -5,7 +5,7 @@
 Django>=1.8,<1.9
 
 # Templates
-Markdown
+Markdown<=2.7
 django_compressor
 
 # Security

@@ -64,10 +64,9 @@ for item in list(sys.path):
         new_sys_path.append(item)
         sys.path.remove(item)
 sys.path[:0] = new_sys_path
-
 # Add the app code to the path
 sys.path.append(PROJECT_ROOT)
-
+sys.path.insert(0, '/usr/lib64/python2.7/site-packages')
 #os.environ['CELERY_LOADER'] = 'django'
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "django_evaluation.settings")
 

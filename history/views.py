@@ -407,14 +407,11 @@ def results(request, id, show_output_only=False):
         
         for r in result_object:
             caption = ResultTag.objects.filter(result_id_id=r.id).order_by('-id')
-
             result_info = {}
-
             result_info['preview_file'] = r.preview_file
 
             if caption:
                 result_info['caption'] = caption[0].text
-
             fd.add_file(r.output_file, result_info)
     
         file_tree = fd.compressed_copy()
@@ -467,7 +464,6 @@ def results(request, id, show_output_only=False):
 
     except Exception, e:
         logging.error(e)
-
     return render(request, 'history/results.html', {'history_object': history_object,
                                                     'result_object': result_object,
                                                     'result_caption': result_caption,

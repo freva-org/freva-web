@@ -53,11 +53,11 @@ def home(request):
 
             login_failed = True
             logging.debug(str(e))
-
+    
     return render(request, 'base/home.html',
                   {'login_failed': login_failed,
                    'guest_login': guest_login,
-                   'next': next_page})
+                    'next': next_page})
 
 
 def dynamic_css(request):

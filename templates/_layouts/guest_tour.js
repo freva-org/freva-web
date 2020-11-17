@@ -33,20 +33,20 @@ var tour2 = new Tour({
     backdrop: false,
   },
   {
-    path: "/plugins/murcss/detail/",
+    path: "/plugins/movieplotter/detail/",
     //orphan: true,
     element: "#navigation",
-    title: "MurCSS",
+    title: "Movieplotter",
     content:
     "One tool for the evaluation of decadal climate predictions is the MurCSS plugin. It offers the user verification methods following the decadal evaluation framework suggested by Goddard et al. (2013). Here you can choose if you would like to start an analysis, browse your history with all the tool runs, or look up the documentation. Let&#039;s start an analysis...",
     placement: "top",
     backdrop: false,
   },
   {
-    path: "/plugins/murcss/setup/",
+    path: "/plugins/movieplotter/setup/",
     orphan: true,
     //element: "#navigation",
-    title: "MurCSS setup",
+    title: "Movieplotter setup",
     content: 
     "To start an analysis with MurCSS, you have to set several options. Some options are very specific for a single tool like the lead times for decadel analysis. For generic options, like output directories which are included in almost any tool, the webpage offers standardized selection methods. Here, we would like to point out the selection of the input files. Instead of giving the path to some input directories or collecting all datasets, you only have to specify the CMOR options of the experiments you want to evaluate. The built-in search framework supports you to find the data you need by giving possible suggestions, e.g. variables to be choosen. The setup checks possibilities even for the observational or reanalysis data sets to be compared to.<br><br>All tools run on a high performance computer enabling a fast evaluation. Let&#039;s have look at the results.",
     placement: "top",

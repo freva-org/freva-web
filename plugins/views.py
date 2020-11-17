@@ -273,7 +273,6 @@ def setup(request, plugin_name, row_id=None):
             config_dict = plugin.setupConfiguration(check_cfg=False, substitute=True)
                   
         form = PluginForm(initial=config_dict, tool=plugin, uid=user.getName())
-
     return render(request, 'plugins/setup.html', {'tool': plugin_web,
                                                   'form': form,
                                                   'user_home': home_dir,

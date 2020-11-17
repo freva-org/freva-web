@@ -29,7 +29,7 @@ django-auth-ldap==1.2.6
 # ssh client (installed version: 1.12.0, needs pycrypto 2.6 maybe)
 paramiko==1.16.0
 
-django-ipware
+django-ipware<=2.7
 
 #installed version 0.8.3
 django-datatable-view==0.8.3

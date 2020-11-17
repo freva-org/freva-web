@@ -5,6 +5,7 @@ repo. If you need to override a setting locally, use local.py
 
 import os
 import logging
+from pathlib2 import Path
 
 # Normally you should not import ANYTHING from Django directly
 # into your settings, but ImproperlyConfigured is an exception.
@@ -121,7 +122,6 @@ STATICFILES_DIRS = (
     os.path.join(PROJECT_ROOT, 'assets')
 )
 
-print os.path.join(PROJECT_ROOT, 'assets')
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
@@ -251,7 +251,7 @@ SECRET_KEY = 'hj1bkzobng0ck@0&%t509*1ki$#)i5y+i0)&=7zv@amu8pm5*t'
 # Recipients of traceback emails and other notifications.
 ADMINS = (
     ('Martin Bergemann', 'bergemann@dkrz.de'),
-    ('Christopher Kadow','kadow@dkrz.de'),
+    #('Christopher Kadow','kadow@dkrz.de'),
 )
 MANAGERS = ADMINS
 
@@ -262,8 +262,8 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     },
 }
-DEBUG = TEMPLATE_DEBUG = False
-DEV = False
+DEBUG = TEMPLATE_DEBUG = True
+DEV = True
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # Hardcoded values can leak through source control. Consider loading

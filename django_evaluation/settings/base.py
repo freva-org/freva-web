@@ -359,7 +359,7 @@ MENU_ENTRIES = [
     {'name':'Plugins','url': reverse_lazy('plugins:home'), 'html_id': 'plugin_menu'},
     {'name':'History','url': reverse_lazy('history:history'), 'html_id': 'history_menu'},
     {'name':'Data-Browser', 'url': reverse_lazy('solr:data_browser'), 'html_id': 'browser_menu'},
-    {'name':'Shell','url': reverse_lazy('base:shell_in_a_box'), 'html_id': 'shell_menu'},
+    #{'name':'Shell','url': reverse_lazy('base:shell_in_a_box'), 'html_id': 'shell_menu'},
     {'name':'Help','url': reverse_lazy('plugins:about'), 'html_id': 'doc_menu'},
     {'name':'Contact','url': reverse_lazy('base:contact'), 'html_id': 'contact_menu'}
 ]

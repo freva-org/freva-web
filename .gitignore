@@ -6,3 +6,7 @@ node_modules
 venv/*
 .*
 static/preview/*
+tail/*
+static/*
+package-lock.json
+django_evaluation/settings/local.py

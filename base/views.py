@@ -74,7 +74,7 @@ def wiki(request):
     """
     View rendering the iFrame for the wiki page.
     """
-    return render(request, 'base/wiki.html', {'page': 'https://code.zmaw.de/projects/miklip-d-integration/wiki'})
+    return render(request, 'base/wiki.html', {'page': 'https://redmine.dkrz.de/projects/nukleus/wiki'})
 
 
 @login_required()

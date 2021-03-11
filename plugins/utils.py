@@ -62,7 +62,7 @@ def ssh_call(username, password, command, hostnames=['127.0.0.1']):
     _hostnames = hostnames[:]
     hostname = _hostnames.pop()
     sentto = hostname
-    
+    env_dict={'LC_TELEPHONE': password}
     while hostname:
         try:
             # create the ssh client
@@ -87,7 +87,7 @@ def ssh_call(username, password, command, hostnames=['127.0.0.1']):
             else:
                 raise
             
-    (stdin, stdout, stderr) = ssh.exec_command(command=command)
+    (stdin, stdout, stderr) = ssh.exec_command(command=command, environment=env_dict)
 
     logging.debug("sent command '%s' to '%s'" % (command, sentto))
 

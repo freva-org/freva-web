@@ -16,6 +16,7 @@ def ncdump(request):
     fn = request.data.get('file')
     user_pw = request.data.get('pass')
     command = '%s -h %s' % (settings.NCDUMP_BINARY, fn,)
+    #command = '%s %s' % (settings.NCDUMP_BINARY, fn,)
     if not request.user.has_perm('history.browse_full_data'):
         ncdump_out = 'Guest users are not allowed to use this command.<br/>Normally you would see the output of <strong>ncdump</strong> here.'
         return Response(
@@ -28,7 +29,7 @@ def ncdump(request):
                           command, get_scheduler_hosts(request.user))
         ncdump_out = result[1].readlines()
         ncdump_err = result[2].readlines()
-        ncdump_out = ''.join(ncdump_out)
+        ncdump_out = u''.join(ncdump_out).encode('utf-8')
         return Response(dict(ncdump=mark_safe(ncdump_out), error_msg=''.join(ncdump_err)),status=200)
     except AuthenticationException:
         return Response('AuthenticationException', status=500)

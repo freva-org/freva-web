@@ -91,6 +91,12 @@ def preview_tree(value, autoescape=None):
                     output.append('<ul class="jqueryFileTree" style="'+visible+'"><li class="file ext_' + file_ext\
                                   + '"><a class="pdf_download" target="_blank" href="'+settings.PREVIEW_URL+fn+'">'\
                                   + key + '</a></li></ul>')
+                elif file_ext in ['mp4', 'ogg', 'avi']:
+                    output.append(render_to_string('history/templatetags/preview-vid.html',
+                                                   {'imgname': caption, 'preview': value['preview_file'],
+                                                    'PREVIEW_URL': settings.PREVIEW_URL, 'visible': visible,
+                                                    'file_ext':file_ext,
+                                                    }))
                 else:
                     output.append(render_to_string('history/templatetags/preview-img.html',
                                                    {'imgname': caption, 'preview': value['preview_file'],

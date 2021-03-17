@@ -97,6 +97,11 @@ def preview_tree(value, autoescape=None):
                                                     'PREVIEW_URL': settings.PREVIEW_URL, 'visible': visible,
                                                     'file_ext':file_ext,
                                                     }))
+                elif file_ext in ['html', 'xhtml']:
+                    output.append(render_to_string('history/templatetags/preview-html.html',
+                                                   {'imgname': caption, 'preview': value['preview_file'],
+                                                    'PREVIEW_URL': settings.PREVIEW_URL, 'visible': visible,
+                                                    }))
                 else:
                     output.append(render_to_string('history/templatetags/preview-img.html',
                                                    {'imgname': caption, 'preview': value['preview_file'],

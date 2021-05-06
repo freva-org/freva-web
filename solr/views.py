@@ -33,7 +33,6 @@ def databrowser(request):
     """
     return render(request, 'plugins/list.html', {'title': 'Databrowser'})
 
-
 @sensitive_post_parameters('pass')
 @login_required()
 def ncdump(request):

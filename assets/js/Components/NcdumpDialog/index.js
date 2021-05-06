@@ -31,7 +31,7 @@ class NcdumpDialog extends React.Component {
                    onShow={() => {if (this.state.pw !== '') this.submitNcdump()}}
                    onHide={() => onClose()}>
                 <Modal.Header closeButton>
-                    <Modal.Title>{status === 'ready' ? `ncdump -h ${file}` : 'Enter your password'}</Modal.Title>
+                    <Modal.Title>{status === 'ready' ? `Metadata for ${file}` : 'Enter your password'}</Modal.Title>
                 </Modal.Header>
 
                 <Modal.Body>
@@ -51,7 +51,7 @@ class NcdumpDialog extends React.Component {
 
                     {output ?
                         <div>
-                            {output.error_msg ? <div>{output.error_msg}</div> : <div>{ReactHtmlParser(output.ncdump)}</div>}
+                            {output.error_msg ? <div>{output.error_msg}</div> : <pre>{ReactHtmlParser(output.ncdump)}</pre>}
                         </div>  :  null}
 
                 </Modal.Body>

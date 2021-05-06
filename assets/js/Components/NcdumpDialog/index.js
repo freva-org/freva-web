@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactHtmlParser, { processNodes, convertNodeToElement, htmlparser2 } from 'react-html-parser';
 import ReactDOM from 'react-dom';
 import {Modal, Button, FormControl, Alert} from 'react-bootstrap';
 import CircularProgress from 'material-ui/CircularProgress';
@@ -50,7 +51,7 @@ class NcdumpDialog extends React.Component {
 
                     {output ?
                         <div>
-                            {output.error_msg ? <pre>{output.error_msg}</pre> : <pre>{output.ncdump}</pre>}
+                            {output.error_msg ? <div>{output.error_msg}</div> : <div>{ReactHtmlParser(output.ncdump)}</div>}
                         </div>  :  null}
 
                 </Modal.Body>

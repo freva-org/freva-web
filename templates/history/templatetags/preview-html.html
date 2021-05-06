@@ -1,8 +1,8 @@
 {% load static %}
 
 
-<div class="col-md-4" style="{{visible}} padding:10px;">
-    <a rel="gallery1" class="thumbnail fancybox" href="{{PREVIEW_URL}}{{preview}}" title="{{imgname}}" style="word-wrap:break-word;">
-        <object class="lazy" width=600 data={{PREVIEW_URL}}{{preview}}>Your browser doesn’t support the object tag.</object>
-    </a>
+<!--<div class="col-md-4" style="{{visible}} padding:10px;">-->
+<div>
+    <object class="lazy" width=900 data={{PREVIEW_URL}}{{preview}} height=600>Your browser doesn’t support the object tag.</object>
+    <a href="{{PREVIEW_URL}}{{preview}}" title="{{imgname}}" style="word-wrap:break-word; color:blue;" class="pdf_download" target="_blank">Click to expand {{imgname}}</a>
 </div>

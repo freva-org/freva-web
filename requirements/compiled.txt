@@ -1,4 +1,0 @@
-MySQL-python
-
-# for bcrypt passwords
-py-bcrypt

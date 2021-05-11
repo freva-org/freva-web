@@ -7,6 +7,7 @@ venv/*
 .*
 static/preview/*
 tail/*
+python=*/
 static/*
 package-lock.json
 django_evaluation/settings/local.py

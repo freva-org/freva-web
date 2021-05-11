@@ -11,4 +11,3 @@ python=*/
 activate
 static/*
 package-lock.json
-django_evaluation/settings/local.py

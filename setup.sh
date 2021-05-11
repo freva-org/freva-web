@@ -26,11 +26,9 @@ pep8 \
 pylint \
 django \
 markdown \
-django_compressor \
 bleach \
 python-memcached \
 django-debug-toolbar \
-django-bootstrap3 \
 python-ldap \
 paramiko \
 django-ipware \

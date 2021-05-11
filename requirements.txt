@@ -7,6 +7,7 @@ django-datatable-view
 #send templated mails
 django-templated-email
 #git+https://github.com/BradWhittington/django-templated-email.git
-
+django_compressor
+django-bootstrap3
 # Testing
 django-discover-runner

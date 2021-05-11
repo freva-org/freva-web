@@ -36,7 +36,6 @@ def databrowser(request):
 @sensitive_post_parameters('pass')
 @login_required()
 def ncdump(request):
-    print request.POST
     fn = request.POST['file']
     user_pw = request.POST['pass']
     #command = '%s -h %s' % (settings.NCDUMP_BINARY, fn,)

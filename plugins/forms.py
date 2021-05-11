@@ -5,7 +5,7 @@ from django.forms.widgets import Input, TextInput
 from django.template import loader
 import evaluation_system.api.parameters as parameters
 from evaluation_system.api import plugin_manager as pm
-from pathlib2 import Path
+from pathlib import Path
 from plugins.utils import ssh_call, get_scheduler_hosts, find_owner
 from evaluation_system.misc.utils import PrintableList
 from django.conf import settings

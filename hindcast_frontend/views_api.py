@@ -76,7 +76,7 @@ def register_hindcast(request):
     query_dict = dict()
     for i in xrange(-1, -1 - len(path_structure), -1):
         query_dict[path_structure[i]] = facet_list[i-1]
-        print path_structure[i], facet_list[i-1]
+        print(path_structure[i], facet_list[i-1])
 
     fn_list = fn.split('_')
     query_dict['score'] = fn_list[1]

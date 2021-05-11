@@ -27,12 +27,11 @@ from history.utils import FileDict, utf8SaveEncode, sendmail_to_follower
 from django.shortcuts import get_object_or_404
 from django.core.mail import EmailMessage
 from django.db.models import Q
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 
 import logging
 from history.models import HistoryTag
-
-from templatetags.resulttags import mask_uid
+from history.templatetags.resulttags import mask_uid
 
 
 class HistoryTable(XEditableDatatableView):
@@ -98,7 +97,7 @@ class HistoryTable(XEditableDatatableView):
         try:
             url = reverse('history:jobinfo', args=[instance.id])
             href = "href='%s'" % url
-        except Exception, e:
+        except Exception as e:
             return escape(str(e))
 
         tooltip_style = "data-toggle='tooltip' data-placement='left'"
@@ -115,8 +114,8 @@ class HistoryTable(XEditableDatatableView):
                 text = escape(mask_uid(str(value), self.request.user.isGuest()))
                 config += '<tr class="blacktable"><td class="blacktable">%s</td><td class="blacktable">%s<td></tr>' \
                           % (key, text)
-        except Exception, e:
-            print "Tooltip error:", e
+        except Exception as e:
+            print("Tooltip error: ", e)
  
         config += "</table>"
 
@@ -134,7 +133,7 @@ class HistoryTable(XEditableDatatableView):
         try:
             url = reverse('history:results', args=[instance.id])
             href = "href='%s'" % url
-        except Exception, e:
+        except Exception as e:
             return escape(str(e))
         
         second_button_text = 'Edit Config'
@@ -143,7 +142,7 @@ class HistoryTable(XEditableDatatableView):
         try:
             url = reverse('plugins:setup', args=[instance.tool, instance.id])
             second_button_href = "href='%s'" % url
-        except Exception, e:
+        except Exception as e:
             return escape(str(e))
 
         if instance.status in [instance.processStatus.finished_no_output,
@@ -249,7 +248,7 @@ def change_flag(request):
                         message = 'The evaluation %s you are following has been deleted by %s.\n' % (str(id), name)
                     
                         sendmail_to_follower(request, id, subject, message)
-                    except Exception, e:
+                    except Exception as  e:
                         logging.error(e)
             # TODO: Exception too broad!
             except:
@@ -361,7 +360,7 @@ def results(request, id, show_output_only=False):
 
     try:
         analyze_command = pm.getCommandString(int(id))
-    except Exception, e:
+    except Exception as e:
         logging.debug(e)
     analyze_command = pm.getCommandString(int(id))
 
@@ -453,7 +452,7 @@ def results(request, id, show_output_only=False):
             (Q(uid=request.user) & Q(type=HistoryTag.tagType.note_private)) | Q(type=HistoryTag.tagType.note_public)
         ).order_by('id')
 
-    except Exception, e:
+    except Exception as e:
         logging.error(e)
 
     try:
@@ -462,7 +461,7 @@ def results(request, id, show_output_only=False):
         if len(follow) > 0:
             follow_string = 'Unfollow'
 
-    except Exception, e:
+    except Exception as e:
         logging.error(e)
     return render(request, 'history/results.html', {'history_object': history_object,
                                                     'result_object': result_object,
@@ -632,7 +631,7 @@ def send_share_email(request):
             email.send()
     
             status = 'Shared with %s\n' % (name,)
-        except Exception, e:
+        except Exception as e:
             logging.error('EMAIL ERROR: ' + str(e))
             status = 'WARNING: Sharing with %s failed!\n' % name
 
@@ -772,7 +771,7 @@ def count_notes(request, history_id, deleted):
             count += history_tags.filter(type=HistoryTag.tagType.note_public).count()
             count += history_tags.filter(type=HistoryTag.tagType.note_private).filter(uid=request.user).count()
         # TODO: Exception too broad!
-        except Exception, e:
+        except Exception as e:
             pass
 
     if int(deleted):

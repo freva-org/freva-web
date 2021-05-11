@@ -5,12 +5,12 @@ repo. If you need to override a setting locally, use local.py
 
 import os
 import logging
-from pathlib2 import Path
+from pathlib import Path
 
 # Normally you should not import ANYTHING from Django directly
 # into your settings, but ImproperlyConfigured is an exception.
 from django.core.exceptions import ImproperlyConfigured
-from django.core.urlresolvers import reverse_lazy
+from django.urls import reverse_lazy
 import django.utils
 
 def get_env_setting(setting):
@@ -223,7 +223,7 @@ def custom_show_toolbar(request):
 #    'debug_toolbar.panels.redirects.RedirectsPanel', 
 #)
 
-FILE_UPLOAD_PERMISSIONS = 0664
+FILE_UPLOAD_PERMISSIONS = 0e664
 
 # The WSGI Application to use for runserver
 WSGI_APPLICATION = 'django_evaluation.wsgi.application'

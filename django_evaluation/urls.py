@@ -1,7 +1,7 @@
 """ Default urlconf for django_evaluation """
 
 from django.conf import settings
-from django.conf.urls import include, patterns, url
+from django.conf.urls import include, url
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib import admin
 from django.views.generic import RedirectView
@@ -22,19 +22,19 @@ def bad(request):
     """ Simulates a server error """
     1 / 0
 
-urlpatterns = patterns('',
+urlpatterns = [
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
-    url(r'^admin/$', admin.site.admin_view(admin.site.index)),
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/$', admin.site.index),
+    url(r'^admin/', admin.site.urls),
     
-    url(r'^plugins/', include('plugins.urls', namespace='plugins')),
-    url(r'^history/', include('history.urls', namespace='history')),
-    url(r'^solr/', include('solr.urls', namespace='solr')),
-    url(r'^external/', include('externaluser.urls', namespace='external')),
-    url(r'^hindcast-frontend/', include('hindcast_frontend.urls', namespace='hindcast_frontend')),
+    url(r'^plugins/', include(('plugins.urls', 'plugins'), namespace='plugins')),
+    url(r'^history/', include(('history.urls', 'history'), namespace='history')),
+    url(r'^solr/', include(('solr.urls', 'solr'), namespace='solr' )),
+    url(r'^external/', include(('externaluser.urls', 'external'), namespace='external')),
+    url(r'^hindcast-frontend/', include(('hindcast_frontend.urls', 'hindcast_frontend'), namespace='hindcast_frontend')),
 
     url(r'^bad/$', bad),
-    url(r'', include('base.urls', namespace='base')),
+    url(r'^$', include(('base.urls', 'base'), namespace='base')),
     
     url(r'^favicon\.ico$', RedirectView.as_view(url=settings.STATIC_URL + 'img/freva-favicon.png', permanent=True)),
 
@@ -47,25 +47,25 @@ urlpatterns = patterns('',
     url(r'^api/solr/ncdump/$', ncdump, name='api-ncdump'),
     url(r'^api/history/result-browser/$', ResultFacets.as_view(), name='api-history-list'),
     url(r'^api/history/result-browser-files/$', ResultFiles.as_view(), name='api-history-files'),
-    url(r'^api/', include(router.urls, namespace='api')),
+    #url(r'^api/', include(router.urls, namespace='api')),
     url(r'^api/hindcast-frontend/get-hindcast-data', get_hindcast_data, name='api-get-hindcast-data'),
     url(r'^api/hindcast-frontend/register-hindcast', register_hindcast, name='api-register-hindcast'),
     url(r'^api/hindcast-frontend/get-hindcast-facets', get_hindcast_facets, name='api-get-hindcast-facets')
 
-)
+]
 
 if settings.DEBUG:
     import debug_toolbar
-    urlpatterns += patterns('',
+    urlpatterns += ['',
         url(r'^__debug__/', include(debug_toolbar.urls)),
-    )
+    ]
 
 # In DEBUG mode, serve media files through Django.
 if settings.DEBUG:
     urlpatterns += staticfiles_urlpatterns()
     # Remove leading and trailing slashes so the regex matches.
     media_url = settings.MEDIA_URL.lstrip('/').rstrip('/')
-    urlpatterns += patterns('',
+    urlpatterns += ['',
         (r'^%s/(?P<path>.*)$' % media_url, 'django.views.static.serve',
          {'document_root': settings.MEDIA_ROOT}),
-    )
+    ]

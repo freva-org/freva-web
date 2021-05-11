@@ -25,7 +25,6 @@ class PluginsList(APIView):
 class PluginDetail(APIView):
 
     def get(self, request, plugin_name):
-        print self.request.user
         pm.reloadPlugins(request.user.username)
         plugin = get_plugin_or_404(plugin_name, user_name=request.user.username)
         #plugin = PluginWeb(plugin)

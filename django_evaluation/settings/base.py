@@ -147,12 +147,11 @@ TIME_ZONE = 'UTC'
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'compressor.finders.CompressorFinder',
+    #'compressor.finders.CompressorFinder',
 )
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
-    
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -163,19 +162,11 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'django_evaluation.middelwares.GlobalUserMiddleware',
     'django_evaluation.middelwares.ReloadPluginsMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+
 ]
 
-TEMPLATE_CONTEXT_PROCESSORS = [
-    'django.contrib.auth.context_processors.auth',
-    'django.core.context_processors.debug',
-    'django.core.context_processors.media',
-    'django.core.context_processors.request',
-    'django.core.context_processors.i18n',
-    'django.core.context_processors.static',
-    'django.core.context_processors.csrf',
-    'django.core.context_processors.tz',
-    'django.contrib.messages.context_processors.messages',
-]
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or
@@ -189,9 +180,32 @@ TEMPLATE_DIRS = (
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
+    'django.template.backends.django.DjangoTemplates'
 )
 
 
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [os.path.join(PROJECT_ROOT, 'templates')],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.contrib.auth.context_processors.auth',
+                'django.core.context_processors.debug',
+                'django.core.context_processors.media',
+                'django.core.context_processors.request',
+                'django.core.context_processors.i18n',
+                'django.core.context_processors.static',
+                'django.core.context_processors.csrf',
+                'django.core.context_processors.tz',
+                'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.request',
+            ],
+        },
+    },
+]
 #DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
 def custom_show_toolbar(request):

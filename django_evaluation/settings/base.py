@@ -60,7 +60,7 @@ INSTALLED_APPS = (
     'compressor',
     'bootstrap3',
     'datatableview',
-    'webpack_loader',
+#    'webpack_loader',
     'rest_framework',
 #    'debug_toolbar_user_panel',
 
@@ -132,7 +132,7 @@ USE_I18N = True
 USE_L10N = True
 
 # If you set this to False, Django will not use timezone-aware datetimes.
-USE_TZ = True
+USE_TZ = False
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -183,7 +183,8 @@ TEMPLATE_LOADERS = (
     'django.template.backends.django.DjangoTemplates'
 )
 
-
+# Allow default field to be auto added by django
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 TEMPLATES = [
     {

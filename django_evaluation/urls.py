@@ -1,7 +1,7 @@
 """ Default urlconf for django_evaluation """
 
 from django.conf import settings
-from django.conf.urls import include, url
+from django.conf.urls import include, re_path as url, static
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib import admin
 from django.views.generic import RedirectView
@@ -34,7 +34,7 @@ urlpatterns = [
     url(r'^hindcast-frontend/', include(('hindcast_frontend.urls', 'hindcast_frontend'), namespace='hindcast_frontend')),
 
     url(r'^bad/$', bad),
-    url(r'^$', include(('base.urls', 'base'), namespace='base')),
+    url(r'', include(('base.urls', 'base'), namespace='base')),
     
     url(r'^favicon\.ico$', RedirectView.as_view(url=settings.STATIC_URL + 'img/freva-favicon.png', permanent=True)),
 
@@ -56,7 +56,7 @@ urlpatterns = [
 
 if settings.DEBUG:
     import debug_toolbar
-    urlpatterns += ['',
+    urlpatterns += [
         url(r'^__debug__/', include(debug_toolbar.urls)),
     ]
 
@@ -64,8 +64,4 @@ if settings.DEBUG:
 if settings.DEBUG:
     urlpatterns += staticfiles_urlpatterns()
     # Remove leading and trailing slashes so the regex matches.
-    media_url = settings.MEDIA_URL.lstrip('/').rstrip('/')
-    urlpatterns += ['',
-        (r'^%s/(?P<path>.*)$' % media_url, 'django.views.static.serve',
-         {'document_root': settings.MEDIA_ROOT}),
-    ]
+    urlpatterns += static.static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

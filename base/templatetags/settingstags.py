@@ -21,12 +21,12 @@ def setting_to_list(value):
         result += '<li>%s</li>' % val
     return result
 
-@register.assignment_tag
+@register.simple_tag
 def get_menu_entries(entry):
     return getattr(settings, entry, None)
 
 
 
-@register.assignment_tag
+@register.simple_tag
 def external_group():
     return getattr(settings, 'EXTERNAL_GROUP', None)

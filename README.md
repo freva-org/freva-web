@@ -13,7 +13,7 @@ into the `FREVA_PATH` directory. The script will create a new conda environment
 in the `venv` folder. To activate this conda environment use the following command:
 
 ```bash
-$: source activate
+$: source activate_web
 ```
 
 # Django deployment

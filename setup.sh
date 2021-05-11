@@ -61,4 +61,4 @@ rm -fr /tmp/anaconda /tmp/anaconda.sh
 [[ $success -ne 0 ]] && echo "conda create -c conda-forge -q -p $YOURPYTHON python=$PYTHONVERSION $CONDA_PKGS -y failed! EXIT" && exit 1
 source ${YOURPYTHON}/bin/activate
 ${YOURPYTHON}/bin/pip install -r requirements.txt
-echo -e "source ${YOURPYTHON}/bin/activate \nexport PYTHONPATH=${YOURPYTHON}/lib/python${PYTHONVERSION}/site-packages/:${FREVA_PATH}/freva/src" > activate
+echo -e "source ${YOURPYTHON}/bin/activate \nexport PYTHONPATH=${YOURPYTHON}/lib/python${PYTHONVERSION}/site-packages/:${FREVA_PATH}/freva/src" > activate_web

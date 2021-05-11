@@ -8,6 +8,6 @@ venv/*
 static/preview/*
 tail/*
 python=*/
-activate
+activate_web
 static/*
 package-lock.json

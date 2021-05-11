@@ -9,5 +9,6 @@ django-templated-email
 #git+https://github.com/BradWhittington/django-templated-email.git
 django_compressor
 django-bootstrap3
+django-model-utils
 # Testing
 django-discover-runner

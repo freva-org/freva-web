@@ -32,7 +32,6 @@ django-debug-toolbar \
 python-ldap \
 paramiko \
 django-ipware \
-django-model-utils \
 pypdf2 \
 requests \
 pygtail \

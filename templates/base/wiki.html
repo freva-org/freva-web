@@ -1,38 +1,15 @@
-{% extends "_layouts/menu.html" %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      h1 {text-align: center;}
+      p {text-align: center;}
+      div {text-align: center;}
+    </style>
+    <meta http-equiv="refresh" content="7; url='{{page}}'" />
+  </head>
+  <body>
+    <p>Please wait, you will be redirected shortly. If not click the link to the <a href="{{page}}">Wiki</a>.</p>
+  </body>
+</html>
 
-{% block page_title %}Evaluation System{% endblock %}
-{% block page_class %}home-page{% endblock %}
-{% block content %}
-
-
-<div class="container">
-<div class="row">
-<div class="col-md-12">
-<!-- Show the wiki page in an iFrame -->
-<iframe  class="col-md-12" style="height:800px;border:none;padding:0" src="{{page}}"  id="iframe">
-Your browser does not support embedded frames.
-
-Click <a href="https://code.zmaw.de/projects/miklip-d-integration/wiki">here</a> to open the wiki. 
-</iframe>
-</div>
-</div>
-</div>
-
-<script>
-// resize iframe to display area
- $(function() {
-   window.updateIframe = function() {
-     var h = $("#maincontent").height();
-     var h = this.contentWindow.document.body.offsetHeight;
-
-     $("#iframe").height(h);
-   }
-//   window.updateIframe();
-//   window.resizeTo(window.updateIframe);
- });
-
-
-
- </script>
-
-{% endblock %}

@@ -1,6 +1,7 @@
-from django.conf.urls import url, patterns
+from django.urls import re_path as url
+import externaluser.views
 
 
-urlpatterns = patterns('externaluser.views',
-    url(r'^register/$', 'external_register', name='external_register')
-)
+urlpatterns = [
+    url(r'^register/$', externaluser.views.external_register, name='external_register')
+]

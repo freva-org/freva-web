@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from externaluser.forms import ExternalUserForm
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.http.response import HttpResponseRedirect
 from templated_email import send_templated_mail
 from django.conf import settings

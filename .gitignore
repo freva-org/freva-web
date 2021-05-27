@@ -3,4 +3,11 @@
 virt
 db
 node_modules
+venv/*
 .*
+static/preview/*
+tail/*
+python=*/
+activate_web
+static/*
+package-lock.json

@@ -1,7 +1,7 @@
 import os
 
 from evaluation_system.misc import utils
-from models import History, HistoryTag
+from evaluation_system.model.history.models import History, HistoryTag
 from django_evaluation import settings
 
 
@@ -31,7 +31,7 @@ def pygtailwrapper(id, restart=False):
     full_file_name = history_object.slurm_output
         
     # path for the offset file
-    utils.supermakedirs(settings.TAIL_TMP_DIR, 0777)
+    utils.supermakedirs(settings.TAIL_TMP_DIR, 0e777)
     
     file_name = os.path.basename(full_file_name)
     

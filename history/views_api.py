@@ -10,21 +10,21 @@ from history.models import History, Result
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.core.cache import cache
 
 
 class FilterAbstract(object):
     @property
     def filter_field(self):
-        raise NotImplementedError, 'filter_field must be implemented'
+        raise NotImplementedError('filter_field must be implemented')
 
     @property
     def filter_method(self):
-        raise NotImplementedError, 'filter_method must be implemented'
+        raise NotImplementedError('filter_method must be implemented')
 
     def get_filter_field(self, value):
-        print {'%s__%s' % (self.filter_field, self.filter_method,): value}
+        print({'%s__%s' % (self.filter_field, self.filter_method,): value})
         return {'%s__%s' % (self.filter_field, self.filter_method,): value}
 
     def generate_filter(self, queryset, params):
@@ -67,7 +67,6 @@ class ResultFacets(APIView, FilterAbstract):
         structure = OrderedDict()
         start = time.time()
         queryset = queryset.values_list('id', 'tool', 'configuration')
-        print 'DatenbankAbfrageFacets: %s ' % (time.time() - start)
         items_dic = []
 
         start = time.time()
@@ -77,7 +76,7 @@ class ResultFacets(APIView, FilterAbstract):
             newItem.update({'plugin': tool})
             items_dic.append(newItem)
         structure_temp = {}
-        print 'PluginUpdate: %s' % (time.time() - start),
+        print('PluginUpdate: %s' % (time.time() - start))
 
         # create a dictionary - tags: list of attributes
         # counts tags: total number of attributes

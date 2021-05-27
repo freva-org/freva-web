@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.debug import sensitive_variables, sensitive_post_parameters
 from django_evaluation.monitor import _restart
 from django.conf import settings
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from subprocess import Popen, STDOUT, PIPE
 from django_evaluation.utils import settings_login_required
 from django.core.exceptions import PermissionDenied
@@ -45,7 +45,7 @@ def home(request):
                 else:
                     raise Exception('Login failed')
 
-        except Exception, e:
+        except Exception as e:
 
             # do not forget the forward after failed login
             if forward:
@@ -53,11 +53,11 @@ def home(request):
 
             login_failed = True
             logging.debug(str(e))
-
+    
     return render(request, 'base/home.html',
                   {'login_failed': login_failed,
                    'guest_login': guest_login,
-                   'next': next_page})
+                    'next': next_page})
 
 
 def dynamic_css(request):
@@ -74,7 +74,7 @@ def wiki(request):
     """
     View rendering the iFrame for the wiki page.
     """
-    return render(request, 'base/wiki.html', {'page': 'https://code.zmaw.de/projects/miklip-d-integration/wiki'})
+    return render(request, 'base/wiki.html', {'page': 'https://redmine.dkrz.de/projects/nukleus/wiki'})
 
 
 @login_required()
@@ -180,7 +180,7 @@ def ncdump(request):
         try:
             p = Popen(command, stdout=PIPE, stderr=STDOUT)
             (stdout, stderr) = p.communicate()
-        except Exception, e:
+        except Exception as e:
             exception = str(e)
 
     return render(request, 'base/ncdump.html', {'ncd_file': file,

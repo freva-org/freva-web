@@ -1,8 +1,7 @@
 import ldap
 
-import settings
-from exceptions import ValueError
-from django.core.cache import cache, get_cache
+from evaluation_system import settings
+from django.core.cache import cache, caches
 from django.core.exceptions import ImproperlyConfigured
 import importlib
 from abc import ABCMeta, abstractmethod
@@ -61,7 +60,7 @@ class LdapUserInformation(object):
         Returns the user info and loads it whenever necessary
         """
         if not self.user_info:
-            get_cache('default')
+            caches['default']
             self.user_info = cache.get('LDAP_user_info')
 
             if not self.user_info:
@@ -69,7 +68,7 @@ class LdapUserInformation(object):
                 cache.set('LDAP_user_info', self.user_info, 3600)
         if uid:
             if not self.user_info_dict:
-                get_cache('default')
+                caches['default']
                 self.user_info_dict = cache.get('LDAP_user_info_dict')
                 if not self.user_info_dict:
                     self.user_info_dict = {}

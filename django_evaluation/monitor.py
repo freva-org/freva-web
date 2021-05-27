@@ -7,14 +7,14 @@ import sys
 import signal
 import threading
 import atexit
-import Queue
+import queue
 
 _interval = 1.0
 _times = {}
 _files = []
 
 _running = False
-_queue = Queue.Queue()
+_queue = queue.Queue()
 _lock = threading.Lock()
 
 
@@ -107,7 +107,10 @@ def _exiting():
         _queue.put(True)
     except:
         pass
-    _thread.join()
+    try:
+        _thread.join()
+    except RuntimeError:
+        pass
 
 atexit.register(_exiting)
 
@@ -126,7 +129,7 @@ def start(interval=1.0):
     _lock.acquire()
     if not _running:
         prefix = 'monitor (pid=%d):' % os.getpid()
-        print >> sys.stderr, '%s Starting change monitor.' % prefix
+        sys.stderr.write('%s Starting change monitor.\n' % prefix)
         _running = True
         _thread.start()
     _lock.release()

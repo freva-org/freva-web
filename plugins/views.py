@@ -243,7 +243,7 @@ def setup(request, plugin_name, row_id=None):
                 if scheduler_output:
                     row_id = int(scheduler_output.split(' ')[-1])
                 else:
-                    raise Exception, "Unexpected output of analyze:\n[%s]\n[%s]\n%s" % (out, err, command)
+                    raise Exception("Unexpected output of analyze:\n[%s]\n[%s]\n%s" % (out, err, command))
 
             else:
                 # IF WE SEND USING NOHUP WE DON'T GET ANY FEEDBACK ABOUT THE ID
@@ -273,7 +273,6 @@ def setup(request, plugin_name, row_id=None):
             config_dict = plugin.setupConfiguration(check_cfg=False, substitute=True)
                   
         form = PluginForm(initial=config_dict, tool=plugin, uid=user.getName())
-
     return render(request, 'plugins/setup.html', {'tool': plugin_web,
                                                   'form': form,
                                                   'user_home': home_dir,
@@ -304,7 +303,7 @@ def dirlist(request):
                         files.append('<li class="file ext_%s"><a href="#" rel="%s">%s</a></li>' % (e, ff, f))
         r = r+files
         r.append('</ul>')
-    except Exception, e:
+    except Exception as e:
         r.append('Could not load directory: %s' % str(e))
         r.append('</ul>')
     return HttpResponse(''.join(r))  
@@ -341,7 +340,7 @@ def list_dir(request):
                             )
                         )
         folders = folders+files
-    except Exception, e:
+    except Exception as e:
         folders.append('Could not load directory: %s' % str(e))
     return HttpResponse(json.dumps(folders))
 

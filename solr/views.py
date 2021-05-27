@@ -33,14 +33,13 @@ def databrowser(request):
     """
     return render(request, 'plugins/list.html', {'title': 'Databrowser'})
 
-
 @sensitive_post_parameters('pass')
 @login_required()
 def ncdump(request):
-    print request.POST
     fn = request.POST['file']
     user_pw = request.POST['pass']
-    command = '%s -h %s' % (settings.NCDUMP_BINARY, fn,)
+    #command = '%s -h %s' % (settings.NCDUMP_BINARY, fn,)
+    command = '%s %s' % (settings.NCDUMP_BINARY, fn,)
     
     if not request.user.has_perm('history.browse_full_data'):
         ncdump_out = 'Guest users are not allowed to use this command.<br/>Normally you would see the output of <strong>ncdump</strong> here.'
@@ -51,12 +50,12 @@ def ncdump(request):
     try:
         result = ssh_call(request.user.username, user_pw,
                           command, get_scheduler_hosts(request.user))
-        ncdump_out = result[1].readlines()
-        ncdump_err = result[2].readlines()
-        ncdump_out = '<pre>'+''.join(ncdump_out)+'</pre>'
-        return HttpResponse(json.dumps(dict(ncdump=mark_safe(ncdump_out),
-                                            error_msg=''.join(ncdump_err))),
-                            status=200)
+        ncdump_out = mark_safe(result[1].read())
+        ncdump_err = mark_safe(result[2].read())
+        return HttpResponse(json.dumps(dict(ncdump=ncdump_out,
+                                            error_msg=ncdump_err)),
+                            status=200,
+                            content_type='text/html')
     except AuthenticationException:
         return HttpResponse('AuthenticationException', status=500,
                             content_type="application/json")

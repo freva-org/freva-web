@@ -5,11 +5,12 @@ repo. If you need to override a setting locally, use local.py
 
 import os
 import logging
+from pathlib import Path
 
 # Normally you should not import ANYTHING from Django directly
 # into your settings, but ImproperlyConfigured is an exception.
 from django.core.exceptions import ImproperlyConfigured
-from django.core.urlresolvers import reverse_lazy
+from django.urls import reverse_lazy
 import django.utils
 
 def get_env_setting(setting):
@@ -27,7 +28,7 @@ TAIL_TMP_DIR = '/tmp/tail_offset/'
 
 # Your project root
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__) + "../../../")
-
+print(PROJECT_ROOT)
 SUPPORTED_NONLOCALES = ['media', 'admin', 'static']
 
 # Language code for this installation. All choices can be found here:
@@ -59,7 +60,7 @@ INSTALLED_APPS = (
     'compressor',
     'bootstrap3',
     'datatableview',
-    'webpack_loader',
+#    'webpack_loader',
     'rest_framework',
 #    'debug_toolbar_user_panel',
 
@@ -113,15 +114,16 @@ STATIC_URL = '/static/'
 PREVIEW_URL = STATIC_URL + 'preview/'
 
 # Additional locations of static files
-STATICFILES_DIRS = (
+STATICFILES_DIRS = [
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
 #    ('preview', '/home/freva/ral-ces/misc4freva/db4freva/preview/'),
+    #('static', 'home/mahesh/Freva/freva_web/static/'),
+    os.path.join(PROJECT_ROOT, 'static'),
     os.path.join(PROJECT_ROOT, 'assets')
-)
+    ]
 
-print os.path.join(PROJECT_ROOT, 'assets')
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
@@ -132,7 +134,7 @@ USE_I18N = True
 USE_L10N = True
 
 # If you set this to False, Django will not use timezone-aware datetimes.
-USE_TZ = True
+USE_TZ = False
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -150,32 +152,23 @@ STATICFILES_FINDERS = (
     'compressor.finders.CompressorFinder',
 )
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
-    
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-#    'debug_toolbar.middleware.DebugToolbarMiddleware',
+   # 'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'django_evaluation.middelwares.GlobalUserMiddleware',
     'django_evaluation.middelwares.ReloadPluginsMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+
 ]
 
-TEMPLATE_CONTEXT_PROCESSORS = [
-    'django.contrib.auth.context_processors.auth',
-    'django.core.context_processors.debug',
-    'django.core.context_processors.media',
-    'django.core.context_processors.request',
-    'django.core.context_processors.i18n',
-    'django.core.context_processors.static',
-    'django.core.context_processors.csrf',
-    'django.core.context_processors.tz',
-    'django.contrib.messages.context_processors.messages',
-]
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or
@@ -189,9 +182,33 @@ TEMPLATE_DIRS = (
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
+    'django.template.backends.django.DjangoTemplates'
 )
 
+# Allow default field to be auto added by django
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [os.path.join(PROJECT_ROOT, 'templates')],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.media',
+                'django.template.context_processors.request',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.static',
+                'django.template.context_processors.csrf',
+                'django.template.context_processors.tz',
+                'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.request',
+            ],
+        },
+    },
+]
 #DEBUG_TOOLBAR_PATCH_SETTINGS = False
 
 def custom_show_toolbar(request):
@@ -223,7 +240,7 @@ def custom_show_toolbar(request):
 #    'debug_toolbar.panels.redirects.RedirectsPanel', 
 #)
 
-FILE_UPLOAD_PERMISSIONS = 0664
+FILE_UPLOAD_PERMISSIONS = 0o664
 
 # The WSGI Application to use for runserver
 WSGI_APPLICATION = 'django_evaluation.wsgi.application'
@@ -251,7 +268,7 @@ SECRET_KEY = 'hj1bkzobng0ck@0&%t509*1ki$#)i5y+i0)&=7zv@amu8pm5*t'
 # Recipients of traceback emails and other notifications.
 ADMINS = (
     ('Martin Bergemann', 'bergemann@dkrz.de'),
-    ('Christopher Kadow','kadow@dkrz.de'),
+    #('Christopher Kadow','kadow@dkrz.de'),
 )
 MANAGERS = ADMINS
 
@@ -262,8 +279,8 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
     },
 }
-DEBUG = TEMPLATE_DEBUG = False
-DEV = False
+DEBUG = TEMPLATE_DEBUG = True
+DEV = True
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # Hardcoded values can leak through source control. Consider loading
@@ -359,7 +376,7 @@ MENU_ENTRIES = [
     {'name':'Plugins','url': reverse_lazy('plugins:home'), 'html_id': 'plugin_menu'},
     {'name':'History','url': reverse_lazy('history:history'), 'html_id': 'history_menu'},
     {'name':'Data-Browser', 'url': reverse_lazy('solr:data_browser'), 'html_id': 'browser_menu'},
-    {'name':'Shell','url': reverse_lazy('base:shell_in_a_box'), 'html_id': 'shell_menu'},
+    #{'name':'Shell','url': reverse_lazy('base:shell_in_a_box'), 'html_id': 'shell_menu'},
     {'name':'Help','url': reverse_lazy('plugins:about'), 'html_id': 'doc_menu'},
     {'name':'Contact','url': reverse_lazy('base:contact'), 'html_id': 'contact_menu'}
 ]

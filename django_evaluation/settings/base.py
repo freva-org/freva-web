@@ -28,7 +28,7 @@ TAIL_TMP_DIR = '/tmp/tail_offset/'
 
 # Your project root
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__) + "../../../")
-
+print(PROJECT_ROOT)
 SUPPORTED_NONLOCALES = ['media', 'admin', 'static']
 
 # Language code for this installation. All choices can be found here:
@@ -114,13 +114,15 @@ STATIC_URL = '/static/'
 PREVIEW_URL = STATIC_URL + 'preview/'
 
 # Additional locations of static files
-STATICFILES_DIRS = (
+STATICFILES_DIRS = [
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
 #    ('preview', '/home/freva/ral-ces/misc4freva/db4freva/preview/'),
+    #('static', 'home/mahesh/Freva/freva_web/static/'),
+    os.path.join(PROJECT_ROOT, 'static'),
     os.path.join(PROJECT_ROOT, 'assets')
-)
+    ]
 
 
 # If you set this to False, Django will make some optimizations so as not
@@ -147,7 +149,7 @@ TIME_ZONE = 'UTC'
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    #'compressor.finders.CompressorFinder',
+    'compressor.finders.CompressorFinder',
 )
 
 MIDDLEWARE = [
@@ -158,7 +160,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-#    'debug_toolbar.middleware.DebugToolbarMiddleware',
+   # 'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.flatpages.middleware.FlatpageFallbackMiddleware',
     'django_evaluation.middelwares.GlobalUserMiddleware',
     'django_evaluation.middelwares.ReloadPluginsMiddleware',
@@ -194,13 +196,13 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.contrib.auth.context_processors.auth',
-                'django.core.context_processors.debug',
-                'django.core.context_processors.media',
-                'django.core.context_processors.request',
-                'django.core.context_processors.i18n',
-                'django.core.context_processors.static',
-                'django.core.context_processors.csrf',
-                'django.core.context_processors.tz',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.media',
+                'django.template.context_processors.request',
+                'django.template.context_processors.i18n',
+                'django.template.context_processors.static',
+                'django.template.context_processors.csrf',
+                'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.request',
             ],
@@ -238,7 +240,7 @@ def custom_show_toolbar(request):
 #    'debug_toolbar.panels.redirects.RedirectsPanel', 
 #)
 
-FILE_UPLOAD_PERMISSIONS = 0e664
+FILE_UPLOAD_PERMISSIONS = 0o664
 
 # The WSGI Application to use for runserver
 WSGI_APPLICATION = 'django_evaluation.wsgi.application'

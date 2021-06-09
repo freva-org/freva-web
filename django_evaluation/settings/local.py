@@ -7,9 +7,7 @@ import ldap
 import django_auth_ldap.config as ldap_cfg
 from django_auth_ldap.config import LDAPSearch, NestedGroupOfNamesType
 from django.urls import reverse_lazy
-
 PROJECT_ROOT = str(Path(__file__).absolute().parents[2])
-print(PROJECT_ROOT)
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
 INSTITUTION_LOGO = STATIC_URL + 'img/RegiKlim_logo.png'

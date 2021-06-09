@@ -1,8 +1,5 @@
 from evaluation_system.api import plugin_manager as pm
-try:
-    from django.utils.depreciation import MiddlewareMixin
-except ImportError:
-    MiddlewareMixin =object
+from django.utils.depreciation import MiddlewareMixin
 
 
 try:

@@ -28,7 +28,6 @@ TAIL_TMP_DIR = '/tmp/tail_offset/'
 
 # Your project root
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__) + "../../../")
-print(PROJECT_ROOT)
 SUPPORTED_NONLOCALES = ['media', 'admin', 'static']
 
 # Language code for this installation. All choices can be found here:

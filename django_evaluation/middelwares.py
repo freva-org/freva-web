@@ -1,14 +1,14 @@
 from evaluation_system.api import plugin_manager as pm
 from django.utils.depreciation import MiddlewareMixin
-
+from threading import current_thread
 
 try:
-    from threading import local, current_thread
+    from threading import local
 except ImportError:
     from django.utils._threading_local import local
 
 _thread_locals = local()
-class MiddlewareMixin(object):
+class MiddlewareMixin:
     def __init__(self, get_response=None):
         self.get_response = get_response
         super(MiddlewareMixin, self).__init__()
@@ -24,9 +24,8 @@ class MiddlewareMixin(object):
         return response
 
 class ReloadPluginsMiddleware(MiddlewareMixin):
-    
+
     def process_request(self, request):
-        print(request.user.username)
         pm.reloadPlugins(request.user.username)
 
 

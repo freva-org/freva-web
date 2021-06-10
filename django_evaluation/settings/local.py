@@ -7,9 +7,9 @@ import ldap
 import django_auth_ldap.config as ldap_cfg
 from django_auth_ldap.config import LDAPSearch, NestedGroupOfNamesType
 from django.urls import reverse_lazy
-
 PROJECT_ROOT = str(Path(__file__).absolute().parents[2])
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
 INSTITUTION_LOGO = STATIC_URL + 'img/RegiKlim_logo.png'
 FREVA_LOGO = STATIC_URL + 'img/by_freva_transparent.png'
 MAIN_COLOR = 'Tomato'
@@ -107,8 +107,10 @@ STATICFILES_DIRS = (
     # Don't forget to use absolute paths, not relative paths.
     #('preview', '/miklip/integration/evaluation_system/database/preview'),
     #PROJECT_ROOT + 'assets',
-    ('assests', '/opt/freva_web-dev/assets/'),
-    ('preview', '/opt/freva-dev/misc4freva/db4freva/preview'),
+    #os.path.join(PROJECT_ROOT, 'static'),
+    os.path.join(PROJECT_ROOT, 'assets'),
+    #('assests', '/home/mahesh/Freva/freva_web/assets/'),
+    ('preview', '/home/mahesh/Freva/freva_web/misc4freva/db4freva/preview'),
 )
 
 
@@ -124,9 +126,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'freva_dev',
-        'USER': 'test_user',
-        'PASSWORD': 'T3st', #'miklip',
-        'HOST': 'www-regiklim.dkrz.de', #'wwwdev-miklip',
+        'USER': 'root',
+        'PASSWORD': 'rOOT123', #'miklip',
+        'HOST': 'localhost', #'wwwdev-miklip',
         'PORT': '3306',
     },
 }
@@ -148,7 +150,7 @@ DEV = False
 
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = ['localhost', 'www.freva.dkrz.de', 'freva.dkrz.de']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1','www.freva.dkrz.de', 'freva.dkrz.de']
 
 # path to the site packages used:
 VENV_PYTHON_DIR = PROJECT_ROOT + '/venv/bin/python'

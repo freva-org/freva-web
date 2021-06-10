@@ -1,21 +1,35 @@
 from evaluation_system.api import plugin_manager as pm
-
+from django.utils.depreciation import MiddlewareMixin
+from threading import current_thread
 
 try:
-    from threading import local, current_thread
+    from threading import local
 except ImportError:
     from django.utils._threading_local import local
 
 _thread_locals = local()
+class MiddlewareMixin:
+    def __init__(self, get_response=None):
+        self.get_response = get_response
+        super(MiddlewareMixin, self).__init__()
 
+    def __call__(self, request):
+        response = None
+        if hasattr(self, 'process_request'):
+            response = self.process_request(request)
+        if not response:
+            response = self.get_response(request)
+        if hasattr(self, 'process_response'):
+            response = self.process_response(request, response)
+        return response
 
-class ReloadPluginsMiddleware(object):
-    
+class ReloadPluginsMiddleware(MiddlewareMixin):
+
     def process_request(self, request):
         pm.reloadPlugins(request.user.username)
 
 
-class GlobalUserMiddleware(object):
+class GlobalUserMiddleware(MiddlewareMixin):
     """
     Sets the current authenticated user in threading locals
 

@@ -4,6 +4,7 @@ virt
 db
 node_modules
 venv/*
+conda/*
 .*
 static/preview/*
 tail/*

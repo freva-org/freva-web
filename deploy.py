@@ -157,7 +157,8 @@ class Installer:
             setattr(self, arg, getattr(args,arg))
         self.install_prefix = self.this_dir / 'conda'
         self.backend_url = 'git+'+EVAL_URL
-        if not (self.this_dir / config_file).is_file():
+        self.config_file = self.this_dir / 'evaluation_system.conf'
+        if not self.config_file.is_file():
             raise ValueError('No config file. Copy the evaluation_system.conf'
                              ' file into this directory first')
         #self.install_prefix.mkdir(exist_ok=True, parents=True)
@@ -165,12 +166,11 @@ class Installer:
     def create_config(self):
         """Copy evaluation_system.conf to etc."""
 
-        config_file = 'evaluation_system.conf'
         cfg = configparser.ConfigParser(\
                 interpolation=configparser.ExtendedInterpolation())
-        config = cfg.read(self.this_dir / config_file)
+        config = cfg.read(self.config_file)
         cfg['evaluation_system']['root_dir'] = str(self.install_prefix)
-        with (self.install_prefix / 'etc' / config_file).open('w') as f:
+        with (self.install_prefix / 'etc' / self.config_file.name).open('w') as f:
             cfg.write(f)
 
     @property

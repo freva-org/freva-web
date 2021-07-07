@@ -92,7 +92,11 @@ class Installer:
                            'numpy', 'scipy', 'ffmpeg', 'imagemagick',
                            'mysqlclient', 'pymysql', 'ipython', 'xarray',
                            'dask'])
-    pip_pkgs = sorted(['pytest-html', 'python-git', 'python-swiftclient'])
+    pip_pkgs = sorted(['pytest-html', 'python-git', 'python-swiftclient',
+                       'django-auth-ldap', 'Django-datatable-view-compat',
+                       'django-templated-email', 'django_compressor',
+                       'django-bootstrap3', 'django-model-utils',
+                       'django-discover-runner'])
 
     @property
     def conda_name(self):

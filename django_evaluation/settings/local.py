@@ -1,11 +1,14 @@
 from pathlib import Path
 import os
 import logging
+import pymysql
 #import ldap
 #import django_auth_ldap.config as ldap_cfg
 #from django_auth_ldap.config import LDAPSearch, NestedGroupOfNamesType
 import configparser
 from django.urls import reverse_lazy
+pymysql.version_info = (1, 4, 2, "final", 0)
+pymysql.install_as_MySQLdb()
 PROJECT_ROOT = str(Path(__file__).absolute().parents[2])
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
@@ -104,16 +107,14 @@ STATICFILES_DIRS = (
 #    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 #)
-### DB settings through evaluation_system.conf file####
-configParser = ConfigParser.RawConfigParser()   
+configParser = configparser.RawConfigParser()   
 #configFilePath = r PROJECT_ROOT+"\conda\etc\evaluation_system.conf"
-configParser.read(PROJECT_ROOT+"\conda\etc\evaluation_system.conf")
-db_name = configParser.get('evaluation_system', 'db.db')
-db_user = configParser.get('your-config', 'db.user')
-db_password = configParser.get('your-config', 'db.password')
-db_host = configParser.get('your-config', 'db.host')
-db_port = configParser.get('your-config', 'db.port')
-## END DB settings through evaluation_system.conf file #######
+configParser.read(PROJECT_ROOT+"/conda/etc/evaluation_system.conf")
+db_name = configParser.get("evaluation_system", 'db.db')
+db_user = configParser.get("evaluation_system", 'db.user')
+db_password = configParser.get("evaluation_system", 'db.passwd')
+db_host = configParser.get("evaluation_system", 'db.host')
+db_port = configParser.get("evaluation_system", 'db.port')
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -122,6 +123,9 @@ DATABASES = {
         'PASSWORD': db_password, #'miklip',
         'HOST': db_host, #'wwwdev-miklip',
         'PORT': db_port,
+        'OPTIONS': {
+            'charset': 'utf8mb4'
+            }
     },
 }
 # register the LDAP authentication backend 
@@ -141,7 +145,7 @@ DEV = False
 #ALLOWED_HOSTS = ['localhost', '127.0.0.1','www.freva.dkrz.de', 'freva.dkrz.de']
 ALLOWED_HOSTS = ['*']
 # path to the site packages used:
-VENV_PYTHON_DIR = PROJECT_ROOT + '/venv/bin/python'
+VENV_PYTHON_DIR = PROJECT_ROOT + '/conda/bin/python'
 # Path to miklip-logo
 MIKLIP_LOGO = STATIC_URL + 'img/miklip-logo.png'
 NCDUMP_BINARY = '/work/ch1187/regiklim-ces/freva/xarray/bin/ncdump_fancy'

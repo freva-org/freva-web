@@ -58,6 +58,6 @@
     "redux": "*",
     "redux-logger": "*",
     "redux-thunk": "*",
-    "topojson": "*"
+    "topojson-client": "*"
   }
 }

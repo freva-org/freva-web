@@ -10,8 +10,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "webpack-dev-server --progress --inline --hot --config webpack.dev.config.js",
-    "build": "webpack --config webpack.dev.config.js --progress --colors",
-    "build-production": "webpack --config webpack.prod.config.js --progress --colors"
+    "build": "webpack --config webpack.dev.config.js --progress --color",
+    "build-production": "webpack --config webpack.prod.config.js --progress --color"
   },
   "repository": {
     "type": "git",

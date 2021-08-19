@@ -1,7 +1,7 @@
 # LDAP for Django (version 1.2.6)
 djangorestframework
 requests
-parmiko
+paramiko
 django-auth-ldap
 webpack_loader
 django-debug-toolbar

@@ -108,14 +108,7 @@ STATICFILES_DIRS = (
 #    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 #)
-configParser = configparser.RawConfigParser()   
-#configFilePath = r PROJECT_ROOT+"\conda\etc\evaluation_system.conf"
-configParser.read(PROJECT_ROOT+"/conda/etc/evaluation_system.conf")
-db_name = configParser.get("evaluation_system", 'db.db')
-db_user = configParser.get("evaluation_system", 'db.user')
-db_password = configParser.get("evaluation_system", 'db.passwd')
-db_host = configParser.get("evaluation_system", 'db.host')
-db_port = configParser.get("evaluation_system", 'db.port')
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',

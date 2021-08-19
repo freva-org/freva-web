@@ -6,6 +6,10 @@ try:
     from threading import local
 except ImportError:
     from django.utils._threading_local import local
+try:
+    from django.utils.deprecation import MiddlewareMixin
+except ImportError:
+    MiddlewareMixin = object
 
 _thread_locals = local()
 class MiddlewareMixin:

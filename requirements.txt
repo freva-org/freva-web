@@ -1,8 +1,13 @@
 # LDAP for Django (version 1.2.6)
+djangorestframework
+requests
+parmiko
 django-auth-ldap
-
+webpack_loader
+django-debug-toolbar
 #installed version 0.8.3
-django-datatable-view
+django-datatable-view-compat
+#django-datatable-view
 #git+https://github.com/pivotal-energy-solutions/django-datatable-view.git
 #send templated mails
 django-templated-email

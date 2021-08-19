@@ -116,7 +116,7 @@ DATABASES = {
         'USER': config.get(config.DB_USER),
         'PASSWORD': config.get(config.DB_PASSWD), #'miklip',
         'HOST': config.get(config.DB_HOST), #'wwwdev-miklip',
-        'PORT': config.get(str(config.DB_PORT), '3306'),
+        'PORT': config.get(str(config.DB_PORT), '3310'),
         'OPTIONS': {
             'charset': 'utf8mb4'
             }

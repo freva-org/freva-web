@@ -1,5 +1,5 @@
 from evaluation_system.api import plugin_manager as pm
-from django.utils.depreciation import MiddlewareMixin
+#from django.utils.depreciation import MiddlewareMixin
 from threading import current_thread
 
 try:

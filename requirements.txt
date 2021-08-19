@@ -3,7 +3,7 @@ djangorestframework
 requests
 paramiko
 django-auth-ldap
-webpack_loader
+#webpack_loader
 django-debug-toolbar
 #installed version 0.8.3
 django-datatable-view-compat

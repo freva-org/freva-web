@@ -7,83 +7,84 @@ import django_auth_ldap.config as ldap_cfg
 from django_auth_ldap.config import LDAPSearch, NestedGroupOfNamesType
 from evaluation_system.misc import config
 from django.urls import reverse_lazy
-configure = configparser.ConfigParser()
-configure.read('/usr/etc/vm_website.conf')
 config.reloadConfiguration()
+config.loadWebconfiguration("website")
 pymysql.version_info = (1, 4, 2, "final", 0)
 pymysql.install_as_MySQLdb()
 PROJECT_ROOT = str(Path(__file__).absolute().parents[2])
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
 
-INSTITUTION_LOGO = STATIC_URL + f'img/'+configure['website_template_settings']['INSTITUTION_LOGO']
-FREVA_LOGO = STATIC_URL + 'img/'+configure['ldap_settings']['FREVA_LOGO']
-MAIN_COLOR = configure['website_template_settings']['MAIN_COLOR']
-BORDER_COLOR =configure['website_template_settings']['BORDER_COLOR']
-HOVER_COLOR = configure['website_template_settings']['HOVER_COLOR']
+INSTITUTION_LOGO = STATIC_URL + f'img/'+config.getWebconfig(config.INSTITUTION_LOGO)
+FREVA_LOGO = STATIC_URL + 'img/'+config.getWebconfig(config.FREVA_LOGO)
+MAIN_COLOR = config.getWebconfig(config.MAIN_COLOR
+BORDER_COLOR =config.getWebconfig(config.BORDER_COLOR)
+HOVER_COLOR = config.getWebconfig(config.HOVER_COLOR)
 
 ##########
 #Here you can customize the footer and texts on the startpage
 ##########
-ABOUT_US_TEXT =configure['website_template_settings']['ABOUT_US_TEXT']
-CONTACTS = [configure['website_template_settings']['CONTACTS']]
-IMPRINT =  [configure['website_template_settings']['PROJECT'],configure['website_template_settings']['INSTITUTE_NAME'],configure['website_template_settings']['INSTITUTE_ADDRESS'],configure['website_template_settings']['ZIP_STATE'],configure['website_template_settings']['COUNTRY']]
-HOMEPAGE_HEADING = configure['website_template_settings']['HOMEPAGE_HEADING']
-HOMEPAGE_TEXT = configure['website_template_settings']['HOMEPAGE_TEXT']
-INSTITUTION_NAME = configure['website_template_settings']['INSTITUTION_NAME']
+ABOUT_US_TEXT =config.getWebconfig(config.ABOUT_US_TEXT)
+CONTACTS = config.getWebconfig(config.CONTACTS)
+IMPRINT = [config.getWebconfig(config.PROJECT),config.getWebconfig(config.INSTITUTE_NAME),config.getWebconfig(config.INSTITUTE_ADDRESS),config.getWebconfig(config.ZIP_STATE),config.getWebconfig(config.ZIP_STATE,config.getWebconfig(config.COUNTRY)]
+HOMEPAGE_HEADING = config.getWebconfig(config.HOMEPAGE_HEADING)
+HOMEPAGE_TEXT = config.getWebconfig(config.HOMEPAGE_TEXT)
+INSTITUTION_NAME = config.getWebconfig(config.INSTITUTION_NAME)
+# the host to start the scheduler
+SCHEDULER_HOSTS=config.getWebconfig(config.SCHEDULER_HOSTS)  # 'mistral.dkrz.de']
+# temporary directory for tailed scheduler files
+TAIL_TMP_DIR = config.getWebconfig(config.TAIL_TMP_DIR) # '/tmp/tail_offset/'
 ##################################################
 ##################################################
 #SETTING FOR LDAP
 #http://pythonhosted.org//django-auth-ldap/
 ##################################################
 ##################################################
+config.loadWebconfiguration("ldap_settings")
 # The server for LDAP configuration
-AUTH_LDAP_SERVER_URI = configure['ldap_settings']['AUTH_LDAP_SERVER_URI']
-AUTH_LDAP_START_TLS =configure['ldap_settings']['AUTH_LDAP_START_TLS']
+AUTH_LDAP_SERVER_URI = config.getWebconfig(config.AUTH_LDAP_SERVER_URI)
+AUTH_LDAP_START_TLS =config.getWebconfig(config.AUTH_LDAP_START_TLS)
 #AUTH_LDAP_SERVER_URI = "ldap://idm.dkrz.de"
 # The directory with SSL certificates
-CA_CERT_DIR = configure['ldap_settings']['CA_CERT_DIR']
+CA_CERT_DIR = config.getWebconfig(config.CA_CERT_DIR)
 # the only allowd group
-ALLOWED_GROUP =  configure['ldap_settings']['ALLOWED_GROUP']
+ALLOWED_GROUP =  config.getWebconfig(config.ALLOWED_GROUP)
 # Require a ca certificate
 AUTH_LDAP_GLOBAL_OPTIONS = {
-    ldap.OPT_X_TLS_REQUIRE_CERT:  configure['ldap_settings']['TYPE_OF_CERTIFICATION'], #TPYE OF CERTIFICATION
+    ldap.OPT_X_TLS_REQUIRE_CERT:  ldap.OPT_X_TLS_DEMAND, #TPYE OF CERTIFICATION
     ldap.OPT_X_TLS_CACERTDIR: CA_CERT_DIR, #PATH OF CERTIFICATION
 }
 # this is not used by django directly, but we use it for
 # python-ldap access, as well.
-LDAP_USER_BASE = configure['ldap_settings']['LDAP_USER_BASE']
+LDAP_USER_BASE = config.getWebconfig(config.LDAP_USER_BASE)
 # Verify the user by bind to LDAP
 AUTH_LDAP_USER_DN_TEMPLATE = "uid=%%(user)s, %s" % LDAP_USER_BASE
 # keep the authenticated user for group search
-AUTH_LDAP_BIND_AS_AUTHENTICATING_USER=configure['ldap_settings']['AUTH_LDAP_BIND_AS_AUTHENTICATING_USER']
+AUTH_LDAP_BIND_AS_AUTHENTICATING_USER=config.getWebconfig(config.AUTH_LDAP_BIND_AS_AUTHENTICATING_USER)
 # ALLOWED_GROUP_MEMBER user only
-AUTH_LDAP_REQUIRE_GROUP = configure['ldap_settings']['AUTH_LDAP_REQUIRE_GROUP']  % ALLOWED_GROUP
+AUTH_LDAP_REQUIRE_GROUP = config.getWebconfig(config.AUTH_LDAP_REQUIRE_GROUP)  % ALLOWED_GROUP
 AUTH_LDAP_USER_ATTR_MAP = {
-    "email": configure['ldap_settings']['email'],
-    "last_name" : configure['ldap_settings']['last_name'],
-    "first_name" : configure['ldap_settings']['givenname'],
+    "email": config.getWebconfig(config.MAIL),
+    "last_name" : config.getWebconfig(config.LAST_NAME),
+    "first_name" : config.getWebconfig(config.GIVENNAME),
 }
-AUTH_LDAP_GROUP_SEARCH = LDAPSearch($AUTH_LDAP_GROUP_SEARCH,
+AUTH_LDAP_GROUP_SEARCH = LDAPSearch(config.getWebconfig(AUTH_LDAP_GROUP_SEARCH),
                                      ldap.SCOPE_SUBTREE, #USE SUB
                                      '(objectClass=groupOfNames)')
 AUTH_LDAP_GROUP_TYPE = NestedGroupOfNamesType()
-AUTH_LDAP_MIRROR_GROUPS = configure['ldap_settings']['AUTH_LDAP_MIRROR_GROUPS']
+AUTH_LDAP_MIRROR_GROUPS = config.getWebconfig(config.AUTH_LDAP_MIRROR_GROUPS)
 # agent user for LDAP
-LDAP_USER_DN = configure['ldap_settings']['LDAP_USER_DN']
-LDAP_USER_PW = configure['ldap_settings']['LDAP_USER_PW']
-LDAP_GROUP_BASE = configure['ldap_settings']['LDAP_GROUP_BASE']
-LDAP_MIKLIP_GROUP_FILTER = '(cn='+configure['ldap_settings']['LDAP_MIKLIP_GROUP_FILTER']+')'
-LDAP_MODEL = configure['ldap_settings']['LDAP_MODEL']
+LDAP_USER_DN = config.getWebconfig(LDAP_USER_DN)
+LDAP_USER_PW = config.getWebconfig(LDAP_USER_PW)
+LDAP_GROUP_BASE = config.getWebconfig(LDAP_GROUP_BASE)
+LDAP_MIKLIP_GROUP_FILTER = '(cn='+config.getWebconfig(LDAP_MIKLIP_GROUP_FILTER)+')'
+LDAP_MODEL = config.getWebconfig(LDAP_MODEL)
 ##################################################
 ##################################################
 #END SETTING FOR LDAP
 ##################################################
 ##################################################
-# the host to start the scheduler
-SCHEDULER_HOSTS=[configure['ldap_settings']['SCHEDULER_HOSTS']]  # 'mistral.dkrz.de']
-# temporary directory for tailed scheduler files
-TAIL_TMP_DIR = configure['ldap_settings']['TAIL_TMP_DIR']  # '/tmp/tail_offset/'
+
 # Additional locations of static files
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".

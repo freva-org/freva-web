@@ -1,11 +1,15 @@
 from evaluation_system.api import plugin_manager as pm
-from django.utils.depreciation import MiddlewareMixin
+#from django.utils.depreciation import MiddlewareMixin
 from threading import current_thread
 
 try:
     from threading import local
 except ImportError:
     from django.utils._threading_local import local
+try:
+    from django.utils.deprecation import MiddlewareMixin
+except ImportError:
+    MiddlewareMixin = object
 
 _thread_locals = local()
 class MiddlewareMixin:

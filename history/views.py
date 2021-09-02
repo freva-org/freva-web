@@ -7,8 +7,8 @@ from django.contrib.flatpages.models import FlatPage
 from django.utils.html import escape
 from datatableview import helpers
 from datatableview.views import XEditableDatatableView
-#TODO: let's not use this until https://github.com/pivotal-energy-solutions/django-datatable-view/issues/248 is resolved
-#from datatableview.utils import get_datatable_structure
+# django_datatableview_compat module solved this issue (#TODO: let's not use this until https://github.com/pivotal-energy-solutions/django-datatable-view/issues/248 is resolved.)
+from datatableview.utils import get_datatable_structure
 
 from django_evaluation.ldaptools import get_ldap_object
 

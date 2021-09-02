@@ -16,17 +16,17 @@ config.output.publicPath = 'http://localhost:8080/assets/bundles/';
 // Add HotModuleReplacementPlugin and BundleTracker plugins
 config.plugins = config.plugins.concat([
   new webpack.HotModuleReplacementPlugin(),
-  new webpack.NoErrorsPlugin(),
+  new webpack.NoEmitOnErrorsPlugin(),
   new BundleTracker({filename: './webpack-stats.json'})
 ]);
 
 // Add a loader for JSX files with react-hot enabled
-config.module.loaders.push(
+config.module.rules.push(
   { test: /\.js?$/,
     exclude: /node_modules/,
     loader: 'babel-loader',
-    query: {
-      presets: ['es2015', 'react', 'react-hmre', 'stage-0', 'babel-polyfill']
+    options: {
+      presets: ['env', 'react', 'react-hmre', 'stage-0', 'babel-polyfill']
     }
   } // to transform JSX into JS
 );

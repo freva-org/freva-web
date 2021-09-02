@@ -87,14 +87,13 @@ HOVER_COLOR = cfg['HOVER_COLOR']
 ##########
 ABOUT_US_TEXT = cfg['ABOUT_US_TEXT']
 CONTACTS = [cfg['CONTACTS']]
-IMPRINT = [cfg['PROJECT'],cfg['INSTITUTE_NAME'], cfg['INSTITUTE_ADDRESS'],
-           cfg['ZIP_STATE'], cfg['COUNTRY']]
+IMPRINT = [cfg['PROJECT'], cfg['INSTITUTE']] + cfg['INSTITUTE_ADDRESS'].split(',')
 HOMEPAGE_HEADING = cfg['HOMEPAGE_HEADING']
-HOMEPAGE_TEXT = cfg['HOMEPAGE_TEXT"]
+HOMEPAGE_TEXT = cfg['HOMEPAGE_TEXT']
 INSTITUTION_NAME = cfg['INSTITUTE_NAME']
 
 # the host to start the scheduler
-SCHEDULER_HOSTS=[cfg['SCHEDULER_HOSTS']  # 'mistral.dkrz.de']
+SCHEDULER_HOSTS=[ cfg['SCHEDULER_HOSTS'] ] # 'mistral.dkrz.de']
 # temporary directory for tailed scheduler files
 TAIL_TMP_DIR = cfg['TAIL_TMP_DIR']  # '/tmp/tail_offset/'
 

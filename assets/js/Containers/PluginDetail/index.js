@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {connect} from 'react-redux';
 import {loadPlugin, resetPlugin, sendDeveloperMail} from './actions'
-import {Grid, Row, Col, Button, ButtonToolbar, Modal, ButtonGroup, FormControl} from 'react-bootstrap';
+import {Container, Row, Col, Button, ButtonToolbar, Modal, ButtonGroup, FormControl} from 'react-bootstrap';
 import nl2br from 'react-nl2br';
 import Linkify from 'react-linkify'
 import CircularProgress from 'material-ui/CircularProgress';
@@ -38,14 +38,14 @@ class PluginDetail extends React.Component {
         // Wait until plugin loaded
         if (!plugin.name) {
             return (
-                <Grid style={{textAlign: 'center'}}>
+                <Container style={{textAlign: 'center'}}>
                     <CircularProgress />
-                </Grid>
+                </Container>
             )
         }
 
         return (
-            <Grid>
+            <Container>
                 <Row>
                     <Col md={12}>
                         <h2>{plugin.name}</h2>
@@ -92,8 +92,7 @@ class PluginDetail extends React.Component {
                         </Modal.Footer>
 
                     </Modal> : null}
-
-            </Grid>
+            </Container>
         )
     }
 }

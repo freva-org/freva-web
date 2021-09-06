@@ -3,8 +3,8 @@ import ReactDOM from 'react-dom';
 import { Link, browserHistory } from 'react-router'
 import {connect} from 'react-redux';
 import {
-    Row, Col, Button, ListGroup, ListGroupItem, Grid, Modal, ButtonGroup, Input,
-    FormGroup, ControlLabel, FormControl, InputGroup, Badge, Label, Panel
+    Row, Col, Button, ListGroup, ListGroupItem, Container, Modal, ButtonGroup, Input,
+    FormGroup, FormLabel, FormControl, InputGroup, Badge,
 } from 'react-bootstrap'
 import FileTree from '../../Components/FileTree'
 import {fetchDir, closeDir, changeRoot} from '../../Components/FileTree/actions'
@@ -88,14 +88,14 @@ class PluginList extends React.Component {
 
         if (!pluginsLoaded) {
             return (
-                <Grid style={{textAlign: 'center'}}>
+                <Container style={{textAlign: 'center'}}>
                     <CircularProgress />
-                </Grid>
+                </Container>
             )
         }
 
         return (
-            <Grid>
+            <Container>
                 <Row>
                     <Col md={6}><h2>Plugins</h2></Col>
                     <Col md={6} style={{paddingTop: 10}}>
@@ -109,7 +109,6 @@ class PluginList extends React.Component {
                 <Row>
                     <Col md={8}  style={{marginTop: 20}}>
                         {decadalPlugins.length > 0 ?
-                            <Panel header={<h2>Decadal Evaluation</h2>}>
                                 <ListGroup fill>
                                     {decadalPlugins.map(val => {
                                         return (
@@ -124,11 +123,9 @@ class PluginList extends React.Component {
                                             </ListGroupItem>
                                         )
                                     })}
-                                </ListGroup>
-                            </Panel> : null}
+                                </ListGroup> : null}
 
                         {statisticPlugins.length > 0 ?
-                            <Panel header={<h2>Statistical Analysis</h2>}>
                                 <ListGroup fill>
                                     {statisticPlugins.map(val => {
                                         return (
@@ -143,11 +140,9 @@ class PluginList extends React.Component {
                                             </ListGroupItem>
                                         )
                                     })}
-                                </ListGroup>
-                            </Panel> : null}
+                                </ListGroup>: null}
 
                         {postprocPlugins.length > 0 ?
-                            <Panel header={<h2>Post-Processing</h2>}>
                                 <ListGroup fill>
                                     {postprocPlugins.map(val => {
                                         return (
@@ -162,11 +157,9 @@ class PluginList extends React.Component {
                                             </ListGroupItem>
                                         )
                                     })}
-                                </ListGroup>
-                            </Panel> : null}
+                                </ListGroup>: null}
 
                         {supportPlugins.length > 0 ?
-                            <Panel header={<h2>Supporting Plugins</h2>}>
                                 <ListGroup fill>
                                     {supportPlugins.map(val => {
                                         return (
@@ -181,11 +174,9 @@ class PluginList extends React.Component {
                                             </ListGroupItem>
                                         )
                                     })}
-                                </ListGroup>
-                            </Panel> : null}
+                                </ListGroup> : null}
 
                         {otherPlugins.length > 0 ?
-                            <Panel header={<h2>Other</h2>}>
                                 <ListGroup fill>
                                     {otherPlugins.map(val => {
                                         return (
@@ -200,8 +191,7 @@ class PluginList extends React.Component {
                                             </ListGroupItem>
                                         )
                                     })}
-                                </ListGroup>
-                            </Panel> : null}
+                                </ListGroup> : null}
                     </Col>
                     <Col md={4}>
                         <InputGroup style={{marginTop: 20}}>
@@ -214,7 +204,7 @@ class PluginList extends React.Component {
                         </InputGroup>
 
                         <div style={{marginTop:10}}>
-                            <ControlLabel>Categories:</ControlLabel>
+                            <FormLabel>Categories:</FormLabel>
                             <div>
                                 {categories.decadal ?
                                 <Checkbox label={`${categoryTitle['decadal']} (${categories['decadal'].length})`}
@@ -246,17 +236,17 @@ class PluginList extends React.Component {
                         </div>
 
                         <div style={{marginTop:10}}>
-                            <ControlLabel>Tags:</ControlLabel>
+                            <FormLabel>Tags:</FormLabel>
                             <div>
                                 {
                                     tags.map(tag => {
                                         return <Col md={4} style={{paddingLeft:0}} key={tag}>
-                                            <Label bsStyle={_.includes(tagsFilter, tag) ? "success" : 'default'}
+                                            <FormLabel bsStyle={_.includes(tagsFilter, tag) ? "success" : 'default'}
                                                    style={styles.chip}
                                                    onClick={() => dispatch(updateTagFilter(tag))}
                                                    >
                                                 {tag}
-                                            </Label></Col>
+                                            </FormLabel></Col>
                                     })
                                 }
 
@@ -287,7 +277,7 @@ class PluginList extends React.Component {
                         </ButtonGroup>
                         {childs}
                         <FormGroup style={{marginTop: 10}}>
-                            <ControlLabel>File to plugin</ControlLabel>
+                            <FormLabel>File to plugin</FormLabel>
                             <FormControl type="text" ref="input" value={this.state.value}
                                          onChange={() => this.setState({value: ReactDOM.findDOMNode(this.refs.input).value})}/>
                         </FormGroup>
@@ -299,7 +289,7 @@ class PluginList extends React.Component {
 
                 </Modal>
 
-            </Grid>
+            </Container>
         )
     }
 }

@@ -1,8 +1,16 @@
 {
-  "status": "error",
-  "assets": {},
-  "chunks": {},
-  "publicPath": "http://localhost:8080/assets/bundles/",
-  "error": "ModuleBuildError",
-  "message": "Module build failed (from ./node_modules/babel-loader/lib/index.js):\nError: Plugin/Preset files are not allowed to export objects, only functions. In /home/wilfred/workspace/freva_web/node_modules/babel-preset-react/lib/index.js\n    at createDescriptor (/home/wilfred/workspace/freva_web/node_modules/@babel/core/lib/config/config-descriptors.js:211:11)\n    at createDescriptor.next (<anonymous>)\n    at step (/home/wilfred/workspace/freva_web/node_modules/gensync/index.js:261:32)\n    at evaluateAsync (/home/wilfred/workspace/freva_web/node_modules/gensync/index.js:291:5)\n    at /home/wilfred/workspace/freva_web/node_modules/gensync/index.js:44:11\n    at Array.forEach (<anonymous>)\n    at Function.async (/home/wilfred/workspace/freva_web/node_modules/gensync/index.js:43:15)\n    at Function.all (/home/wilfred/workspace/freva_web/node_modules/gensync/index.js:216:13)\n    at Generator.next (<anonymous>)\n    at createDescriptors (/home/wilfred/workspace/freva_web/node_modules/@babel/core/lib/config/config-descriptors.js:142:41)"
+  "status": "done",
+  "assets": {
+    "main-132d1de4e6a0cd318a92.js": {
+      "name": "main-132d1de4e6a0cd318a92.js",
+      "path": "/home/wilfred/workspace/freva_web/assets/bundles/main-132d1de4e6a0cd318a92.js",
+      "publicPath": "http://localhost:8080/assets/bundles/main-132d1de4e6a0cd318a92.js"
+    }
+  },
+  "chunks": {
+    "main": [
+      "main-132d1de4e6a0cd318a92.js"
+    ]
+  },
+  "publicPath": "http://localhost:8080/assets/bundles/"
 }

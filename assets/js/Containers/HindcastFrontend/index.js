@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import {connect} from 'react-redux';
 import {bindActionCreators} from 'redux'
 import {
-    Grid,
+    Container,
     Row,
     Col,
     Button,
@@ -52,7 +52,7 @@ class HindcastFrontend extends React.Component {
         if (reference.selected && metric.selected)
             refText = reference.selected.value === 'vs_clim' && metric.selected.value === 'correlation' ? '' : ` with ${reference.selected.label} as reference`;
         return (
-            <Grid>
+            <Container>
 
                 <Row>
                     <Col md={3} xs={12}>
@@ -150,7 +150,7 @@ class HindcastFrontend extends React.Component {
                            Black circles denote significance at the 95% level.</p> : null}
                     </Col>
                 </Row>
-            </Grid>
+            </Container>
         )
     }
 }

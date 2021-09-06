@@ -9,21 +9,21 @@ import {syncHistoryWithStore, routerReducer} from 'react-router-redux'
 // Import containers
 import App from './Containers/App'
 import PluginList from './Containers/PluginList';
-import PluginDetail from './Containers/PluginDetail';
-import Databrowser from './Containers/Databrowser';
-import Resultbrowser from './Containers/Resultbrowser';
-import HindcastFrontend from './Containers/HindcastFrontend';
+//import PluginDetail from './Containers/PluginDetail';
+//import Databrowser from './Containers/Databrowser';
+//import Resultbrowser from './Containers/Resultbrowser';
+//import HindcastFrontend from './Containers/HindcastFrontend';
 
-const initialState = window.INITIAL_STATE || {};
+//const initialState = window.INITIAL_STATE || {};
 
-const store = configureStore(initialState);
+//const store = configureStore(initialState);
 
 // Create an enhanced history that syncs navigation events with the store
-const history = syncHistoryWithStore(browserHistory, store)
+//const history = syncHistoryWithStore(browserHistory, store)
 
 
 ReactDOM.render(
-    <Provider store={store}>
+   <Provider store={store}>
         { /* Tell the Router to use our enhanced history */ }
         <Router history={history} onUpdate={() => window.scrollTo(0, 0)}>
             <Route path="/" component={App}>

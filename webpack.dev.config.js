@@ -3,10 +3,11 @@ var webpack = require('webpack');
 var BundleTracker = require('webpack-bundle-tracker');
 
 var config = require('./webpack.base.config.js');
-
+config.mode = 'development'
 config.entry = [
   'webpack-dev-server/client?http://localhost:8080',
   'webpack/hot/only-dev-server',
+  '@babel/polyfill',
   './assets/js/index'
 ];
 
@@ -26,7 +27,8 @@ config.module.rules.push(
     exclude: /node_modules/,
     loader: 'babel-loader',
     options: {
-      presets: ['env', 'react', 'react-hmre', 'stage-0', 'babel-polyfill']
+      //presets: ['env', 'react', 'react-hmre', 'stage-0', 'babel-polyfill']
+      presets: ["@babel/preset-env", "@babel/preset-react"]
     }
   } // to transform JSX into JS
 );

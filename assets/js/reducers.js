@@ -7,7 +7,7 @@ import {fileTreeReducer} from './Components/FileTree/reducers'
 import {pluginDetailReducer} from './Containers/PluginDetail/reducers'
 import {databrowserReducer} from './Containers/Databrowser/reducers'
 import {resultbrowserReducer} from './Containers/Resultbrowser/reducers'
-import {hindcastFrontendReducer} from './Containers/HindcastFrontend/reducers'
+//import {hindcastFrontendReducer} from './Containers/HindcastFrontend/reducers'
 
 const rootReducer = combineReducers({
     appReducer,

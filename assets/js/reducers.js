@@ -16,7 +16,7 @@ const rootReducer = combineReducers({
     pluginDetailReducer,
     databrowserReducer,
     resultbrowserReducer,
-    hindcastFrontendReducer,
+//    hindcastFrontendReducer,
     routing: routerReducer
 });
 

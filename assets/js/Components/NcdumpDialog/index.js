@@ -1,8 +1,10 @@
 import React from 'react';
+//import { processNodes, convertNodeToElement, htmlparser2 } from 'react-html-parser';
 import ReactHtmlParser, { processNodes, convertNodeToElement, htmlparser2 } from 'react-html-parser';
+//import ReactHtmlParser from 'react-html-parser';
 import ReactDOM from 'react-dom';
-import {Modal, Button, FormControl, Alert} from 'react-bootstrap';
-import CircularProgress from 'material-ui/CircularProgress';
+//import {Modal, Button, FormControl, Alert} from 'react-bootstrap';
+//import CircularProgress from 'material-ui/CircularProgress';
 
 
 class NcdumpDialog extends React.Component {

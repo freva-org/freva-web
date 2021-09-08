@@ -1,18 +1,18 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Link, browserHistory } from 'react-router'
+import { Link, browserHistory } from 'react-router';
 import {connect} from 'react-redux';
 import {
     Row, Col, Button, ListGroup, ListGroupItem, Container, Modal, ButtonGroup, Input,
     FormGroup, FormLabel, FormControl, InputGroup, Badge,
-} from 'react-bootstrap'
-import FileTree from '../../Components/FileTree'
-import {fetchDir, closeDir, changeRoot} from '../../Components/FileTree/actions'
-import {exportPlugin, loadPlugins, updateCategoryFilter, updateTagFilter, updateSearchFilter} from './actions'
+} from 'react-bootstrap';
+import FileTree from '../../Components/FileTree';
+import {fetchDir, closeDir, changeRoot} from '../../Components/FileTree/actions';
+import {exportPlugin, loadPlugins, updateCategoryFilter, updateTagFilter, updateSearchFilter} from './actions';
 import _ from 'lodash';
-import ActionSearch from 'material-ui/svg-icons/action/search';
-import Checkbox from 'material-ui/Checkbox';
-import CircularProgress from 'material-ui/CircularProgress';
+import SearchIcon from '@material-ui/icons/Search';
+import Checkbox from '@material-ui/core/Checkbox';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 const styles = {
     chip: {
@@ -199,7 +199,7 @@ class PluginList extends React.Component {
                                          onChange={() => dispatch(updateSearchFilter(ReactDOM.findDOMNode(this.refs.searchInput).value))}
                                          placeholder="Search for plugins"/>
                             <InputGroup.Addon style={{padding: 0, paddingLeft: 8, paddingRight: 8}}>
-                                <ActionSearch />
+                                <SearchIcon />
                             </InputGroup.Addon>
                         </InputGroup>
 

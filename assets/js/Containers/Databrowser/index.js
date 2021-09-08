@@ -1,15 +1,15 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import {Grid, Row, Col, Accordion, Panel, FormControl, Tooltip, OverlayTrigger, Modal, Button} from 'react-bootstrap';
+import {Container, Row, Col, Accordion, Card, FormControl, Tooltip, OverlayTrigger, Modal, Button} from 'react-bootstrap';
 import {loadFacets, selectFacet, clearFacet, clearAllFacets, setActiveFacet, setMetadata, loadFiles,
         loadNcdump, resetNcdump} from './actions';
 import _ from 'lodash'
 import $ from 'jquery';
 import NcdumpDialog from '../../Components/NcdumpDialog'
-import AccordionItemBody from '../../Components/AccordionItemBody';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import CircularProgress from 'material-ui/CircularProgress';
-import OwnPanel from '../../Components/OwnPanel'
+//import AccordionItemBody from '../../Components/AccordionItemBody';
+//import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
+//import CircularProgress from 'material-ui/CircularProgress';
+//import OwnPanel from '../../Components/OwnPanel'
 
 class Databrowser extends React.Component {
 
@@ -63,7 +63,7 @@ class Databrowser extends React.Component {
         const {activeFacet, files, numFiles,} = this.props.databrowser;
         const {dispatch} = this.props;
         return (
-            <Panel header={<a href="#" onClick={() => dispatch(setActiveFacet('files'))}>Files [{numFiles}]</a>} collapsible expanded={activeFacet === 'files'}>
+            <Card header={<a href="#" onClick={() => dispatch(setActiveFacet('files'))}>Files [{numFiles}]</a>} collapsible expanded={activeFacet === 'files'}>
                 <div style={{maxHeight:500,overflow:'auto'}}>
                     <ul className="jqueryFileTree">
                       {_.map(files, (fn) => {
@@ -81,7 +81,7 @@ class Databrowser extends React.Component {
                       })}
                     </ul>
               </div>
-            </Panel>
+            </Card>
         )
     }
 
@@ -93,9 +93,9 @@ class Databrowser extends React.Component {
         if (facets.length === 0){
             return (
                 <MuiThemeProvider>
-                    <Grid style={{textAlign: 'center'}}>
+                    <Container style={{textAlign: 'center'}}>
                         <CircularProgress />
-                    </Grid>
+                    </Container>
                 </MuiThemeProvider>
             )
         }
@@ -103,7 +103,7 @@ class Databrowser extends React.Component {
         const facetPanels = this.renderFacetPanels();
 
         return (
-            <Grid>
+            <Container>
                 <Row>
                     <Col md={12}>
                         <h2>Data-Browser</h2>
@@ -112,9 +112,9 @@ class Databrowser extends React.Component {
                 <Row>
                     {Object.keys(selectedFacets).length !== 0 ?
                     <Col md={12}>
-                        <Panel>
+                        <Card>
                             <a href="#" onClick={(e) => {e.preventDefault(); dispatch(clearAllFacets())}}>Clear all</a>
-                        </Panel>
+                        </Card>
                     </Col> : null}
                 </Row>
                 <Row>
@@ -123,12 +123,12 @@ class Databrowser extends React.Component {
                             {facetPanels}
                         </Accordion>
                         
-                        <Panel style={{marginTop: 5}}>
+                        <Card style={{marginTop: 5}}>
                             freva --databrowser
                             {_.map(selectedFacets, (value, key) => {
                                 return <span key={`command-${key}`}> {key}=<strong>{value}</strong></span>
                             })}
-                        </Panel>
+                        </Card>
 
                         {this.renderFilesPanel()}
 
@@ -140,7 +140,7 @@ class Databrowser extends React.Component {
                                       output={ncdumpOutput} />
                     </Col>
                 </Row>
-            </Grid>
+            </Container>
         )
     }
 

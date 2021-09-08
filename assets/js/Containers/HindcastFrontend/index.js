@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {connect} from 'react-redux';
-import {bindActionCreators} from 'redux'
+import {bindActionCreators} from 'redux';
 import {
     Container,
     Row,
@@ -15,10 +15,10 @@ import {
     FormControl,
 } from 'react-bootstrap';
 import Select from 'react-select';
-import {changeParamAsync, getHindcastData, loadOptions} from './actions'
-import AbstractMap from '../../Components/AbstactMap'
+import {changeParamAsync, getHindcastData, loadOptions} from './actions';
+import AbstractMap from '../../Components/AbstactMap';
 import Timeseries from '../../Components/Timeseries';
-import LabeledSlider from '../../Components/LabeledSlider'
+import LabeledSlider from '../../Components/LabeledSlider';
 
 const observations = {
     'tas': 'HadCrut4',
@@ -36,7 +36,7 @@ class HindcastFrontend extends React.Component {
     render() {
 
         const {mapData, timeseriesData} = this.props.hindcastFrontend.settingsReducer;
-        const {variable, hindcastSet,metric, reference, leadtime, region} = this.props.hindcastFrontend.selectMenuReducer
+        const {variable, hindcastSet,metric, reference, leadtime, region} = this.props.hindcastFrontend.selectMenuReducer;
         const {changeParamAsync, loadOptions} = this.props.actions;
         const leadtimeVal = leadtime.selected;
 

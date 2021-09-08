@@ -1,16 +1,8 @@
 {
-  "status": "done",
-  "assets": {
-    "main-4017428609a5a8b997f6.js": {
-      "name": "main-4017428609a5a8b997f6.js",
-      "path": "/home/wilfred/workspace/freva_web/assets/bundles/main-4017428609a5a8b997f6.js",
-      "publicPath": "http://localhost:8080/assets/bundles/main-4017428609a5a8b997f6.js"
-    }
-  },
-  "chunks": {
-    "main": [
-      "main-4017428609a5a8b997f6.js"
-    ]
-  },
-  "publicPath": "http://localhost:8080/assets/bundles/"
+  "status": "error",
+  "assets": {},
+  "chunks": {},
+  "publicPath": "http://localhost:8080/assets/bundles/",
+  "error": "ModuleNotFoundError",
+  "message": "Module not found: Error: Can't resolve 'buffer' in '/home/wilfred/workspace/freva_web/node_modules/htmlparser2/lib'\n\nBREAKING CHANGE: webpack < 5 used to include polyfills for node.js core modules by default.\nThis is no longer the case. Verify if you need this module and configure a polyfill for it.\n\nIf you want to include a polyfill, you need to:\n\t- add a fallback 'resolve.fallback: { \"buffer\": require.resolve(\"buffer/\") }'\n\t- install 'buffer'\nIf you don't want to include a polyfill, you can use an empty module like this:\n\tresolve.fallback: { \"buffer\": false }"
 }

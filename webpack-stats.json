@@ -1,15 +1,15 @@
 {
   "status": "done",
   "assets": {
-    "main-132d1de4e6a0cd318a92.js": {
-      "name": "main-132d1de4e6a0cd318a92.js",
-      "path": "/home/wilfred/workspace/freva_web/assets/bundles/main-132d1de4e6a0cd318a92.js",
-      "publicPath": "http://localhost:8080/assets/bundles/main-132d1de4e6a0cd318a92.js"
+    "main-4017428609a5a8b997f6.js": {
+      "name": "main-4017428609a5a8b997f6.js",
+      "path": "/home/wilfred/workspace/freva_web/assets/bundles/main-4017428609a5a8b997f6.js",
+      "publicPath": "http://localhost:8080/assets/bundles/main-4017428609a5a8b997f6.js"
     }
   },
   "chunks": {
     "main": [
-      "main-132d1de4e6a0cd318a92.js"
+      "main-4017428609a5a8b997f6.js"
     ]
   },
   "publicPath": "http://localhost:8080/assets/bundles/"

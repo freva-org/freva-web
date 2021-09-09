@@ -6,10 +6,10 @@ import {loadFacets, selectFacet, clearFacet, clearAllFacets, setActiveFacet, set
 import _ from 'lodash'
 import $ from 'jquery';
 import NcdumpDialog from '../../Components/NcdumpDialog'
-//import AccordionItemBody from '../../Components/AccordionItemBody';
-//import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-//import CircularProgress from 'material-ui/CircularProgress';
-//import OwnPanel from '../../Components/OwnPanel'
+import AccordionItemBody from '../../Components/AccordionItemBody';
+import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import OwnPanel from '../../Components/OwnPanel'
 
 class Databrowser extends React.Component {
 

@@ -11,7 +11,7 @@ import {
     Modal,
     ButtonGroup,
     FormGroup,
-    ControlLabel,
+    FormLabel,
     FormControl,
 } from 'react-bootstrap';
 import Select from 'react-select';
@@ -57,7 +57,7 @@ class HindcastFrontend extends React.Component {
                 <Row>
                     <Col md={3} xs={12}>
                         <FormGroup controlId="formControlsSelect">
-                            <ControlLabel>Variable</ControlLabel>
+                            <FormLabel>Variable</FormLabel>
                             <Select
                                 name="variable"
                                 value={variable.selected}
@@ -68,7 +68,7 @@ class HindcastFrontend extends React.Component {
                             />
                         </FormGroup>
                         <FormGroup controlId="formControlsSelect">
-                            <ControlLabel>Hindcast-Set</ControlLabel>
+                            <FormLabel>Hindcast-Set</FormLabel>
                             <Select
                                 name="hindcastSet"
                                 value={hindcastSet.selected}
@@ -79,7 +79,7 @@ class HindcastFrontend extends React.Component {
                             />
                         </FormGroup>
                         <FormGroup controlId="formControlsSelect">
-                            <ControlLabel>Reference</ControlLabel>
+                            <FormLabel>Reference</FormLabel>
                             <Select
                                 name="reference"
                                 value={reference.selected}
@@ -90,7 +90,7 @@ class HindcastFrontend extends React.Component {
                             />
                         </FormGroup>
                         <FormGroup controlId="formControlsSelect">
-                            <ControlLabel>Region</ControlLabel>
+                            <FormLabel>Region</FormLabel>
                             <Select
                                 name="reference"
                                 value={region.selected}
@@ -101,7 +101,7 @@ class HindcastFrontend extends React.Component {
                             />
                         </FormGroup>
                         <FormGroup controlId="formControlsSelect">
-                            <ControlLabel>Metric</ControlLabel>
+                            <FormLabel>Metric</FormLabel>
                             <Select
                                 name="metric"
                                 value={metric.selected}

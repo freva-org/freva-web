@@ -11,8 +11,8 @@ import App from './Containers/App'
 import PluginList from './Containers/PluginList';
 import PluginDetail from './Containers/PluginDetail';
 import Databrowser from './Containers/Databrowser';
-//import Resultbrowser from './Containers/Resultbrowser';
-//import HindcastFrontend from './Containers/HindcastFrontend';
+import Resultbrowser from './Containers/Resultbrowser';
+import HindcastFrontend from './Containers/HindcastFrontend';
 
 const initialState = window.INITIAL_STATE || {};
 

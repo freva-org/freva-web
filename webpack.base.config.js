@@ -15,20 +15,21 @@ module.exports = {
     plugins: [],
 
     module: {
-        loaders: [
+        rules: [
             {
                 test: /\.json$/,
-                loader: 'json-loader'
+                use: ['json-loader'],
+                type: 'javascript/auto'
             },
             {
                 test: /\.css$/,
-                loader: 'style-loader!css-loader'
+                use: ['style-loader', 'css-loader'],
             }
         ]
     },
 
     resolve: {
-        modulesDirectories: ['node_modules', 'bower_components'],
+        modules: ['node_modules', 'bower_components'],
         extensions: ['', '.js', '.jsx', 'css']
     },
 

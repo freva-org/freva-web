@@ -1,10 +1,14 @@
 from pathlib import Path
 import os
 import logging
-import ldap
-import django_auth_ldap.config as ldap_cfg
-from django_auth_ldap.config import LDAPSearch, NestedGroupOfNamesType
+import pymysql
+#import ldap
+#import django_auth_ldap.config as ldap_cfg
+#from django_auth_ldap.config import LDAPSearch, NestedGroupOfNamesType
+import configparser
 from django.urls import reverse_lazy
+pymysql.version_info = (1, 4, 2, "final", 0)
+pymysql.install_as_MySQLdb()
 PROJECT_ROOT = str(Path(__file__).absolute().parents[2])
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
@@ -38,43 +42,43 @@ INSTITUTION_NAME = 'RegIKlim'
 ##################################################
 ##################################################
 # The server for LDAP configuration
-AUTH_LDAP_SERVER_URI = "ldap://mldap0.hpc.dkrz.de, ldap://mldap1.hpc.dkrz.de"
-AUTH_LDAP_START_TLS = True
+#AUTH_LDAP_SERVER_URI = "ldap://mldap0.hpc.dkrz.de, ldap://mldap1.hpc.dkrz.de"
+#AUTH_LDAP_START_TLS = True
 #AUTH_LDAP_SERVER_URI = "ldap://idm.dkrz.de"
 # The directory with SSL certificates
-CA_CERT_DIR = '/etc/pki/tls/certs'
+#CA_CERT_DIR = '/etc/pki/tls/certs'
 # the only allowd group
-ALLOWED_GROUP = 'ch1187'
+#ALLOWED_GROUP = 'ch1187'
 # Require a ca certificate
-AUTH_LDAP_GLOBAL_OPTIONS = {
-    ldap.OPT_X_TLS_REQUIRE_CERT: ldap.OPT_X_TLS_DEMAND, #TPYE OF CERTIFICATION
-    ldap.OPT_X_TLS_CACERTDIR: CA_CERT_DIR, #PATH OF CERTIFICATION
-}
+#AUTH_LDAP_GLOBAL_OPTIONS = {
+#    ldap.OPT_X_TLS_REQUIRE_CERT: ldap.OPT_X_TLS_DEMAND, #TPYE OF CERTIFICATION
+#    ldap.OPT_X_TLS_CACERTDIR: CA_CERT_DIR, #PATH OF CERTIFICATION
+#}
 # this is not used by django directly, but we use it for
 # python-ldap access, as well.
-LDAP_USER_BASE = "cn=users,cn=accounts,dc=dkrz,dc=de"
+#LDAP_USER_BASE = "cn=users,cn=accounts,dc=dkrz,dc=de"
 # Verify the user by bind to LDAP
-AUTH_LDAP_USER_DN_TEMPLATE = "uid=%%(user)s, %s" % LDAP_USER_BASE
+#AUTH_LDAP_USER_DN_TEMPLATE = "uid=%%(user)s, %s" % LDAP_USER_BASE
 # keep the authenticated user for group search
-AUTH_LDAP_BIND_AS_AUTHENTICATING_USER=True
+#AUTH_LDAP_BIND_AS_AUTHENTICATING_USER=True
 # ALLOWED_GROUP_MEMBER user only
-AUTH_LDAP_REQUIRE_GROUP = "cn=%s,cn=groups,cn=accounts,dc=dkrz,dc=de"  % ALLOWED_GROUP
-AUTH_LDAP_USER_ATTR_MAP = {
-    "email": "mail",
-    "last_name" : "sn",
-    "first_name" : "givenname",
-}
-AUTH_LDAP_GROUP_SEARCH = LDAPSearch('cn=groups,cn=accounts,dc=dkrz,dc=de',
-                                     ldap.SCOPE_SUBTREE, #USE SUB
-                                     '(objectClass=groupOfNames)')
-AUTH_LDAP_GROUP_TYPE = NestedGroupOfNamesType()
-AUTH_LDAP_MIRROR_GROUPS = True
+#AUTH_LDAP_REQUIRE_GROUP = "cn=%s,cn=groups,cn=accounts,dc=dkrz,dc=de"  % ALLOWED_GROUP
+#AUTH_LDAP_USER_ATTR_MAP = {
+#    "email": "mail",
+#    "last_name" : "sn",
+#    "first_name" : "givenname",
+#}
+#AUTH_LDAP_GROUP_SEARCH = LDAPSearch('cn=groups,cn=accounts,dc=dkrz,dc=de',
+ #                                    ldap.SCOPE_SUBTREE, #USE SUB
+#                                     '(objectClass=groupOfNames)')
+#AUTH_LDAP_GROUP_TYPE = NestedGroupOfNamesType()
+#AUTH_LDAP_MIRROR_GROUPS = True
 # agent user for LDAP
-LDAP_USER_DN = 'uid=dkrzagent,cn=sysaccounts,cn=etc,dc=dkrz,dc=de'
-LDAP_USER_PW = 'dkrzprox'
-LDAP_GROUP_BASE = 'cn=groups,cn=accounts,dc=dkrz,dc=de'
-LDAP_MIKLIP_GROUP_FILTER = '(cn=ch1187)'
-LDAP_MODEL = 'django_evaluation.ldaptools.MiklipUserInformation'
+#LDAP_USER_DN = 'uid=dkrzagent,cn=sysaccounts,cn=etc,dc=dkrz,dc=de'
+#LDAP_USER_PW = 'dkrzprox'
+#LDAP_GROUP_BASE = 'cn=groups,cn=accounts,dc=dkrz,dc=de'
+#LDAP_MIKLIP_GROUP_FILTER = '(cn=ch1187)'
+#LDAP_MODEL = 'django_evaluation.ldaptools.MiklipUserInformation'
 ##################################################
 ##################################################
 #END SETTING FOR LDAP
@@ -94,7 +98,7 @@ STATICFILES_DIRS = (
     #os.path.join(PROJECT_ROOT, 'static'),
     os.path.join(PROJECT_ROOT, 'assets'),
     #('assests', '/home/mahesh/Freva/freva_web/assets/'),
-    ('preview', '/home/mahesh/Freva/freva_web/misc4freva/db4freva/preview'),
+    #('preview', '/home/mahesh/Freva/freva_web/misc4freva/db4freva/preview'),
 )
 # List of finder classes that know how to find static files in
 # various locations.
@@ -103,14 +107,25 @@ STATICFILES_DIRS = (
 #    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 #)
+configParser = configparser.RawConfigParser()   
+#configFilePath = r PROJECT_ROOT+"\conda\etc\evaluation_system.conf"
+configParser.read(PROJECT_ROOT+"/conda/etc/evaluation_system.conf")
+db_name = configParser.get("evaluation_system", 'db.db')
+db_user = configParser.get("evaluation_system", 'db.user')
+db_password = configParser.get("evaluation_system", 'db.passwd')
+db_host = configParser.get("evaluation_system", 'db.host')
+db_port = configParser.get("evaluation_system", 'db.port')
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'freva_dev',
-        'USER': 'root',
-        'PASSWORD': 'rOOT123', #'miklip',
-        'HOST': 'localhost', #'wwwdev-miklip',
-        'PORT': '3306',
+        'NAME': db_name,
+        'USER': db_user,
+        'PASSWORD': db_password, #'miklip',
+        'HOST': db_host, #'wwwdev-miklip',
+        'PORT': db_port,
+        'OPTIONS': {
+            'charset': 'utf8mb4'
+            }
     },
 }
 # register the LDAP authentication backend 
@@ -127,9 +142,10 @@ DEBUG = TEMPLATE_DEBUG = True
 DEV = False
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = ['localhost', '127.0.0.1','www.freva.dkrz.de', 'freva.dkrz.de']
+#ALLOWED_HOSTS = ['localhost', '127.0.0.1','www.freva.dkrz.de', 'freva.dkrz.de']
+ALLOWED_HOSTS = ['*']
 # path to the site packages used:
-VENV_PYTHON_DIR = PROJECT_ROOT + '/venv/bin/python'
+VENV_PYTHON_DIR = PROJECT_ROOT + '/conda/bin/python'
 # Path to miklip-logo
 MIKLIP_LOGO = STATIC_URL + 'img/miklip-logo.png'
 NCDUMP_BINARY = '/work/ch1187/regiklim-ces/freva/xarray/bin/ncdump_fancy'

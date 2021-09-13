@@ -1,5 +1,5 @@
 import React from 'react';
-import '../../../../node_modules/react-vis/dist/style.css';
+import '../../../styles/style.css';
 import {XYPlot, LineSeries, XAxis, YAxis, FlexibleWidthXYPlot, LineMarkSeries, MarkSeries, Crosshair} from 'react-vis';
 
 

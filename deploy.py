@@ -91,7 +91,7 @@ class Installer:
                            'djangorestframework', 'conda', 'pip',
                            'numpy', 'scipy', 'ffmpeg', 'imagemagick',
                            'mysqlclient', 'pymysql', 'ipython', 'xarray',
-                           'dask'])
+                           'dask', 'toml' ])
     pip_pkgs = sorted(['pytest-html', 'python-git', 'python-swiftclient',
                        'django-auth-ldap', 'Django-datatable-view-compat',
                        'django-templated-email', 'django_compressor',

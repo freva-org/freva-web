@@ -2,14 +2,27 @@ from pathlib import Path
 import os
 import logging
 import pymysql
-#import ldap
-#import django_auth_ldap.config as ldap_cfg
-#from django_auth_ldap.config import LDAPSearch, NestedGroupOfNamesType
+import ldap
+import django_auth_ldap.config as ldap_cfg
+from django_auth_ldap.config import LDAPSearch, NestedGroupOfNamesType
 import configparser
+import toml
 from django.urls import reverse_lazy
+from evaluation_system.misc import config
+
+evaluation_system_conf = Path(os.environ.get('EVALUATION_SYSTEM_CONFIG_FILE', None) \
+        or config._DEFAULT_CONFIG_FILE_LOCATION).absolute()
+web_config_path = Path(list(evaluation_system_conf.parents)[1] / 'share' / 'freva' / 'web')
 pymysql.version_info = (1, 4, 2, "final", 0)
 pymysql.install_as_MySQLdb()
-PROJECT_ROOT = str(Path(__file__).absolute().parents[2])
+
+try:
+    with (web_config_path / 'freva_web_conf.toml') as f:
+        web_config = toml.load(f)
+except FileNotFoundError:
+    web_config = {}
+print(web_config)
+PROJECT_ROOT = os.environ.get('PROJECT_ROOT', None) or str(Path(__file__).absolute().parents[2])
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
 INSTITUTION_LOGO = STATIC_URL + 'img/RegiKlim_logo.png'
@@ -107,14 +120,13 @@ STATICFILES_DIRS = (
 #    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 #)
-configParser = configparser.RawConfigParser()   
+config.reloadConfiguration()
 #configFilePath = r PROJECT_ROOT+"\conda\etc\evaluation_system.conf"
-configParser.read(PROJECT_ROOT+"/conda/etc/evaluation_system.conf")
-db_name = configParser.get("evaluation_system", 'db.db')
-db_user = configParser.get("evaluation_system", 'db.user')
-db_password = configParser.get("evaluation_system", 'db.passwd')
-db_host = configParser.get("evaluation_system", 'db.host')
-db_port = configParser.get("evaluation_system", 'db.port')
+db_name = config.get('db.db')
+db_user = config.get('db.user')
+db_password = config.get('db.passwd')
+db_host = config.get('db.host')
+db_port = config.get('db.port')
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',

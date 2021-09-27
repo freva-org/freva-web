@@ -1,5 +1,5 @@
 from evaluation_system.api import plugin_manager as pm
-from django.utils.depreciation import MiddlewareMixin
+from django.utils.deprecation import MiddlewareMixin
 from threading import current_thread
 
 try:
@@ -8,7 +8,7 @@ except ImportError:
     from django.utils._threading_local import local
 
 _thread_locals = local()
-class MiddlewareMixin:
+class MiddlewareMixin(MiddlewareMixin):
     def __init__(self, get_response=None):
         self.get_response = get_response
         super(MiddlewareMixin, self).__init__()

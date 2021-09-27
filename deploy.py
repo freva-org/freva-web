@@ -88,7 +88,7 @@ class Installer:
                            'django-debug-toolbar', 'python-ldap',
                            'paramiko', 'django-ipware', 'pypdf2',
                            'requests', 'pygtail', 'django-webpack-loader',
-                           'djangorestframework', 'conda', 'pip',
+                           'djangorestframework', 'conda', 'pil' ,'pip',
                            'numpy', 'scipy', 'ffmpeg', 'imagemagick',
                            'mysqlclient', 'pymysql', 'ipython', 'xarray',
                            'dask', 'toml' ])

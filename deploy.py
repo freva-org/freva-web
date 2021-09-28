@@ -72,6 +72,9 @@ def parse_args(argv=None):
             help='Additional packages that should be installed using pip')
     ap.add_argument('--no-conda', action='store_true', default=False,
             help='Do not install conda environment')
+    ap.add_argument('--install-prefix', '--prefix', '--install_prefix',
+            type=Path, default=Path(__file__).absolute().parent / 'conda',
+            help='Set the install prefix')
     ap.add_argument('--run_tests', action='store_true', default=False,
             help='Run unittests after installation')
     args = ap.parse_args()
@@ -156,10 +159,8 @@ class Installer:
 
     def __init__(self, args):
     
-        self.this_dir = Path(__file__).absolute().parent
         for arg in vars(args):
             setattr(self, arg, getattr(args,arg))
-        self.install_prefix = self.this_dir / 'conda'
         self.backend_url = 'git+'+EVAL_URL
         self.config_file = self.this_dir / 'evaluation_system.conf'
         if not self.config_file.is_file():

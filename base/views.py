@@ -26,7 +26,7 @@ def home(request):
     next_page = request.GET.get('next', None)
     forward = request.POST.get("next", None)
 
-    if not request.user.is_authenticated():
+    if not request.user.is_authenticated:
         try:
             user = request.POST.get("user", "")
             passwd = request.POST.get("password", "")

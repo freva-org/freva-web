@@ -146,7 +146,11 @@
          <div class="widget">
             <h4>Contact</h4>
 			<ul>
-			     {% setting_to_list 'CONTACTS' %} (Also for password reset)
+			    	
+            			{% get_menu_entries 'CONTACTS' as contacts %}
+				{% for item in contacts %}
+				<li>{{ item }}</li>
+				{% endfor %} (Also for password reset)
 			</ul>
 			
          </div>
@@ -156,7 +160,11 @@
          <div class="widget">
             <h4>Imprint</h4>
 			<ul>
-			     {% setting_to_list 'IMPRINT' %}
+            			{% get_menu_entries 'IMPRINT' as imprint %}
+				{% for item in imprint %}
+				<li><a href="mailto:{{ item }}" target=_blank>{{ item }}</a></li>
+				{% endfor %}
+
 
 			</ul>
 

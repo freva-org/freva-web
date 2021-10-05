@@ -15,10 +15,12 @@ def settings_val(value):
 @register.simple_tag
 def setting_to_list(value):
     
+    if isinstance(value, (str, float, int):
+        value = [value]
     setting_value = getattr(settings, value)
     result = ''
     for val in setting_value:
-        result += '<li>%s</li>' % val
+        result += '<li>%s' % val
     return result
 
 @register.simple_tag

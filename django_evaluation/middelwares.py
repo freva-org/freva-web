@@ -10,8 +10,7 @@ except ImportError:
 _thread_locals = local()
 class MiddlewareMixin(MiddlewareMixin):
     def __init__(self, get_response=None):
-        self.get_response = get_response
-        super(MiddlewareMixin, self).__init__()
+        super(MiddlewareMixin, self).__init__(get_response=get_response)
 
     def __call__(self, request):
         response = None

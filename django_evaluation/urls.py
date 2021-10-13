@@ -8,7 +8,7 @@ from django.views.generic import RedirectView
 from base.views_api import UserViewSet, AuthenticatedUser
 from plugins.views_api import PluginsList, ExportPlugin, PluginDetail, SendMailToDeveloper
 from history.views_api import ResultFacets, ResultFiles
-from hindcast_frontend.views_api import get_hindcast_data, register_hindcast, get_hindcast_facets
+#from hindcast_frontend.views_api import get_hindcast_data, register_hindcast, get_hindcast_facets
 from solr.views_api import ncdump
 from rest_framework import routers
 
@@ -31,7 +31,7 @@ urlpatterns = [
     url(r'^history/', include(('history.urls', 'history'), namespace='history')),
     url(r'^solr/', include(('solr.urls', 'solr'), namespace='solr' )),
     url(r'^external/', include(('externaluser.urls', 'external'), namespace='external')),
-    url(r'^hindcast-frontend/', include(('hindcast_frontend.urls', 'hindcast_frontend'), namespace='hindcast_frontend')),
+    #url(r'^hindcast-frontend/', include(('hindcast_frontend.urls', 'hindcast_frontend'), namespace='hindcast_frontend')),
 
     url(r'^bad/$', bad),
     url(r'', include(('base.urls', 'base'), namespace='base')),
@@ -48,9 +48,9 @@ urlpatterns = [
     url(r'^api/history/result-browser/$', ResultFacets.as_view(), name='api-history-list'),
     url(r'^api/history/result-browser-files/$', ResultFiles.as_view(), name='api-history-files'),
     #url(r'^api/', include(router.urls, namespace='api')),
-    url(r'^api/hindcast-frontend/get-hindcast-data', get_hindcast_data, name='api-get-hindcast-data'),
-    url(r'^api/hindcast-frontend/register-hindcast', register_hindcast, name='api-register-hindcast'),
-    url(r'^api/hindcast-frontend/get-hindcast-facets', get_hindcast_facets, name='api-get-hindcast-facets')
+    #url(r'^api/hindcast-frontend/get-hindcast-data', get_hindcast_data, name='api-get-hindcast-data'),
+    #url(r'^api/hindcast-frontend/register-hindcast', register_hindcast, name='api-register-hindcast'),
+    #url(r'^api/hindcast-frontend/get-hindcast-facets', get_hindcast_facets, name='api-get-hindcast-facets')
 
 ]
 

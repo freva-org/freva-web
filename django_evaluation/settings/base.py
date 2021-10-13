@@ -68,7 +68,7 @@ INSTALLED_APPS = (
     'history',
     'solr',
     'externaluser',
-    'hindcast_frontend'
+    #'hindcast_frontend'
 )
 
 # Place bcrypt first in the list, so it will be the default password hashing

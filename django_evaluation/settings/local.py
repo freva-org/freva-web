@@ -32,7 +32,7 @@ except FileNotFoundError:
     web_config = {}
 PROJECT_ROOT = os.environ.get('PROJECT_ROOT', None) or str(Path(__file__).absolute().parents[2])
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(PROJECT_ROOT, STATIC_URL)
+STATIC_ROOT = str(Path(PROJECT_ROOT)  / 'static')
 INSTITUTION_LOGO = _get_conf_key(web_config, 'INSTITUTION_LOGO',
                                  Path(STATIC_ROOT) / 'img/RegiKlim_logo.png')
 FREVA_LOGO = STATIC_URL + 'img/by_freva_transparent.png'

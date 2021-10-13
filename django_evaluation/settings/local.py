@@ -71,10 +71,10 @@ INSTITUTION_NAME = web_config.get('INSTITUION_NAME', 'FreVa')
 AUTH_LDAP_SERVER_URI = web_config.get('AUTH_LDAP_SERVER_URI', 
                                       "ldap://mldap0.hpc.dkrz.de, ldap://mldap1.hpc.dkrz.de")
 try:
-    AUTH_LDAP_SERVER_URI = ','.join(AUTH_LDAP_SERVER_URI)
+    AUTH_LDAP_SERVER_URI = ', '.join(AUTH_LDAP_SERVER_URI)
 except AttributeError:
     pass
-AUTH_LDAP_START_TLS = True
+AUTH_LDAP_START_TLS = web_config.get('AUTH_LDAP_START_TLS', True)
 # The directory with SSL certificates
 CA_CERT_DIR = str(web_config_path.parent)
 # the only allowd group

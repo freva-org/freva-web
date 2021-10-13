@@ -1,6 +1,6 @@
 import ldap
 
-from evaluation_system import settings
+from django_evaluation import settings
 from django.core.cache import cache, caches
 from django.core.exceptions import ImproperlyConfigured
 import importlib
@@ -15,7 +15,26 @@ class LdapUserInformation(object):
     miklip_user = []
     user_info = []
     user_info_dict = {}   
- 
+
+    @staticmethod
+    def _establish_ldap_connection():
+        for SERVER in settings.AUTH_LDAP_SERVER_URI.split(","):
+            if not settings.AUTH_LDAP_START_TLS:
+                ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
+            try:
+                con = ldap.initialize(SERVER)
+            except ldap.LDAPError as e:
+                error = e
+                continue
+            try:
+                con.start_tls_s()
+            except ldap.CONNECT_ERROR as e:
+                error = e
+                continue
+            return con
+        raise error
+
+
     def _connect_to_ldap(self):
         """
         Establish ldap connection, use django settings
@@ -27,22 +46,7 @@ class LdapUserInformation(object):
             ldap.set_option(ldap.OPT_X_TLS_CACERTDIR, settings.CA_CERT_DIR)
         except:
             pass
-        LDAP_SERVERS = settings.AUTH_LDAP_SERVER_URI.split(",")
-        SERVER = LDAP_SERVERS.pop()
-        con = None
-        connected_to = None
-        # try any LDAP server in list
-        while SERVER:
-            try:
-                con = ldap.initialize(SERVER)
-                con.start_tls_s()
-                connected_to = SERVER
-                SERVER = None
-            except:
-                SERVER = LDAP_SERVERS.pop()
-                if not SERVER:
-                    raise
-
+        con = self._establish_ldap_connection(return_uri=False)
         # bind with the simple user
         try:
             con.simple_bind_s(settings.LDAP_USER_DN, settings.LDAP_USER_PW)
@@ -180,38 +184,38 @@ class MiklipUserInformation(LdapUserInformation):
         self.miklip_user = []
         user_info = []
         # test print of the first search
-        #return res
-        #print res
-        #print res[0]
-
         user_list = res[0][1]['member']
              
         # fill the users list
         for user in user_list:
             # look up the user entries in the LDAP System
             # print to see the structure of the user
-            #print(user)
-            user=user.split(",")[0]
+            try:
+                uid = user.decode().split(",")[0]
+            except AttributeError:
+                uid = user.split(",")[0]
             res = con.search_s(settings.LDAP_USER_BASE,
                               ldap.SCOPE_SUBTREE,
                               attrlist=self.ldap_keys,
-                              filterstr='%s' % user)
-            
-            if len(res) > 0:
-                
-                mail = res[0][1].get('mail', None)
-                forward = res[0][1].get('mailForwardingAddress', None)
-                user_id = user.split("=")[-1]
+                              filterstr=f'{uid}') 
+            if res:
+                try:
+                    res_str = {k: list(map(bytes.decode, v)) for (k, v) in res[0][1].items()} 
+                except TypeError:
+                    res_str = {k: v for (k, v) in res[0][1].items()} 
+                mail = res_str.get('mail', None)
+                forward = res_str.get('mailForwardingAddress', None)
+                user_id = uid.split("=")[-1]
                 # user info needs elements user_id, first_name, last_name, email
                 if forward:
                     user_info.append((user_id,
-                                      ' '.join(res[0][1].get('sn','')),
-                                      ' '.join(res[0][1].get('givenName', '')),
+                                      ' '.join(res_str.get('sn','')),
+                                      ' '.join(res_str.get('givenName', '')),
                                       forward[-1],))
                 elif mail:
                     user_info.append((user_id,
-                                      ' '.join(res[0][1].get('sn','')),
-                                      ' '.join(res[0][1].get('givenName', '')),
+                                      ' '.join(res_str.get('sn','')),
+                                      ' '.join(res_str.get('givenName', '')),
                                       mail[-1],))
         self.user_info = sorted(user_info, key=lambda tup: tup[1])
         return self.user_info

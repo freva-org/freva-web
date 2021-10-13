@@ -154,7 +154,7 @@ var datatableview = {
         });
         return $(initialized_datatables).dataTable();
     }
-}
+};
 
 $(function(){
     if (datatableview.auto_initialize) {

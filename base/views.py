@@ -25,15 +25,12 @@ def home(request):
 
     next_page = request.GET.get('next', None)
     forward = request.POST.get("next", None)
-
     if not request.user.is_authenticated:
         try:
             user = request.POST.get("user", "")
             passwd = request.POST.get("password", "")
-            
             if user:
                 u = auth.authenticate(username=user, password=passwd)
-    
                 if u:
                     auth.login(request, u)
     
@@ -52,7 +49,7 @@ def home(request):
                 next_page = forward
 
             login_failed = True
-            logging.debug(str(e))
+            logging.error(str(e))
     
     return render(request, 'base/home.html',
                   {'login_failed': login_failed,

@@ -86,7 +86,7 @@ class Installer:
                            'django-nose', 'coverage', 'pep8',
                            'pylint','django', 'markdown',
                            'bleach', 'python-memcached',
-                           'django-debug-toolbar', 'python-ldap',
+                           'django-debug-toolbar', 'python-ldap', 'ldap3',
                            'paramiko', 'django-ipware', 'pypdf2',
                            'requests', 'pygtail', 'django-webpack-loader',
                            'djangorestframework', 'conda', 'pillow' ,'pip',

@@ -53,16 +53,14 @@ INSTALLED_APPS = (
     'django.contrib.syndication',
     'django.contrib.staticfiles',
     'django.contrib.flatpages',
-
     # Third-party apps, patches, fixes
 #    'debug_toolbar',
     'compressor',
     'bootstrap3',
     'datatableview',
-#    'webpack_loader',
+    'webpack_loader',
     'rest_framework',
 #    'debug_toolbar_user_panel',
-
     'base',
     'plugins',
     'history',

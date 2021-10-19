@@ -87,7 +87,7 @@ class Installer:
                            'pylint','django', 'markdown',
                            'bleach', 'python-memcached',
                            'django-debug-toolbar', 'python-ldap', 'ldap3',
-                           'paramiko', 'django-ipware', 'pypdf2',
+                           'paramiko', 'django-ipware', 'pypdf2', 'mod_wsgi',
                            'requests', 'pygtail', 'django-webpack-loader',
                            'djangorestframework', 'conda', 'pillow' ,'pip',
                            'numpy', 'scipy', 'ffmpeg', 'imagemagick',

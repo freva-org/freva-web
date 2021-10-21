@@ -60,6 +60,7 @@ INSTALLED_APPS = (
     'datatableview',
     'webpack_loader',
     'rest_framework',
+    'mod_wsgi.server',
 #    'debug_toolbar_user_panel',
     'base',
     'plugins',

@@ -10,8 +10,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "webpack-dev-server --progress --inline --hot --config webpack.dev.config.js",
-    "build": "webpack --config webpack.dev.config.js --progress --color",
-    "build-production": "webpack --config webpack.prod.config.js --progress --color"
+    "build": "webpack --config webpack.dev.config.js --progress --color --mode=development",
+    "build-production": "webpack --config webpack.prod.config.js --progress --color --mode=production"
   },
   "repository": {
     "type": "git",
@@ -28,9 +28,9 @@
     "json-loader": "*",
     "react-hot-loader": "*",
     "style-loader": "*",
-    "webpack": "*",
+    "webpack": "^5.59.1",
     "webpack-bundle-tracker": "^1.4.0",
-    "webpack-cli": "*",
+    "webpack-cli": "^4.9.1",
     "webpack-dev-server": "*"
   },
   "dependencies": {

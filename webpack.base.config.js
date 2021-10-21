@@ -4,14 +4,14 @@ var BundleTracker = require('webpack-bundle-tracker');
 
 module.exports = {
     context: __dirname,
-
-    entry: ['babel-polyfill', './assets/js/index'],
-
+    mode : 'production',
     output: {
         path: path.resolve('./assets/bundles/'),
-        filename: "[name]-[hash].js"
+        filename: "[name]-[fullhash].js"
     },
-
+    optimization: {
+        moduleIds: 'named',
+    },
     plugins: [],
 
     module: {
@@ -30,7 +30,7 @@ module.exports = {
 
     resolve: {
         modules: ['node_modules', 'bower_components'],
-        extensions: ['', '.js', '.jsx', 'css']
+        extensions: ['', '.js', '.jsx', '.css', '.ts']
     },
 
     externals: [

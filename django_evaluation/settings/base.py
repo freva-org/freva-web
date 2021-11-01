@@ -54,20 +54,19 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.flatpages',
     # Third-party apps, patches, fixes
-#    'debug_toolbar',
+    'debug_toolbar',
     'compressor',
     'bootstrap3',
     'datatableview',
     'webpack_loader',
     'rest_framework',
     'mod_wsgi.server',
-#    'debug_toolbar_user_panel',
+    'debug_toolbar_user_panel',
     'base',
     'plugins',
     'history',
     'solr',
     'externaluser',
-    #'hindcast_frontend'
 )
 
 # Place bcrypt first in the list, so it will be the default password hashing
@@ -116,8 +115,6 @@ STATICFILES_DIRS = [
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
-#    ('preview', '/home/freva/ral-ces/misc4freva/db4freva/preview/'),
-    #('static', 'home/mahesh/Freva/freva_web/static/'),
     os.path.join(PROJECT_ROOT, 'static'),
     os.path.join(PROJECT_ROOT, 'assets')
     ]
@@ -213,29 +210,6 @@ def custom_show_toolbar(request):
     return False#request.user.is_superuser
 
 
-#DEBUG_TOOLBAR_CONFIG = {
-#    'INTERCEPT_REDIRECTS': False,
-#    'SHOW_TOOLBAR_CALLBACK': custom_show_toolbar,
-#    'HIDE_DJANGO_SQL': True,
-#    'TAG': 'body',
-#    'SHOW_TEMPLATE_CONTEXT': True,
-#    'ENABLE_STACKTRACES': True,
-#}
-
-#DEBUG_TOOLBAR_PANELS = (
-#    'debug_toolbar.panels.versions.VersionsPanel',
-#    'debug_toolbar.panels.timer.TimerPanel',
-#    'debug_toolbar.panels.settings.SettingsPanel',
-#    'debug_toolbar.panels.headers.HeadersPanel',
-#    'debug_toolbar.panels.request.RequestPanel',
-#    'debug_toolbar.panels.sql.SQLPanel',
-#    'debug_toolbar.panels.staticfiles.StaticFilesPanel',
-#    'debug_toolbar.panels.templates.TemplatesPanel',
-#    'debug_toolbar.panels.cache.CachePanel',
-#    'debug_toolbar.panels.signals.SignalsPanel',
-#    'debug_toolbar.panels.logging.LoggingPanel',
-#    'debug_toolbar.panels.redirects.RedirectsPanel', 
-#)
 
 FILE_UPLOAD_PERMISSIONS = 0o664
 
@@ -265,7 +239,6 @@ SECRET_KEY = 'hj1bkzobng0ck@0&%t509*1ki$#)i5y+i0)&=7zv@amu8pm5*t'
 # Recipients of traceback emails and other notifications.
 ADMINS = (
     ('Martin Bergemann', 'bergemann@dkrz.de'),
-    #('Christopher Kadow','kadow@dkrz.de'),
 )
 MANAGERS = ADMINS
 
@@ -337,7 +310,6 @@ LOGGING = {
             'propagate': True,
             'level': 'INFO',
         },
-
     }
 }
 

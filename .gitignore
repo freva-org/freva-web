@@ -4,6 +4,8 @@ virt
 db
 node_modules
 venv/*
+conda/*
+evaluation_system.conf
 .*
 static/preview/*
 tail/*

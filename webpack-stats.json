@@ -1,1 +1,16 @@
-{"status":"done","publicPath":"http://localhost:8080/assets/bundles/","chunks":{"main":[{"name":"main-8ac9c31a690739a2096d.js","publicPath":"http://localhost:8080/assets/bundles/main-8ac9c31a690739a2096d.js","path":"/main-8ac9c31a690739a2096d.js"}]}}
+{
+  "status": "done",
+  "assets": {
+    "main-17123d976ef9589ac8f3.js": {
+      "name": "main-17123d976ef9589ac8f3.js",
+      "path": "/home/wilfred/workspace/freva_web/assets/bundles/main-17123d976ef9589ac8f3.js",
+      "publicPath": "http://localhost:8080/assets/bundles/main-17123d976ef9589ac8f3.js"
+    }
+  },
+  "chunks": {
+    "main": [
+      "main-17123d976ef9589ac8f3.js"
+    ]
+  },
+  "publicPath": "http://localhost:8080/assets/bundles/"
+}

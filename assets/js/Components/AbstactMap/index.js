@@ -1,7 +1,7 @@
 var d3 = require('d3');
 import React from 'react';
 import continentborder from '../../data/continentborder.json'
-import {feature} from 'topojson';
+import {feature} from 'topojson-client';
 import ReactDOM from 'react-dom';
 import Colorbar from '../Colorbar'
 

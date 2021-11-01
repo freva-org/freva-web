@@ -18,12 +18,13 @@ const initialState = window.INITIAL_STATE || {};
 
 const store = configureStore(initialState);
 
+
 // Create an enhanced history that syncs navigation events with the store
 const history = syncHistoryWithStore(browserHistory, store)
 
 
 ReactDOM.render(
-    <Provider store={store}>
+   <Provider store={store}>
         { /* Tell the Router to use our enhanced history */ }
         <Router history={history} onUpdate={() => window.scrollTo(0, 0)}>
             <Route path="/" component={App}>

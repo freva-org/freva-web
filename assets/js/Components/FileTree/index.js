@@ -1,6 +1,4 @@
 import React from 'react';
-import {connect} from 'react-redux';
-import {Row, Col, Button, ListGroup, ListGroupItem, Grid} from 'react-bootstrap'
 
 class FileTree extends React.Component {
 

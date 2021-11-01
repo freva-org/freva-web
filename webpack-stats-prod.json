@@ -1,1 +1,18 @@
-{"status":"done","chunks":{"main":[{"name":"main-3c7d8068167c4f3f8fd4.js","path":"/opt/freva_web/assets/dist/main-3c7d8068167c4f3f8fd4.js"}]}}
+{
+  "status": "done",
+  "assets": {
+    "main-f499e931aba5eef89151.js": {
+      "name": "main-f499e931aba5eef89151.js",
+      "path": "/home/wilfred/workspace/freva_web/assets/dist/main-f499e931aba5eef89151.js"
+    },
+    "main-f499e931aba5eef89151.js.LICENSE.txt": {
+      "name": "main-f499e931aba5eef89151.js.LICENSE.txt",
+      "path": "/home/wilfred/workspace/freva_web/assets/dist/main-f499e931aba5eef89151.js.LICENSE.txt"
+    }
+  },
+  "chunks": {
+    "main": [
+      "main-f499e931aba5eef89151.js"
+    ]
+  }
+}

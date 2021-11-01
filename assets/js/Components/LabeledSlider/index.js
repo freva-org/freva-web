@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-import Slider from 'material-ui/Slider';
-import {ControlLabel} from 'react-bootstrap';
-import Checkbox from 'material-ui/Checkbox';
+import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
+import Slider from '@material-ui/core/Slider';
+import {FormLabel} from 'react-bootstrap';
+import Checkbox from '@material-ui/core/Checkbox';
 
 
 const LabeledSlider = (props) => {
@@ -12,7 +12,7 @@ const LabeledSlider = (props) => {
     const textValue = value !== 0 ? parseFloat(value)*100 : '0';
     return (
         <div>
-            <ControlLabel>
+            <FormLabel>
                 <table>
                     <tbody>
                         <tr>
@@ -33,7 +33,7 @@ const LabeledSlider = (props) => {
                         </tr>
                     </tbody>
                 </table>
-            </ControlLabel>
+            </FormLabel>
             <MuiThemeProvider muiTheme={theme}>
                 <span>
                     <Slider disabled={disabled || !checked}

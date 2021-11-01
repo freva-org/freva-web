@@ -18,7 +18,7 @@ def setting_to_list(value):
     setting_value = getattr(settings, value)
     result = ''
     for val in setting_value:
-        result += '<li>%s</li>' % val
+        result += '<li>%s' % val
     return result
 
 @register.simple_tag

@@ -4,9 +4,9 @@ var BundleTracker = require('webpack-bundle-tracker');
 
 
 var config = require('./webpack.base.config.js');
-
+config.mode = 'production'
 config.output.path = require('path').resolve('./assets/dist');
-
+config.entry = path.resolve(__dirname, './assets/js/index.js'),
 config.plugins = config.plugins.concat([
   new BundleTracker({filename: './webpack-stats-prod.json'}),
 
@@ -17,23 +17,16 @@ config.plugins = config.plugins.concat([
   }}),
 
   // keeps hashes consistent between compilations
-  new webpack.optimize.OccurenceOrderPlugin(),
-
-  // minifies your code
-  new webpack.optimize.UglifyJsPlugin({
-    compressor: {
-      warnings: false
-    }
-  })
+  //new webpack.optimize.OccurenceOrderPlugin(),
 ]);
 
 // Add a loader for JSX files
-config.module.loaders.push(
+config.module.rules.push(
   { test: /\.js?$/,
     exclude: /node_modules/,
     loader: 'babel-loader',
-    query: {
-      presets: ['es2015', 'react', 'stage-0', 'babel-polyfill']
+    options: {
+      presets: ["@babel/preset-env", "@babel/preset-react"]
     }
   } // to transform JSX into JS
 );

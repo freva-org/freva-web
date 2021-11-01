@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import {connect} from 'react-redux';
-import {bindActionCreators} from 'redux'
+import {bindActionCreators} from 'redux';
 import {
-    Grid,
+    Container,
     Row,
     Col,
     Button,
@@ -11,14 +11,14 @@ import {
     Modal,
     ButtonGroup,
     FormGroup,
-    ControlLabel,
+    FormLabel,
     FormControl,
 } from 'react-bootstrap';
 import Select from 'react-select';
-import {changeParamAsync, getHindcastData, loadOptions} from './actions'
-import AbstractMap from '../../Components/AbstactMap'
+import {changeParamAsync, getHindcastData, loadOptions} from './actions';
+import AbstractMap from '../../Components/AbstactMap';
 import Timeseries from '../../Components/Timeseries';
-import LabeledSlider from '../../Components/LabeledSlider'
+import LabeledSlider from '../../Components/LabeledSlider';
 
 const observations = {
     'tas': 'HadCrut4',
@@ -36,7 +36,7 @@ class HindcastFrontend extends React.Component {
     render() {
 
         const {mapData, timeseriesData} = this.props.hindcastFrontend.settingsReducer;
-        const {variable, hindcastSet,metric, reference, leadtime, region} = this.props.hindcastFrontend.selectMenuReducer
+        const {variable, hindcastSet,metric, reference, leadtime, region} = this.props.hindcastFrontend.selectMenuReducer;
         const {changeParamAsync, loadOptions} = this.props.actions;
         const leadtimeVal = leadtime.selected;
 
@@ -52,12 +52,12 @@ class HindcastFrontend extends React.Component {
         if (reference.selected && metric.selected)
             refText = reference.selected.value === 'vs_clim' && metric.selected.value === 'correlation' ? '' : ` with ${reference.selected.label} as reference`;
         return (
-            <Grid>
+            <Container>
 
                 <Row>
                     <Col md={3} xs={12}>
                         <FormGroup controlId="formControlsSelect">
-                            <ControlLabel>Variable</ControlLabel>
+                            <FormLabel>Variable</FormLabel>
                             <Select
                                 name="variable"
                                 value={variable.selected}
@@ -68,7 +68,7 @@ class HindcastFrontend extends React.Component {
                             />
                         </FormGroup>
                         <FormGroup controlId="formControlsSelect">
-                            <ControlLabel>Hindcast-Set</ControlLabel>
+                            <FormLabel>Hindcast-Set</FormLabel>
                             <Select
                                 name="hindcastSet"
                                 value={hindcastSet.selected}
@@ -79,7 +79,7 @@ class HindcastFrontend extends React.Component {
                             />
                         </FormGroup>
                         <FormGroup controlId="formControlsSelect">
-                            <ControlLabel>Reference</ControlLabel>
+                            <FormLabel>Reference</FormLabel>
                             <Select
                                 name="reference"
                                 value={reference.selected}
@@ -90,7 +90,7 @@ class HindcastFrontend extends React.Component {
                             />
                         </FormGroup>
                         <FormGroup controlId="formControlsSelect">
-                            <ControlLabel>Region</ControlLabel>
+                            <FormLabel>Region</FormLabel>
                             <Select
                                 name="reference"
                                 value={region.selected}
@@ -101,7 +101,7 @@ class HindcastFrontend extends React.Component {
                             />
                         </FormGroup>
                         <FormGroup controlId="formControlsSelect">
-                            <ControlLabel>Metric</ControlLabel>
+                            <FormLabel>Metric</FormLabel>
                             <Select
                                 name="metric"
                                 value={metric.selected}
@@ -150,7 +150,7 @@ class HindcastFrontend extends React.Component {
                            Black circles denote significance at the 95% level.</p> : null}
                     </Col>
                 </Row>
-            </Grid>
+            </Container>
         )
     }
 }

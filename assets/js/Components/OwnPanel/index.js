@@ -1,7 +1,7 @@
 import React from 'react'
-import {Panel} from 'react-bootstrap'
+import {Card} from 'react-bootstrap'
 
-class OwnPanel extends Panel {
+class OwnPanel extends Card {
     constructor(props, context) {
         super(props, context);
         this.handleClickTitle = this.handleClickTitle.bind(this);

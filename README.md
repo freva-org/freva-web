@@ -1,21 +1,42 @@
 # Python environment setup
 
 Most of the required python packages are beeging installed via conda.
-To install python bindings simply execute the `setup.sh` script.
+To install python bindings simply execute the `deployment.py` script.
+
 
 ```bash
-$: ./setup.sh FREVA_PATH
+$: python ./deploy.py --help
+usage: deploy_freva_freva_web [-h] [--packages [PACKAGES [PACKAGES ...]]] [--channel CHANNEL] [--shell SHELL] [--arch ARCH] [--python PYTHON] [--pip [PIP [PIP ...]]]
+                              [--no-conda] [--run_tests]
+
+This Programm installs the evaluation_system package.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --packages [PACKAGES [PACKAGES ...]]
+                        Pacakges that are installed (default: ['bleach', 'conda', 'coverage', 'dask', 'django', 'django-debug-toolbar', 'django-ipware', 'django-nose',
+                        'django-webpack-loader', 'djangorestframework', 'fabric', 'ffmpeg', 'imagemagick', 'ipython', 'markdown', 'mock', 'mysqlclient', 'nose', 'numpy',
+                        'paramiko', 'pep8', 'pip', 'pygtail', 'pylint', 'pymysql', 'pypdf2', 'python-ldap', 'python-memcached', 'requests', 'scipy', 'sphinx', 'xarray'])
+  --channel CHANNEL     Conda channel to be used (default: conda-forge)
+  --shell SHELL         Shell type (default: bash)
+  --arch ARCH           The architecture for the current system (default: Linux-x86_64)
+  --python PYTHON       Python Version (default: 3.9)
+  --pip [PIP [PIP ...]]
+                        Additional packages that should be installed using pip (default: ['pytest-html', 'python-git', 'python-swiftclient'])
+  --no-conda            Do not install conda environment (default: False)
+  --run_tests           Run unittests after installation (default: False)
 ```
 
-`FREVA_PATH` where the backend of the evaluation system instance is located. 
-If you do not have the backend installed the `setup.sh` will clone the repository
-into the `FREVA_PATH` directory. The script will create a new conda environment
-in the `venv` folder. To activate this conda environment use the following command:
+After successful installation you can activate the `freva_web` environment:
 
 ```bash
-$: source activate_web
+$: conda activate ./conda
 ```
+or
 
+```bash
+$: source ./conda/bin/activate
+```
 # Django deployment
 
 you can check if django is working and corretly configured by:

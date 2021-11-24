@@ -23,7 +23,7 @@ def _get_conf_key(config, key, alternative, is_file=True):
     value = Path(config.get(key, alternative))
     if value.exists():
         return value
-    return alternative
+    return Path(alternative)
 
 try:
     with (web_config_path / 'freva_web_conf.toml') as f:
@@ -33,9 +33,10 @@ except FileNotFoundError:
 PROJECT_ROOT = os.environ.get('PROJECT_ROOT', None) or str(Path(__file__).absolute().parents[2])
 STATIC_URL = '/static/'
 STATIC_ROOT = str(Path(PROJECT_ROOT)  / 'static')
-INSTITUTION_LOGO = _get_conf_key(web_config, 'INSTITUTION_LOGO',
-                                 Path(STATIC_ROOT) / 'img/RegiKlim_logo.png')
-FREVA_LOGO = STATIC_URL + 'img/by_freva_transparent.png'
+_logo = _get_conf_key(web_config, 'INSTITUTION_LOGO',
+                      Path(STATIC_ROOT) / 'img/RegiKlim_logo.png')
+INSTITUTION_LOGO = f'{STATIC_URL}/img/{_logo.name}'
+FREVA_LOGO = f'{STATIC_URL}/img/by_freva_transparent.png'
 MAIN_COLOR = _get_conf_key(web_config, 'MAIN_COLOR', 'Tomato', False)
 BORDER_COLOR = _get_conf_key(web_config, 'BORDER_COLOR', '#6c2e1f', False)
 HOVER_COLOR = _get_conf_key(web_config, 'HOVER_COLOR', '#d0513a', False)
@@ -60,7 +61,7 @@ if isinstance(CONTACTS, str):
 ##########
 #Here you can customize the footer and texts on the startpage
 ##########
-INSTITUTION_NAME = web_config.get('INSTITUION_NAME', 'FreVa')
+INSTITUTION_NAME = web_config.get('INSTITUTION_NAME', 'FreVa')
 ##################################################
 ##################################################
 #SETTING FOR LDAP
@@ -78,7 +79,7 @@ AUTH_LDAP_START_TLS = web_config.get('AUTH_LDAP_START_TLS', True)
 # The directory with SSL certificates
 CA_CERT_DIR = str(web_config_path.parent)
 # the only allowd group
-ALLOWED_GROUP = web_config['ALLOWED_GROUP']
+ALLOWED_GROUP = web_config.get('ALLOWED_GROUP', 'ch1187')
 # Require a ca certificate
 AUTH_LDAP_GLOBAL_OPTIONS = {
     ldap.OPT_X_TLS_REQUIRE_CERT: ldap.OPT_X_TLS_DEMAND, #TPYE OF CERTIFICATION
@@ -167,7 +168,7 @@ DEBUG = TEMPLATE_DEBUG = True
 DEV = web_config.get('DEV', True)
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = web_config.get('ALLOWED_HOSTS', ['localhost'])
+ALLOWED_HOSTS = web_config.get('ALLOWED_HOSTS', ['localhost', '127.0.0.1'])
 if isinstance(ALLOWED_HOSTS, str):
     ALLOWED_HOSTS = [ALLOWED_HOSTS]
 # path to the site packages used:

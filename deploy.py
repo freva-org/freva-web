@@ -144,10 +144,10 @@ class Installer:
     def pip_install(self):
         """Install additional packages using pip."""
 
-        cmd = f"{self.python_prefix} -m pip install {' '.join(self.pip)}"
+        cmd = f"{self.python_prefix} -m pip install -I {' '.join(self.pip)}"
         logger.info(f'Installing additional packages\n\t {cmd}')
         self.run_cmd(cmd)
-        cmd = f"{self.python_prefix} -m pip install {self.backend_url}"
+        cmd = f"{self.python_prefix} -m pip install -I {self.backend_url}"
         logger.info('Installing evaluation_system packages')
         self.run_cmd(cmd)
 

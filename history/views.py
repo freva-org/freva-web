@@ -180,33 +180,33 @@ class HistoryTable(XEditableDatatableView):
 
     template_name = 'history/history_list.html'
 
-    def get_datatable(self):
-        """
-        Customized implementation of the structure getter.  The custom argument ``type`` is managed
-        by us, and is used in the context and GET parameters to control which table we return.
-        """
-
-        datatable_options = self.get_datatable_options()
-
-        status = int(self.request.GET.get('status', -1))
-
-        flag = int(self.request.GET.get('flag', -1))
- 
-        plugin = self.request.GET.get('plugin', None)
-
-        if plugin:
-            ajax_url = (self.request.path +
-                        "?status={status}".format(status=status) +
-                        "&flag={flag}".format(flag=flag) +
-                        "&plugin={plugin}".format(plugin=plugin))
-        else:
-            ajax_url = (self.request.path +
-                        "?status={status}".format(status=status) +
-                        "&flag={flag}".format(flag=flag))
- 
-        datatable = get_datatable_structure(ajax_url, datatable_options)
- 
-        return datatable
+#     def get_datatable(self):
+#         """
+#         Customized implementation of the structure getter.  The custom argument ``type`` is managed
+#         by us, and is used in the context and GET parameters to control which table we return.
+#         """
+# 
+#         datatable_options = self.get_datatable_options()
+# 
+#         status = int(self.request.GET.get('status', -1))
+# 
+#         flag = int(self.request.GET.get('flag', -1))
+#  
+#         plugin = self.request.GET.get('plugin', None)
+# 
+#         if plugin:
+#             ajax_url = (self.request.path +
+#                         "?status={status}".format(status=status) +
+#                         "&flag={flag}".format(flag=flag) +
+#                         "&plugin={plugin}".format(plugin=plugin))
+#         else:
+#             ajax_url = (self.request.path +
+#                         "?status={status}".format(status=status) +
+#                         "&flag={flag}".format(flag=flag))
+#  
+#         datatable = get_datatable_structure(ajax_url, datatable_options)
+#  
+#         return datatable
 
     def get_context_data(self, **kwargs):
         context = super(HistoryTable, self).get_context_data(**kwargs)

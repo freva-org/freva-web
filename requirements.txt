@@ -10,5 +10,6 @@ django-templated-email
 django_compressor
 django-bootstrap3
 django-model-utils
+django-debug-toolbar-user-panel
 # Testing
 django-discover-runner

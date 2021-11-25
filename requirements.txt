@@ -11,5 +11,6 @@ django_compressor
 django-bootstrap3
 django-model-utils
 django-debug-toolbar-user-panel
+django-debug-toolbar
 # Testing
 django-discover-runner

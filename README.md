@@ -3,13 +3,13 @@ The deployment of a production system is done by a dedicated deployment
 repository that sets up the backend, frontend and all services. To deploy the
 web frontend in a production environment use the [deployment repository](https://gitlab.dkrz.de/freva/deployment)
 
-# Setting up a devlopment version:
+# Setting up a development version:
 ## Installation of the required packages
 The frontend will build upon an installed [backend version](https://gitlab.dkrz.de/freva/evaluation_system).
 Hence you will need to install the backend first. We recommend creating a dedicated
 anaconda environment where both frontend and backend are installed. In case
-you haven't already done so you have to check out the backend and install the 
-ancaconda environment first:
+you haven't already done so you have to check out the backend and install the
+anaconda environment first:
 
 ```bash
 git clone https://gitlab.dkrz.de/freva/evaluation_system
@@ -83,3 +83,4 @@ npm run dev   # starts webpack-dev-server including hot-reloading
 ```bash
 python manage.py collectstatic  # get new js files
 ```
+

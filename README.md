@@ -19,6 +19,7 @@ conda activate freva-dev
 source .envrc
 conda env config vars set EVALUATION_SYSTEM_CONFIG_FILE=$EVALUATION_SYSTEM_CONFIG_FILE
 conda env config vars set PUBKEY=$EVALUATION_SYSTEM_CONFIG_FILE
+conda env config vars set DEV_MODE=1
 conda deactivate
 conda activate freva-dev
 pip install (-e) .

@@ -125,7 +125,7 @@ TAIL_TMP_DIR = os.path.join(PROJECT_ROOT,  'tail/')  # '/tmp/tail_offset/'
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
-    ('assets', os.path.join(PROJECT_ROOT, 'assets')),
+    ('assets', os.path.join(PROJECT_ROOT, 'static', 'assets')),
     ('preview', str(freva_share_path / 'preview')),
 )
 # List of finder classes that know how to find static files in

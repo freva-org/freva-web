@@ -50,12 +50,22 @@ python manage.py check
 If checks are passing issue the following command
 
 ```bash
-$: python manage.py migrate --skip-checks
+python manage.py migrate --fake-initial
+python manage.py createsuperuser
 ```
 
-The `--skip-checks` flag tells `django` not to create the already existing
+The `--fake-inital` flag tells `django` not to create the already existing
 database tables.
 
+## Running the server in dev mode
+A development server can be set using the following command:
+
+```bash
+python manage.py runserver [port_number]
+```
+
+Default port is 8000. If an application is already running on that port you
+can change the port number with help of a command line argument
 ## Building the JS application :
 
 Install dependencies:

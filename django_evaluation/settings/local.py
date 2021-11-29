@@ -30,11 +30,15 @@ try:
         web_config = toml.load(f)
 except FileNotFoundError:
     web_config = {}
+# Is this a development instance? Set this to True on development/master
+# instances and False on stage/prod.
+DEV = bool(int(os.environ.get('DEV_MODE', 0)))
 PROJECT_ROOT = os.environ.get('PROJECT_ROOT', None) or str(Path(__file__).absolute().parents[2])
 STATIC_URL = '/static/'
-STATIC_ROOT = str(Path(PROJECT_ROOT)  / 'static')
+if not DEV:
+    STATIC_ROOT = str(Path(PROJECT_ROOT)  / 'static')
 _logo = _get_conf_key(web_config, 'INSTITUTION_LOGO',
-                      Path(STATIC_ROOT) / 'img/RegiKlim_logo.png')
+                      Path(PROJECT_ROOT) / 'static' / 'img/RegiKlim_logo.png')
 INSTITUTION_LOGO = f'{STATIC_URL}/img/{_logo.name}'
 FREVA_LOGO = f'{STATIC_URL}/img/by_freva_transparent.png'
 MAIN_COLOR = _get_conf_key(web_config, 'MAIN_COLOR', 'Tomato', False)
@@ -71,10 +75,6 @@ INSTITUTION_NAME = web_config.get('INSTITUTION_NAME', 'FreVa')
 # The server for LDAP configuration
 AUTH_LDAP_SERVER_URI = web_config.get('AUTH_LDAP_SERVER_URI', 
                                       "ldap://mldap0.hpc.dkrz.de, ldap://mldap1.hpc.dkrz.de")
-try:
-    AUTH_LDAP_SERVER_URI = ', '.join(AUTH_LDAP_SERVER_URI)
-except AttributeError:
-    pass
 AUTH_LDAP_START_TLS = web_config.get('AUTH_LDAP_START_TLS', True)
 # The directory with SSL certificates
 CA_CERT_DIR = str(web_config_path.parent)
@@ -125,9 +125,15 @@ TAIL_TMP_DIR = os.path.join(PROJECT_ROOT,  'tail/')  # '/tmp/tail_offset/'
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
-    ('assets', os.path.join(PROJECT_ROOT, 'static', 'assets')),
     ('preview', str(freva_share_path / 'preview')),
 )
+if DEV:
+    STATICFILES_DIRS += (
+            os.path.join(PROJECT_ROOT, 'static_root'),
+            ('assets', os.path.join(PROJECT_ROOT, 'static_root', 'assets')),
+            ('img', os.path.join(PROJECT_ROOT, 'static_root', 'img')),
+    )
+print(STATICFILES_DIRS)
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (
@@ -163,9 +169,6 @@ AUTHENTICATION_BACKENDS = (
 # Debugging displays nice error messages, but leaks memory. Set this to False
 # on all server instances and True only for development.
 DEBUG = TEMPLATE_DEBUG = True
-# Is this a development instance? Set this to True on development/master
-# instances and False on stage/prod.
-DEV = web_config.get('DEV', True)
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = web_config.get('ALLOWED_HOSTS', ['localhost', '127.0.0.1'])

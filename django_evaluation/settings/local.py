@@ -133,7 +133,6 @@ if DEV:
             ('assets', os.path.join(PROJECT_ROOT, 'static_root', 'assets')),
             ('img', os.path.join(PROJECT_ROOT, 'static_root', 'img')),
     )
-print(STATICFILES_DIRS)
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (

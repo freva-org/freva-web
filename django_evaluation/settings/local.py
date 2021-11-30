@@ -126,7 +126,7 @@ STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
     # Always use forward slashes, even on Windows.
     os.path.join(PROJECT_ROOT, 'static_root'),
-    ('assets', os.path.join(PROJECT_ROOT, 'assests')),
+    ('assets', os.path.join(PROJECT_ROOT, 'assets')),
 )
 if not DEV:
     STATICFILES_DIRS += (

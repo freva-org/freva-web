@@ -1,6 +1,0 @@
-
-export const LOAD_PLUGIN = 'LOAD_PLUGIN';
-
-export const RESET_PLUGIN = 'RESET_PLUGIN';
-
-export const SEND_DEVELOPER_MAIL = 'SEND_DEVELOPER_MAIL';

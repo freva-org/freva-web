@@ -3,6 +3,7 @@ import argparse
 import configparser
 import logging
 import hashlib
+import os
 from os import path as osp
 from pathlib import Path
 import re
@@ -14,9 +15,10 @@ import urllib.request
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 
 
-SHASUM='2751ab3d678ff0277ae80f9e8a74f218cfc70fe9a9cdc7bb1c137d7e47e33d53'
-CONDA_URL="https://repo.anaconda.com/archive/Anaconda3-2021.05-Linux-x86_64.sh"
-EVAL_URL="https://gitlab.dkrz.de/freva/evaluation_system.git"
+MINICONDA_URL = "https://repo.anaconda.com/miniconda/"
+ANACONDA_URL = "https://repo.anaconda.com/archive/"
+CONDA_PREFIX = os.environ.get("CONDA_PREFIX", "Anaconda3-2021.05")
+CONDA_VERSION = "{conda_prefix}-{arch}.sh"
 
 
 logging.basicConfig(format='%(name)s - %(levelname)s - %(message)s', level=logging.INFO)
@@ -73,8 +75,8 @@ def parse_args(argv=None):
     ap.add_argument('--install-prefix', '--prefix', '--install_prefix',
             type=Path, default=Path(__file__).absolute().parent / 'conda',
             help='Set the install prefix')
-    ap.add_argument('--run_tests', action='store_true', default=False,
-            help='Run unittests after installation')
+    ap.add_argument('--silent', '-s', action='store_true', default=False,
+            help='Silence output')
     args = ap.parse_args()
     return args
 
@@ -93,7 +95,8 @@ class Installer:
                            'numpy', 'scipy', 'ffmpeg', 'imagemagick',
                            'mysqlclient', 'pymysql', 'ipython', 'xarray',
                            'dask', 'toml', 'gitpython' ])
-    pip_pkgs = sorted(['pytest-html', 'python-git', 'python-swiftclient',
+    pip_pkgs = sorted(['pytest-html', 'pytest-html', 'python-git',
+                       'python-swiftclient', 'pytest', 'pyest-env', 'testpath',
                        'django-auth-ldap', 'Django-datatable-view-compat',
                        'django-templated-email', 'django_compressor',
                        'django-bootstrap3', 'django-model-utils',
@@ -108,38 +111,55 @@ class Installer:
     def run_cmd(cmd, **kwargs):
         """Run a given command."""
 
-        res = os.system(cmd)
-        if res != 0:
-            raise CalledProcessError(res, cmd)
+        kwargs['check'] = False
+        if self.silent:
+            kwargs['stdout'] = PIPE
+            kwargs['stderr'] = PIPE
+        res = run(shlex.split(cmd), **kwargs)
+        if res.returncode != 0:
+            try:
+                print(res.stderr.decode())
+            except AttributeError:
+                # stderr wasn't piped
+                pass
+            raise CalledProcessError(res.returncode, cmd)
 
     def create_conda(self):
         """Create the conda environment."""
-
         with TemporaryDirectory(prefix='conda') as td:
-            conda_script = Path(td) /'anaconda.sh'
+            conda_script = Path(td) / 'anaconda.sh'
             tmp_env = Path(td) / 'env'
-            logger.info('Downloading anaconda script')
-            urllib.request.urlretrieve(CONDA_URL,
-                                      filename=str(conda_script),
-                                      reporthook=reporthook)
-            print()
-            # self.check_hash(conda_script)
+            logger.info(f'Downloading {CONDA_PREFIX} script')
+            kwargs = {'filename': str(conda_script)}
+            if  self.silent is False:
+                kwargs['reporthook'] = reporthook
+            urllib.request.urlretrieve(
+                    self.conda_url+CONDA_VERSION.format(arch=self.arch,
+                                                        conda_prefix=CONDA_PREFIX),
+                    **kwargs
+            )
+            self.check_hash(conda_script)
             conda_script.touch(0o755)
             cmd = f"{self.shell} {conda_script} -p {tmp_env} -b -f"
-            logger.info(f'Installing anaconda:\n\t{cmd}')
+            logger.info(f"Installing {CONDA_PREFIX}:\n{cmd}")
             self.run_cmd(cmd)
             cmd = f"{tmp_env / 'bin' / 'conda'} create -c {self.channel} -q -p {self.install_prefix} python={self.python} {' '.join(self.packages)} -y"
-            logger.info(f'Creating conda environment:\n\t {cmd}')
+            logger.info(f'Creating conda environment:\n{cmd}')
             self.run_cmd(cmd)
 
-    @staticmethod
-    def check_hash(filename):
-        sha256_hash = hashlib.sha256()
+    def check_hash(self, filename):
+        archive = urllib.request.urlopen(self.conda_url).read().decode()
+        md5sum = ''
+        for line in archive.split('</tr>'):
+            if CONDA_VERSION.format(arch=self.arch,
+                                    conda_prefix=CONDA_PREFIX) in line:
+                md5sum = line.split('<td>')[-1].strip().strip('</td>')
+        md5_hash = hashlib.md5()
         with filename.open('rb') as f:
-            for byte_block in iter(lambda: f.read(4096),b""):
-                sha256_hash.update(byte_block)
-        if sha256_hash.hexdigest() != SHASUM:
-            raise ValueError('Download failed, shasum mismatch')
+            for byte_block in iter(lambda: f.read(4096), b""):
+                md5_hash.update(byte_block)
+        if md5_hash.hexdigest() != md5sum:
+            raise ValueError('Download failed, md5sum mismatch: {md5sum} ')
 
     def pip_install(self):
         """Install additional packages using pip."""

@@ -1,65 +1,65 @@
 {
-  "name": "evaluation_system_web",
-  "version": "1.0.0",
-  "description": "convert static/img/freva-favicon-black.png -fill '#A020F0' -opaque black -resize 64x64 static/img/freva-favicon.png",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs",
-    "test": "tests"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "webpack-dev-server --progress --inline --hot --config webpack.dev.config.js",
-    "build": "webpack --config webpack.dev.config.js --progress --color --mode=development",
-    "build-production": "webpack --config webpack.prod.config.js --progress --color --mode=production"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@gitlab.met.fu-berlin.de:freva/freva_web.git"
-  },
-  "author": "Sebastian Illing",
-  "license": "ISC",
-  "devDependencies": {
-    "@babel/core": "*",
-    "@babel/preset-env": "*",
-    "@babel/preset-react": "*",
-    "babel-loader": "*",
-    "css-loader": "*",
-    "json-loader": "*",
-    "react-hot-loader": "*",
-    "style-loader": "*",
-    "webpack": "^5.59.1",
-    "webpack-bundle-tracker": "^1.4.0",
-    "webpack-cli": "^4.9.1",
-    "webpack-dev-server": "*"
-  },
-  "dependencies": {
-    "@material-ui/core": "*",
-    "@material-ui/icons": "*",
-    "@popperjs/core": "*",
-    "assert": "*",
-    "buffer": "*",
-    "d3": "*",
-    "htmlparser2": "*",
-    "isomorphic-fetch": "*",
-    "jquery": "*",
-    "linkifyjs": "*",
-    "lodash": "*",
-    "prop-types": "*",
-    "react": "*",
-    "react-bootstrap": "*",
-    "react-bootstrap-table": "*",
-    "react-dom": "*",
-    "react-html-parser": "*",
-    "react-nl2br": "*",
-    "react-redux": "*",
-    "react-router": "^3.2.6",
-    "react-router-redux": "*",
-    "react-select": "*",
-    "react-vis": "^1.11.7",
-    "redux": "*",
-    "redux-logger": "*",
-    "redux-thunk": "*",
-    "topojson-client": "*"
-  }
+   "name": "evaluation_system_web",
+   "version": "2021.05",
+   "description": "convert static/img/freva-favicon-black.png -fill '#A020F0' -opaque black -resize 64x64 static/img/freva-favicon.png",
+   "main": "index.js",
+   "directories": {
+      "doc": "docs",
+      "test": "tests"
+   },
+   "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1",
+      "dev": "webpack-dev-server --progress --inline --hot --config webpack.dev.config.js",
+      "build": "webpack --config webpack.dev.config.js --progress --color --mode=development",
+      "build-production": "webpack --config webpack.prod.config.js --progress --color --mode=production"
+   },
+   "repository": {
+      "type": "git",
+      "url": "git@gitlab.met.fu-berlin.de:freva/freva_web.git"
+   },
+   "author": "Sebastian Illing",
+   "license": "ISC",
+   "devDependencies": {
+      "@babel/core": "^7.16.0",
+      "@babel/preset-env": "^7.16.4",
+      "@babel/preset-react": "^7.16.0",
+      "babel-loader": "^8.2.3",
+      "css-loader": "^6.5.1",
+      "json-loader": "^0.5.7",
+      "react-hot-loader": "^4.13.0",
+      "style-loader": "^3.3.1",
+      "webpack": "^5.64.4",
+      "webpack-bundle-tracker": "^1.4.0",
+      "webpack-cli": "^4.9.1",
+      "webpack-dev-server": "^4.6.0"
+   },
+   "dependencies": {
+      "@material-ui/core": "^4.12.3",
+      "@material-ui/icons": "^4.11.2",
+      "@popperjs/core": "^2.11.0",
+      "assert": "^2.0.0",
+      "buffer": "^6.0.3",
+      "d3": "^7.1.1",
+      "htmlparser2": "^7.2.0",
+      "isomorphic-fetch": "^3.0.0",
+      "jquery": "^3.6.0",
+      "linkifyjs": "^3.0.4",
+      "lodash": "^4.17.21",
+      "prop-types": "^15.7.2",
+      "react-bootstrap-table": "^4.3.1",
+      "react-bootstrap": "^2.0.3",
+      "react-dom": "^16.14.0",
+      "react-html-parser": "^2.0.2",
+      "react-nl2br": "^1.0.2",
+      "react-redux": "^7.2.6",
+      "react-router-redux": "^4.0.8",
+      "react-router": "^3.2.6",
+      "react-select": "^5.2.1",
+      "react-vis": "^1.11.7",
+      "react": "^16.14.0",
+      "redux-logger": "^3.0.6",
+      "redux-thunk": "^2.4.1",
+      "redux": "^4.1.2",
+      "topojson-client": "^3.1.0"
+   }
 }

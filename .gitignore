@@ -12,4 +12,3 @@ tail/*
 python=*/
 activate_web
 static/*
-package-lock.json

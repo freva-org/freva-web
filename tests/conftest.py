@@ -45,13 +45,14 @@ def eval_pubkey():
 @pytest.fixture(scope='session')
 def eval_config(eval_pubkey):
     config = get_config()
+    path_prefix = Path(sys.exec_prefix) / "bin"
     with NamedTemporaryFile(suffix='.conf') as tf:
         env = dict(
                 EVALUATION_SYSTEM_CONFIG_FILE=tf.name,
                 PUBKEY=eval_pubkey,
                 DEV_MODE='1',
                 DJANGO_SETTINGS_MODULE="django_evaluation.settings",
-                PATH=os.environ['PATH'],
+                PATH=str(path_prefix)+':'+os.environ['PATH'],
                 PYTHONPATH=str(Path(__file__).parent.parent.absolute())
         )
         with open(tf.name, 'w') as f:

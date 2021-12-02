@@ -6,6 +6,7 @@ import pytest
 import mock
 import random
 import string
+import sys
 from tempfile import NamedTemporaryFile
 
 def get_config():
@@ -49,12 +50,21 @@ def eval_config(eval_pubkey):
                 EVALUATION_SYSTEM_CONFIG_FILE=tf.name,
                 PUBKEY=eval_pubkey,
                 DEV_MODE='1',
-                PATH=os.environ['PATH']
+                DJANGO_SETTINGS_MODULE="django_evaluation.settings",
+                PATH=os.environ['PATH'],
+                PYTHONPATH=str(Path(__file__).parent.parent.absolute())
         )
         with open(tf.name, 'w') as f:
             config.write(f)
         with mock.patch.dict(os.environ, env, clear=True):
             yield config
+
 @pytest.fixture(scope='function')
-def random_admin():
-    yield ''.join(random.choice(string.ascii_lowercase) for i in range(10))
+def random_admin(eval_config):
+    user = ''.join(random.choice(string.ascii_lowercase) for i in range(10))
+    yield user
+    sys.path.insert(0, str(Path(__file__).parent.parent.absolute()))
+    import django
+    django.setup()
+    from django.contrib.auth.models import User
+    User.objects.get(username=user, is_superuser=True).delete()

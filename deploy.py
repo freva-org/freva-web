@@ -144,6 +144,7 @@ class Installer:
         "mock",
         "mod_wsgi",
         "mysqlclient",
+        "nodejs",
         "nose",
         "numpy",
         "paramiko",

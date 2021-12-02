@@ -222,7 +222,9 @@ class Installer:
             cmd = f"{self.shell} {conda_script} -p {tmp_env} -b -f"
             logger.info(f"Installing {CONDA_PREFIX}:\n{cmd}")
             self.run_cmd(cmd)
-            cmd = f"{tmp_env / 'bin' / 'conda'} create -c {self.channel} -q -p {self.install_prefix} python={self.python} {' '.join(self.packages)} -y"
+            cmd = (f"{tmp_env / 'bin' / 'conda'} create -c {self.channel} "
+                   f"-q -p {self.install_prefix} python={self.python} "
+                   f"{' '.join(self.packages)} -y")
             logger.info(f"Creating conda environment:\n{cmd}")
             self.run_cmd(cmd)
 
@@ -272,7 +274,8 @@ class Installer:
 
 
 if __name__ == "__main__":
-    import sys, os
+    import os
+    import sys
 
     args = parse_args(sys.argv)
     Inst = Installer(args)

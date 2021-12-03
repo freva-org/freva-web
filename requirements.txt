@@ -1,16 +1,7 @@
 # LDAP for Django (version 1.2.6)
-django-auth-ldap
 
 #installed version 0.8.3
-django-datatable-view
 #git+https://github.com/pivotal-energy-solutions/django-datatable-view.git
 #send templated mails
-django-templated-email
 #git+https://github.com/BradWhittington/django-templated-email.git
-django_compressor
-django-bootstrap3
-django-model-utils
-django-debug-toolbar-user-panel
-django-debug-toolbar
 # Testing
-django-discover-runner

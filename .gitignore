@@ -7,9 +7,9 @@ venv/*
 conda/*
 evaluation_system.conf
 .*
+!.gitlab-ci.yml
 static/preview/*
 tail/*
 python=*/
 activate_web
 static/*
-package-lock.json

@@ -40,6 +40,17 @@ When finished, tear down the environment with
 docker-compose down
 ```
 
+### Running tests
+There are some rudimentaray tests that check the integration of `django` and the
+`nodejs` building process. Assuming you have followed steps mentioned above and
+created a `freva-dev` cona miniconda environment you can run the tests after
+activating this environment:
+
+```bash
+conda activate freva-dev
+python -m pytest -vv tests
+```
+
 ## Django deployment
 
 you can check if django is working and corretly configured by:

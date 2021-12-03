@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import argparse
-import configparser
 import logging
 import hashlib
 import os
@@ -10,9 +9,8 @@ import re
 import shlex
 import sys
 from subprocess import run, CalledProcessError, PIPE
-import shutil
 import urllib.request
-from tempfile import NamedTemporaryFile, TemporaryDirectory
+from tempfile import TemporaryDirectory
 
 
 MINICONDA_URL = "https://repo.anaconda.com/miniconda/"
@@ -49,7 +47,6 @@ def find_version(*parts):
 def reporthook(count, block_size, total_size):
     if count == 0:
         return
-    progress_size = int(count * block_size)
     frac = count * block_size / total_size
     percent = int(100 * frac)
     bar = "#" * int(frac * 40)
@@ -60,7 +57,7 @@ def reporthook(count, block_size, total_size):
     sys.stdout.flush()
 
 
-def parse_args(argv=None):
+def parse_args():
     """Consturct command line argument parser."""
 
     ap = argparse.ArgumentParser(
@@ -276,7 +273,6 @@ class Installer:
 
 if __name__ == "__main__":
     import os
-    import sys
 
     args = parse_args(sys.argv)
     Inst = Installer(args)

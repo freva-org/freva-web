@@ -12,6 +12,7 @@ import {exportPlugin, loadPlugins, updateCategoryFilter, updateTagFilter, update
 import _ from 'lodash';
 import Checkbox from '@material-ui/core/Checkbox';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import { support } from 'jquery';
 
 const styles = {
     chip: {
@@ -41,6 +42,28 @@ class PluginList extends React.Component {
     handleExport() {
         this.props.dispatch(exportPlugin(this.state.value));
         this.setState({showModal: false})
+    }
+
+    renderPluginBlock(plugins) {
+        if (plugins.length <= 0) {
+            return null;
+        }
+        return (
+            <ListGroup fill>
+                {plugins.map(val => {
+                    return (
+                        <ListGroupItem header={val[1].name}
+                                       onClick={(e) => {e.preventDefault(); browserHistory.push(`/plugins/${val[0]}/detail/`)}}
+                                       href={`/plugins/${val[0]}/detail/`}
+                                       key={val[0]}>
+                            {val[1].user_exported ?
+                                <span className="text-danger">You have plugged in this tool.<br/><br/></span> : null}
+                            {val[1].description}
+                        </ListGroupItem>
+                    )
+                })}
+            </ListGroup>
+        );
     }
 
     render() {
@@ -108,85 +131,11 @@ class PluginList extends React.Component {
 
                  <Row>
                      <Col md={8} className="mt-3">
-                         {decadalPlugins.length > 0 ?
-                                 <ListGroup fill>
-                                     {decadalPlugins.map(val => {
-                                         return (
-                                             <ListGroupItem header={val[1].name}
-                                                            onClick={(e) => {e.preventDefault(); browserHistory.push(`/plugins/${val[0]}/detail/`)}}
-                                                            href={`/plugins/${val[0]}/detail/`}
-                                                            key={val[0]}>
-                                                 {val[1].user_exported ?
-                                                     <span className="text-danger">You have plugged in this tool.<br/><br/></span> : null}
-                                                 {val[1].description}
-                                             </ListGroupItem>
-                                         )
-                                     })}
-                                 </ListGroup> : null}
-
-                         {statisticPlugins.length > 0 ?
-                                 <ListGroup fill>
-                                     {statisticPlugins.map(val => {
-                                         return (
-                                             <ListGroupItem header={val[1].name}
-                                                            onClick={(e) => {e.preventDefault(); browserHistory.push(`/plugins/${val[0]}/detail/`)}}
-                                                            href={`/plugins/${val[0]}/detail/`}
-                                                            key={val[0]}>
-                                                 {val[1].user_exported ?
-                                                     <span className="text-danger">You have plugged in this tool.<br/><br/></span> : null}
-                                                 {val[1].description}
-                                             </ListGroupItem>
-                                         )
-                                     })}
-                                 </ListGroup>: null}
-
-                         {postprocPlugins.length > 0 ?
-                                 <ListGroup fill>
-                                     {postprocPlugins.map(val => {
-                                         return (
-                                             <ListGroupItem header={val[1].name}
-                                                            onClick={(e) => {e.preventDefault(); browserHistory.push(`/plugins/${val[0]}/detail/`)}}
-                                                            href={`/plugins/${val[0]}/detail/`}
-                                                            key={val[0]}>
-                                                 {val[1].user_exported ?
-                                                     <span className="text-danger">You have plugged in this tool.<br/><br/></span> : null}
-                                                 {val[1].description}
-                                             </ListGroupItem>
-                                         )
-                                     })}
-                                 </ListGroup>: null}
-
-                         {supportPlugins.length > 0 ?
-                                 <ListGroup fill>
-                                     {supportPlugins.map(val => {
-                                         return (
-                                             <ListGroupItem header={val[1].name}
-                                                            onClick={(e) => {e.preventDefault(); browserHistory.push(`/plugins/${val[0]}/detail/`)}}
-                                                            href={`/plugins/${val[0]}/detail/`}
-                                                            key={val[0]}>
-                                                 {val[1].user_exported ?
-                                                     <span className="text-danger">You have plugged in this tool.<br/><br/></span> : null}
-                                                 {val[1].description}
-                                             </ListGroupItem>
-                                         )
-                                     })}
-                                 </ListGroup> : null}
-
-                         {otherPlugins.length > 0 ?
-                                 <ListGroup fill>
-                                     {otherPlugins.map(val => {
-                                         return (
-                                             <ListGroupItem header={val[1].name}
-                                                            onClick={(e) => {e.preventDefault(); browserHistory.push(`/plugins/${val[0]}/detail/`)}}
-                                                            href={`/plugins/${val[0]}/detail/`}
-                                                            key={val[0]}>
-                                                 {val[1].user_exported ?
-                                                     <span className="text-Danger">You have plugged in this tool.<br/><br/></span> : null}
-                                                 {val[1].description}
-                                             </ListGroupItem>
-                                         )
-                                     })}
-                                 </ListGroup> : null}
+                         {this.renderPluginBlock(decadalPlugins)}
+                         {this.renderPluginBlock(statisticPlugins)}
+                         {this.renderPluginBlock(postprocPlugins)}
+                         {this.renderPluginBlock(supportPlugins)}
+                         {this.renderPluginBlock(otherPlugins)}
                      </Col>
 
                      <Col md={4}>
@@ -224,7 +173,6 @@ class PluginList extends React.Component {
                                                           onCheck={() => dispatch(updateCategoryFilter('other'))}
                                                           checked={_.includes(categoriesFilter, 'other')}
                                                           key={'other-cat'}/> : null}
-
                              </div>
                          </div>
                          <div className="mt-2">
@@ -241,12 +189,9 @@ class PluginList extends React.Component {
                                              </FormLabel></Col>
                                      })
                                  }
-
                              </div>
                          </div>
-
                      </Col>
-
                  </Row>
 
                  <Modal show={this.state.showModal}

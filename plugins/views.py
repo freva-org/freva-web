@@ -291,7 +291,7 @@ def dirlist(request):
     file_type = request.GET.get('file_type', 'nc')
     try:
         r = ['<ul class="jqueryFileTree" style="display: none;">']
-        d = urllib.unquote(request.POST.get('dir'))
+        d = urllib.parse.unquote(request.POST.get('dir'))
         for f in sorted(os.listdir(d)):
             if f[0] != '.':
                 ff = os.path.join(d, f)
@@ -316,7 +316,7 @@ def list_dir(request):
     # we can specify an ending in GET request
     file_type = request.GET.get('file_type', 'pdf')
     try:
-        d = urllib.unquote(request.GET.get('dir'))
+        d = urllib.parse.unquote(request.GET.get('dir'))
         for f in sorted(os.listdir(d)):
             if f[0] != '.':
                 ff = os.path.join(d, f)

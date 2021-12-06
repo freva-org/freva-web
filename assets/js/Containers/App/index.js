@@ -1,10 +1,8 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import {getCurrentUser} from './actions'
-import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
+import { getCurrentUser } from './actions'
 import CircularProgress from '@material-ui/core/CircularProgress';
-import {Row, Col, Button, ListGroup, ListGroupItem, Container, Modal, ButtonGroup, Input,
-    FormGroup, ControlLabel, FormControl} from 'react-bootstrap';
+import { Container } from 'react-bootstrap';
 
 class App extends React.Component {
  
@@ -17,18 +15,16 @@ class App extends React.Component {
     // Wait until the current user is loaded
     if (!this.props.state.appReducer.currentUser){
         return (
-            <MuiThemeProvider>
-                <Container style={{textAlign: 'center'}}>
-                    <CircularProgress />
-                </Container>
-            </MuiThemeProvider>
+            <Container style={{textAlign: 'center'}}>
+                <CircularProgress />
+            </Container>
         )
     }
 
     return (
-        <MuiThemeProvider>
+        <React.Fragment>
             {this.props.children}
-        </MuiThemeProvider>
+        </React.Fragment>
     )
   }
 }

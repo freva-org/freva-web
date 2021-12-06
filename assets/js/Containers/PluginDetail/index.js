@@ -4,7 +4,7 @@ import {connect} from 'react-redux';
 import {loadPlugin, resetPlugin, sendDeveloperMail} from './actions';
 import {Container, Row, Col, Button, ButtonToolbar, Modal, ButtonGroup, FormControl} from 'react-bootstrap';
 import nl2br from 'react-nl2br';
-import Linkify from 'linkifyjs/react';
+import Linkify from 'linkify-react';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 class PluginDetail extends React.Component {

@@ -9,7 +9,7 @@
    },
    "scripts": {
       "test": "echo \"Error: no test specified\" && exit 1",
-      "dev": "webpack-dev-server --progress --inline --hot --config webpack.dev.config.js",
+      "dev": "webpack-dev-server --progress --hot --config webpack.dev.config.js",
       "build": "webpack --config webpack.dev.config.js --progress --color --mode=development",
       "build-production": "webpack --config webpack.prod.config.js --progress --color --mode=production"
    },
@@ -43,7 +43,7 @@
       "htmlparser2": "^7.2.0",
       "isomorphic-fetch": "^3.0.0",
       "jquery": "^3.6.0",
-      "linkifyjs": "^3.0.4",
+      "linkify-react":"3.0.4",
       "lodash": "^4.17.21",
       "prop-types": "^15.7.2",
       "react-bootstrap-table": "^4.3.1",

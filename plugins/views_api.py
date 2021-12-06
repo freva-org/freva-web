@@ -17,7 +17,7 @@ class PluginsList(APIView):
         pm.reloadPlugins(request.user.username)
         tools = pm.getPlugins(request.user.username)
         res = []
-        for key, val in sorted(tools.iteritems()):
+        for key, val in sorted(tools.items()):
             res.append([key, val])
         return Response(res)
 

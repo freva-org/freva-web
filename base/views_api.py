@@ -16,6 +16,6 @@ class AuthenticatedUser(APIView):
 
     def get(self, request):
 
-        if request.user.is_authenticated():
+        if request.user.is_authenticated:
             return Response(self.serializer_class(request.user).data)
         return Response({})#False)

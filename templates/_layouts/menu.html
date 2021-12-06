@@ -16,7 +16,7 @@
 
 <header style="padding-top:0px;">
    <div class="container">
-      <div class="row">
+      <div class="row justify-content-between">
          <div class="col-md-4 col-sm-6">
             <!-- Logo and site link -->
             <div class="logo">
@@ -24,7 +24,7 @@
                <h1><a href="{% url 'base:home' %}"><img src="{% settings_val 'INSTITUTION_LOGO' %}" style="width:100%;"/></a></h1>
             </div>
          </div>
-         <div class="col-md-2 col-sm-4 pull-right hidden-xs" style="padding-top:20px;">
+         <div class="col-md-2 col-sm-4 float-right d-none d-sm-block" style="padding-top:20px;">
             <!-- Logo and site link -->
             <div class="logo">
                <!-- <h1><a href="{% url 'base:home' %}"><img src="{{ STATIC_URL }}img/miklip-logo.png" style="width:100%;"/></a></h1> -->
@@ -39,89 +39,76 @@
 
 <!-- Navigation Starts -->
 
-<!-- Note down the syntax before editing. It is the default twitter bootstrap navigation -->
-
-    <div class="navbar bs-docs-nav" role="banner">
-      
-        <div class="container" id="navigation">
-          <div class="navbar-header" >
-	          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-	            <span class="icon-bar"></span>
-	            <span class="icon-bar"></span>
-	            <span class="icon-bar"></span>
-	          </button>
-		  </div>
-            {% get_menu_entries 'MENU_ENTRIES' as menu_entries %}
-          <nav class="collapse navbar-collapse bs-navbar-collapse" role="navigation">
-            <!-- Navigation links starts here -->
-	          <ul class="nav navbar-nav ">
-                  {% for item in menu_entries %}
-	            <li><a id={{item.html_id}} href={{item.url}}>{{item.name}}</a></li>
-                  {% endfor %}
-	          </ul>
-
-             {% if not request.user.is_authenticated %}
-		<div class="navbar-right  navbar-nav col-md-5">
-			  <form class="navbar-form navbar-right  navbar-nav" method="post" action="{% url 'base:home' %}">
- 				{% csrf_token %}
-	            <div class="form-group col-md-5" style="padding-left:0px;">
-	                <div class="input-group">
-                    <span class="input-group-btn">
-                        <button class="btn btn-default" type="button" id='guest_credentials' title='Press to insert the credentials for the guest login.' data-toggle='tooltip' data-placement='top' data-container='body'>
-				Guest?
-<!--                            <span class="glyphicon glyphicon-user" aria-hidden="true">
-                            </span> 
--->
-                        </button>
-                    </span>
-                    <input name="user" type="text" placeholder="Username" class="form-control" id='in_user'>
-                </div><!-- /input-group -->
-
-	            </div>
-	            <div class="form-group col-md-3"  style=" padding-left:0px;">
-	              <input name="password" type="password" placeholder="Password" class="form-control" id='in_pwd'>
-	            </div>
-	             <input name="next" type="hidden" id="next_page">
-	             
-	             <button type="submit" class="col-md-2 btn">Sign in</button>
-		{% external_group as show_external%}
-		{%if show_external %}		
-		     <button class="col-md-2 btn" id="signup">Sign Up</button>
-		{%endif%}
-	          </form>
-	        </div> 
-		 {% else %}
-	           <ul class="nav navbar-nav navbar-right">
-	               <li>  <a href="{% url 'base:logout' %}">logout ({{ request.user.username }})</a></li>
-	          </ul>
-	        
-	          {% endif %} 
-          </nav>
-        </div>
+<div class="navbar-container" role="banner">
+  <div class="container" id="navigation">
+    <nav class="navbar navbar-expand-lg navbar-dark w-100 justify-content-between">
+      <div class="fs-6">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        {% get_menu_entries 'MENU_ENTRIES' as menu_entries %}
+        <ul class="navbar-nav ">
+          {% for item in menu_entries %}
+          <li class="nav-item"><a id={{item.html_id}} class="nav-link" href={{item.url}}>{{item.name}}</a></li>
+          {% endfor %}
+        </ul>
       </div>
-   
+      <div>
+        {% if not request.user.is_authenticated %}
+        <form class="navbar-form d-flex justify-around-content" method="post" action="{% url 'base:home' %}">
+          {% csrf_token %}
+          <div class="form-group" style="padding-left:0px;">
+            <div class="input-group">
+              <span class="input-group-btn">
+                <button class="btn btn-default" type="button" id='guest_credentials' title='Press to insert the credentials for the guest login.' data-toggle='tooltip' data-placement='top' data-container='body'>
+                  Guest?
+                </button>
+              </span>
+              <input name="user" type="text" placeholder="Username" class="form-control" id='in_user'>
+            </div><!-- /input-group -->
+
+          </div>
+          <div class="form-group"  style=" padding-left:0px;">
+            <input name="password" type="password" placeholder="Password" class="form-control" id='in_pwd'>
+          </div>
+          <input name="next" type="hidden" id="next_page">
+
+          <button type="submit" class="btn">Sign in</button>
+          {% external_group as show_external%}
+          {%if show_external %}
+          <button class="btn" id="signup">Sign Up</button>
+          {%endif%}
+        </form>
+        {% else %}
+        <ul class="navbar-nav fs-6">
+          <li class="nav-item">  <a class="nav-link" href="{% url 'base:logout' %}">logout ({{ request.user.username }})</a></li>
+        </ul>
+        {% endif %}
+      </div>
+    </nav>
+  </div>
+</div>
+
+
    <script>
-   
+
    $(document).ready(function() {
     $('#guest_credentials').tooltip();
     $('#guest_credentials').on('click', function(){
         $('#in_user').val('guest');
         $('#in_pwd').val('miklip');
     });
-    
+
     $('#signup').on('click', function(){
        document.location = '{%url 'external:external_register'%}';
        return false;
     });
-    
+
     });
     </script>
+<!-- Navigation Ends -->
 
-   
-    
-<!-- Navigation Ends --> 
 
-	    
 {% endblock %}
 
 
@@ -146,13 +133,13 @@
          <div class="widget">
             <h4>Contact</h4>
 			<ul>
-			    	
+
             			{% get_menu_entries 'CONTACTS' as contacts %}
 				{% for item in contacts %}
 				<li>{{ item }}</li>
 				{% endfor %} (Also for password reset)
 			</ul>
-			
+
          </div>
       </div>
       <div class="col-md-4">

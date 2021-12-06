@@ -56,7 +56,7 @@ INSTALLED_APPS = (
     # Third-party apps, patches, fixes
     'debug_toolbar',
     'compressor',
-    'bootstrap3',
+    'bootstrap5',
     'datatableview',
     'webpack_loader',
     'rest_framework',

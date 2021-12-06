@@ -16,10 +16,8 @@ a:hover{
 color:{{hover_color}};
 }
 
-.navbar{
+.navbar-container{
 background: {{main_color}} !important;
-border-top:1px solid {{hover_color}} !important;
-border-bottom:1px solid {{hover_color}} !important; 
 }
 
 .nav .open>a, .nav .open>a:hover, .nav .open>a:focus {
@@ -27,7 +25,7 @@ border-bottom:1px solid {{hover_color}} !important;
 }
 
 .navbar button{
-background:{{hover_color}} !important;  
+background:{{hover_color}} !important;
 }
 
 .navbar button:hover{
@@ -39,7 +37,7 @@ border-right:1px solid {{border_color}};
 }
 
 .navbar .nav > li > a{
-background: {{main_color}}; 
+background: {{main_color}};
 border-left:1px solid {{border_color}};
 }
 

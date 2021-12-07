@@ -50,7 +50,7 @@ class ResultFacets(APIView, FilterAbstract):
         params = request.query_params
 
         modRequest = {}
-        for key, value in params.iteritems():
+        for key, value in params.items():
             if key == 'plugin':
                 queryset = queryset.filter(tool=value)
             else:
@@ -99,7 +99,7 @@ class ResultFacets(APIView, FilterAbstract):
                         matchlist.append(value)
                     else:
                         continue
-            for key, num in OrderedDict(sorted(Counter(structure_temp[fac]).items())).iteritems():
+            for key, num in OrderedDict(sorted(Counter(structure_temp[fac]).items())).items():
                 structure[fac].append(key)
                 structure[fac].append(num)
 
@@ -158,12 +158,13 @@ class ResultFiles(APIView, FilterAbstract):
             full_path = re.sub(r'&%s=(\d+|\w+)' % item, '', full_path)
 
         # new entries in database?
-        max_id = queryset.filter(flag__lt=3, status__lt=2).order_by('id').last().id
+        max_entry = queryset.filter(flag__lt=3, status__lt=2).order_by('id').last()
+        max_id = max_entry.id if max_entry else 0
         cache_max_id = cache.get('{}_{}'.format(full_path, max_id), 0)
 
         # regex are tricky - some replacements
         mod_request = {}
-        for key, value in params.iteritems():
+        for key, value in params.items():
             if key == 'plugin':
                 queryset = queryset.filter(tool=value)
             else:

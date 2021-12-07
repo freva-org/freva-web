@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {Grid, Row, Col, Panel, FormControl, Tooltip, OverlayTrigger, Modal, Button} from 'react-bootstrap';
+import { Row, Col, FormControl, Tooltip, OverlayTrigger } from 'react-bootstrap';
 
 
 class AccordionItemBody extends React.Component {
@@ -60,13 +60,11 @@ class AccordionItemBody extends React.Component {
         const filteredItems = this.renderFilteredItems(filteredValues);
 
         return (
-            <Row>
-                <Col md={12}>
-                    <FormControl id={`search`} type="text" placeholder={`Search ${eventKey} name`} ref={`searchInput`}
+            <div className="d-flex">
+                <FormControl className="m-3" id={`search`} type="text" placeholder={`Search ${eventKey} name`} ref={`searchInput`}
                                  onChange={() => this.handleChange()}/>
-                </Col>
                 {filteredItems}
-            </Row>
+            </div>
         )
 
     }

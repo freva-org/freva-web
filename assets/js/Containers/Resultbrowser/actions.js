@@ -2,27 +2,22 @@ import * as constants from './constants'
 import fetch from 'isomorphic-fetch'
 import {getCookie} from '../../utils'
 import _ from 'lodash';
-import $ from 'jquery';
 
 export const selectResultFacet = (facet, value) => dispatch => {
-    $('html').addClass('wait');
     setTimeout(function(){
-
-
-    dispatch({
-        type: constants.SELECT_RESULT_FACET,
-        facet,
-        value
-    });
-    dispatch(setActiveResultFacet(facet));
-    dispatch(loadResultFacets());
-    dispatch(loadResultFiles());
+        dispatch({
+            type: constants.SELECT_RESULT_FACET,
+            facet,
+            value
+        });
+        dispatch(setActiveResultFacet(facet));
+        dispatch(loadResultFacets());
+        dispatch(loadResultFiles());
     },50);
 
 };
 
 export const clearResultFacet = (facet) => dispatch => {
-    $('html').addClass('wait');
     dispatch({
         type: constants.CLEAR_RESULT_FACET,
         facet
@@ -38,7 +33,6 @@ export const setMetadata = (metadata) => ({
 });
 
 export const clearAllResultFacets = (facet) => dispatch => {
-    $('html').addClass('wait');
     dispatch({
         type: constants.CLEAR_ALL_RESULT_FACETS,
         facet
@@ -74,12 +68,10 @@ export const loadResultFacets = () => (dispatch, getState) => {
                 type: constants.LOAD_RESULT_FACETS,
                 payload: json
             });
-            $('html').removeClass('wait');
         })
 };
 
 export const loadResultFiles = () => (dispatch, getState) => {
-    $('html').addClass('wait');
     const {selectedFacets, page, limit, sortName, sortOrder, searchText} = getState().resultbrowserReducer;
     let params = '';
     _.map(selectedFacets, (value, key) => {
@@ -104,7 +96,6 @@ export const loadResultFiles = () => (dispatch, getState) => {
                 type: constants.LOAD_RESULT_FILES,
                 payload: json
             });
-            $('html').removeClass('wait');
         })
 };
 

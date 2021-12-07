@@ -7,9 +7,8 @@ import {loadResultFacets, selectResultFacet, clearResultFacet,
     setMetadata } from './actions';
 import _ from 'lodash';
 import AccordionItemBody from '../../Components/AccordionItemBody';
-import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import OwnPanel from '../../Components/OwnPanel'
+import Spinner from '../../Components/Spinner'
 import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
 import { dateformatter } from '../../utils'
 
@@ -33,14 +32,14 @@ class Resultbrowser extends React.Component {
     }
 
 
-     _searchInText(searchText) {
-            this.setState({searchtext:searchText})
-            if (this.state.searchtext.length > 2 || this.state.searchtext.length == 0)
-                setTimeout(() => {
-                    if (this.state.searchtext.length === searchText.length)
-                        this.props.dispatch(searchInText(searchText))
-         }, 500)
-        }
+    _searchInText(searchText) {
+        this.setState({searchtext:searchText})
+        if (this.state.searchtext.length > 2 || this.state.searchtext.length == 0)
+            setTimeout(() => {
+                if (this.state.searchtext.length === searchText.length)
+                    this.props.dispatch(searchInText(searchText))
+        }, 500)
+    }
 
     /**
      * Loop all facets and render the panels
@@ -51,24 +50,24 @@ class Resultbrowser extends React.Component {
         const {dispatch} = this.props;
         return _.map(facets, (value, key) => {
             let panelHeader;
-            if (selectedFacets[key]) {
-                panelHeader = <span style={{cursor: 'pointer'}}>{key}: <strong>{selectedFacets[key]} <a href="#"
-                                                                                                        onClick={(e) => e.preventDefault()}><span
-                    className="glyphicon glyphicon-remove-circle"
-                    onClick={(e) => e.preventDefault()}/></a></strong></span>
+            const isFacetSelected = !!selectedFacets[key];
+            if (isFacetSelected) {
+                panelHeader = <span>{key}: <strong>{selectedFacets[key]}</strong></span>
             } else if (value.length === 2) {
-                panelHeader = <span style={{cursor: 'pointer'}}>{key}: <strong>{value[0]}</strong></span>
+                panelHeader = <span>{key}: <strong>{value[0]}</strong></span>
             } else {
-                panelHeader = <span style={{cursor: 'pointer'}}>{key} ({value.length / 2})</span>
+                const numberOfValues = value.length / 2;
+                panelHeader = <span>{key} ({numberOfValues})</span>
             }
             return (
-                <OwnPanel header={panelHeader} eventKey={key} key={key} removeFacet={() => dispatch(clearResultFacet(key))}
+                <OwnPanel header={panelHeader} eventKey={key} key={key} removeFacet={isFacetSelected ? (() => dispatch(clearResultFacet(key))) : null}
                           collapse={() => dispatch(setActiveResultFacet(key))}>
                     <AccordionItemBody eventKey={key} value={value}
                                        facetClick={(key, item) => dispatch(selectResultFacet(key, item))}
                                        metadata={metadata[key] ? metadata[key] : null} visible={key === activeFacet}/>
                 </OwnPanel>
             )
+
         });
     }
 
@@ -81,11 +80,7 @@ class Resultbrowser extends React.Component {
             <Card header={<a href="#" onClick={() => dispatch(setActiveResultFacet('results'))}>
                 Results [{numResults}]</a>} collapsible expanded={activeFacet === 'results'} id='result-browser'>
                 { numResults === null ?
-                    <MuiThemeProvider>
-                        <Container style={{textAlign: 'center'}}>
-                            <CircularProgress />
-                        </Container>
-                    </MuiThemeProvider>
+                        <Spinner />
                     :
                    <BootstrapTable data={results}
                                    remote = { true }
@@ -126,11 +121,7 @@ class Resultbrowser extends React.Component {
         // Wait until facets are loaded
         if (facets.length === 0){
             return (
-                <MuiThemeProvider>
-                    <Container style={{textAlign: 'center'}}>
-                        <CircularProgress />
-                    </Container>
-                </MuiThemeProvider>
+                <Spinner />
             )
         }
 

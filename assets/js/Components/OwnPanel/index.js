@@ -1,22 +1,54 @@
 import React from 'react'
-import {Card} from 'react-bootstrap'
+import PropTypes from "prop-types";
+import {Accordion, Button, Card, useAccordionButton} from 'react-bootstrap'
+import {FaTimes} from "react-icons/fa";
 
-class OwnPanel extends Card {
-    constructor(props, context) {
-        super(props, context);
-        this.handleClickTitle = this.handleClickTitle.bind(this);
+function CustomToggle({ children, eventKey, collapse, removeFacet }) {
+  const decoratedOnClick = useAccordionButton(eventKey, () => {
+        collapse();
     }
+  );
 
-    /**
-     * Override the method to allow different title click behaviour
-     */
-    handleClickTitle(e) {
-        if (e.target.className.indexOf('remove') !== -1) {
-            this.props.removeFacet();
-        }else
-            this.props.collapse();
-            super.handleClickTitle(e);
+  const dropFacetAndCollapse = useAccordionButton(eventKey, () => {
+        removeFacet();
+        collapse();
     }
+  );
+
+  return (
+    <React.Fragment>
+        <Button
+            type="button"
+            variant="link"
+            onClick={decoratedOnClick}
+        >
+            {children}
+        </Button>
+        {removeFacet ? <Button variant="link" className="link-danger" onClick={dropFacetAndCollapse}> <FaTimes /> </Button> : null}
+    </React.Fragment>
+  );
+}
+
+OwnPanel.propTypes = {
+    collapse: PropTypes.func.isRequired,
+    header: PropTypes.node.isRequired,
+    eventKey: PropTypes.string.isRequired,
+    isFacetSelected: PropTypes.bool,
+    removeFacet: PropTypes.func,
+    children: PropTypes.node
+}
+
+function OwnPanel(props) {
+    return (
+        <Card className="my-2">
+            <Card.Header>
+                <CustomToggle eventKey={props.eventKey} collapse={props.collapse} removeFacet={props.removeFacet}> {props.header} </CustomToggle>
+            </Card.Header>
+            <Accordion.Collapse eventKey={props.eventKey}>
+                {props.children}
+            </Accordion.Collapse>
+        </Card>
+    );
 }
 
 export default OwnPanel;

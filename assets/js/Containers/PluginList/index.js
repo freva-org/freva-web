@@ -3,16 +3,14 @@ import ReactDOM from 'react-dom';
 import { Link, browserHistory } from 'react-router';
 import {connect} from 'react-redux';
 import {
-    Row, Col, Button, ListGroup, ListGroupItem, Container, Modal, ButtonGroup,
+    Row, Col, Button, ListGroup, ListGroupItem, Container, Modal, ButtonGroup, Form,
     FormGroup, FormLabel, FormControl, InputGroup
 } from 'react-bootstrap';
 import FileTree from '../../Components/FileTree';
 import {fetchDir, closeDir, changeRoot} from '../../Components/FileTree/actions';
 import {exportPlugin, loadPlugins, updateCategoryFilter, updateTagFilter, updateSearchFilter} from './actions';
 import _ from 'lodash';
-import Checkbox from '@material-ui/core/Checkbox';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import { support } from 'jquery';
+import Spinner from "../../Components/Spinner"
 
 const styles = {
     chip: {
@@ -21,7 +19,13 @@ const styles = {
         padding: 6
     }
 };
-
+const categoryTitle = {
+    decadal: 'Decadal Evaluation',
+    statistical: 'Statistical Analysis',
+    postproc: 'Post-Processing',
+    support: 'Support Plugins',
+    other: 'Others'
+};
 
 class PluginList extends React.Component {
 
@@ -66,6 +70,19 @@ class PluginList extends React.Component {
         );
     }
 
+    renderCategoryCheckbox(categories, categoryName) {
+        if (!categories[categoryName]) {
+            return null;
+        }
+
+        return (
+            <Checkbox label={`${categoryTitle[categoryName]} (${categories[categoryName].length})`}
+                                                          onCheck={() => dispatch(updateCategoryFilter(categoryName))}
+                                                          checked={_.includes(categoriesFilter, categoryName)}
+                                                          key={categoryName + '-cat'}/>
+        );
+    }
+
     render() {
         let {exported, tags, categories, categoriesFilter, tagsFilter, filteredPlugins, searchFilter,
              pluginsLoaded} = this.props.pluginList;
@@ -92,13 +109,7 @@ class PluginList extends React.Component {
             return val[1].category.toLowerCase() === 'other';
         });
 
-        let categoryTitle = {
-            decadal: 'Decadal Evaluation',
-            statistical: 'Statistical Analysis',
-            postproc: 'Post-Processing',
-            support: 'Support Plugins',
-            other: 'Others'
-        };
+
 
         let childs = nodes.map(n =>
             <FileTree node={n}
@@ -111,9 +122,7 @@ class PluginList extends React.Component {
 
         if (!pluginsLoaded) {
             return (
-                <Container className="text-center">
-                    <CircularProgress />
-                </Container>
+                <Spinner />
             )
         }
          return (
@@ -148,31 +157,11 @@ class PluginList extends React.Component {
                          <div className="mt-2">
                              <FormLabel>Categories:</FormLabel>
                              <div>
-                                 {categories.decadal ?
-                                 <Checkbox label={`${categoryTitle['decadal']} (${categories['decadal'].length})`}
-                                                          onCheck={() => dispatch(updateCategoryFilter('decadal'))}
-                                                          checked={_.includes(categoriesFilter, 'decadal')}
-                                                          key={'decadal-cat'}/> : null}
-                                 {categories.statistical ?
-                                 <Checkbox label={`${categoryTitle['statistical']} (${categories['statistical'].length})`}
-                                                          onCheck={() => dispatch(updateCategoryFilter('statistical'))}
-                                                          checked={_.includes(categoriesFilter, 'statistical')}
-                                                          key={'statistical-cat'}/> : null}
-                                 {categories.postproc ?
-                                 <Checkbox label={`${categoryTitle['postproc']} (${categories['postproc'].length})`}
-                                                          onCheck={() => dispatch(updateCategoryFilter('postproc'))}
-                                                          checked={_.includes(categoriesFilter, 'postproc')}
-                                                          key={'postproc-cat'}/> : null}
-                                 {categories.support ?
-                                 <Checkbox label={`${categoryTitle['support']} (${categories['support'].length})`}
-                                                          onCheck={() => dispatch(updateCategoryFilter('support'))}
-                                                          checked={_.includes(categoriesFilter, 'support')}
-                                                          key={'support-cat'}/> : null}
-                                 {categories.other ?
-                                 <Checkbox label={`${categoryTitle['other']} (${categories['other'].length})`}
-                                                          onCheck={() => dispatch(updateCategoryFilter('other'))}
-                                                          checked={_.includes(categoriesFilter, 'other')}
-                                                          key={'other-cat'}/> : null}
+                                 {this.renderCategoryCheckbox(categories, "decadal")}
+                                 {this.renderCategoryCheckbox(categories, "statistical")}
+                                 {this.renderCategoryCheckbox(categories, "postproc")}
+                                 {this.renderCategoryCheckbox(categories, "support")}
+                                 {this.renderCategoryCheckbox(categories, "other")}
                              </div>
                          </div>
                          <div className="mt-2">

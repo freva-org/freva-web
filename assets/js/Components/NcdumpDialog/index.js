@@ -2,8 +2,8 @@ import React from 'react';
 import ReactHtmlParser, { processNodes, convertNodeToElement, htmlparser2 } from 'react-html-parser';
 import ReactDOM from 'react-dom';
 import {Modal, Button, FormControl, Alert} from 'react-bootstrap';
-import CircularProgress from '@material-ui/core/CircularProgress';
 
+import Spinner from "../Spinner";
 
 class NcdumpDialog extends React.Component {
 
@@ -27,7 +27,7 @@ class NcdumpDialog extends React.Component {
     render() {
         const {show, onClose, status, output, file} = this.props;
         return (
-            <Modal show={show} bsSize="large" dialogClassName="ncdump-modal"
+            <Modal show={show} size="lg" dialogClassName="ncdump-modal"
                    onShow={() => {if (this.state.pw !== '') this.submitNcdump()}}
                    onHide={() => onClose()}>
                 <Modal.Header closeButton>
@@ -36,7 +36,7 @@ class NcdumpDialog extends React.Component {
 
                 <Modal.Body>
                     <span style={status === 'pw' || status === 'pw_fail' ? {} : {display: 'none'}}>
-                        {status === 'pw_fail' ? <Alert bsStyle="danger"><strong>Wrong password!</strong> Please try again.</Alert> : null}
+                        {status === 'pw_fail' ? <Alert variant="danger"><strong>Wrong password!</strong> Please try again.</Alert> : null}
                         <p>To start Ncdump you have to re-enter your password</p>
                         <form method="post" id="passForm" name="passForm">
                             <FormControl id={`username`} type="text" ref={`username`} name="password" style={{display: 'none'}}/>
@@ -44,10 +44,7 @@ class NcdumpDialog extends React.Component {
                                          onChange={this.handleChange} value={this.state.pw}/>
                         </form>
                     </span>
-                    {status === 'loading' ?
-                    <div style={{textAlign: 'center'}}>
-                        <CircularProgress />
-                    </div> : null}
+                    {status === 'loading' ?  <Spinner /> : null}
 
                     {output ?
                         <div>
@@ -57,7 +54,7 @@ class NcdumpDialog extends React.Component {
                 </Modal.Body>
 
                 <Modal.Footer>
-                    <Button bsStyle="primary" onClick={() => this.submitNcdump()}>Start Ncdump</Button>
+                    <Button variant="primary" onClick={() => this.submitNcdump()}>Start Ncdump</Button>
                 </Modal.Footer>
 
             </Modal>

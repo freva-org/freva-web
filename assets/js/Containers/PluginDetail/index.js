@@ -2,10 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {connect} from 'react-redux';
 import {loadPlugin, resetPlugin, sendDeveloperMail} from './actions';
-import {Container, Row, Col, Button, ButtonToolbar, Modal, ButtonGroup, FormControl} from 'react-bootstrap';
+import {Container, Row, Col, Button, ButtonToolbar, Modal, FormControl} from 'react-bootstrap';
 import nl2br from 'react-nl2br';
 import Linkify from 'linkify-react';
-import CircularProgress from '@material-ui/core/CircularProgress';
+
+import Spinner from '../../Components/Spinner';
 
 class PluginDetail extends React.Component {
 
@@ -38,9 +39,7 @@ class PluginDetail extends React.Component {
         // Wait until plugin loaded
         if (!plugin.name) {
             return (
-                <Container style={{textAlign: 'center'}}>
-                    <CircularProgress />
-                </Container>
+                <Spinner />
             )
         }
 
@@ -59,14 +58,14 @@ class PluginDetail extends React.Component {
                     </Col>
                     <Col md={12}>
                         <ButtonToolbar>
-                            <Button bsStyle="primary" href={`/plugins/${plugin.name.toLowerCase()}/setup/`}>Start
+                            <Button variant="primary" href={`/plugins/${plugin.name.toLowerCase()}/setup/`}>Start
                                 analysis</Button>
-                            <Button bsStyle="primary" href={`/history/?plugin=${plugin.name.toLowerCase()}`}>Show
+                            <Button variant="primary" href={`/history/?plugin=${plugin.name.toLowerCase()}`}>Show
                                 history</Button>
                             {plugin.docpage ?
-                                <Button bsStyle="primary" href={plugin.docpage}>Documentation</Button> : null}
+                                <Button variant="primary" href={plugin.docpage}>Documentation</Button> : null}
                             {plugin.tool_developer ?
-                                <Button bsStyle="info" onClick={() => this.setState({showModal: true})}>Contact
+                                <Button variant="info" onClick={() => this.setState({showModal: true})}>Contact
                                     Developer</Button> : null}
                         </ButtonToolbar>
                     </Col>
@@ -88,7 +87,7 @@ class PluginDetail extends React.Component {
                         </Modal.Body>
 
                         <Modal.Footer>
-                            <Button bsStyle="primary" onClick={() => this.handleSend()}>Send</Button>
+                            <Button variant="primary" onClick={() => this.handleSend()}>Send</Button>
                         </Modal.Footer>
 
                     </Modal> : null}

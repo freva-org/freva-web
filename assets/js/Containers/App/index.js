@@ -1,8 +1,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import { getCurrentUser } from './actions'
-import CircularProgress from '@material-ui/core/CircularProgress';
-import { Container } from 'react-bootstrap';
+import Spinner from "../../Components/Spinner";
 
 class App extends React.Component {
  
@@ -15,9 +14,7 @@ class App extends React.Component {
     // Wait until the current user is loaded
     if (!this.props.state.appReducer.currentUser){
         return (
-            <Container style={{textAlign: 'center'}}>
-                <CircularProgress />
-            </Container>
+          <Spinner />
         )
     }
 

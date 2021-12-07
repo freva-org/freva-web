@@ -7,7 +7,7 @@ class FileTree extends React.Component {
         let childNodes, cN, click;
         if (node.childNodes != null) {
             childNodes = node.childNodes.map((n, i) => {
-                return <FileTree {...this.props} node={n}/>
+                return <FileTree {...this.props} key={i} node={n}/>
             });
             cN = 'directory expanded';
             click = this.props.handleClose;
@@ -19,12 +19,12 @@ class FileTree extends React.Component {
             click = this.props.handleOpen;
         }
         return (
-            <ul className="jqueryFileTree">
-                <li className={cN}>
-                    <a onClick={(e) => click(e, node.path)} href="#">{node.name}</a>
-                    {childNodes}
-                </li>
-            </ul>
+           <ul className="jqueryFileTree">
+               <li className={cN}>
+                   <a onClick={(e) => click(e, node.path)} href="#">{node.name}</a>
+                   {childNodes}
+               </li>
+           </ul>
         )
     }
 }

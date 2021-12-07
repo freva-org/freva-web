@@ -34,15 +34,10 @@
       "webpack-dev-server": "^4.6.0"
    },
    "dependencies": {
-      "@material-ui/core": "^4.12.3",
-      "@material-ui/icons": "^4.11.2",
-      "@popperjs/core": "^2.11.0",
       "assert": "^2.0.0",
       "buffer": "^6.0.3",
-      "d3": "^7.1.1",
       "htmlparser2": "^7.2.0",
       "isomorphic-fetch": "^3.0.0",
-      "jquery": "^3.6.0",
       "linkify-react":"3.0.4",
       "lodash": "^4.17.21",
       "prop-types": "^15.7.2",
@@ -55,12 +50,9 @@
       "react-redux": "^7.2.6",
       "react-router-redux": "^4.0.8",
       "react-router": "^3.2.6",
-      "react-select": "^5.2.1",
-      "react-vis": "^1.11.7",
       "react": "^16.14.0",
       "redux-logger": "^3.0.6",
       "redux-thunk": "^2.4.1",
-      "redux": "^4.1.2",
-      "topojson-client": "^3.1.0"
+      "redux": "^4.1.2"
    }
 }

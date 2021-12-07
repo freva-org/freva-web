@@ -126,7 +126,7 @@ def solr_search(request):
                 results[cm] = res.pop(cm)
             except KeyError:
                 pass
-        for k, v in res.iteritems():
+        for k, v in res.items():
             results[k] = v
         return results
 
@@ -149,7 +149,7 @@ def solr_search(request):
             results = reorder_results(results)
     else:
         results = SolrFindFiles.search(_retrieve_metadata=True, **args)
-        metadata = results.next()
+        metadata = next(results)
         results = list(results)
       
     return HttpResponse(json.dumps(dict(data=results, metadata=metadata)), content_type="application/json")

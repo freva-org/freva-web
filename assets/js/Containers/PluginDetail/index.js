@@ -51,7 +51,7 @@ class PluginDetail extends React.Component {
                     </Col>
                     <Col md={12}>
                         <p>
-                            <Linkify properties={{target: '_blank'}}>
+                            <Linkify>
                                 {nl2br(plugin.long_description)}
                             </Linkify>
                         </p>

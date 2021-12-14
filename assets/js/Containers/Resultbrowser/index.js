@@ -75,42 +75,49 @@ class Resultbrowser extends React.Component {
         //TODO: This should be a separate component
         const {activeFacet,results, numResults, page, limit } = this.props.resultbrowser;
         const {dispatch} = this.props;
+            //<Card header={<a href="#" onClick={() => dispatch(setActiveResultFacet('results'))}>
 
         return (
-            <Card header={<a href="#" onClick={() => dispatch(setActiveResultFacet('results'))}>
-                Results [{numResults}]</a>} collapsible expanded={activeFacet === 'results'} id='result-browser'>
-                { numResults === null ?
-                        <Spinner />
-                    :
-                   <BootstrapTable data={results}
-                                   remote = { true }
-                                   search = { true }
-                                   multiColumnSearch={ true }
-                                   pagination = { true }
-                                   fetchInfo={ { dataTotalSize: numResults } }
-                                   tableStyle = {{border:'none'}}
-                                   options={ {
-                                       noDataText: 'No results available',
-                                       sizePerPage: limit,
-                                       hideSizePerPage: true,
-                                       page: page,
-                                       onPageChange: (page) => dispatch(selectActivePage(page)),
-                                       onSortChange: (sortName,sortOrder) => dispatch(sortActivePage(sortName,sortOrder)),
-                                       onSearchChange: this._searchInText,
-                                       clearSearch: true
-                                   } }
-                   >
-                       <TableHeaderColumn dataField='id' isKey hidden>ID</TableHeaderColumn>
-                       <TableHeaderColumn dataField='timestamp' dataSort={ true } dataFormat={dateformatter}>Timestamp</TableHeaderColumn>
-                       <TableHeaderColumn dataField='tool' dataSort={ true }>Plugin</TableHeaderColumn>
-                       <TableHeaderColumn dataField='caption' dataSort={ true }>Caption</TableHeaderColumn>
-                       <TableHeaderColumn dataField='uid' dataSort={ true }>User</TableHeaderColumn>
-                       <TableHeaderColumn dataField='link2results' dataFormat={ cell => (
-                           <a href={ cell }>{`Show`}</a>
-                       )}>Link</TableHeaderColumn>
-                   </BootstrapTable>
-                }
-            </Card>
+            <Accordion activeKey={activeFacet}>
+                <OwnPanel header={<span>Results [{numResults}]</span>}
+                    eventKey="results"
+                    id='result-browser'
+                    collapse={() => dispatch(setActiveResultFacet('results'))}
+                >
+
+                    { numResults === null ?
+                            <Spinner />
+                        :
+                    <BootstrapTable data={results}
+                                    remote = { true }
+                                    search = { true }
+                                    multiColumnSearch={ true }
+                                    pagination = { true }
+                                    fetchInfo={ { dataTotalSize: numResults } }
+                                    tableStyle = {{border:'none'}}
+                                    options={ {
+                                        noDataText: 'No results available',
+                                        sizePerPage: limit,
+                                        hideSizePerPage: true,
+                                        page: page,
+                                        onPageChange: (page) => dispatch(selectActivePage(page)),
+                                        onSortChange: (sortName,sortOrder) => dispatch(sortActivePage(sortName,sortOrder)),
+                                        onSearchChange: this._searchInText,
+                                        clearSearch: true
+                                    } }
+                    >
+                        <TableHeaderColumn dataField='id' isKey hidden>ID</TableHeaderColumn>
+                        <TableHeaderColumn dataField='timestamp' dataSort={ true } dataFormat={dateformatter}>Timestamp</TableHeaderColumn>
+                        <TableHeaderColumn dataField='tool' dataSort={ true }>Plugin</TableHeaderColumn>
+                        <TableHeaderColumn dataField='caption' dataSort={ true }>Caption</TableHeaderColumn>
+                        <TableHeaderColumn dataField='uid' dataSort={ true }>User</TableHeaderColumn>
+                        <TableHeaderColumn dataField='link2results' dataFormat={ cell => (
+                            <a href={ cell }>{`Show`}</a>
+                        )}>Link</TableHeaderColumn>
+                    </BootstrapTable>
+                    }
+                </OwnPanel>
+            </Accordion>
         )
     }
 

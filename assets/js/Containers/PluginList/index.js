@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import { Link, browserHistory } from 'react-router';
 import {connect} from 'react-redux';
 import {
-    Row, Col, Button, ListGroup, ListGroupItem, Container, Modal, ButtonGroup, Form,
+    Row, Col, Button, ListGroup, ListGroupItem, Container, Modal, ButtonGroup, FormCheck,
     FormGroup, FormLabel, FormControl, InputGroup
 } from 'react-bootstrap';
 import FileTree from '../../Components/FileTree';
@@ -32,6 +32,7 @@ class PluginList extends React.Component {
     constructor(props) {
         super(props);
         this.handleExport = this.handleExport.bind(this);
+        this.renderCategoryCheckbox = this.renderCategoryCheckbox.bind(this);
 
         this.state = {
             showModal: false,
@@ -53,7 +54,7 @@ class PluginList extends React.Component {
             return null;
         }
         return (
-            <ListGroup fill>
+            <ListGroup>
                 {plugins.map(val => {
                     return (
                         <ListGroupItem header={val[1].name}
@@ -76,10 +77,19 @@ class PluginList extends React.Component {
         }
 
         return (
-            <Checkbox label={`${categoryTitle[categoryName]} (${categories[categoryName].length})`}
-                                                          onCheck={() => dispatch(updateCategoryFilter(categoryName))}
-                                                          checked={_.includes(categoriesFilter, categoryName)}
-                                                          key={categoryName + '-cat'}/>
+            <FormCheck>
+                <FormCheck.Label
+                    htmlFor={categoryName + '-cat'}
+                >
+                    <FormCheck.Input
+                        type="checkbox"
+                        onChange={() => this.props.dispatch(updateCategoryFilter(categoryName))}
+                        checked={_.includes(categoriesFilter, categoryName)}
+                        id={categoryName + '-cat'}
+                    />
+                    &nbsp; {categoryTitle[categoryName]} ({categories[categoryName].length})
+                </FormCheck.Label>
+            </FormCheck>
         );
     }
 
@@ -157,11 +167,11 @@ class PluginList extends React.Component {
                          <div className="mt-2">
                              <FormLabel>Categories:</FormLabel>
                              <div>
-                                 {this.renderCategoryCheckbox(categories, "decadal")}
-                                 {this.renderCategoryCheckbox(categories, "statistical")}
-                                 {this.renderCategoryCheckbox(categories, "postproc")}
-                                 {this.renderCategoryCheckbox(categories, "support")}
-                                 {this.renderCategoryCheckbox(categories, "other")}
+                                 {this.renderCategoryCheckbox(categories, categoriesFilter, "decadal")}
+                                 {this.renderCategoryCheckbox(categories, categoriesFilter, "statistical")}
+                                 {this.renderCategoryCheckbox(categories, categoriesFilter, "postproc")}
+                                 {this.renderCategoryCheckbox(categories, categoriesFilter, "support")}
+                                 {this.renderCategoryCheckbox(categories, categoriesFilter, "other")}
                              </div>
                          </div>
                          <div className="mt-2">

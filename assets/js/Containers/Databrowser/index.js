@@ -77,7 +77,7 @@ class Databrowser extends React.Component {
                                 <li className="file ext_nc" key={fn} style={{whiteSpace: 'normal'}}>
                                     <OverlayTrigger overlay={<Tooltip>Click to execute 'ncdump -h'<br/>and view metadata</Tooltip>}>
                                         <Button variant="link" onClick={() => {this.setState({showDialog: true, fn: fn})}}>
-                                            <FaInfoCircle className="ncdump glyphicon glyphicon-info-sign" />
+                                            <FaInfoCircle className="ncdump" />
                                         </Button>
                                     </OverlayTrigger>
                                     {` `}{fn}

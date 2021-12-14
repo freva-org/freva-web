@@ -46,7 +46,7 @@ def home(request):
     pm.reloadPlugins(request.user.username)
     tools = pm.getPlugins(request.user.username) 
     return render(request, 'plugins/home.html',
-                  {'tool_list': sorted(tools.iteritems()),
+                  {'tool_list': sorted(tools.items()),
                    'home_dir': home_dir,
                    'scratch_dir': scratch_dir,
                    'exported_plugin': exported_plugin})
@@ -103,7 +103,7 @@ def search_similar_results(request, plugin_name=None, history_id=None):
             plugin_fields = param_dict.keys()
             
             # don't search for empty form fields
-            for key, val in request.GET.iteritems():
+            for key, val in request.GET.items():
                 if val != '':
                     if key in plugin_fields:
                         data[key] = val

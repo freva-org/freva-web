@@ -20,7 +20,7 @@ def dict_to_url(d):
     if d is None:
         return ''
     result = ''
-    for key, val in d.iteritems():
+    for key, val in d.items():
         for item in val:
             result += '&'+key+'='+item
     return mark_safe(result)

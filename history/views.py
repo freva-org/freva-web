@@ -332,7 +332,7 @@ def results(request, id, show_output_only=False):
     flag = history_object.flag
 
     if not flag == History.Flag.free:
-        if not request.user.is_authenticated():
+        if not request.user.is_authenticated:
             from django.contrib.auth.views import redirect_to_login
             path = request.get_full_path()
             return redirect_to_login(path)
@@ -345,7 +345,7 @@ def results(request, id, show_output_only=False):
                                                                                         History.Flag.shared,
                                                                                         History.Flag.guest]):
                 raise PermissionDenied
-    if not request.user.is_authenticated():
+    if not request.user.is_authenticated:
         request.user.isGuest = True
 
 
@@ -765,7 +765,7 @@ def count_notes(request, history_id, deleted):
 
     history_tags = None
 
-    if request.user.is_authenticated():
+    if request.user.is_authenticated:
         try:
             history_tags = HistoryTag.objects.filter(history_id_id=history_id)
     

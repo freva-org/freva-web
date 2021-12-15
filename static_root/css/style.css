@@ -13,10 +13,13 @@
 
    ========================================================================== */
 
-@import url('bootstrap.css');
+@import url('bootstrap.min.css');
 @import url('style_test.css');
 
 @import url('slider.css');
+/*
+ * Andrej: FML, this is a url in base/urls.py ...
+ * */
 @import url('/freva.cs');
 @import url('app.css');
 @import url('react-bootstrap-table-all.min.css');

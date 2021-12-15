@@ -154,8 +154,9 @@ class ResultFiles(APIView, FilterAbstract):
         options = ['limit', 'offset', 'sortName', 'sortOrder', 'searchText']
         queries = {}
         for item in options:
+          if item in params:
             queries[item] = params[item]
-            full_path = re.sub(r'&%s=(\d+|\w+)' % item, '', full_path)
+          full_path = re.sub(r'&%s=(\d+|\w+)' % item, '', full_path)
 
         # new entries in database?
         max_entry = queryset.filter(flag__lt=3, status__lt=2).order_by('id').last()
@@ -189,7 +190,7 @@ class ResultFiles(APIView, FilterAbstract):
 
 
         # looking for searchText in configurations
-        if len(queries['searchText']) > 0:
+        if "searchText" in queries and len(queries['searchText']) > 0:
             # pattern = r'{.*?zykpak.*?\d+}' # alternative for re.findall - see below
             pattern = re.compile(r'{.*?%s.*?"id": \d+}' % queries['searchText'])
             # for findall we need a fake entry
@@ -201,9 +202,14 @@ class ResultFiles(APIView, FilterAbstract):
 
         # sort entries
         reverse_order = False
-        if queries['sortOrder'] == 'desc': reverse_order = True
-        data = sorted(data, key=itemgetter(queries['sortName']), reverse=reverse_order)
+        if "sortOrder" in queries and queries['sortOrder'] == 'desc': reverse_order = True
+        if "sortName" in queries:
+          data = sorted(data, key=itemgetter(queries['sortName']), reverse=reverse_order)
 
-        result = {'data': data[int(queries['offset']):int(queries['offset']) + int(queries['limit'])],
-                  'metadata': {'start': 0, 'numFound': len(data)}}
+        if "offset" in queries:
+          result = {'data': data[int(queries['offset']):int(queries['offset']) + int(queries['limit'])],
+                    'metadata': {'start': 0, 'numFound': len(data)}}
+        else:
+          result = {'data': data,
+                    'metadata': {'start': 0, 'numFound': len(data)}}
         return Response(result)

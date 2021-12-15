@@ -19,12 +19,6 @@ from plugins.utils import ssh_call, get_scheduler_hosts
 import json
 import logging
 
-
-@login_required()
-def data_browser(request):
-    return render(request, 'solr/data_browser_new.html')
-
-
 @login_required()
 def databrowser(request):
     """

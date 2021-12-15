@@ -184,7 +184,7 @@ SHELL_IN_A_BOX = '/shell/'
 WEBPACK_LOADER = {
     'DEFAULT': {
         'BUNDLE_DIR_NAME': 'dist/',
-        'STATS_FILE': PROJECT_ROOT +  '/webpack-stats-prod.json',
+        'STATS_FILE': PROJECT_ROOT +  '/webpack-stats.json',
     }
 }
 RESULT_BROWSER_FACETS = ['plugin', 'project', 'product', 'institute',

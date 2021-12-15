@@ -13,3 +13,5 @@ tail/*
 python=*/
 activate_web
 static/*
+assets/bundles/*
+webpack-stats.json

@@ -12,13 +12,11 @@ import {exportPlugin, loadPlugins, updateCategoryFilter, updateTagFilter, update
 import _ from 'lodash';
 import Spinner from "../../Components/Spinner"
 
-const styles = {
-    chip: {
-        cursor: 'pointer',
-        margin: 5,
-        padding: 6
-    }
-};
+/*
+These are the hardcodet categories of this group. If a category is not listed here, the
+corresponding plugins will not be shown
+FIXME: Is this actually a good idea?
+*/
 const categoryTitle = {
     decadal: 'Decadal Evaluation',
     statistical: 'Statistical Analysis',
@@ -49,20 +47,29 @@ class PluginList extends React.Component {
         this.setState({showModal: false})
     }
 
-    renderPluginBlock(plugins) {
+    renderPluginBlock(filteredPlugins, category) {
+        let plugins = _.filter(filteredPlugins, (val) => {
+                return val[1].category.toLowerCase() === category;
+            });
+
         if (plugins.length <= 0) {
             return null;
         }
         return (
-            <ListGroup>
+            <ListGroup key={category + "plugins"}>
+                <ListGroupItem>
+                    <h3>{categoryTitle[category]}</h3>
+                </ListGroupItem>
                 {plugins.map(val => {
                     return (
-                        <ListGroupItem header={val[1].name}
+                        <ListGroupItem
+                                       action
                                        onClick={(e) => {e.preventDefault(); browserHistory.push(`/plugins/${val[0]}/detail/`)}}
                                        href={`/plugins/${val[0]}/detail/`}
                                        key={val[0]}>
+                            <div className="fs-5">{val[1].name}</div>
                             {val[1].user_exported ?
-                                <span className="text-danger">You have plugged in this tool.<br/><br/></span> : null}
+                                <span className="text-danger">You have plugged in this tool.<br/></span> : null}
                             {val[1].description}
                         </ListGroupItem>
                     )
@@ -71,24 +78,24 @@ class PluginList extends React.Component {
         );
     }
 
-    renderCategoryCheckbox(categories, categoryName) {
+    renderCategoryCheckbox(categories, categoriesFilter, categoryName) {
         if (!categories[categoryName]) {
             return null;
         }
 
         return (
-            <FormCheck>
-                <FormCheck.Label
-                    htmlFor={categoryName + '-cat'}
-                >
+            <FormCheck key={categoryName + "checkbox"}>
                     <FormCheck.Input
                         type="checkbox"
                         onChange={() => this.props.dispatch(updateCategoryFilter(categoryName))}
                         checked={_.includes(categoriesFilter, categoryName)}
                         id={categoryName + '-cat'}
                     />
-                    &nbsp; {categoryTitle[categoryName]} ({categories[categoryName].length})
-                </FormCheck.Label>
+                    <FormCheck.Label
+                        htmlFor={categoryName + '-cat'}
+                    >
+                        {categoryTitle[categoryName]} ({categories[categoryName].length})
+                    </FormCheck.Label>
             </FormCheck>
         );
     }
@@ -98,28 +105,6 @@ class PluginList extends React.Component {
              pluginsLoaded} = this.props.pluginList;
         const {nodes, root} = this.props.fileTree;
         const {currentUser, dispatch} = this.props;
-
-        let decadalPlugins = _.filter(filteredPlugins, (val) => {
-            return val[1].category === 'decadal';
-        });
-
-        let statisticPlugins = _.filter(filteredPlugins, (val) => {
-            return val[1].category === 'statistical';
-        });
-
-        let postprocPlugins = _.filter(filteredPlugins, (val) => {
-            return val[1].category === 'postproc';
-        });
-
-        let supportPlugins = _.filter(filteredPlugins, (val) => {
-            return val[1].category === 'support';
-        });
-
-        let otherPlugins = _.filter(filteredPlugins, (val) => {
-            return val[1].category.toLowerCase() === 'other';
-        });
-
-
 
         let childs = nodes.map(n =>
             <FileTree node={n}
@@ -150,11 +135,11 @@ class PluginList extends React.Component {
 
                  <Row>
                      <Col md={8} className="mt-3">
-                         {this.renderPluginBlock(decadalPlugins)}
-                         {this.renderPluginBlock(statisticPlugins)}
-                         {this.renderPluginBlock(postprocPlugins)}
-                         {this.renderPluginBlock(supportPlugins)}
-                         {this.renderPluginBlock(otherPlugins)}
+                        {
+                            Object.keys(categoryTitle).map(key => {
+                              return this.renderPluginBlock(filteredPlugins, key)
+                            })
+                        }
                      </Col>
 
                      <Col md={4}>
@@ -167,25 +152,26 @@ class PluginList extends React.Component {
                          <div className="mt-2">
                              <FormLabel>Categories:</FormLabel>
                              <div>
-                                 {this.renderCategoryCheckbox(categories, categoriesFilter, "decadal")}
-                                 {this.renderCategoryCheckbox(categories, categoriesFilter, "statistical")}
-                                 {this.renderCategoryCheckbox(categories, categoriesFilter, "postproc")}
-                                 {this.renderCategoryCheckbox(categories, categoriesFilter, "support")}
-                                 {this.renderCategoryCheckbox(categories, categoriesFilter, "other")}
+                                {
+                                    Object.keys(categoryTitle).map(key => {
+                                        return this.renderCategoryCheckbox(categories, categoriesFilter, key);
+                                    })
+                                }
                              </div>
                          </div>
                          <div className="mt-2">
                              <FormLabel>Tags:</FormLabel>
-                             <div>
+                             <div className="d-flex flex-wrap justify-content-between">
                                  {
                                      tags.map(tag => {
-                                         return <Col md={4} className="pe-0" key={tag}>
-                                             <FormLabel
-                                                    style={styles.chip}
+                                         return (
+                                               <Button className="badge mb-2 me-2" variant={_.includes(tagsFilter, tag) ? "success" : 'secondary'}
+                                                    key={tag}
                                                     onClick={() => dispatch(updateTagFilter(tag))}
-                                                    >
-                                                 {tag}
-                                             </FormLabel></Col>
+                                                >
+                                                  {tag}
+                                               </Button>
+                                        )
                                      })
                                  }
                              </div>

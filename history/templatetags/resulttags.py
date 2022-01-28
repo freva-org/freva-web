@@ -36,7 +36,7 @@ def preview_tree(value, autoescape=None):
         """
         output = []
 
-        sort_key = lambda k, v: (('d' if isinstance(v, FileDict) else 'f') + str(k))
+        sort_key = lambda k_v: (('d' if isinstance(k_v[1], FileDict) else 'f') + str(k_v[0]))
 
         first_dir = True
         first_file = True

@@ -109,7 +109,7 @@ class FileDict(dict):
         Single files will end as one entry containing the whole path.
         This routing splits up this path. Browsing will be more convenient.
         """
-        for k in self.keys():
+        for k in list(self.keys()):
             entry = self[k]
             if isinstance(entry, FileDict):
                 entry.uncompress_single_files()

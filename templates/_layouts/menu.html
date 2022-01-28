@@ -4,108 +4,108 @@
 
 {% load settingstags %}
 
-
 <style>
-@media (max-width: 768px) {
-   .navbar-collapse {
+  @media (max-width: 768px) {
+    .navbar-collapse {
       max-height: 100%;
-   }
-}
+    }
+  }
 </style>
 <!-- Header starts -->
 
 <header style="padding-top:0px;">
-   <div class="container">
-      <div class="row justify-content-between">
-         <div class="col-md-4 col-sm-6">
-            <!-- Logo and site link -->
-            <div class="logo">
-               <!-- <h1><a href="{% url 'base:home' %}"><img src="{{ STATIC_URL }}img/miklip-logo.png" style="width:100%;"/></a></h1> -->
-               <h1><a href="{% url 'base:home' %}"><img src="{% settings_val 'INSTITUTION_LOGO' %}" style="width:100%;"/></a></h1>
-            </div>
-         </div>
-         <div class="col-md-2 col-sm-4 float-right d-none d-sm-block" style="padding-top:20px;">
-            <!-- Logo and site link -->
-            <div class="logo">
-               <!-- <h1><a href="{% url 'base:home' %}"><img src="{{ STATIC_URL }}img/miklip-logo.png" style="width:100%;"/></a></h1> -->
-               <h1><a href="{% url 'base:home' %}"><img src="{% settings_val 'FREVA_LOGO' %}" style="width:100%;"/></a></h1>
-            </div>
-         </div>
+  <div class="container">
+    <div class="row justify-content-between">
+      <div class="col-md-4 col-sm-6">
+        <!-- Logo and site link -->
+        <div class="logo">
+          <!-- <h1><a href="{% url 'base:home' %}"><img src="{{ STATIC_URL }}img/miklip-logo.png" style="width:100%;"/></a></h1> -->
+          <h1><a href="{% url 'base:home' %}"><img src="{% settings_val 'INSTITUTION_LOGO' %}"
+                style="width:100%;" /></a></h1>
+        </div>
       </div>
-   </div>
+      <div class="col-md-2 col-sm-4 float-right d-none d-sm-block" style="padding-top:20px;">
+        <!-- Logo and site link -->
+        <div class="logo">
+          <!-- <h1><a href="{% url 'base:home' %}"><img src="{{ STATIC_URL }}img/miklip-logo.png" style="width:100%;"/></a></h1> -->
+          <h1><a href="{% url 'base:home' %}"><img src="{% settings_val 'FREVA_LOGO' %}" style="width:100%;" /></a></h1>
+        </div>
+      </div>
+    </div>
+  </div>
 </header>
 
 <!-- Header ends -->
 
 <!-- Navigation Starts -->
 
-<div class="navbar-container" role="banner">
+<div class="navbar-container mb-2" role="banner">
   <div class="container" id="navigation">
     <nav class="navbar navbar-expand-lg navbar-dark w-100 justify-content-between">
-      <div class="fs-6">
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div id="navbarSupportedContent" class="fs-6 collapse navbar-collapse">
         {% get_menu_entries 'MENU_ENTRIES' as menu_entries %}
-        <ul class="navbar-nav ">
+        <ul class="navbar-nav me-auto">
           {% for item in menu_entries %}
-          <li class="nav-item"><a id={{item.html_id}} class="nav-link" href={{item.url}}>{{item.name}}</a></li>
+          <li class="nav-item"><a id={{item.html_id}} class="nav-link {% if request.path == item.url %} active {% endif %}" active href={{item.url}}>{{item.name}}</a></li>
           {% endfor %}
         </ul>
-      </div>
-      <div>
-        {% if not request.user.is_authenticated %}
-        <form class="navbar-form d-flex justify-around-content" method="post" action="{% url 'base:home' %}">
-          {% csrf_token %}
-          <div class="form-group" style="padding-left:0px;">
-            <div class="input-group">
-              <span class="input-group-btn">
-                <button class="btn btn-default" type="button" id='guest_credentials' title='Press to insert the credentials for the guest login.' data-toggle='tooltip' data-placement='top' data-container='body'>
+        <div class="d-flex">
+          {% if not request.user.is_authenticated %}
+          <form class="navbar-form d-flex justify-around-content" method="post" action="{% url 'base:home' %}">
+            {% csrf_token %}
+            <div class="form-group" style="padding-left:0px;">
+              <div class="input-group">
+                <button class="btn text-white" type="button" id='guest_credentials'
+                  title='Press to insert the credentials for the guest login.' data-bs-toggle="tooltip"
+                  data-bs-placement="top" data-container='body'>
                   Guest?
                 </button>
-              </span>
-              <input name="user" type="text" placeholder="Username" class="form-control" id='in_user'>
-            </div><!-- /input-group -->
-
-          </div>
-          <div class="form-group"  style=" padding-left:0px;">
-            <input name="password" type="password" placeholder="Password" class="form-control" id='in_pwd'>
-          </div>
-          <input name="next" type="hidden" id="next_page">
-
-          <button type="submit" class="btn">Sign in</button>
-          {% external_group as show_external%}
-          {%if show_external %}
-          <button class="btn" id="signup">Sign Up</button>
-          {%endif%}
-        </form>
-        {% else %}
-        <ul class="navbar-nav fs-6">
-          <li class="nav-item">  <a class="nav-link" href="{% url 'base:logout' %}">logout ({{ request.user.username }})</a></li>
-        </ul>
-        {% endif %}
+                <input name="user" type="text" placeholder="Username" class="form-control" id='in_user'>
+                <input name="password" type="password" placeholder="Password" class="form-control" id='in_pwd'>
+                <input name="next" type="hidden" id="next_page">
+            <button type="submit" class="btn text-white">Sign in</button>
+            {% external_group as show_external%}
+            {%if show_external %}
+            <button class="btn text-white" id="signup">Sign Up</button>
+            {%endif%}
+              </div><!-- /input-group -->
+            </div>
+          </form>
+          {% else %}
+          <ul class="navbar-nav fs-6">
+            <li class="nav-item"> <a class="nav-link" href="{% url 'base:logout' %}">logout ({{ request.user.username }})</a></li>
+          </ul>
+          {% endif %}
+        </div>
       </div>
     </nav>
   </div>
 </div>
 
 
-   <script>
+<script>
 
-   $(document).ready(function() {
-    $('#guest_credentials').tooltip();
-    $('#guest_credentials').on('click', function(){
-        $('#in_user').val('guest');
-        $('#in_pwd').val('miklip');
+  $(document).ready(function () {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+    $('#guest_credentials').on('click', function () {
+      $('#in_user').val('guest');
+      $('#in_pwd').val('miklip');
     });
 
-    $('#signup').on('click', function(){
-       document.location = '{%url 'external:external_register'%}';
-       return false;
+    $('#signup').on('click', function () {
+      document.location = "{%url 'external:external_register'%}";
+      return false;
     });
 
-    });
-    </script>
+  });
+</script>
 <!-- Navigation Ends -->
 
 
@@ -119,49 +119,51 @@
   <div class="container">
     <div class="row">
       <div class="col-md-4">
-         <!-- Widget 1 -->
-         <div class="widget">
-         <h4>About Us</h4>
-<!--    INTEGRAted data and evaluation system for decadal scale predicTION. -->
-<p>
-{% settings_val 'ABOUT_US_TEXT' %}
-</p>
-         </div>
+        <!-- Widget 1 -->
+        <div class="widget">
+          <h4>About Us</h4>
+          <!--    INTEGRAted data and evaluation system for decadal scale predicTION. -->
+          <p>
+            {% settings_val 'ABOUT_US_TEXT' %}
+          </p>
+        </div>
       </div>
       <div class="col-md-4">
-         <!-- widget 2 -->
-         <div class="widget">
-            <h4>Contact</h4>
-			<ul>
+        <!-- widget 2 -->
+        <div class="widget">
+          <h4>Contact</h4>
+          <ul>
 
-            			{% get_menu_entries 'CONTACTS' as contacts %}
-				{% for item in contacts %}
-				<li>{{ item }}</li>
-				{% endfor %} (Also for password reset)
-			</ul>
+            {% get_menu_entries 'CONTACTS' as contacts %}
+            {% for item in contacts %}
+            <li>{{ item }}</li>
+            {% endfor %} (Also for password reset)
+          </ul>
 
-         </div>
+        </div>
       </div>
       <div class="col-md-4">
-         <!-- Widget 3 -->
-         <div class="widget">
-            <h4>Imprint</h4>
-			<ul>
-            			{% get_menu_entries 'IMPRINT' as imprint %}
-				{% for item in imprint %}
-				<li><a href="mailto:{{ item }}" target=_blank>{{ item }}</a></li>
-				{% endfor %}
+        <!-- Widget 3 -->
+        <div class="widget">
+          <h4>Imprint</h4>
+          <ul>
+            {% get_menu_entries 'IMPRINT' as imprint %}
+            {% for item in imprint %}
+            <li><a href="mailto:{{ item }}" target=_blank>{{ item }}</a></li>
+            {% endfor %}
 
 
-			</ul>
+          </ul>
 
-         </div>
+        </div>
       </div>
-	 </div>
-	 <div class="row">
+    </div>
+    <div class="row">
       <hr />
-      <div class="col-md-12"><p class="copy pull-left">
-               Created by <a href="https://github.com/FREVA-CLINT/Freva" target="_blank">Freva</a></p></div>
+      <div class="col-md-12">
+        <p class="copy pull-left">
+          Created by <a href="https://github.com/FREVA-CLINT/Freva" target="_blank">Freva</a></p>
+      </div>
     </div>
   </div>
 </footer>

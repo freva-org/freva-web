@@ -8,7 +8,6 @@
 {% load resulttags %}       
 {% load dialogtags %}
 
-
     <div class="container">
       <!-- Example row of columns -->
       <div class="row">
@@ -70,7 +69,7 @@
 <div class="panel panel-default" style="margin-top:10px;">
     <div class="panel-heading">
       <h4 class="panel-title">
-        <a data-toggle="collapse" href="#collapseConfig">
+        <a data-bs-toggle="collapse" href="#collapseConfig">
           Configuration
         </a>
       </h4>
@@ -128,12 +127,12 @@
 <div class="panel panel-default">
     <div class="panel-heading">
       <h4 class="panel-title">
-        <a data-toggle="collapse" href="#collapseOutput">
+        <a data-bs-toggle="collapse" href="#collapseOutput">
           Program&#039;s output
         </a>
       </h4>
     </div><!-- panel-heading -->
-    <div id="collapseOutput" class="panel-collapse collapse">
+    <div id="collapseOutput" class="collapse">
       <div class="panel-body">
       {% if file_content %}
       {% if history_object.status > 2 %}
@@ -199,7 +198,7 @@
 <div class="panel panel-default" style="margin-top:10px;">
     <div class="panel-heading">
       <h4 class="panel-title">
-        <a data-toggle="collapse" href="#collapseNotes">
+        <a data-bs-toggle="collapse" href="#collapseNotes">
           Notes <span id='note_count'>(0)</span>
         </a>
       </h4>
@@ -224,7 +223,7 @@
 <div class="panel panel-default">
     <div class="panel-heading">
       <h4 class="panel-title">
-        <a data-toggle="collapse" href="#collapseResults">
+        <a data-bs-toggle="collapse" href="#collapseResults">
 
        {% if history_object.status > 0 %}
          No Results (Process status: {{history_object.status_name}})
@@ -384,17 +383,6 @@
 		
 		
 		{% endif %}
-		
-		{% if "configuration" in collapse %} 
-		$('#collapseConfig').collapse();
-		{% endif %}
-		{% if "output" in collapse %} 
-		$('#collapseOutput').collapse();
-		{% endif %}
-		{% if "results" in collapse %} 
-		$('#collapseResults').collapse();
-		{% endif %}
-
 	});
 </script>
 

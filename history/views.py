@@ -5,10 +5,9 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.debug import sensitive_post_parameters
 from django.contrib.flatpages.models import FlatPage
 from django.utils.html import escape
-from datatableview import helpers
+from datatableview import helpers, columns
+from datatableview import Datatable
 from datatableview.views import XEditableDatatableView
-#TODO: let's not use this until https://github.com/pivotal-energy-solutions/django-datatable-view/issues/248 is resolved
-#from datatableview.utils import get_datatable_structure
 
 from django_evaluation.ldaptools import get_ldap_object
 
@@ -35,48 +34,22 @@ from history.models import HistoryTag
 from history.templatetags.resulttags import mask_uid
 
 
-class HistoryTable(XEditableDatatableView):
-    model = History
+class HistoryDatatable(Datatable):
+    configuration = columns.TextColumn(
+        "Configuration", sources=["configuration"], processor="info_button"
+    )
 
-    datatable_options = {
-        'columns': [
-            ('', 'checkbox', 'checkbox'),
-            ('Id', 'id'),
-            ('User', 'uid'),
-            ('Plugin', 'tool'),
-            ('Caption', 'caption', helpers.make_xeditable()),
-            # the timestamp year search bug is fixed in django-datatable-view==0.8.3
-            ('Timestamp', 'timestamp', helpers.format_date('%d.%m.%y %H:%M')),
-            ('Status', 'get_status_display'),
-            ('Info', 'configuration', 'info_button')
-        ]
-    } 
-        
-    def get_queryset(self):
-        user = self.kwargs.get('uid', self.request.user)
+    select_data = columns.TextColumn(
+        "", sources=["select_data"], processor="checkbox"
+    )
 
-        if not (user and
-                self.request.user.has_perm('history.results_view_others')):
-            user = self.request.user
-
-        objects = History.objects.order_by('-id').filter(uid=user)
-
-        status = int(self.request.GET.get('status', -1))
-        flag = int(self.request.GET.get('flag', -1))
-        plugin = self.request.GET.get('plugin', None)
-
-        if status >= 0:
-            objects = objects.filter(status=status)
-     
-        if flag >= 0:
-            objects = objects.filter(flag=flag)
-        else:
-            objects = objects.filter(~Q(flag=History.Flag.deleted))
-
-        if plugin:
-            objects = objects.filter(tool=plugin)
-
-        return objects
+    status = columns.TextColumn(
+        "Status", sources=["get_status_display"]
+    )
+    class Meta:
+        model = History
+        columns = ["select_data", "id", "uid", "tool", "caption", "timestamp", "status", "configuration"]
+        structure_template = 'datatableview/default_structure.html'
 
     def checkbox(self, instance, *args, **kwargs):
         id = "cb_%i" % instance.id
@@ -85,6 +58,7 @@ class HistoryTable(XEditableDatatableView):
 
     def info_button(self, instance, *args, **kwargs):
         # default text and format (scheduled jobs)
+        request = kwargs.get("view").request
         information = 'Information to scheduled job:'
         css_class = "class='btn btn-primary btn-sm ttbtn'"
         button_text = 'Info'
@@ -101,23 +75,23 @@ class HistoryTable(XEditableDatatableView):
         except Exception as e:
             return escape(str(e))
 
-        tooltip_style = "data-toggle='tooltip' data-placement='left'"
+        tooltip_style = "data-bs-html='true' data-bs-toggle='tooltip' data-bs-placement='left'"
 
         caption = instance.caption if instance.caption else ''
 
         config = '%s<br><br><table class="table-condensed blacktable">' % information
-        
+
         # fill configuration
         try:
             # this is much faster than the routine config_dict.
             config_dict = json.loads(instance.configuration)
             for key, value in config_dict.items():
-                text = escape(mask_uid(str(value), self.request.user.isGuest()))
+                text = escape(mask_uid(str(value), request.user.isGuest()))
                 config += '<tr class="blacktable"><td class="blacktable">%s</td><td class="blacktable">%s<td></tr>' \
                           % (key, text)
         except Exception as e:
             print("Tooltip error: ", e)
- 
+
         config += "</table>"
 
         if caption:
@@ -136,7 +110,7 @@ class HistoryTable(XEditableDatatableView):
             href = "href='%s'" % url
         except Exception as e:
             return escape(str(e))
-        
+
         second_button_text = 'Edit Config'
         second_button_style = 'class="btn btn-success btn-sm" style="width:70px; padding-left:3px;"'
 
@@ -160,13 +134,14 @@ class HistoryTable(XEditableDatatableView):
             second_button_href = 'onclick="cancelDialog.show(%i);"' % instance.id
 
             # disable button for manually started jobs
-            if instance.slurm_output == '0':
+            ## FIXME: == stat !=
+            if instance.slurm_output != '0':
                 second_button_text = 'n/a'
                 second_button_style = 'class="btn btn-danger btn-sm mybtn-cancel disabled" style="width:70px; padding-left:3px;"'
                 second_button_href = ''
 
             # disable button when its not the user's job
-            if instance.uid != self.request.user:
+            if instance.uid != request.user:
                 second_button_style = 'class="btn btn-danger btn-sm mybtn-cancel disabled" style="width:70px; padding-left:3px;"'
                 second_button_href = ''
 
@@ -177,36 +152,34 @@ class HistoryTable(XEditableDatatableView):
                                              second_button_text,)
 
         return '%s\n%s\n%s' % (result_button, second_button, info_button)
-
+class HistoryTable(XEditableDatatableView):
+    datatable_class = HistoryDatatable
     template_name = 'history/history_list.html'
 
-#     def get_datatable(self):
-#         """
-#         Customized implementation of the structure getter.  The custom argument ``type`` is managed
-#         by us, and is used in the context and GET parameters to control which table we return.
-#         """
-# 
-#         datatable_options = self.get_datatable_options()
-# 
-#         status = int(self.request.GET.get('status', -1))
-# 
-#         flag = int(self.request.GET.get('flag', -1))
-#  
-#         plugin = self.request.GET.get('plugin', None)
-# 
-#         if plugin:
-#             ajax_url = (self.request.path +
-#                         "?status={status}".format(status=status) +
-#                         "&flag={flag}".format(flag=flag) +
-#                         "&plugin={plugin}".format(plugin=plugin))
-#         else:
-#             ajax_url = (self.request.path +
-#                         "?status={status}".format(status=status) +
-#                         "&flag={flag}".format(flag=flag))
-#  
-#         datatable = get_datatable_structure(ajax_url, datatable_options)
-#  
-#         return datatable
+    def get_queryset(self):
+        user = self.kwargs.get('uid', self.request.user)
+
+        if not (user and
+                self.request.user.has_perm('history.results_view_others')):
+            user = self.request.user
+
+        objects = History.objects.order_by('-id').filter(uid=user)
+
+        status = int(self.request.GET.get('status', -1))
+        flag = int(self.request.GET.get('flag', -1))
+        plugin = self.request.GET.get('plugin', None)
+        if status >= 0:
+            objects = objects.filter(status=status)
+
+        if flag >= 0:
+            objects = objects.filter(flag=flag)
+        else:
+            objects = objects.filter(~Q(flag=History.Flag.deleted))
+
+        if plugin:
+            objects = objects.filter(tool=plugin)
+
+        return objects
 
     def get_context_data(self, **kwargs):
         context = super(HistoryTable, self).get_context_data(**kwargs)
@@ -219,7 +192,6 @@ class HistoryTable(XEditableDatatableView):
         context['flag'] = flag
         context['status'] = status
         context['uid'] = uid
-
         return context
 
 

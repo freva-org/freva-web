@@ -13,7 +13,6 @@
 
    ========================================================================== */
 
-@import url('bootstrap.min.css');
 @import url('style_test.css');
 
 @import url('slider.css');
@@ -22,4 +21,3 @@
  * */
 @import url('/freva.cs');
 @import url('app.css');
-@import url('react-bootstrap-table-all.min.css');

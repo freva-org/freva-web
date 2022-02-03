@@ -1,3 +1,4 @@
+/*
 body{
 font-family: "PT Sans", Arial, Helvetica, sans-serif;
 font-size:13px;
@@ -13,7 +14,7 @@ color:#666;
 margin:3px 0px;
 padding:3px 0px;
 }
-
+*/
 hr{
 margin:3px 0px 15px 0px;
 padding:0px;
@@ -65,7 +66,7 @@ margin-top:5px;
 display: inline;
 float: right;
 }
-   
+
 .aligncenter, img.aligncenter {
 margin-right: auto;
 margin-left: auto;
@@ -74,10 +75,6 @@ clear: both;
 }
 
 /* Button */
-
-a.btn, a.btn:visited, a.btn:hover{
-	color:#333 !important;
-}
 
 a.btn-primary,a.btn-primary:visited,a.btn-primary:hover,
 a.btn-warning,a.btn-warning:visited,a.btn-warning:hover,
@@ -266,10 +263,10 @@ margin: 0px;
 
 .content ul li{
 background-repeat: no-repeat;
-background-position: 2px 7px; 
+background-position: 2px 7px;
 background-size:13px 13px;
 padding:4px 0px;
-padding-left: 21px; 
+padding-left: 21px;
 }
 
 .flexslider  ul li{
@@ -332,7 +329,7 @@ position:relative;
    padding-bottom:3px;
    border-bottom:1px solid #444;
 }
-	
+
 .flex-caption p {
 	margin:0;
 	line-height: 19px;
@@ -949,7 +946,7 @@ padding:6px 0;
 line-height:17px;
 font-size:13px;
 }
- 
+
 .paging span, .paging a {
 display:block;
 float:left;
@@ -962,11 +959,11 @@ background: #fff;
 border:1px solid #ddd;
 font-weight:normal;
 }
- 
+
 .paging a:hover{
 color:#fff;
 }
- 
+
 .paging .current{
 padding:5px 8px;
 color:#fff;
@@ -1963,10 +1960,10 @@ margin: 0px;
 
 footer ul li{
 background-repeat: no-repeat;
-background-position: 2px 7px; 
+background-position: 2px 7px;
 background-size:13px 13px;
 padding:0px 0px;
-padding-left: 21px; 
+padding-left: 21px;
 }
 
 footer .widget{
@@ -2006,7 +2003,7 @@ margin-bottom:10px;
    .serv-b,.feat-b,.price-b{
    width:100%;
    float:none;
-   } 
+   }
    .blog .meta span{
    float:none !important;
    }
@@ -2033,8 +2030,8 @@ margin-bottom:10px;
    .aserv-r{
    width:100%;
    float:none;
-   }   
-   
+   }
+
 }
 
 @media (max-width: 767px){
@@ -2068,7 +2065,7 @@ margin-bottom:10px;
 	}
    .dropdown-menu a{
    border-bottom:none !important;
-   } 
+   }
    .flex-caption{
    display:none;
    }
@@ -2082,7 +2079,7 @@ margin-bottom:10px;
    .resume .rinfo{
    margin-top:15px;
    }
-   
+
    .teams{
    text-align:center;
    }
@@ -2092,7 +2089,7 @@ margin-bottom:10px;
    }
    .error .error-small{
    max-width:300px;
-   }  
+   }
    .ifeat{
    margin:5px 0px;
    padding:5px 0px 10px 0px;
@@ -2106,27 +2103,27 @@ margin-bottom:10px;
    margin:0 auto;
    margin-bottom:8px;
    width:100%;
-   }    
+   }
    .sidebar{
    margin-top:20px;
    }
    .logreg-page{
-   width:90%;   
+   width:90%;
    }
    .reinfo{
    width:100%;
    float:none;
    margin-right:0px;
    }
-   
+
    .form-horizontal .control-label {
 		text-align: left;
 	}
-	
+
 	.prdetails h5{
 		margin-top:20px;
 	}
-   
+
    .rgood{
    width:92%;
    float:none;
@@ -2142,7 +2139,7 @@ margin-bottom:10px;
    }
    footer{
    padding:10px 20px;
-   } 
+   }
 }
 
 @media (max-width: 991px){
@@ -2152,7 +2149,7 @@ margin-bottom:10px;
    .navbar .nav > li > a{
    border:0px !important;
    }
-   
+
    .dropdown-menu a{
    border-bottom:none !important;
    }
@@ -2165,5 +2162,5 @@ margin-bottom:10px;
    margin:0 auto;
    margin-bottom:8px;
    width:100%;
-   }   
+   }
 }

@@ -191,14 +191,8 @@ class ResultFiles(APIView, FilterAbstract):
 
         # looking for searchText in configurations
         if "searchText" in queries and len(queries['searchText']) > 0:
-            # pattern = r'{.*?zykpak.*?\d+}' # alternative for re.findall - see below
-            pattern = re.compile(r'{.*?%s.*?"id": \d+}' % queries['searchText'])
-            # for findall we need a fake entry
-            json_data = json.dumps(data)[:-1]+', {"fake" : "%s", "id": 0}' % queries['searchText']+']'
-            first_findall = pattern.findall(json_data)
-            data = [json.loads(re.findall(r'{.*?"id": \d+}', regex).pop()) for regex in first_findall]
-            # remove fake entry
-            data.pop()
+            searchText = queries['searchText']
+            data = list(filter(lambda s: searchText in json.dumps(s), data))
 
         # sort entries
         reverse_order = False

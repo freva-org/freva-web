@@ -79,7 +79,7 @@ class HistoryDatatable(Datatable):
 
         caption = instance.caption if instance.caption else ''
 
-        config = '%s<br><br><table class="table-condensed blacktable">' % information
+        config = '%s<br><br><table class="table-condensed blacktable w-100">' % information
 
         # fill configuration
         try:
@@ -99,11 +99,11 @@ class HistoryDatatable(Datatable):
         else:
             title = "title='%s'" % (config,)
 
-        info_button = "<a %s %s %s %s style='width:35px; padding-left:5px'>%s</a>" % (
+        info_button = "<a %s %s %s %s>%s</a>" % (
                 css_class, href, tooltip_style, title, button_text)
 
         result_text = 'Results'
-        style = "class='btn btn-success btn-sm' style='width:70px'"
+        style = "class='btn btn-success btn-sm'"
 
         try:
             url = reverse('history:results', args=[instance.id])
@@ -112,7 +112,7 @@ class HistoryDatatable(Datatable):
             return escape(str(e))
 
         second_button_text = 'Edit Config'
-        second_button_style = 'class="btn btn-success btn-sm" style="width:70px; padding-left:3px;"'
+        second_button_style = 'class="btn btn-success btn-sm"'
 
         try:
             url = reverse('plugins:setup', args=[instance.tool, instance.id])
@@ -129,7 +129,7 @@ class HistoryDatatable(Datatable):
                                  instance.processStatus.running]:
             result_text = 'Progress'
             second_button_text = 'Cancel Job'
-            second_button_style = 'class="btn btn-danger btn-sm mybtn-cancel" style="width:70px; padding-left:3px;"'
+            second_button_style = 'class="btn btn-danger btn-sm mybtn-cancel"'
 
             second_button_href = 'onclick="cancelDialog.show(%i);"' % instance.id
 
@@ -137,12 +137,12 @@ class HistoryDatatable(Datatable):
             ## FIXME: == stat !=
             if instance.slurm_output != '0':
                 second_button_text = 'n/a'
-                second_button_style = 'class="btn btn-danger btn-sm mybtn-cancel disabled" style="width:70px; padding-left:3px;"'
+                second_button_style = 'class="btn btn-danger btn-sm mybtn-cancel disabled"'
                 second_button_href = ''
 
             # disable button when its not the user's job
             if instance.uid != request.user:
-                second_button_style = 'class="btn btn-danger btn-sm mybtn-cancel disabled" style="width:70px; padding-left:3px;"'
+                second_button_style = 'class="btn btn-danger btn-sm mybtn-cancel disabled"'
                 second_button_href = ''
 
         result_button = "<a  %s %s>%s</a>" % (style, href, result_text)

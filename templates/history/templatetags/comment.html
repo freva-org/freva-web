@@ -1,14 +1,9 @@
 {% load resulttags %}
 
-<div class='container'  style="border: 2px solid #eee;padding: 5px; margin: 2px" id='cont_{{class_id}}'>
+<div class='container card p-2 mb-2 shadow-sm' id='cont_{{class_id}}'>
 <div class="col-md-12">
 {% ifequal class_id 'new' %}
-    <div class="col-md-11">
-        <input class="form-control class_{{class_id}} mybtn-edit" id='dummyinput' tabindex=-1></input>
-    </div>
-    <div class="col-md-1">
-        <a class="btn btn-info class_{{class_id}} mybtn-edit" id='btn_edit_{{class_id}}'>New</a>
-    </div>
+    <input class="form-control class_{{class_id}} mybtn-edit" id='dummyinput' placeholder="Insert new now" tabindex=-1></input>
     {% else %}
 	{% ifequal htag.type|slugify tagType.note_public|slugify %}
 		{% if user.isGuest %}
@@ -24,12 +19,8 @@
         </div>
         {% ifequal htag.uid user %}
 
-        <div class="col-md-offset-10 col-md-1">
         <a class="btn btn-danger class_{{class_id}} mybtn-edit"  id='btn_delete_{{class_id}}'>Delete</a>
-        </div>
-        <div class="col-md-1">
-        <a class="btn btn-info class_{{class_id}} mybtn-edit"  id='btn_edit_{{class_id}}'>Edit</a>
-        </div>
+        <a class="btn btn-warning class_{{class_id}} mybtn-edit"  id='btn_edit_{{class_id}}'>Edit</a>
         {% endifequal %}
     {% endifequal %}
     {% if class_id == "new" or  htag.uid == user %}
@@ -62,16 +53,12 @@
         	</div> <!-- alert -->
 	    </div>
 		</div> <!-- row -->
-            <div class="col-md-2">
             <a class="btn btn-danger" id='btn_cancel_{{class_id}}'>Cancel</a>
-            </div>
-            <div class="col-md-offset-9 col-md-1">
-                <a class="btn btn-success" id='btn_save_{{class_id}}'>Save</a>
-            </div>
+            <a class="btn btn-success" id='btn_save_{{class_id}}'>Save</a>
         </form>
     </div> <!-- new_node -->
     {% endif %}
-</div> <!-- col-md-12 --> 
+</div> <!-- col-md-12 -->
 </div> <!-- container -->
 
 <script>
@@ -115,7 +102,7 @@
                 		$('#textarea_{{class_id}}').focus().val('').val(text);
 			}
 
-                
+
 		{% if class_id == "new" or  htag.uid == user %}
                 $('#btn_cancel_{{class_id}}').on('click', function(){
 			$('.class_{{class_id}}').toggle();
@@ -145,17 +132,17 @@
 	                        $('.mybtn-edit').removeAttr("disabled");
 				$('.class_{{class_id}}').toggle();
 	       			var kind = $( "input:radio[name='radiogrp_{{class_id}}']:checked" ).val();
-	
+
 	                        var data = {'text':$('#textarea_{{class_id}}').val(),
 	                                    'type': kind };
-	
+
 	                        {% ifequal class_id 'new'  %}
 	                        var url = '{% url 'history:edit-historytag' history_id '0' %}';
 	                        $.post(url, data, function(resp){
 	                                var url = '{% url 'history:result-comments' history_id %}';
 				                    $('#loadComments').load(url)
 	                        });
-	   
+
 	                	//$('#cont_new').on('click', click_cont_new);
 				reactivate_cont_new();
 	                        {% else %}
@@ -163,7 +150,7 @@
 	                         $.post(url, data, function(resp){
 					$('#text_{{class_id}}').html(resp);
 	                        });
-	                        
+
 	                        if(kind == {{tagType.note_public}}) {
 	                            $('#h4_text_{{class_id}}').text('Commentary by you');
 	                        }
@@ -171,13 +158,13 @@
 	                            $('#h4_text_{{class_id}}').text('Private comment');
 	                        }
 	                       {% endifequal %}
-	
+
 	                        $('#caption_modal').modal('hide');
 			}
 		});
-		{% endif %}        
-	                                
-        });    
+		{% endif %}
+
+        });
 
 </script>
 

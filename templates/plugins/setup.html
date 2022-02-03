@@ -34,10 +34,6 @@
 
     {# Load CSS and JavaScript #}
 
-
-    {% bootstrap_javascript %}
-
-
     <div class="container">
         <!-- Example row of columns -->
         <div class="row">
@@ -183,8 +179,9 @@
                         </div>
                         <div class="row">
                             <div class="col-md-12" id="similarResults">
-                                <center><p>Loading similar results!</p><img src="{{ STATIC_URL }}img/ajax-loader.gif"/>
-                                </center>
+                                <div class="spinner-border text-center" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
                             </div>
                         </div>
 
@@ -289,7 +286,7 @@
                     index_pw = index;
             });
             form_vals.splice(index_pw, 1);
-            $('#' + container).html('<p>Loading similar results!</p><img src="{{STATIC_URL}}img/ajax-loader.gif" style="margin-left:50px;"/>');
+            $('#' + container).html('<div class="text-center"><p>Loading similar results!</p><div class="spinner-border" role="status"> <span class="visually-hidden">Loading...</span> </div></div> ');
             $.ajax({
                 url: '/plugins/{{tool.name}}/similar-results/',
                 data: form_vals,
@@ -402,18 +399,6 @@
                 searchResults('similarDiv');
             });
             searchResults('similarDiv');
-
-
-            $('#simAffix').affix({
-                offset: {
-                    top: 200,
-                    bottom: function () {
-                        return (this.bottom = $('.footer').outerHeight(true))
-                    }
-                }
-            });
-
-
         });
 
 

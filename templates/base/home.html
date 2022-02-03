@@ -4,13 +4,9 @@
 {% block page_class %}home-page{% endblock %}
 {% block content %}
 
-{% load bootstrap5 %}
-
 {# Load CSS and JavaScript #}
 
 {% load settingstags %}
-{% bootstrap_javascript %}
-
 
 <!-- Show an error message after accessing a protected page -->
 {% if login_failed and not request.GET.login_required%}

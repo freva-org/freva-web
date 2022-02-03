@@ -1,7 +1,6 @@
 {% load static %}
 {% load dialogtags %}
 {% load settingstags %}
-{% load bootstrap5 %}
 
  <!-- Beware that this is not part of the dialog! -->
  <div class="alert alert-success" role="alert" id='alert_send_success' style='display:none'>
@@ -22,8 +21,8 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
           <h4 class="modal-title">Send email to {% settings_val 'INSTITUTION_NAME' %} users</h4>
+		  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body" id="browsefield">
         	<div class="form-group">
@@ -63,6 +62,7 @@
 			sendmail();
 		});
 
+		$(".select2-choices").addClass("form-control");
 	});
 
 
@@ -83,7 +83,7 @@
                             'one4all' : one4all,
                             'copy4me' : copy4me,
                             'action' : 'results'};
-		var url = '{% url 'history:sendMail' %}';
+		var url = "{% url 'history:sendMail' %}";
 		var self = this;
 		var success = ""
 		var failed = ""

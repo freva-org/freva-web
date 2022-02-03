@@ -149,10 +149,8 @@
           <ul>
             {% get_menu_entries 'IMPRINT' as imprint %}
             {% for item in imprint %}
-            <li><a href="mailto:{{ item }}" target=_blank>{{ item }}</a></li>
+            <li>{{ item }}</li>
             {% endfor %}
-
-
           </ul>
 
         </div>

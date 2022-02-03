@@ -171,7 +171,7 @@ def sendmail_to_follower(request, history_id, subject, message):
     :type message: string
     :param message: the mesaage
     """
-    from django.core.urlresolvers import reverse
+    from django.urls import reverse
     from django.core.mail import EmailMessage
     from django_evaluation.ldaptools import get_ldap_object
 

@@ -3,7 +3,7 @@ class DarkEditable{
         this._element = { element: null, form: null, load: null, buttons: {success: null, cancel: null}}
         this.element = element;
         this.options = options;
-        
+
         this.init_options();
         this.init_popover();
         this.init_text();
@@ -39,7 +39,7 @@ class DarkEditable{
         get_opt("pk", null);
         get_opt("title", "");
         get_opt("type", "text");
-        get_opt("emptytext", "<i>Empty</i>");
+        get_opt("emptytext", "Empty");
         get_opt("url", null);
         get_opt("ajaxOptions", {});
         this.ajaxOptions = Object.assign({
@@ -83,7 +83,7 @@ class DarkEditable{
                 if(this.value == ""){
                     this.element.innerHTML = this.emptytext;
                 } else {
-                    this.element.innerHTML = this.value;
+                    this.element.innerHTML = $("<div></div>").text(this.value).html();
                     empty = false;
                 }
             break;
@@ -217,7 +217,7 @@ class DarkEditable{
             opt.innerHTML = item.text;
             select.append(opt);
         });
-        
+
         return this.createContainer(select);
     }
 
@@ -361,7 +361,7 @@ class DarkEditable{
       return new Promise(function (resolve, reject) {
         $.ajax({
           url: url,
-          method: "POST", 
+          method: "POST",
           dataType: "json",
           data: {name: self.name, value: new_value, pk: self.pk}
         }).done(resolve).fail(reject)

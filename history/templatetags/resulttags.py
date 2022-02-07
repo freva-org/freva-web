@@ -140,18 +140,20 @@ user_mask = {}
 
 
 @register.inclusion_tag('history/templatetags/mail_to_developer.html')
-def mail_to_developer(tool_name):
+def mail_to_developer(tool_name, url):
+
     from evaluation_system.api import plugin_manager as pm
     from django_evaluation.middelwares import get_current_user
     tool = pm.getPluginInstance(tool_name, user_name=get_current_user().username)
-    
+
     try:
         developer = tool.tool_developer
     except AttributeError:
         developer = False
-    
+
     return {'tool_name': tool_name,
-            'developer': developer}
+            'developer': developer,
+            'current_url': url}
 
 
 def get_masked_uid(uid):

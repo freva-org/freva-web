@@ -3,7 +3,7 @@
 <div class='container card p-2 mb-2 shadow-sm' id='cont_{{class_id}}'>
 <div class="col-md-12">
 {% ifequal class_id 'new' %}
-    <input class="form-control class_{{class_id}} mybtn-edit" id='dummyinput' placeholder="Insert new now" tabindex=-1></input>
+    <input class="form-control class_{{class_id}} mybtn-edit" id='dummyinput' placeholder="Insert new note" tabindex=-1></input>
     {% else %}
 	{% ifequal htag.type|slugify tagType.note_public|slugify %}
 		{% if user.isGuest %}

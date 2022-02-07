@@ -528,14 +528,19 @@ def cancel_slurmjob(request):
 @login_required()
 def send_mail_to_developer(request):
     from templated_email import send_templated_mail
-    
-    text = request.POST.get('text', None)
+
+    text = request.POST.get('text', "")
     tool_name = request.POST.get('tool_name', None)
-    
+    url = request.POST.get('url', None)
+
+
+    if (url):
+        text = text + "\nThis email has been send from this url: " + url
+
     tool = pm.getPluginInstance(tool_name, user_name=request.user.username)
     developer = tool.tool_developer
-    
-    user_info = get_ldap_object() 
+
+    user_info = get_ldap_object()
     myinfo = user_info.get_user_info(str(request.user))
     try:
         my_email = myinfo[3]

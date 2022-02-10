@@ -24,7 +24,6 @@ class FilterAbstract(object):
         raise NotImplementedError('filter_method must be implemented')
 
     def get_filter_field(self, value):
-        print({'%s__%s' % (self.filter_field, self.filter_method,): value})
         return {'%s__%s' % (self.filter_field, self.filter_method,): value}
 
     def generate_filter(self, queryset, params):
@@ -76,7 +75,6 @@ class ResultFacets(APIView, FilterAbstract):
             newItem.update({'plugin': tool})
             items_dic.append(newItem)
         structure_temp = {}
-        print('PluginUpdate: %s' % (time.time() - start))
 
         # create a dictionary - tags: list of attributes
         # counts tags: total number of attributes

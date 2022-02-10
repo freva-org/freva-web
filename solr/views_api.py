@@ -19,7 +19,8 @@ def ncdump(request):
     if not request.user.has_perm('history.browse_full_data'):
         ncdump_out = 'Guest users are not allowed to use this command.<br/>Normally you would see the output of <strong>ncdump</strong> here.'
         return Response(
-            json.dumps(dict(ncdump=mark_safe(ncdump_out), error_msg='')),
+            dict(ncdump=mark_safe(ncdump_out), error_msg=''),
+            content_type='application/json',
             status=200
         )
 

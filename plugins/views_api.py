@@ -27,8 +27,11 @@ class PluginDetail(APIView):
     def get(self, request, plugin_name):
         pm.reloadPlugins(request.user.username)
         plugin = get_plugin_or_404(plugin_name, user_name=request.user.username)
+        plugin_dict = pm.getPluginDict(plugin_name, user_name=request.user.username)
         #plugin = PluginWeb(plugin)
-        return Response(PluginSerializer(plugin).data)
+        data = PluginSerializer(plugin).data
+        data["user_exported"] = plugin_dict.get("user_exported", False)
+        return Response(data)
 
 
 class ExportPlugin(APIView):

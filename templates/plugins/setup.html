@@ -40,6 +40,9 @@
             <div class="col-md-9">
                 <h1>{{ tool.name }}</h1>
                 <p>{{ tool.short_description }}</p>
+                {% if user_exported %}
+                    <div class="text-danger mb-2">You have plugged in this tool.</div>
+                {% endif %}
                 <form action="" method="post" name="plugin_form" id="plugin_form">
                     {% csrf_token %}
 

@@ -57,6 +57,10 @@ class PluginDetail extends React.Component {
                 {nl2br(plugin.long_description)}
               </Linkify>
             </p>
+            {
+              plugin.user_exported &&
+              <div className="text-danger mb-2">This plugin has been exported</div>
+            }
           </Col>
           <Col md={12}>
             <ButtonToolbar>

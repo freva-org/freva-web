@@ -273,7 +273,11 @@ def setup(request, plugin_name, row_id=None):
             config_dict = plugin.setupConfiguration(check_cfg=False, substitute=True)
                   
         form = PluginForm(initial=config_dict, tool=plugin, uid=user.getName())
+
+    plugin_dict = pm.getPluginDict(plugin_name, user_name=request.user.username)
+
     return render(request, 'plugins/setup.html', {'tool': plugin_web,
+                                                  'user_exported': plugin_dict.get("user_exported", False),
                                                   'form': form,
                                                   'user_home': home_dir,
                                                   'user_scratch': scratch_dir,

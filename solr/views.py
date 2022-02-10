@@ -34,13 +34,13 @@ def ncdump(request):
     user_pw = request.POST['pass']
     #command = '%s -h %s' % (settings.NCDUMP_BINARY, fn,)
     command = '%s %s' % (settings.NCDUMP_BINARY, fn,)
-    
+
     if not request.user.has_perm('history.browse_full_data'):
         ncdump_out = 'Guest users are not allowed to use this command.<br/>Normally you would see the output of <strong>ncdump</strong> here.'
         return HttpResponse(json.dumps(dict(ncdump=mark_safe(ncdump_out),
                                             error_msg='')),
-                            status=200)        
-     
+                            status=200, content_type="application/json")
+
     try:
         result = ssh_call(request.user.username, user_pw,
                           command, get_scheduler_hosts(request.user))
@@ -63,7 +63,7 @@ def solr_search(request):
         facets = request.GET['facet']
     except KeyError:
         facets = False
-    
+
     # get page and strange "_" argument
     try:
         page_limit = args.pop('page_limit')
@@ -73,9 +73,9 @@ def solr_search(request):
 
     if not request.user.has_perm('history.browse_full_data'):
         restrictions = settings.SOLR_RESTRICTIONS
-
-        for k in args.keys():
-            if not restrictions.get(k, None) is None:
+        arg_keys = list(args.keys())
+        for k in arg_keys:
+            if k in restrictions:
                 args[k] = list(set(args[k]).intersection(set(restrictions[k])))
                 if not args[k]:
                     args.pop(k)
@@ -88,9 +88,9 @@ def solr_search(request):
         args['start'] = int(request.GET['start'])
     if 'rows' in args:
         args['rows'] = int(request.GET['rows'])
-    
+
     metadata = None
-   
+
     def remove_year(d):
         tmp = []
         for i, val in enumerate(d):
@@ -145,5 +145,5 @@ def solr_search(request):
         results = SolrFindFiles.search(_retrieve_metadata=True, **args)
         metadata = next(results)
         results = list(results)
-      
+
     return HttpResponse(json.dumps(dict(data=results, metadata=metadata)), content_type="application/json")

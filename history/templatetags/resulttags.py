@@ -9,6 +9,8 @@ from django_evaluation import settings
 from history.utils import FileDict
 from history.models import HistoryTag
 
+from evaluation_system.model.user import User
+
 import re
 
 register = template.Library()
@@ -144,7 +146,8 @@ def mail_to_developer(tool_name, url):
 
     from evaluation_system.api import plugin_manager as pm
     from django_evaluation.middelwares import get_current_user
-    tool = pm.get_plugin_instance(tool_name, user_name=get_current_user().username)
+    user = User(str(get_current_user()));
+    tool = pm.get_plugin_instance(tool_name, user)
 
     try:
         developer = tool.tool_developer

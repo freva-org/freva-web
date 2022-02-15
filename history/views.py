@@ -16,6 +16,7 @@ import os
 
 import evaluation_system.api.plugin_manager as pm
 from evaluation_system.model.db import UserDB
+from evaluation_system.model.user import User
 from evaluation_system.misc import config
 
 from evaluation_system.model.history.models import History, ResultTag
@@ -248,7 +249,7 @@ def follow_result(request, history_id):
                               History.Flag.public,
                               History.Flag.guest]:
         user = str(request.user)
-        pm.followHistoryTag(history_object.id, user, 'Web page: follow')
+        pm.follow_history_tag(history_object.id, user, 'Web page: follow')
         retstr = 'Unfollow'
 
     return HttpResponse(retstr, content_type="text/plain")
@@ -269,7 +270,7 @@ def unfollow_result(request, history_id):
 
     user = str(request.user)
     try:
-        pm.unfollowHistoryTag(history_object.id, user)
+        pm.unfollow_history_tag(history_object.id, user)
         retstr = 'Follow'
         success = True
     # Todo: Exception too broad!
@@ -290,12 +291,12 @@ def jobinfo(request, id):
 
 def results(request, id, show_output_only=False):
     from history.utils import pygtailwrapper
+    user = User(request.user.username)
 
     # get history object
     history_object = get_object_or_404(History, id=id)
     try:
-        plugin = pm.get_plugin_instance(history_object.tool,
-                                      user_name=request.user.username)
+        plugin = pm.get_plugin_instance(history_object.tool, user=user)
         developer = plugin.tool_developer
     # TODO: Exception too broad!
     except:
@@ -332,10 +333,10 @@ def results(request, id, show_output_only=False):
         pass
 
     try:
-        analyze_command = pm.getCommandString(int(id))
+        analyze_command = pm.get_command_string(int(id))
     except Exception as e:
         logging.debug(e)
-    analyze_command = pm.getCommandString(int(id))
+    analyze_command = pm.get_command_string(int(id))
 
     history_object = History.objects.get(id=id)
     file_content = []
@@ -482,7 +483,7 @@ def generate_caption(request, id, type):
     caption = request.POST['caption'].strip() 
     tool_name = request.POST['tool'].strip().capitalize()
  
-    retval = pm.generateCaption(caption, tool_name)
+    retval = pm.generate_caption(caption, tool_name)
     
     if not request.user.isGuest():
         
@@ -537,7 +538,8 @@ def send_mail_to_developer(request):
     if (url):
         text = text + "\nThis email has been send from this url: " + url
 
-    tool = pm.get_plugin_instance(tool_name, user_name=request.user.username)
+    user = User(request.user.username)
+    tool = pm.get_plugin_instance(tool_name, user)
     developer = tool.tool_developer
 
     user_info = get_ldap_object()
@@ -637,6 +639,7 @@ def send_share_email(request):
 
     user_info = get_ldap_object()
 
+    # FIXME: Getting user info does not always work
     myinfo = user_info.get_user_info(str(request.user))
     myemail = myinfo[3]
     myname = "%s %s" % (myinfo[2], myinfo[1])

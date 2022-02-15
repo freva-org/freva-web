@@ -3,6 +3,7 @@ from rest_framework.response import Response
 import os
 
 import evaluation_system.api.plugin_manager as pm
+from evaluation_system.model.user import User
 from evaluation_system.misc import config
 from django_evaluation.ldaptools import get_ldap_object
 from plugins.utils import get_plugin_or_404, plugin_metadata_as_dict
@@ -23,8 +24,10 @@ class PluginsList(APIView):
 class PluginDetail(APIView):
 
     def get(self, request, plugin_name):
+
         pm.reload_plugins(request.user.username)
-        plugin = get_plugin_or_404(plugin_name, user_name=request.user.username)
+        user = User(request.user.username)
+        plugin = get_plugin_or_404(plugin_name, user=user)
         plugin_dict = pm.get_plugin_metadata(plugin_name, user_name=request.user.username)
         #plugin = PluginWeb(plugin)
         data = PluginSerializer(plugin).data
@@ -58,7 +61,8 @@ class SendMailToDeveloper(APIView):
         from templated_email import send_templated_mail
         text = request.data.get('text', None)
         tool_name = request.data.get('tool_name', None)
-        tool = pm.get_plugin_instance(tool_name, user_name=request.user.username)
+        user = User(request.user.username)
+        tool = pm.get_plugin_instance(tool_name, user=user)
         developer = tool.tool_developer
         user_info = get_ldap_object()
         myinfo = user_info.get_user_info(str(request.user))

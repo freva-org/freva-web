@@ -1,6 +1,6 @@
 import React from "react";
-import {connect} from "react-redux";
-import {Container, Row, Col, Accordion, Card, Tooltip, OverlayTrigger, Button} from "react-bootstrap";
+import { connect } from "react-redux";
+import { Container, Row, Col, Accordion, Card, Tooltip, OverlayTrigger, Button } from "react-bootstrap";
 
 import { FaInfoCircle } from "react-icons/fa";
 import _ from "lodash";
@@ -10,14 +10,14 @@ import AccordionItemBody from "../../Components/AccordionItemBody";
 import OwnPanel from "../../Components/OwnPanel";
 import Spinner from "../../Components/Spinner";
 
-import {loadFacets, selectFacet, clearFacet, clearAllFacets, setActiveFacet, setMetadata, loadFiles,
-  loadNcdump, resetNcdump} from "./actions";
+import { loadFacets, selectFacet, clearFacet, clearAllFacets, setActiveFacet, setMetadata, loadFiles,
+  loadNcdump, resetNcdump } from "./actions";
 
 class Databrowser extends React.Component {
 
   constructor (props) {
     super(props);
-    this.state = {showDialog: false, fn: null};
+    this.state = { showDialog: false, fn: null };
   }
 
   /**
@@ -30,7 +30,7 @@ class Databrowser extends React.Component {
     const script = document.createElement("script");
     script.src = "/static/js/metadata.js";
     script.async = true;
-    script.onload = () => this.props.dispatch(setMetadata({variable: window.variable, model: window.model, institute: window.institute}));
+    script.onload = () => this.props.dispatch(setMetadata({ variable: window.variable, model: window.model, institute: window.institute }));
     document.body.appendChild(script);
   }
 
@@ -38,14 +38,14 @@ class Databrowser extends React.Component {
      * Loop all facets and render the panels
      */
   renderFacetPanels () {
-    const {facets, selectedFacets, activeFacet, metadata} = this.props.databrowser;
-    const {dispatch} = this.props;
+    const { facets, selectedFacets, activeFacet, metadata } = this.props.databrowser;
+    const { dispatch } = this.props;
     return _.map(facets, (value, key) => {
       let panelHeader;
       const isFacetSelected = !!selectedFacets[key];
       if (isFacetSelected) {
         panelHeader = <span>{key}: <strong>{selectedFacets[key]}</strong></span>;
-      } else if (value.length == 2) {
+      } else if (value.length === 2) {
         panelHeader = <span>{key}: <strong>{value[0]}</strong></span>;
       } else {
         const numberOfValues = value.length / 2;
@@ -67,8 +67,8 @@ class Databrowser extends React.Component {
 
   renderFilesPanel () {
     //TODO: This should be a separate component
-    const {activeFacet, files, numFiles,} = this.props.databrowser;
-    const {dispatch} = this.props;
+    const { activeFacet, files, numFiles, } = this.props.databrowser;
+    const { dispatch } = this.props;
     return (
       <Accordion activeKey={activeFacet}>
         <OwnPanel
@@ -76,14 +76,14 @@ class Databrowser extends React.Component {
           eventKey="files"
           collapse={() => dispatch(setActiveFacet("files"))}
         >
-          <div style={{maxHeight:500,overflow:"auto"}}>
+          <div style={{ maxHeight:500,overflow:"auto" }}>
             <ul className="jqueryFileTree">
               {
                 _.map(files, (fn) => {
                   return (
-                    <li className="ext_nc" key={fn} style={{whiteSpace: "normal"}}>
+                    <li className="ext_nc" key={fn} style={{ whiteSpace: "normal" }}>
                       <OverlayTrigger overlay={<Tooltip>Click to execute &apos;ncdump -h&apos;<br />and view metadata</Tooltip>}>
-                        <Button variant="link" className="p-0" onClick={() => {this.setState({showDialog: true, fn});}}>
+                        <Button variant="link" className="p-0" onClick={() => {this.setState({ showDialog: true, fn });}}>
                           <FaInfoCircle className="ncdump" />
                         </Button>
                       </OverlayTrigger>
@@ -100,8 +100,8 @@ class Databrowser extends React.Component {
   }
 
   render () {
-    const {files, facets, selectedFacets, activeFacet, ncdumpStatus, ncdumpOutput} = this.props.databrowser;
-    const {dispatch} = this.props;
+    const { files, facets, selectedFacets, activeFacet, ncdumpStatus, ncdumpOutput } = this.props.databrowser;
+    const { dispatch } = this.props;
 
     // Wait until facets are loaded
     if (facets.length === 0) {
@@ -149,7 +149,7 @@ class Databrowser extends React.Component {
             <NcdumpDialog
               show={this.state.showDialog}
               file={this.state.fn}
-              onClose={() => {this.setState({showDialog: false}); dispatch(resetNcdump());}}
+              onClose={() => {this.setState({ showDialog: false }); dispatch(resetNcdump());}}
               submitNcdump={(fn, pw) => dispatch(loadNcdump(fn, pw))}
               status={ncdumpStatus}
               output={ncdumpOutput}

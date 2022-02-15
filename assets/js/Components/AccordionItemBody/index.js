@@ -1,59 +1,64 @@
 import React from "react";
-import ReactDOM from "react-dom";
-import { Row, Col, FormControl, Tooltip, OverlayTrigger } from "react-bootstrap";
+import PropTypes from "prop-types";
+import { FormControl, Tooltip, OverlayTrigger } from "react-bootstrap";
 
 
 class AccordionItemBody extends React.Component {
 
   constructor (props, context) {
     super(props, context);
-    this.state = {needle: ""};
+    this.state = { needle: "" };
+
+    this.handleChange = this.handleChange.bind(this);
   }
 
-  handleChange () {
-    const needle = ReactDOM.findDOMNode(this.refs.searchInput).value;
-    this.setState({needle});
-  }
 
   shouldComponentUpdate (nextProps) {
     return this.props.visible || nextProps.visible;
   }
 
+  handleChange (e) {
+    this.setState({ needle: e.target.value });
+  }
+
   renderFilteredItems (filteredValues) {
-    const {metadata, facetClick, eventKey} = this.props;
+    const { metadata, facetClick, eventKey } = this.props;
     return filteredValues.map((item, i) => {
-      if (i % 2 == 0) {
-        if (metadata && metadata[item]) {
-          return (
-            <div className="pe-2" key={item}>
-              <OverlayTrigger overlay={<Tooltip>{metadata[item]}</Tooltip>}>
-                <a href="#" onClick={(e) => {e.preventDefault(); facetClick(eventKey, item);}}>{item}</a>
-              </OverlayTrigger>
-              {" "}[{filteredValues[i + 1]}]
-            </div>
-          );
-        }
+      if (i % 2 === 1) {
+        return null;
+      }
+      if (metadata && metadata[item]) {
         return (
           <div className="pe-2" key={item}>
-            <a href="#" onClick={(e) => {e.preventDefault(); facetClick(eventKey, item);}}>{item}</a> [{filteredValues[i + 1]}]
+            <OverlayTrigger overlay={<Tooltip>{metadata[item]}</Tooltip>}>
+              <a href="#" onClick={(e) => {e.preventDefault(); facetClick(eventKey, item);}}>{item}</a>
+            </OverlayTrigger>
+            {" "}[{filteredValues[i + 1]}]
           </div>
         );
       }
+      return (
+        <div className="pe-2" key={item}>
+          <a href="#" onClick={(e) => {e.preventDefault(); facetClick(eventKey, item);}}>{item}</a> [{filteredValues[i + 1]}]
+        </div>
+      );
     });
   }
 
   render () {
-    const {eventKey, value, metadata} = this.props;
-    let {needle} = this.state;
+
+    const { eventKey, value, metadata } = this.props;
+    let { needle } = this.state;
     needle = needle.toLowerCase();
     const filteredValues = [];
-    value.map((val, i) => {
-      if (i % 2 == 0) {
-        if (val.toLowerCase().indexOf(needle) !== -1 || (metadata && metadata[val] && metadata[val].toLowerCase().indexOf(needle) !== -1)) {
-          filteredValues.push(val);
-          filteredValues.push(value[i + 1]);
-        }
 
+    value.forEach((val, i) => {
+      if (i % 2 === 1) {
+        return;
+      }
+      if (val.toLowerCase().indexOf(needle) !== -1 || (metadata && metadata[val] && metadata[val].toLowerCase().indexOf(needle) !== -1)) {
+        filteredValues.push(val);
+        filteredValues.push(value[i + 1]);
       }
     });
 
@@ -62,10 +67,11 @@ class AccordionItemBody extends React.Component {
     return (
       <div>
         <FormControl
-          className="mb-2" id="search" type="text" placeholder={`Search ${eventKey} name`} ref="searchInput"
-          onChange={() => this.handleChange()}
+          className="mb-2" id="search" type="text" placeholder={`Search ${eventKey} name`}
+          onChange={this.handleChange}
         />
         <div className="d-flex justify-content-start flex-wrap">
+          AccordionItem
           {filteredItems}
         </div>
       </div>
@@ -73,5 +79,13 @@ class AccordionItemBody extends React.Component {
 
   }
 }
+
+AccordionItemBody.propTypes = {
+  eventKey: PropTypes.any,
+  value: PropTypes.any,
+  metadata: PropTypes.any,
+  visible: PropTypes.any,
+  facetClick: PropTypes.any,
+};
 
 export default AccordionItemBody;

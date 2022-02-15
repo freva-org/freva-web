@@ -1,14 +1,14 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import {connect} from "react-redux";
+import { connect } from "react-redux";
 
-import {Container, Row, Col, Button, ButtonToolbar, Modal, FormControl} from "react-bootstrap";
+import { Container, Row, Col, Button, ButtonToolbar, Modal, FormControl } from "react-bootstrap";
 import nl2br from "react-nl2br";
 import Linkify from "linkify-react";
 
 import Spinner from "../../Components/Spinner";
 
-import {loadPlugin, resetPlugin, sendDeveloperMail} from "./actions";
+import { loadPlugin, resetPlugin, sendDeveloperMail } from "./actions";
 
 class PluginDetail extends React.Component {
 
@@ -30,13 +30,13 @@ class PluginDetail extends React.Component {
   handleSend () {
     const text = ReactDOM.findDOMNode(this.refs.textarea).value;
     this.props.dispatch(sendDeveloperMail(text, this.props.plugin.name));
-    this.setState({showModal: false});
+    this.setState({ showModal: false });
     ReactDOM.findDOMNode(this.refs.textarea).value = "";
   }
 
   render () {
 
-    const {plugin} = this.props;
+    const { plugin } = this.props;
 
     // Wait until plugin loaded
     if (!plugin.name) {
@@ -74,7 +74,7 @@ class PluginDetail extends React.Component {
               }
               {
                 plugin.tool_developer ?
-                  <Button variant="info" className="me-2" onClick={() => this.setState({showModal: true})}>Contact
+                  <Button variant="info" className="me-2" onClick={() => this.setState({ showModal: true })}>Contact
                     Developer</Button> : null
               }
             </ButtonToolbar>
@@ -85,7 +85,7 @@ class PluginDetail extends React.Component {
           plugin.tool_developer ?
             <Modal
               show={this.state.showModal}
-              onHide={() => this.setState({showModal: false})}
+              onHide={() => this.setState({ showModal: false })}
             >
               <Modal.Header closeButton>
                 <Modal.Title>Contact developer</Modal.Title>

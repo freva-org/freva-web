@@ -1,19 +1,17 @@
 import React from "react";
 import PropTypes from "prop-types";
-import {Accordion, Button, Card, useAccordionButton} from "react-bootstrap";
-import {FaTimes} from "react-icons/fa";
+import { Accordion, Button, Card, useAccordionButton } from "react-bootstrap";
+import { FaTimes } from "react-icons/fa";
 
 function CustomToggle ({ children, eventKey, collapse, removeFacet }) {
   const decoratedOnClick = useAccordionButton(eventKey, () => {
     collapse();
-  }
-  );
+  });
 
   const dropFacetAndCollapse = useAccordionButton(eventKey, () => {
     removeFacet();
     collapse();
-  }
-  );
+  });
 
   return (
     <React.Fragment>

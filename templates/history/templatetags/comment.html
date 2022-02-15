@@ -2,10 +2,10 @@
 
 <div class='container card p-2 mb-2 shadow-sm' id='cont_{{class_id}}'>
 <div class="col-md-12">
-{% ifequal class_id 'new' %}
+{% if class_id == "new" %}
     <input class="form-control class_{{class_id}} mybtn-edit" id='dummyinput' placeholder="Insert new note" tabindex=-1></input>
     {% else %}
-	{% ifequal htag.type|slugify tagType.note_public|slugify %}
+	{% if htag.type|slugify == tagType.note_public|slugify %}
 		{% if user.isGuest %}
 	            <h4>#{{htag.id}} <span id="h4_text_{{class_id}}">Commentary by <span id='user_{{class_id}}'>{{htag.uid.first_name}} {{htag.uid.last_name}}</span></span></h4>
 		{% else %}
@@ -13,16 +13,16 @@
 		{% endif %}
         {% else %}
             <h4>#{{htag.id}} <span id="h4_text_{{class_id}}">Private comment</span></h4>
-        {% endifequal %}
+        {% endif %}
         <div class="col-md-12">
         <span class='class_{{class_id}}' id='text_{{class_id}}'>{{htag.text|linebreaks|escape}}</span>
         </div>
-        {% ifequal htag.uid user %}
+        {% if htag.uid == user %}
 
         <a class="btn btn-danger class_{{class_id}} mybtn-edit"  id='btn_delete_{{class_id}}'>Delete</a>
         <a class="btn btn-warning class_{{class_id}} mybtn-edit"  id='btn_edit_{{class_id}}'>Edit</a>
-        {% endifequal %}
-    {% endifequal %}
+        {% endif%}
+    {% endif%}
     {% if class_id == "new" or  htag.uid == user %}
     <div class='class_{{class_id}} col-md-12' style='display:none'>
         <form role='form'> <!-- class='form-inline'> -->
@@ -48,7 +48,7 @@
             </div> <!-- form-group -->
 	    <div class="col-md-6">
 	  	<div class="alert alert-danger alert-dismissible" role="alert" id='alert_empty_{{class_id}}'>
-        	<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+        	<button type="button" class="close" data-dismiss="alert"><span class="sr-only">Close</span></button>
         	<strong>Empty comment!<br></strong> To delete a comment use cancel and delete instead.
         	</div> <!-- alert -->
 	    </div>
@@ -67,13 +67,13 @@
 			$('#user_{{class_id}}').text('you');
 		}
 
-		{% ifnotequal class_id 'new' %}
+		{% if class_id != "new" %}
 		$("input[name='radiogrp_{{class_id}}'][value='{{htag.type}}']").attr("checked","checked");
                 $('#textarea_{{class_id}}').val('{{htag.text|escape|escapejs}}');
 		{% else %}
 		$("input[name='radiogrp_{{class_id}}'][value='{{htag.type}}']").attr("checked","checked");
 		$("input[name='radiogrp_{{class_id}}'][value='{{tagType.note_public}}']").attr("checked","checked");
-		{% endifnotequal %}
+		{% endif %}
 
 		{% if class_id != "new" and  htag.uid == user %}
                 $('#btn_delete_{{class_id}}').on('click', function(){
@@ -108,35 +108,33 @@
 			$('.class_{{class_id}}').toggle();
                         $('.mybtn-edit').removeAttr("disabled");
 
-                        {% ifequal class_id 'new' %}
+                        {% if class_id == "new" %}
                         $('#textarea_{{class_id}}').val('');
                         {% else %}
                         $('#textarea_{{class_id}}').val('{{htag.text|escape|escapejs}}');
-                        {% endifequal %}
+                        {% endif %}
 		});
 
                 $('#btn_edit_{{class_id}}').on('click', click_edit_{{class_id}});
 
-		{% ifequal class_id 'new' %}
+		{% if class_id == "new" %}
                 $('#dummyinput').on('focus', click_edit_{{class_id}});
-		{% endifequal %}
+		{% endif %}
 
                 $('#btn_save_{{class_id}}').on('click', function(){
 			var text=$('#textarea_{{class_id}}').val();
 			if( text.trim() == '' ) {
 				$('#alert_empty_{{class_id}}').show();
 				$('#textarea_{{class_id}}').focus();
-			}
-			else {
-
-	                        $('.mybtn-edit').removeAttr("disabled");
-				$('.class_{{class_id}}').toggle();
+			} else {
+	      $('.mybtn-edit').removeAttr("disabled");
+        $('.class_{{class_id}}').toggle();
 	       			var kind = $( "input:radio[name='radiogrp_{{class_id}}']:checked" ).val();
 
 	                        var data = {'text':$('#textarea_{{class_id}}').val(),
 	                                    'type': kind };
 
-	                        {% ifequal class_id 'new'  %}
+	                        {% if class_id == "new"  %}
 	                        var url = '{% url 'history:edit-historytag' history_id '0' %}';
 	                        $.post(url, data, function(resp){
 	                                var url = '{% url 'history:result-comments' history_id %}';
@@ -144,7 +142,7 @@
 	                        });
 
 	                	//$('#cont_new').on('click', click_cont_new);
-				reactivate_cont_new();
+				//reactivate_cont_new();
 	                        {% else %}
 	                        var url = '{% url 'history:edit-historytag' history_id htag.id %}';
 	                         $.post(url, data, function(resp){
@@ -157,7 +155,7 @@
 	                        else {
 	                            $('#h4_text_{{class_id}}').text('Private comment');
 	                        }
-	                       {% endifequal %}
+	                       {% endif %}
 
 	                        $('#caption_modal').modal('hide');
 			}

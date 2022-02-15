@@ -294,7 +294,7 @@ def results(request, id, show_output_only=False):
     # get history object
     history_object = get_object_or_404(History, id=id)
     try:
-        plugin = pm.getPluginInstance(history_object.tool,
+        plugin = pm.get_plugin_instance(history_object.tool,
                                       user_name=request.user.username)
         developer = plugin.tool_developer
     # TODO: Exception too broad!
@@ -537,7 +537,7 @@ def send_mail_to_developer(request):
     if (url):
         text = text + "\nThis email has been send from this url: " + url
 
-    tool = pm.getPluginInstance(tool_name, user_name=request.user.username)
+    tool = pm.get_plugin_instance(tool_name, user_name=request.user.username)
     developer = tool.tool_developer
 
     user_info = get_ldap_object()

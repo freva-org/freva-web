@@ -1,7 +1,8 @@
 """ Default urlconf for django_evaluation """
 
 from django.conf import settings
-from django.conf.urls import include, re_path as url, static
+from django.urls import include, re_path as url
+from django.conf.urls import static
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib import admin
 from django.views.generic import RedirectView

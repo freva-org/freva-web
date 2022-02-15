@@ -5,7 +5,7 @@ import os
 import evaluation_system.api.plugin_manager as pm
 from evaluation_system.misc import config
 from django_evaluation.ldaptools import get_ldap_object
-from plugins.utils import get_plugin_or_404
+from plugins.utils import get_plugin_or_404, plugin_metadata_as_dict
 from .forms import PluginWeb
 from .serializers import PluginSerializer
 from django.conf import settings
@@ -14,23 +14,21 @@ from django.conf import settings
 class PluginsList(APIView):
 
     def get(self, request, format=None):
-        pm.reloadPlugins(request.user.username)
-        tools = pm.getPlugins(request.user.username)
-        res = []
-        for key, val in sorted(tools.items()):
-            res.append([key, val])
+        pm.reload_plugins(request.user.username)
+        plugins = pm.get_plugins(request.user.username)
+        tools = { k: plugin_metadata_as_dict(v) for (k,v) in pm.get_plugins(request.user.username).items() }
+        res = sorted(tools.items())
         return Response(res)
-
 
 class PluginDetail(APIView):
 
     def get(self, request, plugin_name):
-        pm.reloadPlugins(request.user.username)
+        pm.reload_plugins(request.user.username)
         plugin = get_plugin_or_404(plugin_name, user_name=request.user.username)
-        plugin_dict = pm.getPluginDict(plugin_name, user_name=request.user.username)
+        plugin_dict = pm.get_plugin_metadata(plugin_name, user_name=request.user.username)
         #plugin = PluginWeb(plugin)
         data = PluginSerializer(plugin).data
-        data["user_exported"] = plugin_dict.get("user_exported", False)
+        data["user_exported"] = plugin_dict.user_exported
         return Response(data)
 
 
@@ -60,7 +58,7 @@ class SendMailToDeveloper(APIView):
         from templated_email import send_templated_mail
         text = request.data.get('text', None)
         tool_name = request.data.get('tool_name', None)
-        tool = pm.getPluginInstance(tool_name, user_name=request.user.username)
+        tool = pm.get_plugin_instance(tool_name, user_name=request.user.username)
         developer = tool.tool_developer
         user_info = get_ldap_object()
         myinfo = user_info.get_user_info(str(request.user))

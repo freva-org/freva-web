@@ -1,5 +1,5 @@
 from django import template
-from evaluation_system.api.plugin_manager import getErrorWarning
+from evaluation_system.api.plugin_manager import get_error_warning
 
 register = template.Library()
 
@@ -19,7 +19,7 @@ def infodialog(caption, text, show='show'):
     
 @register.inclusion_tag('plugins/templatetags/infodialog.html')
 def error_warning_dialog(tool_name):
-    (error, warning) = getErrorWarning(tool_name.lower())
+    (error, warning) = get_error_warning(tool_name.lower())
     
     if error:
         return infodialog('Error', error, 'show')

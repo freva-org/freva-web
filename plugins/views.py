@@ -14,7 +14,7 @@ import evaluation_system.api.plugin_manager as pm
 from evaluation_system.model.user import User
 from evaluation_system.misc import config
 
-from plugins.utils import get_plugin_or_404, ssh_call, get_scheduler_hosts
+from plugins.utils import get_plugin_or_404, ssh_call, get_scheduler_hosts, plugin_metadata_as_dict
 from plugins.forms import PluginForm, PluginWeb
 from history.models import History, Configuration
 
@@ -43,8 +43,9 @@ def home(request):
     
     exported_plugin = os.environ.get("EVALUATION_SYSTEM_PLUGINS_%s" % request.user, None)
     
-    pm.reloadPlugins(request.user.username)
-    tools = pm.getPlugins(request.user.username) 
+    pm.reload_plugins(request.user.username)
+    tools = { k: plugin_metadata_as_dict(v) for (k,v) in pm.get_plugins(request.user.username).items() }
+
     return render(request, 'plugins/home.html',
                   {'tool_list': sorted(tools.items()),
                    'home_dir': home_dir,
@@ -72,7 +73,7 @@ def detail(request, plugin_name):
 
 @login_required()
 def search_similar_results(request, plugin_name=None, history_id=None):
-    pm.reloadPlugins(request.user.username)
+    pm.reload_plugins(request.user.username)
 
     def hist_to_dict(h_obj):
         hist_dict = dict()
@@ -96,7 +97,7 @@ def search_similar_results(request, plugin_name=None, history_id=None):
 
         else:
             # create the tool
-            tool = pm.getPluginInstance(plugin_name,
+            tool = pm.get_plugin_instance(plugin_name,
                                         user_name=request.user.username)
             param_dict = tool.__parameters__
             param_dict.synchronize(plugin_name)
@@ -122,7 +123,7 @@ def search_similar_results(request, plugin_name=None, history_id=None):
 @sensitive_variables('password')
 @login_required()    
 def setup(request, plugin_name, row_id=None):
-    pm.reloadPlugins(request.user.username)
+    pm.reload_plugins(request.user.username)
 
     user_can_submit = request.user.has_perm('history.history_submit_job')
 
@@ -142,7 +143,7 @@ def setup(request, plugin_name, row_id=None):
     plugin = get_plugin_or_404(plugin_name, user=user)
     plugin_web = PluginWeb(plugin)
     
-    error_msg = pm.getErrorWarning(plugin_name)[0]
+    error_msg = pm.get_error_warning(plugin_name)[0]
         
     if request.method == 'POST':
         form = PluginForm(request.POST, tool=plugin, uid=request.user.username)
@@ -274,10 +275,10 @@ def setup(request, plugin_name, row_id=None):
                   
         form = PluginForm(initial=config_dict, tool=plugin, uid=user.getName())
 
-    plugin_dict = pm.getPluginDict(plugin_name, user_name=request.user.username)
+    plugin_dict = pm.get_plugin_metadata(plugin_name, user_name=request.user.username)
 
     return render(request, 'plugins/setup.html', {'tool': plugin_web,
-                                                  'user_exported': plugin_dict.get("user_exported", False),
+                                                  'user_exported': plugin_dict.user_exported,
                                                   'form': form,
                                                   'user_home': home_dir,
                                                   'user_scratch': scratch_dir,

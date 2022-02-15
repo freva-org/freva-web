@@ -1,6 +1,6 @@
 from django import template
 from django.utils.safestring import mark_safe
-from django.utils.encoding import force_text
+from django.utils.encoding import force_str
 from django.utils.html import conditional_escape
 from django.template.loader import render_to_string
 
@@ -107,7 +107,7 @@ def preview_tree(value, autoescape=None):
             else:
                 output.append('<li class="%s" style="%s"><a href="#">%s</a>%s</li>' % (folder_image,
                                                                                        visible + wordwrap,
-                                                                                       escaper(force_text(key)),
+                                                                                       escaper(force_str(key)),
                                                                                        subdict))
         # close the html environment
         if not first_file:
@@ -144,7 +144,7 @@ def mail_to_developer(tool_name, url):
 
     from evaluation_system.api import plugin_manager as pm
     from django_evaluation.middelwares import get_current_user
-    tool = pm.getPluginInstance(tool_name, user_name=get_current_user().username)
+    tool = pm.get_plugin_instance(tool_name, user_name=get_current_user().username)
 
     try:
         developer = tool.tool_developer

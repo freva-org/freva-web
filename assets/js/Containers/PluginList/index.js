@@ -1,7 +1,6 @@
 import React from "react";
-import ReactDOM from "react-dom";
 import { Link, browserHistory } from "react-router";
-import {connect} from "react-redux";
+import { connect } from "react-redux";
 import {
   Row, Col, Button, ListGroup, ListGroupItem, Container, Modal, ButtonGroup, FormCheck,
   FormGroup, FormLabel, FormControl, InputGroup
@@ -10,11 +9,11 @@ import {
 import _ from "lodash";
 
 import FileTree from "../../Components/FileTree";
-import {fetchDir, closeDir, changeRoot} from "../../Components/FileTree/actions";
+import { fetchDir, closeDir, changeRoot } from "../../Components/FileTree/actions";
 
 import Spinner from "../../Components/Spinner";
 
-import {exportPlugin, loadPlugins, updateCategoryFilter, updateTagFilter, updateSearchFilter} from "./actions";
+import { exportPlugin, loadPlugins, updateCategoryFilter, updateTagFilter, updateSearchFilter } from "./actions";
 
 /*
 These are the hardcodet categories of this group. If a category is not listed here, the
@@ -34,6 +33,8 @@ class PluginList extends React.Component {
   constructor (props) {
     super(props);
     this.handleExport = this.handleExport.bind(this);
+    this.handleSearchFilter = this.handleSearchFilter.bind(this);
+    this.handlePluginValue = this.handlePluginValue.bind(this);
     this.renderCategoryCheckbox = this.renderCategoryCheckbox.bind(this);
 
     this.state = {
@@ -48,7 +49,15 @@ class PluginList extends React.Component {
 
   handleExport () {
     this.props.dispatch(exportPlugin(this.state.value));
-    this.setState({showModal: false});
+    this.setState({ showModal: false });
+  }
+
+  handleSearchFilter (e) {
+    this.props.dispatch(updateSearchFilter(e.target.value));
+  }
+
+  handlePluginValue (e) {
+    this.setState({ value: e.target.value });
   }
 
   renderPluginBlock (filteredPlugins, category) {
@@ -110,10 +119,10 @@ class PluginList extends React.Component {
   }
 
   render () {
-    const {exported, tags, categories, categoriesFilter, tagsFilter, filteredPlugins, searchFilter,
-      pluginsLoaded} = this.props.pluginList;
-    const {nodes, root} = this.props.fileTree;
-    const {currentUser, dispatch} = this.props;
+    const { exported, tags, categories, categoriesFilter, tagsFilter, filteredPlugins, searchFilter,
+      pluginsLoaded } = this.props.pluginList;
+    const { nodes, root } = this.props.fileTree;
+    const { currentUser, dispatch } = this.props;
 
     const childs = nodes.map(n =>
       (<FileTree
@@ -122,7 +131,7 @@ class PluginList extends React.Component {
         extension="py"
         handleOpen={(e, path) => {e.preventDefault(); this.props.dispatch(fetchDir(path, "py"));}}
         handleClose={(e, path) => {e.preventDefault(); this.props.dispatch(closeDir(path));}}
-        handleFileClick={(e, path) => {e.preventDefault(); this.setState({value:path});}}
+        handleFileClick={(e, path) => {e.preventDefault(); this.setState({ value:path });}}
       />)
     );
 
@@ -140,7 +149,7 @@ class PluginList extends React.Component {
               !currentUser.isGuest ?
                 <Button
                   variant="info" className="float-end"
-                  onClick={() => (exported ? this.props.dispatch(exportPlugin()) : this.setState({showModal: true}))}
+                  onClick={() => (exported ? this.props.dispatch(exportPlugin()) : this.setState({ showModal: true }))}
                 >
                   {exported ? "Remove exported Plugin" : "Plug-my-Plugin"}
                 </Button> : null
@@ -160,8 +169,8 @@ class PluginList extends React.Component {
           <Col md={4}>
             <InputGroup className="mt-3">
               <FormControl
-                type="text" ref="searchInput" value={searchFilter}
-                onChange={() => dispatch(updateSearchFilter(ReactDOM.findDOMNode(this.refs.searchInput).value))}
+                type="text" value={searchFilter}
+                onChange={this.handleSearchFilter}
                 placeholder="Search for plugins"
               />
             </InputGroup>
@@ -199,34 +208,34 @@ class PluginList extends React.Component {
 
         <Modal
           show={this.state.showModal}
-          onShow={() => this.props.dispatch(changeRoot({id: "home", path: currentUser.home}, "py"))}
-          onHide={() => this.setState({showModal: false})}
+          onShow={() => this.props.dispatch(changeRoot({ id: "home", path: currentUser.home }, "py"))}
+          onHide={() => this.setState({ showModal: false })}
         >
           <Modal.Header closeButton>
             <Modal.Title>Plug-in your own plugin</Modal.Title>
           </Modal.Header>
           <Modal.Body>
             <p>Here you can plugin your own plugin</p>
-            <ButtonGroup style={{marginBottom: 10}}>
+            <ButtonGroup style={{ marginBottom: 10 }}>
               <Button
                 variant="primary" active={root.id === "home"}
-                onClick={() => this.props.dispatch(changeRoot({id: "home", path: currentUser.home}, "py"))}
+                onClick={() => this.props.dispatch(changeRoot({ id: "home", path: currentUser.home }, "py"))}
               >
                 Home
               </Button>
               <Button
                 variant="primary" active={root.id === "scratch"}
-                onClick={() => this.props.dispatch(changeRoot({id: "scratch", path: currentUser.scratch}, "py"))}
+                onClick={() => this.props.dispatch(changeRoot({ id: "scratch", path: currentUser.scratch }, "py"))}
               >
                 Scratch
               </Button>
             </ButtonGroup>
             {childs}
-            <FormGroup style={{marginTop: 10}}>
+            <FormGroup style={{ marginTop: 10 }}>
               <FormLabel>File to plugin</FormLabel>
               <FormControl
-                type="text" ref="input" value={this.state.value}
-                onChange={() => this.setState({value: ReactDOM.findDOMNode(this.refs.input).value})}
+                type="text" value={this.state.value}
+                onChange={this.handlePluginValue}
               />
             </FormGroup>
           </Modal.Body>

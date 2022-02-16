@@ -291,11 +291,11 @@ def jobinfo(request, id):
 
 def results(request, id, show_output_only=False):
     from history.utils import pygtailwrapper
-    user = User(request.user.username)
 
     # get history object
     history_object = get_object_or_404(History, id=id)
     try:
+        user = User(request.user.username)
         plugin = pm.get_plugin_instance(history_object.tool, user=user)
         developer = plugin.tool_developer
     # TODO: Exception too broad!

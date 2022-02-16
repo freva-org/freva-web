@@ -1,5 +1,4 @@
 import React from "react";
-import ReactDOM from "react-dom";
 import { connect } from "react-redux";
 
 import { Container, Row, Col, Button, ButtonToolbar, Modal, FormControl } from "react-bootstrap";
@@ -16,7 +15,10 @@ class PluginDetail extends React.Component {
     super(props);
     this.state = {
       showModal: false,
+      text: ""
     };
+
+    this.handleChange = this.handleChange.bind(this);
   }
 
   componentDidMount () {
@@ -28,10 +30,12 @@ class PluginDetail extends React.Component {
   }
 
   handleSend () {
-    const text = ReactDOM.findDOMNode(this.refs.textarea).value;
-    this.props.dispatch(sendDeveloperMail(text, this.props.plugin.name));
-    this.setState({ showModal: false });
-    ReactDOM.findDOMNode(this.refs.textarea).value = "";
+    this.props.dispatch(sendDeveloperMail(this.state.text, this.props.plugin.name));
+    this.setState({ showModal: false, text: "" });
+  }
+
+  handleChange (e) {
+    this.setState({ text: e.target.value });
   }
 
   render () {
@@ -96,7 +100,7 @@ class PluginDetail extends React.Component {
                   The developer of {plugin.name} is <strong>{plugin.tool_developer.name}</strong>.
                   If you have questions or want to report a bug, please send him a message:
                 </p>
-                <FormControl componentClass="textarea" ref="textarea" />
+                <FormControl as="textarea" onChange={this.handleChange} />
               </Modal.Body>
 
               <Modal.Footer>

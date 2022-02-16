@@ -71,7 +71,6 @@ class AccordionItemBody extends React.Component {
           onChange={this.handleChange}
         />
         <div className="d-flex justify-content-start flex-wrap">
-          AccordionItem
           {filteredItems}
         </div>
       </div>

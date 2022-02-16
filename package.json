@@ -35,18 +35,18 @@
       "json-loader": "^0.5.7",
       "react-hot-loader": "^4.13.0",
       "style-loader": "^3.3.1",
-      "webpack": "^5.64.4",
+      "webpack": "^5.69",
       "webpack-merge": "5.8.0",
       "webpack-bundle-tracker": "^1.4.0",
       "webpack-cli": "^4.9.1",
-      "webpack-dev-server": "^4.6.0"
+      "webpack-dev-server": "^4.7"
    },
    "dependencies": {
       "assert": "^2.0.0",
       "buffer": "^6.0.3",
       "htmlparser2": "^7.2.0",
       "isomorphic-fetch": "^3.0.0",
-      "linkify-react":"3.0.4",
+      "linkify-react": "3.0.4",
       "lodash": "^4.17.21",
       "prop-types": "^15.7.2",
       "react-bootstrap": "^2.0.3",

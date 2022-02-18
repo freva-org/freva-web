@@ -123,7 +123,7 @@ class Databrowser extends React.Component {
           {
             Object.keys(selectedFacets).length !== 0 ?
               <Col md={12}>
-                <Card>
+                <Card className="p-2">
                   <a href="#" onClick={(e) => {e.preventDefault(); dispatch(clearAllFacets());}}>Clear all</a>
                 </Card>
               </Col> : null

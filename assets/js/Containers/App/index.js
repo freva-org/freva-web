@@ -14,7 +14,7 @@ class App extends React.Component {
   render () {
 
     // Wait until the current user is loaded
-    if (!this.props.state.appReducer.currentUser) {
+    if (!this.props.state.appReducer.currentUser && this.props.state.appReducer.error === "") {
       return (
         <Spinner />
       );

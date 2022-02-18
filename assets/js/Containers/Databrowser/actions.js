@@ -1,7 +1,7 @@
 import fetch from "isomorphic-fetch";
 import _ from "lodash";
 
-import {getCookie} from "../../utils";
+import { getCookie } from "../../utils";
 
 import * as constants from "./constants";
 
@@ -55,10 +55,10 @@ export const setActiveFacet = (facet) => ({
 
 export const loadFacets = () => (dispatch, getState) => {
 
-  const {selectedFacets} = getState().databrowserReducer;
+  const { selectedFacets } = getState().databrowserReducer;
   let params = "";
   _.map(selectedFacets, (value, key) => {
-    params += `&${key}=${value};`;
+    params += `&${key}=${value}`;
   });
   const url = `/solr/solr-search/?facet=*${params}`;
 
@@ -68,7 +68,7 @@ export const loadFacets = () => (dispatch, getState) => {
       "X-CSRFToken": getCookie("csrftoken"),
       "Accept": "application/json",
       "Content-Type": "application/json"
-    }}
+    } }
   ).then(response => response.json())
     .then(json => {
       dispatch({
@@ -80,10 +80,10 @@ export const loadFacets = () => (dispatch, getState) => {
 
 export const loadFiles = () => (dispatch, getState) => {
 
-  const {selectedFacets} = getState().databrowserReducer;
+  const { selectedFacets } = getState().databrowserReducer;
   let params = "";
   _.map(selectedFacets, (value, key) => {
-    params += `&${key}=${value};`;
+    params += `&${key}=${value}`;
   });
   const url = `/solr/solr-search/?start=0&rows=100${params}`;
 
@@ -93,7 +93,7 @@ export const loadFiles = () => (dispatch, getState) => {
       "X-CSRFToken": getCookie("csrftoken"),
       "Accept": "application/json",
       "Content-Type": "application/json"
-    }}
+    } }
   ).then(response => response.json())
     .then(json => {
       dispatch({
@@ -105,7 +105,7 @@ export const loadFiles = () => (dispatch, getState) => {
 
 export const loadNcdump = (fn, pw) => dispatch => {
   const url = "/api/solr/ncdump/";
-  dispatch({type: constants.LOAD_NCDUMP, fn});
+  dispatch({ type: constants.LOAD_NCDUMP, fn });
   return fetch(url, {
     credentials: "same-origin",
     method: "POST",
@@ -126,7 +126,7 @@ export const loadNcdump = (fn, pw) => dispatch => {
     const data = resp.json();
     return data;
   }).then(json => {
-    return dispatch({type: constants.LOAD_NCDUMP_SUCCESS, payload: json});
+    return dispatch({ type: constants.LOAD_NCDUMP_SUCCESS, payload: json });
   }
-  ).catch(error => dispatch({type: constants.LOAD_NCDUMP_ERROR}));
+  ).catch(error => dispatch({ type: constants.LOAD_NCDUMP_ERROR }));
 };

@@ -145,7 +145,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default tourbtn" data-bs-dismiss="modal"
+                        <button type="button" class="btn btn-primary tourbtn" data-bs-dismiss="modal"
                                 onclick='window.location.href="/history";'>Ok
                         </button>
                     </div>
@@ -370,14 +370,13 @@
                 $('#runButton').removeAttr('disabled');
                 $('.tourbtn').removeAttr('disabled');
                 $('#runButton').on('click', function (e) {
-                    $('#guestModal').modal({show: true, backdrop: 'static'});
+                    $('#guestModal').modal("show");
                 });
             {% elif error_message %}
                 $('.btn').attr('disabled', 'disabled'); // {{ disable_buttons }}
                 $('#okBtn').removeAttr('disabled');
 
             {% else %}
-
                 $('#runButton').on('click', function (e) {
                     searchResults('similarResults'); //This triggers the search for similar results
                     $('#myModalPw').modal('show');

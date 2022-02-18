@@ -106,7 +106,10 @@ def search_similar_results(request, plugin_name=None, history_id=None):
     if request.user.isGuest():
         hist_objects = History.objects.filter(uid=request.user).filter(tool=plugin_name)
     else:
-        user = User(request.user.username)
+        try:
+            user = User(request.user.username)
+        except:
+            user = User()
         if history_id is not None:
             o = Configuration.objects.filter(history_id_id=history_id)
             hist_objects = History.find_similar_entries(o, max_entries=5)
@@ -145,7 +148,10 @@ def setup(request, plugin_name, row_id=None):
     user_can_submit = request.user.has_perm("history.history_submit_job")
 
     if user_can_submit:
-        user = User(request.user.username, request.user.email)
+        try:
+            user = User(request.user.username, request.user.email)
+        except:
+            user = User()
     else:
         user = User()
 

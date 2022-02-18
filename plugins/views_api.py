@@ -13,54 +13,62 @@ from django.conf import settings
 
 
 class PluginsList(APIView):
-
     def get(self, request, format=None):
         pm.reload_plugins(request.user.username)
         plugins = pm.get_plugins(request.user.username)
-        tools = { k: plugin_metadata_as_dict(v) for (k,v) in pm.get_plugins(request.user.username).items() }
+        tools = {
+            k: plugin_metadata_as_dict(v)
+            for (k, v) in pm.get_plugins(request.user.username).items()
+        }
         res = sorted(tools.items())
         return Response(res)
 
+
 class PluginDetail(APIView):
-
     def get(self, request, plugin_name):
-
         pm.reload_plugins(request.user.username)
-        user = User(request.user.username)
+        user = None
+        try:
+            user = User(request.user.username)
+        except:
+            user = User()
         plugin = get_plugin_or_404(plugin_name, user=user)
-        plugin_dict = pm.get_plugin_metadata(plugin_name, user_name=request.user.username)
-        #plugin = PluginWeb(plugin)
+        plugin_dict = pm.get_plugin_metadata(
+            plugin_name, user_name=request.user.username
+        )
+        # plugin = PluginWeb(plugin)
         data = PluginSerializer(plugin).data
         data["user_exported"] = plugin_dict.user_exported
         return Response(data)
 
 
 class ExportPlugin(APIView):
-
     def get(self, request):
         # try to remove plugin from enironment
         try:
             del os.environ["EVALUATION_SYSTEM_PLUGINS_%s" % request.user]
-            return Response('Plugin removed')
+            return Response("Plugin removed")
         # add plugin to env
         except:
 
-            fn = request.GET.get('export_file')
+            fn = request.GET.get("export_file")
             if fn is not None and os.path.isfile(fn):
-                parts = fn.split('/')
-                path = '/'.join(parts[:-1])
-                module = parts[-1].split('.')[0]
-                os.environ["EVALUATION_SYSTEM_PLUGINS_%s" % request.user] = \
-                    "%s,%s" % (path, module)
+                parts = fn.split("/")
+                path = "/".join(parts[:-1])
+                module = parts[-1].split(".")[0]
+                os.environ["EVALUATION_SYSTEM_PLUGINS_%s" % request.user] = "%s,%s" % (
+                    path,
+                    module,
+                )
             return Response(fn)
 
 
 class SendMailToDeveloper(APIView):
-
     def post(self, request):
         from templated_email import send_templated_mail
-        text = request.data.get('text', None)
-        tool_name = request.data.get('tool_name', None)
+
+        text = request.data.get("text", None)
+        tool_name = request.data.get("tool_name", None)
         user = User(request.user.username)
         tool = pm.get_plugin_instance(tool_name, user=user)
         developer = tool.tool_developer
@@ -72,22 +80,22 @@ class SendMailToDeveloper(APIView):
         # TODO: Exception too broad!
         except:
             my_email = settings.SERVER_EMAIL
-            username = 'guest'
+            username = "guest"
 
         send_templated_mail(
-            template_name='mail_to_developer',
+            template_name="mail_to_developer",
             from_email=my_email,
-            recipient_list=[developer['email']],
+            recipient_list=[developer["email"]],
             context={
-                'username': username,
-                'developer_name': developer['name'],
-                'text': text,
-                'tool_name': tool_name,
-                'mail': my_email,
-                'project': config.get('project_name'),
-                'website': config.get('project_website')
+                "username": username,
+                "developer_name": developer["name"],
+                "text": text,
+                "tool_name": tool_name,
+                "mail": my_email,
+                "project": config.get("project_name"),
+                "website": config.get("project_website"),
             },
             cc=[a[1] for a in settings.ADMINS],
-            headers={'Reply-To': my_email},
+            headers={"Reply-To": my_email},
         )
         return Response(True)

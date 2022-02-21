@@ -33,16 +33,14 @@
 	$(document).ready(function(){
 
 		$('#mail_to_developer_button').on('click', function(){
-
 			$('#mail_to_developer').modal('show');
-
 		});
 
 
 		$('#send_developer_button').on('click', function(){
 
 		    var data={'text':$('#developer_text').val(),'tool_name':'{{tool_name}}','url':"{{ current_url }}"};
-		    var url = '{% url 'history:mail_to_developer' %}';
+		    var url = '{% url 'api-mail-to-developer' %}';
 		    $.ajax({
 		        url: url,
 		        method: 'post',

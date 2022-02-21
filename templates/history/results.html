@@ -38,6 +38,8 @@
        {% sendmail_dialog request.build_absolute_uri request.user.isGuest %}
        {% endif %}
        </div> <!-- row -->
+
+	   {% if not request.user.isGuest %}
        <div class="row mb-3">
 	 	 	<div class="col-md-12">
 	 	 		<a class="btn btn-primary" href="{% url 'plugins:setup' history_object.tool history_object.id%}" id="config_button">Edit configuration</a>
@@ -50,8 +52,7 @@
 				{# Render a Bootstrap password/cancel dialog #}
 	 			{% cancel_dialog %}
 	 	 		{%endif%}
-
-	 			<a class="btn btn-secondary mybtn-sendmail" id="sendButton_{{h_item.id}}" onClick="$('#sendmail_modal').modal('show')">Share Results</a>
+					<a class="btn btn-secondary mybtn-sendmail" id="sendButton_{{h_item.id}}" onClick="$('#sendmail_modal').modal('show')">Share Results</a>
 
 	 			<a class="btn btn-secondary mybtn-caption" id="captionButton_{{h_item.id}}" onClick="$('#caption_modal').modal('show')">Set Caption</a>
 				{# Render a Bootstrap caption dialog #}
@@ -61,9 +62,9 @@
 		        {%if developer %}
 					{% mail_to_developer history_object.tool request.build_absolute_uri %}
 				{%endif%}
-
 	 	 	</div>
           </div>
+		{%endif%}
 
 <!-- Configuration -->
 <div class="card mb-3">
@@ -134,7 +135,6 @@
       {% if history_object.status > 2 %}
       <script>
       function doUpdate() {
-
 		  var tailServiceUrl = '{% url 'history:tailFile' history_object.id %}';
 		  $.ajax({type: "GET", url : tailServiceUrl,
 		          success: function (data) {

@@ -1,5 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 import os
 
 import evaluation_system.api.plugin_manager as pm
@@ -42,6 +43,18 @@ class PluginDetail(APIView):
         return Response(data)
 
 
+"""
+ExportPlugin does not export anything. It either deletes a Env-Variable
+EVALUATION_SYSTEM_PLUGINS_<username> which has a path to a Plugin
+or it _IMPORTS_ a plugin to freva by setting the same env-variable.
+
+FIXME: At least in the dev-environment there is another env-var EVALUATION_SYSTEM_PLUGINS (without suffix)
+which also contains the path to a plugin. This one is connected to all
+users and if it is set then the "remove exported plugin"-Button in the web-interface is
+basically useless.
+"""
+
+
 class ExportPlugin(APIView):
     def get(self, request):
         # try to remove plugin from enironment
@@ -50,7 +63,6 @@ class ExportPlugin(APIView):
             return Response("Plugin removed")
         # add plugin to env
         except:
-
             fn = request.GET.get("export_file")
             if fn is not None and os.path.isfile(fn):
                 parts = fn.split("/")
@@ -64,23 +76,35 @@ class ExportPlugin(APIView):
 
 
 class SendMailToDeveloper(APIView):
+    permission_classes = (IsAuthenticated,)
+
     def post(self, request):
+        if request.user.isGuest():
+            return Response(False)
         from templated_email import send_templated_mail
 
         text = request.data.get("text", None)
         tool_name = request.data.get("tool_name", None)
-        user = User(request.user.username)
+        url = request.data.get("url", None)
+
+        if url:
+            text = text + "\nThis email has been send from this url: " + url
+        try:
+            user = User(request.user.username)
+        except:
+            user = User()
+
+        my_email = request.user.email
+        username = request.user.get_full_name()
+
+        if not username:
+            username = request.user.username
+
+        if not my_email:
+            my_email = settings.SERVER_EMAIL
+
         tool = pm.get_plugin_instance(tool_name, user=user)
         developer = tool.tool_developer
-        user_info = get_ldap_object()
-        myinfo = user_info.get_user_info(str(request.user))
-        try:
-            my_email = myinfo[3]
-            username = request.user.get_full_name()
-        # TODO: Exception too broad!
-        except:
-            my_email = settings.SERVER_EMAIL
-            username = "guest"
 
         send_templated_mail(
             template_name="mail_to_developer",
@@ -95,7 +119,77 @@ class SendMailToDeveloper(APIView):
                 "project": config.get("project_name"),
                 "website": config.get("project_website"),
             },
-            cc=[a[1] for a in settings.ADMINS],
+            #  cc=[a[1] for a in settings.ADMINS],
             headers={"Reply-To": my_email},
         )
         return Response(True)
+
+
+class ShareResultsByMail(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def post(self, request):
+        if request.user.isGuest():
+            status = "Normally, the selected recipients would get an email containing a link to this result,"
+            status += "but this feature is turned off for guest users."
+            return Response(status)
+
+        from templated_email import send_templated_mail
+
+        text = request.data.get("text", None)
+        url = request.data.get("url", None)
+
+        my_email = request.user.email
+        username = request.user.get_full_name()
+
+        one4all = request.data.get("one4all", "off")
+        copy4me = request.data.get("copy4me", "off")
+
+        if not username:
+            username = request.user.username
+
+        if not my_email:
+            my_email = settings.SERVER_EMAIL
+
+        recipient_names = request.POST["rec"].split(",")
+
+        email_adresses = []
+        ldap_object = get_ldap_object()
+        for uid in recipient_names:
+            recipient_info = ldap_object.get_user_info(uid)
+            email_adresses.append(recipient_info[3])
+
+        if copy4me == "on":
+            email_adresses.append(my_email)
+        if one4all == "on":
+            send_templated_mail(
+                template_name="share_results",
+                from_email=my_email,
+                recipient_list=email_adresses,
+                context={
+                    "username": username,
+                    "text": text,
+                    "mail": my_email,
+                    "url": url,
+                    "project": config.get("project_name"),
+                    "website": config.get("project_website"),
+                },
+                headers={"Reply-To": my_email},
+            )
+        else:
+            for r in email_adresses:
+                send_templated_mail(
+                    template_name="share_results",
+                    from_email=my_email,
+                    recipient_list=[r],
+                    context={
+                        "username": username,
+                        "text": text,
+                        "mail": my_email,
+                        "url": url,
+                        "project": config.get("project_name"),
+                        "website": config.get("project_website"),
+                    },
+                    headers={"Reply-To": my_email},
+                )
+        return Response("Results successfully shared")

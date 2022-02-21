@@ -31,44 +31,6 @@ import json
 
 
 @login_required()
-def home(request):
-    """Default view for the root"""
-    user_can_submit = request.user.has_perm("history.history_submit_job")
-
-    if user_can_submit:
-        user = User(request.user.username, request.user.email)
-    else:
-        user = User()
-    home_dir = user.getUserHome()
-    scratch_dir = None
-    try:
-        scratch_dir = user.getUserScratch()
-    except:
-        pass
-
-    exported_plugin = os.environ.get(
-        "EVALUATION_SYSTEM_PLUGINS_%s" % request.user, None
-    )
-
-    pm.reload_plugins(request.user.username)
-    tools = {
-        k: plugin_metadata_as_dict(v)
-        for (k, v) in pm.get_plugins(request.user.username).items()
-    }
-
-    return render(
-        request,
-        "plugins/home.html",
-        {
-            "tool_list": sorted(tools.items()),
-            "home_dir": home_dir,
-            "scratch_dir": scratch_dir,
-            "exported_plugin": exported_plugin,
-        },
-    )
-
-
-@login_required()
 def plugin_list(request):
     """
     New view for plugin list
@@ -397,26 +359,3 @@ def list_dir(request):
 
 def list_docu(request):
     return render(request, "plugins/list-docu.html")
-
-
-@require_POST
-@login_required()
-def export_plugin(request):
-    """
-    Website version of "export EVALUATION_SYSTEM_PLUGINS=..."
-    """
-    try:
-        del os.environ["EVALUATION_SYSTEM_PLUGINS_%s" % request.user]
-        return redirect("plugins:home")
-    except:
-        fn = request.POST.get("export_file")
-        if fn is not None and os.path.isfile(fn):
-            parts = fn.split("/")
-            path = "/".join(parts[:-1])
-            module = parts[-1].split(".")[0]
-            os.environ["EVALUATION_SYSTEM_PLUGINS_%s" % request.user] = "%s,%s" % (
-                path,
-                module,
-            )
-
-    return redirect("plugins:home")

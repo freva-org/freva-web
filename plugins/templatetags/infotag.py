@@ -28,9 +28,3 @@ def error_warning_dialog(tool_name):
     else:
         return infodialog('', '', 'hide')
     
-
-@register.inclusion_tag('plugins/templatetags/plugin_your_plugin.html')
-def export_plugin_dialog(user_home, user_scratch):
-    return {'caption': 'Plug-in your own plugin',
-            'user_home': user_home,
-            'user_scratch': user_scratch}

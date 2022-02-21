@@ -81,7 +81,6 @@ def solr_search(request):
     except KeyError:
         page_limit = 10
 
-    print("SOLR SEARCH", args)
     if not request.user.has_perm("history.browse_full_data"):
         restrictions = settings.SOLR_RESTRICTIONS
         arg_keys = list(args.keys())

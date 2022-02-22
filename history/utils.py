@@ -193,9 +193,7 @@ def sendmail_to_follower(request, history_id, subject, message):
         prev_uid = uid
 
         for addr in addresses:
-
             to_email.append(addr)
 
     email = EmailMessage(subject, text, from_email, to_email, headers=replyto)
-
     email.send()

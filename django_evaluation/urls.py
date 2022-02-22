@@ -22,12 +22,6 @@ router.register(r"users", UserViewSet)
 
 admin.autodiscover()
 
-
-def bad(request):
-    """Simulates a server error"""
-    1 / 0
-
-
 urlpatterns = [
     url(r"^admin/doc/", include("django.contrib.admindocs.urls")),
     url(r"^admin/$", admin.site.index),
@@ -38,7 +32,6 @@ urlpatterns = [
     url(
         r"^external/", include(("externaluser.urls", "external"), namespace="external")
     ),
-    url(r"^bad/$", bad),
     url(r"", include(("base.urls", "base"), namespace="base")),
     url(
         r"^favicon\.ico$",

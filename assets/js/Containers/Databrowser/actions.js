@@ -103,7 +103,7 @@ export const loadFiles = () => (dispatch, getState) => {
     });
 };
 
-export const loadNcdump = (fn, pw) => dispatch => {
+export const loadNcdump = (fn) => dispatch => {
   const url = "/api/solr/ncdump/";
   dispatch({ type: constants.LOAD_NCDUMP, fn });
   return fetch(url, {
@@ -115,7 +115,6 @@ export const loadNcdump = (fn, pw) => dispatch => {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      pass: pw,
       file: fn
     })
   }).then(resp => {

@@ -11,27 +11,27 @@
     <div class="container">
       <!-- Example row of columns -->
       <div class="row">
-	      <div class="col-md-12">
-	      	<h1 id='result_caption'>{{ result_caption }}</h1>
-	      	<p>Analysis from {{ history_object.timestamp|date:"d.m.y H:i:s" }} done by <a href="{% url 'history:history' history_object.uid %}">{{history_object.uid}}</a></p>
-	      </div>
+          <div class="col-md-12">
+            <h1 id='result_caption'>{{ result_caption }}</h1>
+            <p>Analysis from {{ history_object.timestamp|date:"d.m.y H:i:s" }} done by <a href="{% url 'history:history' history_object.uid %}">{{history_object.uid}}</a></p>
+          </div>
       </div>
        <div class="row">
 
-		 <div class="alert alert-success alert-dismissible" role="alert" id='alert_send_developer_success' style='display:none'>
-		    Mail sent to {{developer.name}}
-			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-		 </div> <!-- alert success -->
+         <div class="alert alert-success alert-dismissible" role="alert" id='alert_send_developer_success' style='display:none'>
+            Mail sent to {{developer.name}}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+         </div> <!-- alert success -->
 
-		<div class="alert alert-success alert-dismissible" role="alert" id='alert_follow' style='display:none'>
-				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="alert alert-success alert-dismissible" role="alert" id='alert_follow' style='display:none'>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 <strong>Following!</strong> You get notified by email, when somebody generated content for this result.
-		</div> <!-- alert follow -->
-		<div class="alert alert-warning alert-dismissible" role="alert" id='alert_unfollow' style='display:none'>
-				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div> <!-- alert follow -->
+        <div class="alert alert-warning alert-dismissible" role="alert" id='alert_unfollow' style='display:none'>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 <strong>Unfollowing!</strong> You will not get further email notifications for this result.
-		</div> <!-- alert unfollow -->
-	</div> <!-- row -->
+        </div> <!-- alert unfollow -->
+    </div> <!-- row -->
        <div class="row">
        {# Render a Bootstrap sendmail dialog #}
        {% if request.user == history_object.uid %}
@@ -39,64 +39,64 @@
        {% endif %}
        </div> <!-- row -->
 
-	   {% if not request.user.isGuest %}
+       {% if not request.user.isGuest %}
        <div class="row mb-3">
-	 	 	<div class="col-md-12">
-	 	 		<a class="btn btn-primary" href="{% url 'plugins:setup' history_object.tool history_object.id%}" id="config_button">Edit configuration</a>
-	 	 		{% if documentation %}
-	 	 			<a class="btn btn-success" href="{{documentation.url}}">Documentation</a>
-	 	 		{%endif%}
-		 		{% if history_object.status > 2 and history_object.slurm_output != '0' and history_object.uid == request.user %}
+            <div class="col-md-12">
+                <a class="btn btn-primary" href="{% url 'plugins:setup' history_object.tool history_object.id%}" id="config_button">Edit configuration</a>
+                {% if documentation %}
+                    <a class="btn btn-success" href="{{documentation.url}}">Documentation</a>
+                {%endif%}
+                {% if history_object.status > 2 and history_object.slurm_output != '0' and history_object.uid == request.user %}
 
-	 			<a class="btn btn-danger mybtn-cancel" id="cancelButton_{{h_item.id}}" onClick="cancelDialog.show({{history_object.id}})">Cancel job</a>
-				{# Render a Bootstrap password/cancel dialog #}
-	 			{% cancel_dialog %}
-	 	 		{%endif%}
-					<a class="btn btn-secondary mybtn-sendmail" id="sendButton_{{h_item.id}}" onClick="$('#sendmail_modal').modal('show')">Share Results</a>
+                <a class="btn btn-danger mybtn-cancel" id="cancelButton_{{h_item.id}}" onClick="cancelDialog.show({{history_object.id}})">Cancel job</a>
+                {# Render a Bootstrap password/cancel dialog #}
+                {% cancel_dialog %}
+                {%endif%}
+                    <a class="btn btn-secondary mybtn-sendmail" id="sendButton_{{h_item.id}}" onClick="$('#sendmail_modal').modal('show')">Share Results</a>
 
-	 			<a class="btn btn-secondary mybtn-caption" id="captionButton_{{h_item.id}}" onClick="$('#caption_modal').modal('show')">Set Caption</a>
-				{# Render a Bootstrap caption dialog #}
-	 			{% caption_dialog result_caption default_caption history_object request.user %}
+                <a class="btn btn-secondary mybtn-caption" id="captionButton_{{h_item.id}}" onClick="$('#caption_modal').modal('show')">Set Caption</a>
+                {# Render a Bootstrap caption dialog #}
+                {% caption_dialog result_caption default_caption history_object request.user %}
 
-		                <a class="btn btn-warning" id="followButton"><span id='followText'>{{follow}}</span></a>
-		        {%if developer %}
-					{% mail_to_developer history_object.tool request.build_absolute_uri %}
-				{%endif%}
-	 	 	</div>
+                        <a class="btn btn-warning" id="followButton"><span id='followText'>{{follow}}</span></a>
+                {%if developer %}
+                    {% mail_to_developer history_object.tool request.build_absolute_uri %}
+                {%endif%}
+            </div>
           </div>
-		{%endif%}
+        {%endif%}
 
 <!-- Configuration -->
 <div class="card mb-3">
-	<h4 class="card-header">
-	<a data-bs-toggle="collapse" href="#collapseConfig">
-		Configuration
-	</a>
-	</h4>
+    <h4 class="card-header">
+    <a data-bs-toggle="collapse" href="#collapseConfig">
+        Configuration
+    </a>
+    </h4>
     <div id="collapseConfig" class="panel-collapse collapse">
       <div class="card-body mb-3">
-   	 	 	<div class="col-md-12">
-		 	 	<table class="table col-md-12" id="config_table" style="margin-top:10px;">
-		 	 	<tr>
-		 	 	<th colspan="2">Tool configuration</th>
-		 	 	</tr>
-		 	 	{% for key,value in history_object.config_dict.items %}
-		 	 		<tr>
-		 	 			<td>{{key}}:</td>
-		 	 			<td>{{value|mask_uid:request.user.isGuest}}</td>
-		 	 		</tr>
-		 	 	{% endfor %}
-		 	 	<tr class='additional' style='display:none;'>
-		 	 	<th colspan="2">Additional Information</th>
-		 	 	</tr>
+            <div class="col-md-12">
+                <table class="table col-md-12" id="config_table" style="margin-top:10px;">
+                <tr>
+                <th colspan="2">Tool configuration</th>
+                </tr>
+                {% for key,value in history_object.config_dict.items %}
+                    <tr>
+                        <td>{{key}}:</td>
+                        <td>{{value|mask_uid:request.user.isGuest}}</td>
+                    </tr>
+                {% endfor %}
+                <tr class='additional' style='display:none;'>
+                <th colspan="2">Additional Information</th>
+                </tr>
                 <tr class='additional' style='display:none;'>
                 <td>Analyze command:</td>
                 <td>{{analyze_command|mask_uid:request.user.isGuest}}</td>
                 </tr>
                 <tr class='additional' style='display:none;'>
-	 	 	    <td>Tool repository:</td>
-	 	 	    <td>{{tool_repos}}</td>
-	 	 	    <tr class='additional' style='display:none;'>
+                <td>Tool repository:</td>
+                <td>{{tool_repos}}</td>
+                <tr class='additional' style='display:none;'>
                 <td>Tool internal version:</td>
                 <td>{{tool_version}}</td>
                 </tr>
@@ -108,14 +108,14 @@
                 <td>System internal version:</td>
                 <td>{{api_version}}</td>
                 </tr>
-		 	 	</table>
+                </table>
            </div> <!-- col-md-12 -->
-			<a class="btn btn-info" onClick="$('.additional').toggle()">Additional information</a>
-			<a class="btn btn-info"
-			onClick="window.prompt('Copy to clipboard: Ctrl+C, Enter', '{{analyze_command | mask_uid:request.user.isGuest | escapejs}}');"
-			id="copy_button"">
-				Copy analyze command
-			</a>
+            <a class="btn btn-info" onClick="$('.additional').toggle()">Additional information</a>
+            <a class="btn btn-info"
+            onClick="window.prompt('Copy to clipboard: Ctrl+C, Enter', '{{analyze_command | mask_uid:request.user.isGuest | escapejs}}');"
+            id="copy_button"">
+                Copy analyze command
+            </a>
 
       </div><!-- panel-body -->
     </div><!-- panel-collapse collapse-->
@@ -135,55 +135,55 @@
       {% if history_object.status > 2 %}
       <script>
       function doUpdate() {
-		  var tailServiceUrl = '{% url 'history:tailFile' history_object.id %}';
-		  $.ajax({type: "GET", url : tailServiceUrl,
-		          success: function (data) {
-		             if (!data)
-		             {
+          var tailServiceUrl = '{% url 'history:tailFile' history_object.id %}';
+          $.ajax({type: "GET", url : tailServiceUrl,
+                  success: function (data) {
+                     if (!data)
+                     {
                         window.location.reload(true)
                      }
-		             if (data.length > 0)
-		             {
-		                var output = '';
-		                $.each(data, function(index,value){
-		                	output += value;
-		                });
-		                $("#logOutputDiv").append(output);
-		                $('#logOutputDiv').stop().animate({
-						  scrollTop: $("#logOutputDiv")[0].scrollHeight
-						}, 800);
-		             }
-		             setTimeout("doUpdate()", 5000);
-		           }});
-		}
-		setTimeout("doUpdate()", 2000);
-		</script>
-		{% endif %}
+                     if (data.length > 0)
+                     {
+                        var output = '';
+                        $.each(data, function(index,value){
+                            output += value;
+                        });
+                        $("#logOutputDiv").append(output);
+                        $('#logOutputDiv').stop().animate({
+                          scrollTop: $("#logOutputDiv")[0].scrollHeight
+                        }, 800);
+                     }
+                     setTimeout("doUpdate()", 5000);
+                   }});
+        }
+        setTimeout("doUpdate()", 2000);
+        </script>
+        {% endif %}
 
-	      <div class="row">
-	        <div class="col-md-12">
-	            {% if history_object.status > 2 %}
-	          	<p>The tool is still running. Here you can see the output:</p>
-	          	{% endif %}
-		        <div id="logOutputDiv" class="well well-lg" style="height:450px; overflow-y:scroll; overflow-x: hidden;">
+          <div class="row">
+            <div class="col-md-12">
+                {% if history_object.status > 2 %}
+                <p>The tool is still running. Here you can see the output:</p>
+                {% endif %}
+                <div id="logOutputDiv" class="well well-lg" style="height:450px; overflow-y:scroll; overflow-x: hidden;">
 
-		        {% for line in file_content %}
+                {% for line in file_content %}
 
-		        	{{line}}<br>
+                    {{line}}<br>
 
-		        {%endfor%}
+                {%endfor%}
 
-		        </div>
-	        </div>
-	      </div>
-	      {%else%}
-	      </div>
-	      <div class="row">
-	      	 <div class="col-md-12">
-	      	 	<p>Process status is <strong>{{ history_object.status_name }}</strong><br/>Because you did not use batchmode we can't display any information</p>
-	      	 </div>
+                </div>
+            </div>
+          </div>
+          {%else%}
+          </div>
+          <div class="row">
+             <div class="col-md-12">
+                <p>Process status is <strong>{{ history_object.status_name }}</strong><br/>Because you did not use batchmode we can't display any information</p>
+             </div>
 
-	  	  {%endif%}
+          {%endif%}
 
 
       </div><!-- panel-body -->
@@ -192,11 +192,11 @@
 
 <!-- Notes -->
 <div class="card mb-3">
-	<h4 class="card-header">
-		<a data-bs-toggle="collapse" href="#collapseNotes">
-			Notes <span id='note_count'>(0)</span>
-		</a>
-	</h4>
+    <h4 class="card-header">
+        <a data-bs-toggle="collapse" href="#collapseNotes">
+            Notes <span id='note_count'>(0)</span>
+        </a>
+    </h4>
     <div id="collapseNotes" class="panel-collapse collapse">
       <div class="card-body" id='loadComments'>
       <!-- INSERT COMMENTS HERE -->
@@ -215,167 +215,160 @@
 
 <!-- Results -->
 <div class="card mb-3">
-	<h4 class="card-header">
-		<a data-bs-toggle="collapse" href="#collapseResults">
+    <h4 class="card-header">
+        <a data-bs-toggle="collapse" href="#collapseResults">
 
-		{% if history_object.status > 0 %}
-			No Results (Process status: {{history_object.status_name}})
-		{% else %}
-			Results
-		{%endif%}
-		</a>
-	</h4>
+        {% if history_object.status > 0 %}
+            No Results (Process status: {{history_object.status_name}})
+        {% else %}
+            Results
+        {%endif%}
+        </a>
+    </h4>
     <div id="collapseResults" class="panel-collapse collapse">
       <div class="card-body">
-	    <div class="row">
-	 	 {%if not file_list %}
-		 	 	{% if history_object.status == history_object.processStatus.finished_no_output %}
-		 	 		<div class="col-md-3">
-		 	 			<p>There was no output produced!</p>
-		 	 		</div>
-		 	 	{% endif %}
-		 	 		<div class="col-md-3">
-		 	 			<p>{{history_object.tool}} produced no plots.</p>
-		 	 		</div>
+        <div class="row">
+         {%if not file_list %}
+                {% if history_object.status == history_object.processStatus.finished_no_output %}
+                    <div class="col-md-3">
+                        <p>There was no output produced!</p>
+                    </div>
+                {% endif %}
+                    <div class="col-md-3">
+                        <p>{{history_object.tool}} produced no plots.</p>
+                    </div>
                    <div class="col-md-12">
-	               </div>
+                   </div>
 
 
-		 	{%else%}
+            {%else%}
 
-	        <div class="col-md-12">
-				<ul class="jqueryFileTree">
-				{{ file_list|preview_tree|mask_safe_uid:request.user.isGuest }}
-				</ul>
-	        </div>
-			{%endif%}
-		</div>
+            <div class="col-md-12">
+                <ul class="jqueryFileTree">
+                {{ file_list|preview_tree|mask_safe_uid:request.user.isGuest }}
+                </ul>
+            </div>
+            {%endif%}
+        </div>
 
       </div><!-- panel-body -->
     </div><!-- panel-collapse collapse-->
   </div><!-- panel panel-default-->
-
 </div>
+
 <script>
+    function doCount() {
+        var url = '{% url 'history:count-notes' history_object.id 0 %}';
+        $.ajax({
+            type: "GET",
+            url : url,
+            success: function (data) {
+                $('#note_count').text('(' + data + ')');
+            }
+        });
+    }
 
-      function doCount() {
-		  var url = '{% url 'history:count-notes' history_object.id 0 %}';
-		  $.ajax({type: "GET", url : url,
-		       		success: function (data) {
-                                   $('#note_count').text('(' + data + ')');
-			  }
-		});
-	}
-
-	function capitalizeFirst(string) {
-		return string.charAt(0).toUpperCase() + string.slice(1);
-	}
-
-
-	$(document).ready(function() {
-
-		doCount();
-		//inter_counter = setInterval(doCount, 4000);
-
-		$('#collapseNotes').on('show.bs.collapse', function() {
-			var url='{% url 'history:result-comments' history_object.id %}';
-			$('#loadComments').load(url);
-			});
+    function capitalizeFirst(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+    }
 
 
-		$("img").lazyload({
-		    effect : "fadeIn",
-		    threshold : 200,
-		    placeholder: "{{STATIC_URL}}img/loading.gif",
-		    //event : "click",
-		});
+    $(document).ready(function() {
+
+        doCount();
+        //inter_counter = setInterval(doCount, 4000);
+
+        $('#collapseNotes').on('show.bs.collapse', function() {
+            var url='{% url 'history:result-comments' history_object.id %}';
+            $('#loadComments').load(url);
+        });
 
 
-		$('#followButton').on('click', function() {
-     		text = $('#followText').text().toLowerCase();
+        $("img").lazyload({
+            effect : "fadeIn",
+            threshold : 200,
+            placeholder: "{{STATIC_URL}}img/loading.gif",
+            //event : "click",
+        });
 
 
-			if(text == "follow"){
-				$.ajax({
-					type: "GET",
-					url: "{% url 'history:follow' history_object.id%}",
-					async: false,
-					data: "button=1",
-					success: function(text) {
-             					if(text.toLowerCase() == "unfollow") {
-							$('#followText').text(text);
+        $('#followButton').on('click', function() {
+            text = $('#followText').text().toLowerCase();
+            if(text == "follow"){
+                $.ajax({
+                    type: "GET",
+                    url: "{% url 'history:follow' history_object.id%}",
+                    async: false,
+                    data: "button=1",
+                    success: function(text) {
+                        if(text.toLowerCase() == "unfollow") {
+                            $('#followText').text(text);
+                            $('#alert_follow').show();
+                            $('#alert_unfollow').hide();
+                        }
+                        // show only info, when following worked
+                    }
+                });
 
-	          		    			$('#alert_follow').show();
-	        	  		 		$('#alert_unfollow').hide();
-						}
-						// show only info, when following worked
+            } else {
+                $.ajax({
+                    type: "GET",
+                    url: "{% url 'history:unfollow' history_object.id%}",
+                    async: false,
+                    data: "button=1",
+                    success: function(text) {
+                        if(text.toLowerCase() == "follow") {
+                            $('#followText').text(text);
+                            $('#alert_unfollow').show();
+                            $('#alert_follow').hide();
+                        }
+                        // show only info, when following worked
+                        }
+                   });
 
-				     	}
-				   });
+                }
 
-          		}
+        });
 
-			else
-			{
-				$.ajax({
-					type: "GET",
-					url: "{% url 'history:unfollow' history_object.id%}",
-					async: false,
-					data: "button=1",
-					success: function(text) {
-             					if(text.toLowerCase() == "follow") {
-							$('#followText').text(text);
+        $('.jqueryFileTree a').on('click', function(target) {
+            if($(target.target).hasClass('pdf_download')) {
+                return;
+            }
+            var list_el = $(target.target).parent();
+            list_el.toggleClass("expanded");
+            list_el.toggleClass("collapsed");
+            var next_list = $(target.target).next();
 
-	          		    			$('#alert_unfollow').show();
-	        	  		 		$('#alert_follow').hide();
-						}
-						// show only info, when following worked
+            var children = $(next_list.parent()).children();
+            var len = children.length;
+            var ret = false;
 
-				     	}
-				   });
+            if(list_el.hasClass('fancybox')) {
+                ret = true;
+            }
 
-          		}
+            for (var i = 0; i < len; i++) {
+                if(!$(children[i]).hasClass('a')) {
+                    $($(children[i]).children()).toggle();
+                }
+            }
 
-		});
+            // Trigger scroll event, that lazy load plugins gets fired
+            $(window).trigger("scroll");
 
-		$('.jqueryFileTree a').on('click', function(target){
-			if($(target.target).hasClass('pdf_download'))
-				return
-			var list_el = $(target.target).parent();
-			list_el.toggleClass("expanded");
-			list_el.toggleClass("collapsed");
-			var next_list = $(target.target).next();
+            return ret; //don't activate the link
+        });
 
-                        var children = $(next_list.parent()).children();
-                        var len = children.length;
-			var ret = false;
+        $(".fancybox").fancybox({
+            openEffect  : 'none',
+            closeEffect : 'none'
+        });
 
-			if(list_el.hasClass('fancybox'))
-				ret = true;
-
-                        for (var i = 0; i < len; i++)
-				if(!$(children[i]).hasClass('a')) {
-					// ret = true;
-					$($(children[i]).children()).toggle();
-			}
-                        // Trigger scroll event, that lazy load plugins gets fired
-                        $(window).trigger("scroll");
-
-			return ret; //don't activate the link
-		});
-
-		$(".fancybox").fancybox({
-			openEffect	: 'none',
-			closeEffect	: 'none'
-		});
-
-		{% if request.user != history_object.uid %}
-		$('#sendButton_{{h_item.id}}').attr('disabled', true);
-		$('#captionButton_{{h_item.id}}').attr('disabled', true);
-
-
-		{% endif %}
-	});
+        {% if request.user != history_object.uid %}
+        $('#sendButton_{{h_item.id}}').attr('disabled', true);
+        $('#captionButton_{{h_item.id}}').attr('disabled', true);
+        {% endif %}
+    });
 </script>
 
 {% endblock %}

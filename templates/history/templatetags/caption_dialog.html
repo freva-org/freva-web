@@ -6,13 +6,13 @@
       <div class="modal-content">
         <div class="modal-header">
           <h4 class="modal-title">Change caption</h4>
-		  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body" id="browsefield">
-        	<div class="form-group">
-				<input id="caption_field" class="form-control" name="caption_field" value="{{current_caption}}" style="width: 90%;">
-				<input id="job_id" type="hidden" name="job_id">
-			</div>
+            <div class="form-group">
+                <input id="caption_field" class="form-control" name="caption_field" value="{{current_caption}}" style="width: 90%;">
+                <input id="job_id" type="hidden" name="job_id">
+            </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-primary" name="applyBtn" id="applyBtn">Set Caption</button>
@@ -22,27 +22,24 @@
   </div><!-- /.modal -->
 
 <script>
-	$(document).ready(function(){
+    $(document).ready(function(){
 
-		$('#defaultBtn').on('click', function(){
-        	    $('#caption_field').val($('#defaultCaption').text());
-           	 });
+        $('#defaultBtn').on('click', function(){
+                $('#caption_field').val($('#defaultCaption').text());
+             });
 
-		$('#applyBtn').on('click', function(){
-			var kind = 1;
-			var data = {'caption':$('#caption_field').val(),
-						'tool': '{{history_object.tool}}' };
-			var url = '{% url 'history:generate-caption' history_object.id '__KIND__'%}';
-			url = url.replace(/__KIND__/g, kind)
-			$.post(url, data, function(resp){
-				$('#result_caption').text(resp);
-				document.title = resp;
-			});
+        $('#applyBtn').on('click', function(){
+            var newCaption = $('#caption_field').val()
+            var data = {'caption':newCaption};
+            var url = '{% url 'history:set-caption' history_object.id %}';
+            $.post(url, data, function(resp) {
+                $('#result_caption').text(newCaption);
+                document.title = newCaption;
+            });
 
-			$('#caption_modal').modal('hide');
+            $('#caption_modal').modal('hide');
+        });
 
-		});
-
-	});
+    });
 
 </script>

@@ -53,7 +53,7 @@
 }
 
 .blacktable{
-	background:#000 !important;
+  background:#000 !important;
 }
 
 .dataTables_length,
@@ -182,9 +182,10 @@ $(document).ready(function() {
       const elementIndex = rowData["1"];
       const popover = new DarkEditable(cell, {
           type: "text",
-          url: "{% url 'history:history' %}",
-          pk: elementIndex,
-          name: "caption"
+          url: "{% url 'history:set-caption' 42%}".replace(/42/, elementIndex.toString()),
+          name: "caption",
+          value: rowData[4],
+          pk: elementIndex
       });
     }
 
@@ -209,6 +210,8 @@ $(document).ready(function() {
       var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl, {
           // FIXME: Maybe we should check if this is really a good decision
+          // We disable sanitization of the tooltip because it contains a server-side-rendered
+          // table (defined in history/views)
             sanitize: false
         })
       })
@@ -323,12 +326,12 @@ $(document).ready(function() {
 //    // the very first initialization needs this line of code
 //   // $('.ttbtn').tooltip({html:true});
 //
-////	$('.datatable')
+////  $('.datatable')
 ////    .on( 'processing.dt', function ( e, settings, processing ) {
-////    	if(processing)
-////    		$('html').addClass('wait');
-////    	else
-////    		$('html').removeClass('wait');
+////      if(processing)
+////        $('html').addClass('wait');
+////      else
+////        $('html').removeClass('wait');
 ////        $('#processingIndicator').css( 'display', processing ? 'block' : 'none' );
 ////    } )
 //
@@ -347,11 +350,11 @@ $(document).ready(function() {
            $(this).text('Unselect all');
 
       }else{
-	    $('.chksel').prop('checked', false);
-           $(this).text('Select all');
-           $('.chksel').prop('checked',false);
-           $('.chksel').parent().parent().removeClass('selected');
-           dataTable.rows().deselect();
+          $('.chksel').prop('checked', false);
+          $(this).text('Select all');
+          $('.chksel').prop('checked',false);
+          $('.chksel').parent().parent().removeClass('selected');
+          dataTable.rows().deselect();
       }
   });
 
@@ -377,7 +380,7 @@ $(document).ready(function() {
           $.post(url, data, function(resp) {if(resp != '') alert(resp);
             $('#DataTables_Table_0').dataTable().fnClearTable()
             $('#DataTables_Table_0').dataTable().fnDraw();
-	   });
+     });
 
       var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
       var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {

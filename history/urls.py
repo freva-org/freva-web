@@ -27,9 +27,9 @@ urlpatterns = [
     url(r"^change-flag/$", views.change_flag, name="changeFlag"),
     url(r"^cancel-slurmjob/$", views.cancel_slurmjob, name="cancelSlurmjob"),
     url(
-        r"^(?P<id>\w+)/(?P<type>\w+)/generate-caption/$",
-        views.generate_caption,
-        name="generate-caption",
+        r"^(?P<id>\w+)/set-caption/$",
+        views.set_caption,
+        name="set-caption",
     ),
     url(
         r"^(?P<history_id>\w+)/(?P<deleted>\w+)/count-notes/$",

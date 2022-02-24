@@ -7,7 +7,7 @@ from django.contrib.flatpages.models import FlatPage
 from django.utils.html import escape
 from datatableview import helpers, columns
 from datatableview import Datatable
-from datatableview.views import XEditableDatatableView
+from datatableview.views import DatatableView
 
 from django_evaluation.ldaptools import get_ldap_object
 
@@ -155,9 +155,7 @@ class HistoryDatatable(Datatable):
 
             second_button_href = 'onclick="cancelDialog.show(%i);"' % instance.id
 
-            # disable button for manually started jobs
-            ## FIXME: == stat !=
-            if instance.slurm_output != "0":
+            if instance.slurm_output == "0":
                 second_button_text = "n/a"
                 second_button_style = (
                     'class="btn btn-danger btn-sm mybtn-cancel disabled"'
@@ -182,7 +180,7 @@ class HistoryDatatable(Datatable):
         return "%s\n%s\n%s" % (result_button, second_button, info_button)
 
 
-class HistoryTable(XEditableDatatableView):
+class HistoryTable(DatatableView):
     datatable_class = HistoryDatatable
     template_name = "history/history_list.html"
 
@@ -543,23 +541,15 @@ def tail_file(request, id):
 
 
 @login_required()
-def generate_caption(request, id, type):
-    caption = request.POST["caption"].strip()
-    tool_name = request.POST["tool"].strip().capitalize()
-
-    retval = pm.generate_caption(caption, tool_name)
-
-    if not request.user.isGuest():
-
-        hist = History.objects.get(id=id)
-        if hist.uid == request.user:
-            hist.caption = retval
-            hist.save()
-        else:
-            retval = "*" + retval
-
+def set_caption(request, id):
+    hist = History.objects.get(id=id)
+    if not request.user.isGuest() and hist.uid == request.user:
+        caption = request.POST["caption"].strip()
+        hist.caption = caption
+        hist.save()
+        retval = {"status": "success"}
     else:
-        retval = "*" + retval
+        retval = {"status": "permission denied"}
 
     return HttpResponse(json.dumps(retval), content_type="application/json")
 

@@ -7,8 +7,6 @@ import * as constants from "./constants";
 
 export const selectFacet = (facet, value) => dispatch => {
   setTimeout(function () {
-
-
     dispatch({
       type: constants.SELECT_FACET,
       facet,

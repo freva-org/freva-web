@@ -85,8 +85,7 @@ class DarkEditable {
         if (this.value == "") {
           this.element.innerHTML = this.emptytext;
         } else {
-          console.log("thisvalue", this.value);
-          this.element.innerHTML = escapeHtml(this.value);//$("<div></div>").text(this.value).html();
+          this.element.innerHTML = escapeHtml(this.value);
           empty = false;
         }
         break;

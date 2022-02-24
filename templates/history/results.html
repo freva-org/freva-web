@@ -198,17 +198,8 @@
         </a>
     </h4>
     <div id="collapseNotes" class="panel-collapse collapse">
-      <div class="card-body" id='loadComments'>
-      <!-- INSERT COMMENTS HERE -->
-      {% comment %}
-      {% comment_field request.user history_object.id None %}
-
-      {% for note in notes.all %}
-      {% comment_field request.user history_object.id note %}
-      {% endfor %}
-      {% endcomment %}
-
-       </div><!-- panel-body -->
+        <div class="card-body" id='loadComments'>
+        </div><!-- panel-body -->
     </div><!-- panel-collapse collapse-->
   </div><!-- panel panel-default-->
 
@@ -276,7 +267,6 @@
     $(document).ready(function() {
 
         doCount();
-        //inter_counter = setInterval(doCount, 4000);
 
         $('#collapseNotes').on('show.bs.collapse', function() {
             var url='{% url 'history:result-comments' history_object.id %}';

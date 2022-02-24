@@ -5,11 +5,10 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.debug import sensitive_post_parameters
 from django.contrib.flatpages.models import FlatPage
 from django.utils.html import escape
-from datatableview import helpers, columns
+from datatableview import columns
 from datatableview import Datatable
 from datatableview.views import DatatableView
-
-from django_evaluation.ldaptools import get_ldap_object
+from django.utils.html import escape
 
 import json
 import os
@@ -544,7 +543,7 @@ def tail_file(request, id):
 def set_caption(request, id):
     hist = History.objects.get(id=id)
     if not request.user.isGuest() and hist.uid == request.user:
-        caption = request.POST["caption"].strip()
+        caption = escape(request.POST["caption"].strip())
         hist.caption = caption
         hist.save()
         retval = {"status": "success"}

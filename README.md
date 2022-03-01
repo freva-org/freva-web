@@ -13,7 +13,7 @@ Hence you will need to install the backend first. We recommend creating a dedica
 anaconda environment where both frontend and backend are installed.
 
 ```bash
-conda env create -f dev-environment.yml
+conda env create -f conda-env.yml
 conda activate freva-web
 source .envrc
 conda env config vars set EVALUATION_SYSTEM_CONFIG_FILE=$EVALUATION_SYSTEM_CONFIG_FILE

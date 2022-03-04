@@ -31,7 +31,13 @@ class AccordionItemBody extends React.Component {
         return (
           <div className="pe-2" key={item}>
             <OverlayTrigger overlay={<Tooltip>{metadata[item]}</Tooltip>}>
-              <a href="#" onClick={(e) => {e.preventDefault(); facetClick(eventKey, item);}}>{item}</a>
+              <a
+                href="#" onClick={
+                  (e) => {
+                    e.preventDefault(); facetClick(eventKey, item);
+                  }
+                }
+              >{item}</a>
             </OverlayTrigger>
             {" "}[{filteredValues[i + 1]}]
           </div>
@@ -39,7 +45,13 @@ class AccordionItemBody extends React.Component {
       }
       return (
         <div className="pe-2" key={item}>
-          <a href="#" onClick={(e) => {e.preventDefault(); facetClick(eventKey, item);}}>{item}</a> [{filteredValues[i + 1]}]
+          <a
+            href="#" onClick={
+              (e) => {
+                e.preventDefault(); facetClick(eventKey, item);
+              }
+            }
+          >{item}</a> [{filteredValues[i + 1]}]
         </div>
       );
     });

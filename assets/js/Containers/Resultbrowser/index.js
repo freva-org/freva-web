@@ -1,6 +1,8 @@
 import React from "react";
-import {connect} from "react-redux";
-import {Container, Row, Col, Accordion, Card, Form, FormControl, InputGroup, OverlayTrigger, Pagination, Popover, Table } from "react-bootstrap";
+import PropTypes from "prop-types";
+
+import { connect } from "react-redux";
+import { Container, Row, Col, Accordion, Card, Form, Pagination, Table } from "react-bootstrap";
 
 import _ from "lodash";
 
@@ -13,10 +15,10 @@ import OwnPanel from "../../Components/OwnPanel";
 import Spinner from "../../Components/Spinner";
 import { dateformatter, getCookie } from "../../utils";
 
-import {loadResultFacets, selectResultFacet, clearResultFacet,
-  clearAllResultFacets, setActiveResultFacet, loadResultFiles,
-  selectActivePage, sortActivePage, searchInText,
-  setMetadata } from "./actions";
+import {
+  loadResultFacets, selectResultFacet, clearResultFacet,
+  clearAllResultFacets, setActiveResultFacet
+} from "./actions";
 
 let timer;
 
@@ -50,10 +52,16 @@ function GlobalFilter ({
   );
 }
 
-function ResultTable ({ columns, data, fetchData, loading, selectedFacets, pageCount: controlledPageCount}) {
+GlobalFilter.propTypes = {
+  globalFilter: PropTypes.string,
+  setGlobalFilter: PropTypes.func.isRequired
+};
+
+function ResultTable ({ columns, data, fetchData, loading, selectedFacets, pageCount: controlledPageCount }) {
   const skipPageResetRef = React.useRef();
 
-  const { getTableProps,
+  const {
+    getTableProps,
     headerGroups,
     prepareRow,
     page,
@@ -65,13 +73,13 @@ function ResultTable ({ columns, data, fetchData, loading, selectedFacets, pageC
     nextPage,
     previousPage,
     setPageSize,
-    state: { pageIndex, pageSize, sortBy, globalFilter},
+    state: { pageIndex, pageSize, sortBy, globalFilter },
     setGlobalFilter,
   } = useTable({
     columns,
     data,
     selectedFacets,
-    initialState: {pageIndex: 0, pageSize: 10, sortBy: [], globalFilter: ""},
+    initialState: { pageIndex: 0, pageSize: 10, sortBy: [], globalFilter: "" },
     manualPagination: true,
     manualSortBy: true,
     manualGlobalFilter: true,
@@ -87,7 +95,7 @@ function ResultTable ({ columns, data, fetchData, loading, selectedFacets, pageC
 
   React.useEffect(() => {
     skipPageResetRef.current = true;
-    fetchData && fetchData({ pageIndex, pageSize, sortBy, globalFilter, selectedFacets});
+    fetchData({ pageIndex, pageSize, sortBy, globalFilter, selectedFacets });
   }, [fetchData, pageIndex, pageSize, sortBy, globalFilter, selectedFacets]);
 
   React.useEffect(() => {
@@ -111,7 +119,7 @@ function ResultTable ({ columns, data, fetchData, loading, selectedFacets, pageC
           </tr>
           {
             headerGroups.map(headerGroup => {
-              const { key, ...restHeaderGroupProps} = headerGroup.getHeaderGroupProps();
+              const { key, ...restHeaderGroupProps } = headerGroup.getHeaderGroupProps();
               return (<tr key={key} {...restHeaderGroupProps}>
                 {
                   headerGroup.headers.map(column => {
@@ -206,18 +214,34 @@ function ResultTable ({ columns, data, fetchData, loading, selectedFacets, pageC
   );
 }
 
+
+ResultTable.propTypes = {
+  columns: PropTypes.array,
+  data: PropTypes.array,
+  fetchData: PropTypes.func.isRequired,
+  loading: PropTypes.bool,
+  selectedFacets: PropTypes.object,
+  pageCount: PropTypes.number
+};
+
 const LinkCell = (props) => {
   return <a href={props.cell.value}>Show</a>;
 };
 
-function TableContainer ({activeFacet, selectedFacets, closeAccordion}) {
+LinkCell.propTypes = {
+  cell: PropTypes.shape({
+    value: PropTypes.string
+  }).isRequired
+};
+
+function TableContainer ({ activeFacet, selectedFacets, closeAccordion }) {
   const columns = React.useMemo(
     () => [
       {
         Header: "Timestamp",
         accessor: "timestamp",
-        Cell: (props) => {
-          return dateformatter(props.cell.value);
+        Cell: (properties) => {
+          return dateformatter(properties.cell.value);
         }
       },
       {
@@ -275,8 +299,8 @@ function TableContainer ({activeFacet, selectedFacets, closeAccordion}) {
         "X-CSRFToken": getCookie("csrftoken"),
         "Accept": "application/json",
         "Content-Type": "application/json"
-      }}
-    ).then(response => response.json())
+      }
+    }).then(response => response.json())
       .then(json => {
         setData(json.data);
         setResultCount(json.metadata.numFound);
@@ -284,7 +308,6 @@ function TableContainer ({activeFacet, selectedFacets, closeAccordion}) {
         return;
       })
       .catch(err => {
-        console.log(err);
         return err;
       })
       .then(() => {
@@ -313,6 +336,13 @@ function TableContainer ({activeFacet, selectedFacets, closeAccordion}) {
     </Accordion>
   );
 }
+
+TableContainer.propTypes = {
+  activeFacet: PropTypes.string,
+  selectedFacets: PropTypes.object,
+  closeAccordion: PropTypes.func.isRequired
+};
+
 class Resultbrowser extends React.Component {
 
   constructor (props) {
@@ -331,8 +361,8 @@ class Resultbrowser extends React.Component {
      * Loop all facets and render the panels
      */
   renderFacetPanels () {
-    const {facets, selectedFacets, activeFacet, metadata } = this.props.resultbrowser;
-    const {dispatch} = this.props;
+    const { facets, selectedFacets, activeFacet, metadata } = this.props.resultbrowser;
+    const { dispatch } = this.props;
     return _.map(facets, (value, key) => {
       let panelHeader;
       const isFacetSelected = !!selectedFacets[key];
@@ -362,8 +392,8 @@ class Resultbrowser extends React.Component {
 
   renderFilesPanel () {
     //TODO: This should be a separate component
-    const {activeFacet, selectedFacets } = this.props.resultbrowser;
-    const {dispatch} = this.props;
+    const { activeFacet, selectedFacets } = this.props.resultbrowser;
+    const { dispatch } = this.props;
     return (
       <TableContainer
         selectedFacets={selectedFacets}
@@ -374,8 +404,8 @@ class Resultbrowser extends React.Component {
   }
 
   render () {
-    const {facets, selectedFacets, activeFacet} = this.props.resultbrowser;
-    const {dispatch} = this.props;
+    const { facets, selectedFacets, activeFacet } = this.props.resultbrowser;
+    const { dispatch } = this.props;
 
     // Wait until facets are loaded
     if (facets.length === 0) {
@@ -398,7 +428,13 @@ class Resultbrowser extends React.Component {
             Object.keys(selectedFacets).length !== 0 ?
               <Col md={12}>
                 <Card>
-                  <a className="m-3" href="#" onClick={(e) => {e.preventDefault(); dispatch(clearAllResultFacets());}}>Clear all</a>
+                  <a
+                    className="m-3" href="#" onClick={
+                      (e) => {
+                        e.preventDefault(); dispatch(clearAllResultFacets());
+                      }
+                    }
+                  >Clear all</a>
                 </Card>
               </Col> : null
           }
@@ -415,6 +451,16 @@ class Resultbrowser extends React.Component {
     );
   }
 }
+
+Resultbrowser.propTypes = {
+  resultbrowser: PropTypes.shape({
+    facets: PropTypes.object,
+    selectedFacets: PropTypes.object,
+    activeFacet: PropTypes.string,
+    metadata: PropTypes.object
+  }),
+  dispatch: PropTypes.func.isRequired,
+};
 
 const mapStateToProps = (state) => ({
   resultbrowser: state.resultbrowserReducer

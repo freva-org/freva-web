@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Container, Row, Col, Accordion, Card, Tooltip, OverlayTrigger, Button } from "react-bootstrap";
 
@@ -10,8 +11,17 @@ import AccordionItemBody from "../../Components/AccordionItemBody";
 import OwnPanel from "../../Components/OwnPanel";
 import Spinner from "../../Components/Spinner";
 
-import { loadFacets, selectFacet, clearFacet, clearAllFacets, setActiveFacet, setMetadata, loadFiles,
-  loadNcdump, resetNcdump } from "./actions";
+import {
+  loadFacets,
+  selectFacet,
+  clearFacet,
+  clearAllFacets,
+  setActiveFacet,
+  setMetadata,
+  loadFiles,
+  loadNcdump,
+  resetNcdump
+} from "./actions";
 
 class Databrowser extends React.Component {
 
@@ -83,7 +93,13 @@ class Databrowser extends React.Component {
                   return (
                     <li className="ext_nc" key={fn} style={{ whiteSpace: "normal" }}>
                       <OverlayTrigger overlay={<Tooltip>Click to execute &apos;ncdump -h&apos;<br />and view metadata</Tooltip>}>
-                        <Button variant="link" className="p-0" onClick={() => {this.setState({ showDialog: true, fn });}}>
+                        <Button
+                          variant="link" className="p-0" onClick={
+                            () => {
+                              this.setState({ showDialog: true, fn });
+                            }
+                          }
+                        >
                           <FaInfoCircle className="ncdump" />
                         </Button>
                       </OverlayTrigger>
@@ -100,7 +116,7 @@ class Databrowser extends React.Component {
   }
 
   render () {
-    const { files, facets, selectedFacets, activeFacet, ncdumpStatus, ncdumpOutput } = this.props.databrowser;
+    const { facets, selectedFacets, activeFacet, ncdumpStatus, ncdumpOutput } = this.props.databrowser;
     const { dispatch } = this.props;
 
     // Wait until facets are loaded
@@ -124,7 +140,13 @@ class Databrowser extends React.Component {
             Object.keys(selectedFacets).length !== 0 ?
               <Col md={12}>
                 <Card className="p-2">
-                  <a href="#" onClick={(e) => {e.preventDefault(); dispatch(clearAllFacets());}}>Clear all</a>
+                  <a
+                    href="#" onClick={
+                      (e) => {
+                        e.preventDefault(); dispatch(clearAllFacets());
+                      }
+                    }
+                  >Clear all</a>
                 </Card>
               </Col> : null
           }
@@ -149,7 +171,11 @@ class Databrowser extends React.Component {
             <NcdumpDialog
               show={this.state.showDialog}
               file={this.state.fn}
-              onClose={() => {this.setState({ showDialog: false }); dispatch(resetNcdump());}}
+              onClose={
+                () => {
+                  this.setState({ showDialog: false }); dispatch(resetNcdump());
+                }
+              }
               submitNcdump={(fn, pw) => dispatch(loadNcdump(fn, pw))}
               status={ncdumpStatus}
               output={ncdumpOutput}
@@ -161,6 +187,20 @@ class Databrowser extends React.Component {
   }
 
 }
+
+Databrowser.propTypes = {
+  databrowser: PropTypes.shape({
+    facets: PropTypes.object,
+    files: PropTypes.array,
+    numFiles: PropTypes.number,
+    selectedFacets: PropTypes.object,
+    activeFacet: PropTypes.string,
+    ncdumpStatus: PropTypes.string,
+    ncdumpOutput: PropTypes.status,
+    metadata: PropTypes.object,
+  }),
+  dispatch: PropTypes.func.isRequired
+};
 
 const mapStateToProps = state => ({
   databrowser: state.databrowserReducer

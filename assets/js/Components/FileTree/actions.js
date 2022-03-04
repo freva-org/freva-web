@@ -22,11 +22,18 @@ export const fetchDir = (dir, ext) => (dispatch) => {
     headers: {
       "Accept": "application/json",
       "Content-Type": "application/json"
-    } })
-    .then(response => response.json())
+    }
+  }).then(response => response.json())
     .then(json => {
-      dispatch({
-        type: constants.FETCH_DIR_SUCCESS,
+      if (json.status === "success") {
+        return dispatch({
+          type: constants.FETCH_DIR_SUCCESS,
+          payload: json,
+          path: dir
+        });
+      }
+      return dispatch({
+        type: constants.FETCH_DIR_ERROR,
         payload: json,
         path: dir
       });

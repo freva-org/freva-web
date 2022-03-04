@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { connect } from "react-redux";
 
 import { Container, Row, Col, Button, ButtonToolbar, Modal, FormControl } from "react-bootstrap";
@@ -113,6 +114,22 @@ class PluginDetail extends React.Component {
     );
   }
 }
+
+PluginDetail.propTypes = {
+  params: PropTypes.shape({
+    pluginName: PropTypes.string.isRequired
+  }),
+  plugin: PropTypes.shape({
+    name: PropTypes.string,
+    tool_developer: PropTypes.shape({
+      name: PropTypes.string
+    }),
+    docpage: PropTypes.string,
+    user_exported: PropTypes.bool,
+    long_description: PropTypes.string,
+  }),
+  dispatch: PropTypes.func.isRequired
+};
 
 const mapStateToProps = state => ({
   plugin: state.pluginDetailReducer.plugin

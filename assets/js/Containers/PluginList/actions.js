@@ -1,5 +1,7 @@
 import fetch from "isomorphic-fetch";
 
+import { getCookie } from "../../utils";
+
 import * as constants from "./constants";
 
 export const updateCategoryFilter = (category) => dispatch => {
@@ -34,13 +36,18 @@ export const updateSearchFilter = (value) => dispatch => {
 };
 
 export const exportPlugin = (path) => (dispatch) => {
-  const url = `/api/plugins/export/?export_file=${path}`;
+  const url = "/api/plugins/export/";
   return fetch(url, {
+    method: "POST",
     credentials: "same-origin",
     headers: {
       "Accept": "application/json",
-      "Content-Type": "application/json"
-    }
+      "Content-Type": "application/json",
+      "X-CSRFToken": getCookie("csrftoken"),
+    },
+    body: JSON.stringify({
+      export_file: path
+    })
   })
     .then(response => response.json())
     .then(json => {
@@ -49,7 +56,7 @@ export const exportPlugin = (path) => (dispatch) => {
       });
       return json;
     })
-    .then(json => dispatch(loadPlugins()));
+    .then(() => dispatch(loadPlugins()));
 };
 
 export const loadPlugins = () => (dispatch) => {

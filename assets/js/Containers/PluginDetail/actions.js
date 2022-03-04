@@ -30,7 +30,7 @@ export const loadPlugin = pluginName => dispatch => {
     });
 };
 
-export const sendDeveloperMail = (text, tool_name) => () => {
+export const sendDeveloperMail = (text, toolName) => () => {
   const url = "/api/utils/mail-to-developer/";
   return fetch(url, {
     credentials: "same-origin",
@@ -42,7 +42,7 @@ export const sendDeveloperMail = (text, tool_name) => () => {
     },
     body: JSON.stringify({
       text,
-      tool_name
+      "tool_name": toolName
     })
   });
 };

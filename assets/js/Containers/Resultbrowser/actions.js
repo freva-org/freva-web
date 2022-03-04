@@ -1,7 +1,7 @@
 import fetch from "isomorphic-fetch";
 import _ from "lodash";
 
-import {getCookie} from "../../utils";
+import { getCookie } from "../../utils";
 
 import * as constants from "./constants";
 
@@ -50,7 +50,7 @@ export const setActiveResultFacet = (facet) => ({
 
 export const loadResultFacets = () => (dispatch, getState) => {
 
-  const {selectedFacets} = getState().resultbrowserReducer;
+  const { selectedFacets } = getState().resultbrowserReducer;
   let params = "";
   _.map(selectedFacets, (value, key) => {
     params += `&${key}=${value}`;
@@ -63,10 +63,10 @@ export const loadResultFacets = () => (dispatch, getState) => {
       "X-CSRFToken": getCookie("csrftoken"),
       "Accept": "application/json",
       "Content-Type": "application/json"
-    }}
-  ).then(response => response.json())
+    }
+  }).then(response => response.json())
     .then(json => {
-      dispatch({
+      return dispatch({
         type: constants.LOAD_RESULT_FACETS,
         payload: json
       });
@@ -74,7 +74,7 @@ export const loadResultFacets = () => (dispatch, getState) => {
 };
 
 export const loadResultFiles = () => (dispatch, getState) => {
-  const {selectedFacets, page, limit, sortName, sortOrder, searchText} = getState().resultbrowserReducer;
+  const { selectedFacets, page, limit, sortName, sortOrder, searchText } = getState().resultbrowserReducer;
   let params = "";
   _.map(selectedFacets, (value, key) => {
     params += `&${key}=${value}`;
@@ -91,10 +91,10 @@ export const loadResultFiles = () => (dispatch, getState) => {
       "X-CSRFToken": getCookie("csrftoken"),
       "Accept": "application/json",
       "Content-Type": "application/json"
-    }}
-  ).then(response => response.json())
+    }
+  }).then(response => response.json())
     .then(json => {
-      dispatch({
+      return dispatch({
         type: constants.LOAD_RESULT_FILES,
         payload: json
       });

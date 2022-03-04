@@ -28,11 +28,9 @@ function CustomToggle ({ children, eventKey, collapse, removeFacet }) {
   );
 }
 
-OwnPanel.propTypes = {
+CustomToggle.propTypes = {
   collapse: PropTypes.func.isRequired,
-  header: PropTypes.node.isRequired,
   eventKey: PropTypes.string.isRequired,
-  isFacetSelected: PropTypes.bool,
   removeFacet: PropTypes.func,
   children: PropTypes.node
 };
@@ -49,5 +47,14 @@ function OwnPanel (props) {
     </Card>
   );
 }
+
+OwnPanel.propTypes = {
+  collapse: PropTypes.func.isRequired,
+  header: PropTypes.node.isRequired,
+  eventKey: PropTypes.string.isRequired,
+  isFacetSelected: PropTypes.bool,
+  removeFacet: PropTypes.func,
+  children: PropTypes.node
+};
 
 export default OwnPanel;

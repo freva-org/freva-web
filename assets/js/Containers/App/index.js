@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { connect } from "react-redux";
 
 import Spinner from "../../Components/Spinner";
@@ -14,7 +15,7 @@ class App extends React.Component {
   render () {
 
     // Wait until the current user is loaded
-    if (!this.props.state.appReducer.currentUser && this.props.state.appReducer.error === "") {
+    if (!this.props.currentUser && this.props.error === "") {
       return (
         <Spinner />
       );
@@ -28,8 +29,24 @@ class App extends React.Component {
   }
 }
 
+App.propTypes = {
+  children: PropTypes.node.isRequired,
+  currentUser: PropTypes.shape({
+    id: PropTypes.number,
+    username: PropTypes.string,
+    email: PropTypes.string,
+    first_name: PropTypes.string,
+    isGuest: PropTypes.bool,
+    home: PropTypes.string,
+    scratch: PropTypes.string
+  }),
+  error: PropTypes.string,
+  dispatch: PropTypes.func.isRequired,
+};
+
 const mapStateToProps = state => ({
-  state
+  currentUser: state.appReducer.currentUser,
+  error: state.appReducer.error
 });
 
 export default connect(mapStateToProps)(App);

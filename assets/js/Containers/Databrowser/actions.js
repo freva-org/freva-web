@@ -66,10 +66,10 @@ export const loadFacets = () => (dispatch, getState) => {
       "X-CSRFToken": getCookie("csrftoken"),
       "Accept": "application/json",
       "Content-Type": "application/json"
-    } }
-  ).then(response => response.json())
+    }
+  }).then(response => response.json())
     .then(json => {
-      dispatch({
+      return dispatch({
         type: constants.LOAD_FACETS,
         payload: json
       });
@@ -91,10 +91,10 @@ export const loadFiles = () => (dispatch, getState) => {
       "X-CSRFToken": getCookie("csrftoken"),
       "Accept": "application/json",
       "Content-Type": "application/json"
-    } }
-  ).then(response => response.json())
+    }
+  }).then(response => response.json())
     .then(json => {
-      dispatch({
+      return dispatch({
         type: constants.LOAD_FILES,
         payload: json
       });
@@ -125,5 +125,5 @@ export const loadNcdump = (fn) => dispatch => {
   }).then(json => {
     return dispatch({ type: constants.LOAD_NCDUMP_SUCCESS, payload: json });
   }
-  ).catch(error => dispatch({ type: constants.LOAD_NCDUMP_ERROR }));
+  ).catch(() => dispatch({ type: constants.LOAD_NCDUMP_ERROR }));
 };

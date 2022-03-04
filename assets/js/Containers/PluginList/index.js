@@ -1,5 +1,6 @@
 import React from "react";
-import { Link, browserHistory } from "react-router";
+import PropTypes from "prop-types";
+import { browserHistory } from "react-router";
 import { connect } from "react-redux";
 import {
   Row, Col, Button, ListGroup, ListGroupItem, Container, Modal, ButtonGroup, FormCheck,
@@ -16,7 +17,7 @@ import Spinner from "../../Components/Spinner";
 import { exportPlugin, loadPlugins, updateCategoryFilter, updateTagFilter, updateSearchFilter } from "./actions";
 
 /*
-These are the hardcodet categories of this group. If a category is not listed here, the
+These are the hardcoded categories of this group. If a category is not listed here, the
 corresponding plugins will not be shown
 FIXME: Is this actually a good idea?
 */
@@ -32,7 +33,7 @@ class PluginList extends React.Component {
 
   constructor (props) {
     super(props);
-    this.handleExport = this.handleExport.bind(this);
+    this.handleExport = this.handleImport.bind(this);
     this.handleSearchFilter = this.handleSearchFilter.bind(this);
     this.handlePluginValue = this.handlePluginValue.bind(this);
     this.renderCategoryCheckbox = this.renderCategoryCheckbox.bind(this);
@@ -47,7 +48,7 @@ class PluginList extends React.Component {
     this.props.dispatch(loadPlugins());
   }
 
-  handleExport () {
+  handleImport () {
     this.props.dispatch(exportPlugin(this.state.value));
     this.setState({ showModal: false });
   }
@@ -78,7 +79,11 @@ class PluginList extends React.Component {
             return (
               <ListGroupItem
                 action
-                onClick={(e) => {e.preventDefault(); browserHistory.push(`/plugins/${val[0]}/detail/`);}}
+                onClick={
+                  (e) => {
+                    e.preventDefault(); browserHistory.push(`/plugins/${val[0]}/detail/`);
+                  }
+                }
                 href={`/plugins/${val[0]}/detail/`}
                 key={val[0]}
               >
@@ -119,21 +124,52 @@ class PluginList extends React.Component {
   }
 
   render () {
-    const { exported, tags, categories, categoriesFilter, tagsFilter, filteredPlugins, searchFilter,
-      pluginsLoaded } = this.props.pluginList;
-    const { nodes, root } = this.props.fileTree;
-    const { currentUser, dispatch } = this.props;
+    const {
+      exported,
+      tags,
+      categories,
+      categoriesFilter,
+      tagsFilter,
+      filteredPlugins,
+      searchFilter,
+      pluginsLoaded
+    } = this.props.pluginList;
 
-    const childs = nodes.map(n =>
-      (<FileTree
-        node={n}
-        key={n.name}
-        extension="py"
-        handleOpen={(e, path) => {e.preventDefault(); this.props.dispatch(fetchDir(path, "py"));}}
-        handleClose={(e, path) => {e.preventDefault(); this.props.dispatch(closeDir(path));}}
-        handleFileClick={(e, path) => {e.preventDefault(); this.setState({ value:path });}}
-      />)
-    );
+    const { nodes, root, error } = this.props.fileTree;
+    const { currentUser, dispatch } = this.props;
+    let children;
+    if (nodes && nodes.length > 0) {
+      children = nodes.map(n => {
+        return (
+          <FileTree
+            node={n}
+            key={n.name}
+            extension="py"
+            handleOpen={
+              (e, path) => {
+                e.preventDefault(); this.props.dispatch(fetchDir(path, "py"));
+              }
+            }
+            handleClose={
+              (e, path) => {
+                e.preventDefault(); this.props.dispatch(closeDir(path));
+              }
+            }
+            handleFileClick={
+              (e, path) => {
+                e.preventDefault(); this.setState({ value:path });
+              }
+            }
+          />
+        );
+      });
+    } else if (error) {
+      children = (
+        <div className="text-danger">
+          {error}
+        </div>
+      );
+    }
 
     if (!pluginsLoaded) {
       return (
@@ -151,7 +187,7 @@ class PluginList extends React.Component {
                   variant="info" className="float-end"
                   onClick={() => (exported ? this.props.dispatch(exportPlugin()) : this.setState({ showModal: true }))}
                 >
-                  {exported ? "Remove exported Plugin" : "Plug-my-Plugin"}
+                  {exported ? "Remove imported Plugin" : "Plug-my-Plugin"}
                 </Button> : null
             }
           </Col>
@@ -216,7 +252,7 @@ class PluginList extends React.Component {
           </Modal.Header>
           <Modal.Body>
             <p>Here you can plugin your own plugin</p>
-            <ButtonGroup style={{ marginBottom: 10 }}>
+            <ButtonGroup className="mb-2">
               <Button
                 variant="primary" active={root.id === "home"}
                 onClick={() => this.props.dispatch(changeRoot({ id: "home", path: currentUser.home }, "py"))}
@@ -230,7 +266,7 @@ class PluginList extends React.Component {
                 Scratch
               </Button>
             </ButtonGroup>
-            {childs}
+            {children}
             <FormGroup style={{ marginTop: 10 }}>
               <FormLabel>File to plugin</FormLabel>
               <FormControl
@@ -241,13 +277,42 @@ class PluginList extends React.Component {
           </Modal.Body>
 
           <Modal.Footer>
-            <Button variant="primary" onClick={() => this.handleExport()}>Export Plugin</Button>
+            <Button variant="primary" onClick={() => this.handleExport()}>Import Plugin</Button>
           </Modal.Footer>
         </Modal>
       </Container>
     );
   }
 }
+
+PluginList.propTypes = {
+  pluginList: PropTypes.shape({
+    exported: PropTypes.bool,
+    tags: PropTypes.array,
+    categories: PropTypes.object,
+    categoriesFilter: PropTypes.array,
+    tagsFilter: PropTypes.array,
+    filteredPlugins: PropTypes.array,
+    searchFilter: PropTypes.string,
+    pluginsLoaded: PropTypes.bool
+  }),
+  fileTree: PropTypes.shape({
+    nodes: PropTypes.array,
+    root: PropTypes.shape({
+      id: PropTypes.string
+    }),
+    error: PropTypes.string
+  }),
+  currentUser: PropTypes.shape({
+    id: PropTypes.number,
+    username: PropTypes.string,
+    email: PropTypes.string,
+    isGuest: PropTypes.bool,
+    home: PropTypes.string,
+    scratch: PropTypes.string
+  }),
+  dispatch: PropTypes.func.isRequired
+};
 
 const mapStateToProps = state => ({
   pluginList: state.pluginListReducer,

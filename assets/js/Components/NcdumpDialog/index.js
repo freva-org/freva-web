@@ -1,6 +1,6 @@
 import React from "react";
-import ReactHtmlParser from "react-html-parser";
-import { Modal, Button, FormControl, Alert } from "react-bootstrap";
+import PropTypes from "prop-types";
+import { Modal, Button } from "react-bootstrap";
 
 import Spinner from "../Spinner";
 
@@ -41,5 +41,17 @@ class NcdumpDialog extends React.Component {
     );
   }
 }
+
+NcdumpDialog.propTypes = {
+  show: PropTypes.bool,
+  submitNcdump: PropTypes.func.isRequired,
+  onClose: PropTypes.func,
+  status: PropTypes.string,
+  output: PropTypes.shape({
+    ncdump: PropTypes.string,
+    error_msg: PropTypes.string
+  }),
+  file: PropTypes.string
+};
 
 export default NcdumpDialog;

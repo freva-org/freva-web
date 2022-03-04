@@ -1,29 +1,38 @@
-var path = require("path");
-var webpack = require('webpack');
-var BundleTracker = require('webpack-bundle-tracker');
+const webpack = require("webpack");
 
-var mode = 'development'
-var entry = [
-  'webpack-dev-server/client?http://localhost:8080',
-  'webpack/hot/only-dev-server',
-  './assets/js/index'
+const mode = "development";
+const entry = [
+  "webpack-dev-server/client?http://localhost:8080",
+  "webpack/hot/dev-server",
+  "./assets/js/index"
 ];
 
 // override django's STATIC_URL for webpack bundles
-var output = { publicPath: 'http://localhost:8080/assets/bundles/'};
+const output = { publicPath: "http://localhost:8080/assets/bundles/" };
+
+const devServer = {
+  port: 8080,
+  host: "localhost",
+  historyApiFallback: true,
+  client: {
+    logging: "verbose",
+  }
+};
 
 // Add HotModuleReplacementPlugin and BundleTracker plugins
-var plugins = [
+const plugins = [
   new webpack.HotModuleReplacementPlugin(),
   new webpack.NoEmitOnErrorsPlugin()
 ];
 
 module.exports = function getDevConfig () {
   return {
+    target: "web",
     mode,
     entry,
     resolve: { extensions: [".js"] },
     output,
-    plugins
+    plugins,
+    devServer
   };
 };

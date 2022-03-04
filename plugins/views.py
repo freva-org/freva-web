@@ -18,7 +18,6 @@ from plugins.utils import (
     get_plugin_or_404,
     ssh_call,
     get_scheduler_hosts,
-    plugin_metadata_as_dict,
 )
 from plugins.forms import PluginForm, PluginWeb
 from history.models import History, Configuration
@@ -336,8 +335,8 @@ def dirlist(request):
 
 @login_required()
 def list_dir(request):
-    files = list()
-    folders = list()
+    files = []
+    folders = []
     # we can specify an ending in GET request
     file_type = request.GET.get("file_type", "pdf")
     try:
@@ -353,8 +352,12 @@ def list_dir(request):
                         files.append(dict(type="file", ext=e, path=ff, name=f))
         folders = folders + files
     except Exception as e:
-        folders.append("Could not load directory: %s" % str(e))
-    return HttpResponse(json.dumps(folders))
+        return HttpResponse(
+            json.dumps(
+                {"status": "Could not load directory: %s" % str(e), "folders": []}
+            )
+        )
+    return HttpResponse(json.dumps({"status": "success", "folders": folders}))
 
 
 def list_docu(request):

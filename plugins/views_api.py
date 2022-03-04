@@ -56,15 +56,19 @@ basically useless.
 
 
 class ExportPlugin(APIView):
-    def get(self, request):
+    def post(self, request):
+        if request.user.isGuest():
+            return Response("Guests are not allowed to add plugins")
+
         # try to remove plugin from enironment
         try:
             del os.environ["EVALUATION_SYSTEM_PLUGINS_%s" % request.user]
             return Response("Plugin removed")
         # add plugin to env
         except:
-            fn = request.GET.get("export_file")
-            if fn is not None and os.path.isfile(fn):
+            fn = request.data.get("export_file")
+            if fn and os.path.isfile(fn):
+                fn = os.path.normpath(fn)
                 parts = fn.split("/")
                 path = "/".join(parts[:-1])
                 module = parts[-1].split(".")[0]

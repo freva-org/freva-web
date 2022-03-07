@@ -1,6 +1,7 @@
 *.pyc
 *.db
 virt
+freva_web.conf
 db
 node_modules
 venv/*

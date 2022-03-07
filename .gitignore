@@ -7,8 +7,12 @@ node_modules
 venv/*
 conda/*
 evaluation_system.conf
+
 .*
+!.gitignore
+!.envrc
 !.gitlab-ci.yml
+
 static/preview/*
 tail/*
 python=*/

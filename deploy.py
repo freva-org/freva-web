@@ -163,7 +163,7 @@ class Installer:
     pip_pkgs = [
         "Django-datatable-view-compat",
         "django-auth-ldap",
-        "django-bootstrap3",
+        "django-bootstrap-v5",
         "django-datatable-view",
         "django-debug-toolbar",
         "django-debug-toolbar-user-panel",

@@ -1,171 +1,469 @@
-import React from 'react';
-import {connect} from 'react-redux';
-import {Container, Row, Col, Accordion, Card} from 'react-bootstrap';
-import {loadResultFacets, selectResultFacet, clearResultFacet,
-    clearAllResultFacets, setActiveResultFacet, loadResultFiles,
-    selectActivePage, sortActivePage, searchInText,
-    setMetadata } from './actions';
-import _ from 'lodash';
-import AccordionItemBody from '../../Components/AccordionItemBody';
-import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import OwnPanel from '../../Components/OwnPanel'
-import { BootstrapTable, TableHeaderColumn } from 'react-bootstrap-table';
-import { dateformatter } from '../../utils'
+import React from "react";
+import PropTypes from "prop-types";
+
+import { connect } from "react-redux";
+import { Container, Row, Col, Accordion, Card, Form, Pagination, Table } from "react-bootstrap";
+
+import _ from "lodash";
+
+import { useTable, useSortBy, usePagination, useGlobalFilter } from "react-table";
+
+import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
+
+import AccordionItemBody from "../../Components/AccordionItemBody";
+import OwnPanel from "../../Components/OwnPanel";
+import Spinner from "../../Components/Spinner";
+import { dateformatter, getCookie } from "../../utils";
+
+import {
+  loadResultFacets, selectResultFacet, clearResultFacet,
+  clearAllResultFacets, setActiveResultFacet
+} from "./actions";
+
+let timer;
+
+function GlobalFilter ({
+  globalFilter,
+  setGlobalFilter,
+}) {
+  const [value, setValue] = React.useState(globalFilter);
+  const onChange = (value) => {
+    clearTimeout(timer);
+    if (value.length > 2 || value.length === 0) {
+      timer = setTimeout(() => {
+        setGlobalFilter(value);
+      }, 500);
+    }
+  };
+
+
+  return (
+    <input
+      value={value || ""}
+      className="float-end form-control w-25"
+      onChange={
+        e => {
+          setValue(e.target.value);
+          onChange(e.target.value);
+        }
+      }
+      placeholder="Search"
+    />
+  );
+}
+
+GlobalFilter.propTypes = {
+  globalFilter: PropTypes.string,
+  setGlobalFilter: PropTypes.func.isRequired
+};
+
+function ResultTable ({ columns, data, fetchData, loading, selectedFacets, pageCount: controlledPageCount }) {
+  const skipPageResetRef = React.useRef();
+
+  const {
+    getTableProps,
+    headerGroups,
+    prepareRow,
+    page,
+    canPreviousPage,
+    canNextPage,
+    pageOptions,
+    pageCount,
+    gotoPage,
+    nextPage,
+    previousPage,
+    setPageSize,
+    state: { pageIndex, pageSize, sortBy, globalFilter },
+    setGlobalFilter,
+  } = useTable({
+    columns,
+    data,
+    selectedFacets,
+    initialState: { pageIndex: 0, pageSize: 10, sortBy: [], globalFilter: "" },
+    manualPagination: true,
+    manualSortBy: true,
+    manualGlobalFilter: true,
+    autoResetPage: true,
+    autoResetSortBy: true,
+    autoResetGlobalFilter: true,
+    pageCount: controlledPageCount,
+  }, useGlobalFilter, useSortBy, usePagination);
+
+  React.useEffect(() => {
+    gotoPage(0);
+  }, [selectedFacets]);
+
+  React.useEffect(() => {
+    skipPageResetRef.current = true;
+    fetchData({ pageIndex, pageSize, sortBy, globalFilter, selectedFacets });
+  }, [fetchData, pageIndex, pageSize, sortBy, globalFilter, selectedFacets]);
+
+  React.useEffect(() => {
+    // After the table has updated, always remove the flag
+    skipPageResetRef.current = false;
+  });
+
+  return (
+    <div className="p-2">
+      <Table striped hover responsive {...getTableProps()}>
+        <thead>
+          <tr>
+            <th
+              colSpan={columns.length}
+            >
+              <GlobalFilter
+                globalFilter={globalFilter}
+                setGlobalFilter={setGlobalFilter}
+              />
+            </th>
+          </tr>
+          {
+            headerGroups.map(headerGroup => {
+              const { key, ...restHeaderGroupProps } = headerGroup.getHeaderGroupProps();
+              return (<tr key={key} {...restHeaderGroupProps}>
+                {
+                  headerGroup.headers.map(column => {
+                    const { key, ...restHeaderProps } = column.getHeaderProps((column.canSort ? column.getSortByToggleProps() : undefined));
+                    return (
+                      <th key={key} {...restHeaderProps}>
+                        {column.render("Header")}
+                        <span>
+                          {
+                            column.canSort
+                              ? column.isSorted
+                                ? column.isSortedDesc
+                                  ? <FaSortDown />
+                                  : <FaSortUp />
+                                : <FaSort className="text-muted" />
+                              : ""
+                          }
+                        </span>
+                      </th>
+                    );
+                  })
+                }
+              </tr>
+              );
+            })
+          }
+        </thead>
+        <tbody>
+          {
+            loading ?
+              <tr><td className="text-center" colSpan={columns.length}><Spinner /></td></tr>
+              :
+              page.length === 0 ?
+                <tr><td className="fw-bold text-center" colSpan={columns.length}>No elements found</td></tr>
+                :
+                page.map((row) => {
+                  prepareRow(row);
+                  const { key, ...restRowProps } = row.getRowProps();
+                  return (
+                    <tr key={key} {...restRowProps}>
+                      {
+                        row.cells.map(cell => {
+                          const { key, ...restCellProps } = cell.getCellProps();
+                          return (
+                            <td key={key} {...restCellProps}>
+                              {cell.render("Cell")}
+                            </td>
+                          );
+                        })
+                      }
+                    </tr>
+                  );
+                })
+          }
+        </tbody>
+      </Table>
+      <div className="d-flex justify-content-between px-0">
+        <Form.Select
+          className="w-25"
+          size="sm"
+          value={pageSize}
+          onChange={
+            e => {
+              setPageSize(Number(e.target.value));
+            }
+          }
+        >
+          {
+            [10, 25, 50].map(pageSize => (
+              <option key={pageSize} value={pageSize}>
+                Show {pageSize}
+              </option>
+            ))
+          }
+        </Form.Select>
+
+        <span>
+          Page{" "}
+          <strong>
+            {pageIndex + 1} of {pageOptions.length}
+          </strong>{" "}
+        </span>
+
+        <Pagination className="m-0">
+          <Pagination.First disabled={!canPreviousPage} onClick={() => gotoPage(0)} />
+          <Pagination.Prev onClick={() => previousPage()} disabled={!canPreviousPage} />
+          <Pagination.Next onClick={() => nextPage()} disabled={!canNextPage} />
+          <Pagination.Last onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage} />
+        </Pagination>
+      </div>
+    </div>
+  );
+}
+
+
+ResultTable.propTypes = {
+  columns: PropTypes.array,
+  data: PropTypes.array,
+  fetchData: PropTypes.func.isRequired,
+  loading: PropTypes.bool,
+  selectedFacets: PropTypes.object,
+  pageCount: PropTypes.number
+};
+
+const LinkCell = (props) => {
+  return <a href={props.cell.value}>Show</a>;
+};
+
+LinkCell.propTypes = {
+  cell: PropTypes.shape({
+    value: PropTypes.string
+  }).isRequired
+};
+
+function TableContainer ({ activeFacet, selectedFacets, closeAccordion }) {
+  const columns = React.useMemo(
+    () => [
+      {
+        Header: "Timestamp",
+        accessor: "timestamp",
+        Cell: (properties) => {
+          return dateformatter(properties.cell.value);
+        }
+      },
+      {
+        Header: "Plugin",
+        accessor: "tool",
+      },
+      {
+        Header: "Caption",
+        accessor: "caption",
+      },
+      {
+        Header: "User",
+        accessor: "uid",
+      },
+      {
+        Header: "Link",
+        accessor: "link2results",
+        Cell: LinkCell
+      }
+    ]
+  );
+
+  const [data, setData] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
+  const [pageCount, setPageCount] = React.useState(0);
+  const [resultCount, setResultCount] = React.useState(0);
+
+  const fetchData = React.useCallback(({ pageSize, pageIndex, sortBy, globalFilter, selectedFacets }) => {
+    setLoading(true);
+
+    let params = "";
+    if (selectedFacets) {
+      _.map(selectedFacets, (value, key) => {
+        params += `&${key}=${value}`;
+      });
+    }
+
+    const offset = pageSize * pageIndex;
+
+    params += `&limit=${pageSize}&offset=${offset}`;
+
+    if (sortBy.length > 0) {
+      const sortElement = sortBy[0];
+      const order = sortElement.desc ? "desc" : "asc";
+      params += `&sortName=${sortElement.id}&sortOrder=${order}`;
+    }
+    if (globalFilter) {
+      params += `&searchText=${globalFilter}`;
+    }
+
+    const url = `/api/history/result-browser-files/?${params}`;
+    return fetch(url, {
+      credentials: "same-origin",
+      headers: {
+        "X-CSRFToken": getCookie("csrftoken"),
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+      }
+    }).then(response => response.json())
+      .then(json => {
+        setData(json.data);
+        setResultCount(json.metadata.numFound);
+        setPageCount(Math.ceil(json.metadata.numFound / pageSize));
+        return;
+      })
+      .catch(err => {
+        return err;
+      })
+      .then(() => {
+        return setLoading(false);
+      });
+  }, []);
+
+
+  return (
+    <Accordion activeKey={activeFacet}>
+      <OwnPanel
+        header={<span>Results [{resultCount}]</span>}
+        eventKey="results"
+        id="result-browser"
+        collapse={closeAccordion}
+      >
+        <ResultTable
+          columns={columns}
+          data={data}
+          fetchData={fetchData}
+          loading={loading}
+          pageCount={pageCount}
+          selectedFacets={selectedFacets}
+        />
+      </OwnPanel>
+    </Accordion>
+  );
+}
+
+TableContainer.propTypes = {
+  activeFacet: PropTypes.string,
+  selectedFacets: PropTypes.object,
+  closeAccordion: PropTypes.func.isRequired
+};
 
 class Resultbrowser extends React.Component {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            searchtext : ''
-        }
-        this._searchInText = this._searchInText.bind(this)
-    }
+  constructor (props) {
+    super(props);
+  }
 
-    /**
+  /**
      * On mount we load all facets and files to display
      * Also load the metadata.js script
      */
-    componentDidMount() {
-        this.props.dispatch(loadResultFacets());
-        this.props.dispatch(loadResultFiles());
-    }
+  componentDidMount () {
+    this.props.dispatch(loadResultFacets());
+  }
 
-
-     _searchInText(searchText) {
-            this.setState({searchtext:searchText})
-            if (this.state.searchtext.length > 2 || this.state.searchtext.length == 0)
-                setTimeout(() => {
-                    if (this.state.searchtext.length === searchText.length)
-                        this.props.dispatch(searchInText(searchText))
-         }, 500)
-        }
-
-    /**
+  /**
      * Loop all facets and render the panels
      */
-    renderFacetPanels() {
+  renderFacetPanels () {
+    const { facets, selectedFacets, activeFacet, metadata } = this.props.resultbrowser;
+    const { dispatch } = this.props;
+    return _.map(facets, (value, key) => {
+      let panelHeader;
+      const isFacetSelected = !!selectedFacets[key];
+      if (isFacetSelected) {
+        panelHeader = <span>{key}: <span className="fw-bold">{selectedFacets[key]}</span></span>;
+      } else if (value.length === 2) {
+        panelHeader = <span>{key}: <span className="fw-bold">{value[0]}</span></span>;
+      } else {
+        const numberOfValues = value.length / 2;
+        panelHeader = <span>{key} ({numberOfValues})</span>;
+      }
+      return (
+        <OwnPanel
+          header={panelHeader} eventKey={key} key={key} removeFacet={isFacetSelected ? (() => dispatch(clearResultFacet(key))) : null}
+          collapse={() => dispatch(setActiveResultFacet(key))}
+        >
+          <AccordionItemBody
+            eventKey={key} value={value}
+            facetClick={(key, item) => dispatch(selectResultFacet(key, item))}
+            metadata={metadata[key] ? metadata[key] : null} visible={key === activeFacet}
+          />
+        </OwnPanel>
+      );
 
-        const {facets, selectedFacets, activeFacet, metadata, } = this.props.resultbrowser;
-        const {dispatch} = this.props;
-        return _.map(facets, (value, key) => {
-            let panelHeader;
-            if (selectedFacets[key]) {
-                panelHeader = <span style={{cursor: 'pointer'}}>{key}: <strong>{selectedFacets[key]} <a href="#"
-                                                                                                        onClick={(e) => e.preventDefault()}><span
-                    className="glyphicon glyphicon-remove-circle"
-                    onClick={(e) => e.preventDefault()}/></a></strong></span>
-            } else if (value.length === 2) {
-                panelHeader = <span style={{cursor: 'pointer'}}>{key}: <strong>{value[0]}</strong></span>
-            } else {
-                panelHeader = <span style={{cursor: 'pointer'}}>{key} ({value.length / 2})</span>
-            }
-            return (
-                <OwnPanel header={panelHeader} eventKey={key} key={key} removeFacet={() => dispatch(clearResultFacet(key))}
-                          collapse={() => dispatch(setActiveResultFacet(key))}>
-                    <AccordionItemBody eventKey={key} value={value}
-                                       facetClick={(key, item) => dispatch(selectResultFacet(key, item))}
-                                       metadata={metadata[key] ? metadata[key] : null} visible={key === activeFacet}/>
-                </OwnPanel>
-            )
-        });
+    });
+  }
+
+  renderFilesPanel () {
+    //TODO: This should be a separate component
+    const { activeFacet, selectedFacets } = this.props.resultbrowser;
+    const { dispatch } = this.props;
+    return (
+      <TableContainer
+        selectedFacets={selectedFacets}
+        closeAccordion={() => dispatch(setActiveResultFacet("results"))}
+        activeFacet={activeFacet}
+      />
+    );
+  }
+
+  render () {
+    const { facets, selectedFacets, activeFacet } = this.props.resultbrowser;
+    const { dispatch } = this.props;
+
+    // Wait until facets are loaded
+    if (facets.length === 0) {
+      return (
+        <Spinner />
+      );
     }
 
-    renderFilesPanel() {
-        //TODO: This should be a separate component
-        const {activeFacet,results, numResults, page, limit } = this.props.resultbrowser;
-        const {dispatch} = this.props;
+    const facetPanels = this.renderFacetPanels();
 
-        return (
-            <Card header={<a href="#" onClick={() => dispatch(setActiveResultFacet('results'))}>
-                Results [{numResults}]</a>} collapsible expanded={activeFacet === 'results'} id='result-browser'>
-                { numResults === null ?
-                    <MuiThemeProvider>
-                        <Container style={{textAlign: 'center'}}>
-                            <CircularProgress />
-                        </Container>
-                    </MuiThemeProvider>
-                    :
-                   <BootstrapTable data={results}
-                                   remote = { true }
-                                   search = { true }
-                                   multiColumnSearch={ true }
-                                   pagination = { true }
-                                   fetchInfo={ { dataTotalSize: numResults } }
-                                   tableStyle = {{border:'none'}}
-                                   options={ {
-                                       noDataText: 'No results available',
-                                       sizePerPage: limit,
-                                       hideSizePerPage: true,
-                                       page: page,
-                                       onPageChange: (page) => dispatch(selectActivePage(page)),
-                                       onSortChange: (sortName,sortOrder) => dispatch(sortActivePage(sortName,sortOrder)),
-                                       onSearchChange: this._searchInText,
-                                       clearSearch: true
-                                   } }
-                   >
-                       <TableHeaderColumn dataField='id' isKey hidden>ID</TableHeaderColumn>
-                       <TableHeaderColumn dataField='timestamp' dataSort={ true } dataFormat={dateformatter}>Timestamp</TableHeaderColumn>
-                       <TableHeaderColumn dataField='tool' dataSort={ true }>Plugin</TableHeaderColumn>
-                       <TableHeaderColumn dataField='caption' dataSort={ true }>Caption</TableHeaderColumn>
-                       <TableHeaderColumn dataField='uid' dataSort={ true }>User</TableHeaderColumn>
-                       <TableHeaderColumn dataField='link2results' dataFormat={ cell => (
-                           <a href={ cell }>{`Show`}</a>
-                       )}>Link</TableHeaderColumn>
-                   </BootstrapTable>
-                }
-            </Card>
-        )
-    }
-
-    render() {
-        const {facets, selectedFacets, activeFacet} = this.props.resultbrowser;
-        const {dispatch} = this.props;
-
-        // Wait until facets are loaded
-        if (facets.length === 0){
-            return (
-                <MuiThemeProvider>
-                    <Container style={{textAlign: 'center'}}>
-                        <CircularProgress />
-                    </Container>
-                </MuiThemeProvider>
-            )
-        }
-
-        const facetPanels = this.renderFacetPanels();
-
-        return (
-            <Container>
-                <Row>
-                    <Col md={12}>
-                        <h2>Resultbrowser</h2>
-                    </Col>
-                </Row>
-                <Row>
-                    {Object.keys(selectedFacets).length !== 0 ?
-                    <Col md={12}>
-                        <Card>
-                            <a href="#" onClick={(e) => {e.preventDefault(); dispatch(clearAllResultFacets())}}>Clear all</a>
-                        </Card>
-                    </Col> : null}
-                </Row>
-                <Row>
-                    <Col md={12}>
-                        <Accordion activeKey={activeFacet}>
-                            {facetPanels}
-                        </Accordion>
-                        {this.renderFilesPanel()}
-                    </Col>
-                </Row>
-            </Container>
-        )
-    }
+    return (
+      <Container>
+        <Row>
+          <Col md={12}>
+            <h2>Resultbrowser</h2>
+          </Col>
+        </Row>
+        <Row>
+          {
+            Object.keys(selectedFacets).length !== 0 ?
+              <Col md={12}>
+                <Card>
+                  <a
+                    className="m-3" href="#" onClick={
+                      (e) => {
+                        e.preventDefault(); dispatch(clearAllResultFacets());
+                      }
+                    }
+                  >Clear all</a>
+                </Card>
+              </Col> : null
+          }
+        </Row>
+        <Row>
+          <Col md={12}>
+            <Accordion activeKey={activeFacet}>
+              {facetPanels}
+            </Accordion>
+            {this.renderFilesPanel()}
+          </Col>
+        </Row>
+      </Container>
+    );
+  }
 }
 
+Resultbrowser.propTypes = {
+  resultbrowser: PropTypes.shape({
+    facets: PropTypes.object,
+    selectedFacets: PropTypes.object,
+    activeFacet: PropTypes.string,
+    metadata: PropTypes.object
+  }),
+  dispatch: PropTypes.func.isRequired,
+};
+
 const mapStateToProps = (state) => ({
-    resultbrowser: state.resultbrowserReducer
+  resultbrowser: state.resultbrowserReducer
 });
 
-export default connect(mapStateToProps) (Resultbrowser)
+export default connect(mapStateToProps) (Resultbrowser);

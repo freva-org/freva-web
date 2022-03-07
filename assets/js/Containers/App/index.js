@@ -1,40 +1,52 @@
-import React from 'react';
-import {connect} from 'react-redux';
-import {getCurrentUser} from './actions'
-import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
-import CircularProgress from '@material-ui/core/CircularProgress';
-import {Row, Col, Button, ListGroup, ListGroupItem, Container, Modal, ButtonGroup, Input,
-    FormGroup, ControlLabel, FormControl} from 'react-bootstrap';
+import React from "react";
+import PropTypes from "prop-types";
+import { connect } from "react-redux";
+
+import Spinner from "../../Components/Spinner";
+
+import { getCurrentUser } from "./actions";
 
 class App extends React.Component {
- 
-  componentDidMount() {
-      this.props.dispatch(getCurrentUser())
+
+  componentDidMount () {
+    this.props.dispatch(getCurrentUser());
   }
 
-  render() {
+  render () {
 
     // Wait until the current user is loaded
-    if (!this.props.state.appReducer.currentUser){
-        return (
-            <MuiThemeProvider>
-                <Container style={{textAlign: 'center'}}>
-                    <CircularProgress />
-                </Container>
-            </MuiThemeProvider>
-        )
+    if (!this.props.currentUser && this.props.error === "") {
+      return (
+        <Spinner />
+      );
     }
 
     return (
-        <MuiThemeProvider>
-            {this.props.children}
-        </MuiThemeProvider>
-    )
+      <React.Fragment>
+        {this.props.children}
+      </React.Fragment>
+    );
   }
 }
 
+App.propTypes = {
+  children: PropTypes.node.isRequired,
+  currentUser: PropTypes.shape({
+    id: PropTypes.number,
+    username: PropTypes.string,
+    email: PropTypes.string,
+    first_name: PropTypes.string,
+    isGuest: PropTypes.bool,
+    home: PropTypes.string,
+    scratch: PropTypes.string
+  }),
+  error: PropTypes.string,
+  dispatch: PropTypes.func.isRequired,
+};
+
 const mapStateToProps = state => ({
-    state: state
+  currentUser: state.appReducer.currentUser,
+  error: state.appReducer.error
 });
 
 export default connect(mapStateToProps)(App);

@@ -1,3 +1,4 @@
+{% load bootstrap5 %}
 
 <!doctype html>
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
@@ -18,30 +19,25 @@
   <!-- Mobile viewport optimized: h5bp.com/viewport -->
   <meta name="viewport" content="width=device-width">
 
-  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.0/css/jquery.dataTables.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/MurCSS.css" />
-  
-  {% block css_files %}{% endblock %} 
- 
+  {% block css_files %}
+
+  {% bootstrap_css %}
   <link rel="stylesheet" href="{{ STATIC_URL }}css/style.css">
 
   <link rel="stylesheet" href="{{ STATIC_URL }}jqueryfiletree/jqueryFileTree.css">
-  
+
   <link rel="stylesheet" href="{{ STATIC_URL }}fancybox/jquery.fancybox.css">
-  
+
   <link rel="stylesheet" href="{{ STATIC_URL }}js/documentcloud-visualsearch-4550d61/build-min/visualsearch-datauri.css">
-  
+
   <link rel="stylesheet" href="{{ STATIC_URL }}select2/select2.css">
-
-  <link rel="stylesheet" href="{{ STATIC_URL }}css/react-select.min.css">
-
-  
 
   <link href="{{STATIC_URL}}js/bootstrap-tour/build/css/bootstrap-tour.min.css" rel="stylesheet">
 
   <link rel="shortcut icon" href="{{STATIC_URL}}img/freva-favicon.png?av={% now "U" %}"/>
-  
+  {% endblock %}
   {% block css %}{% endblock %}
   <style>
     body {
@@ -59,50 +55,43 @@
        Modernizr enables HTML5 elements & feature detects for optimal performance.
        Create your own custom Modernizr build: www.modernizr.com/download/ -->
   <script src="{{ STATIC_URL }}js/libs/modernizr-2.6.2-respond-1.1.0.min.js"></script>
-  
+
   <!-- JavaScript at the bottom for fast page loading -->
 
-  <!-- Grab Google CDN's jQuery, with a protocol relative URL; fall back to local if offline -->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-  
-
   <!-- scripts concatenated and minified via django-compressor -->
-  
-  
-  <script src="{{ STATIC_URL }}js/plugins.js"></script>
-  <script src="{{ STATIC_URL }}js/main.js"></script>
-  
+
+  {% bootstrap_javascript%}
   <script src="{{ STATIC_URL }}js/documentcloud-visualsearch-4550d61/build-min/dependencies.js" type="text/javascript"></script>
 
   <script src="{{ STATIC_URL }}js/documentcloud-visualsearch-4550d61/build-min/visualsearch.js" type="text/javascript"></script>
-  <script src="https://code.jquery.com/jquery-2.0.3.min.js"></script>   
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
   <script src="{{ STATIC_URL }}jqueryfiletree/jqueryFileTree.js"></script>
-  
+
   <script src="{{ STATIC_URL }}fancybox/jquery.fancybox.js"></script>
-  
+
   <script src="{{ STATIC_URL }}js/jquery.cslider.js"></script>
-  
+
   <script src="{{ STATIC_URL }}select2/select2.js"></script>
-  
+
   <script src="{{ STATIC_URL }}lazyload/jquery.lazyload.min.js"></script>
-  
-  <script src="{{ STATIC_URL }}js/bootstrap.min.js"></script>
+
 
   <script src="{{ STATIC_URL }}js/bootstrap-tour/build/js/bootstrap-tour.min.js"></script>
- 
+
   {% include "_layouts/guest_tour.js" %}
   <!--<script src="{{ STATIC_URL }}js/guest_tour.js"></script>-->
-  
-  
+
+
   <!-- end scripts -->
-  
+
   <!--<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" ></script> -->
   <script type="text/javascript" async
     src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-  </script>  
-  <style type="text/css"> 
-.MathJax_MathML {text-indent: 0;} 
-</style> 
+  </script>
+  <style type="text/css">
+.MathJax_MathML {text-indent: 0;}
+</style>
 
 </head>
 <body class="body" >
@@ -116,9 +105,9 @@
 
   <div role="main">
 	{% block menu %}{% endblock %}
-    
+
     <div id="maincontent">{% block content %}{% endblock %}</div>
-    
+
     {% block footer %}{% endblock %}
   </div>
 
@@ -130,7 +119,7 @@ startTour();
 
 </script>
 
-  
+
 
   <!-- Asynchronous Google Analytics snippet. Change UA-XXXXX-X to be your site's ID.
        mathiasbynens.be/notes/async-analytics-snippet -->
@@ -139,7 +128,7 @@ startTour();
     (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
     g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
     s.parentNode.insertBefore(g,s)}(document,'script'));
-    
+
     $(document).ajaxSend(function(event, xhr, settings) {
 	    function getCookie(name) {
 	        var cookieValue = null;
@@ -171,7 +160,7 @@ startTour();
 	    function safeMethod(method) {
 	        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
 	    }
-	
+
 	    if (!safeMethod(settings.type) && sameOrigin(settings.url)) {
 	        xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
 	    }

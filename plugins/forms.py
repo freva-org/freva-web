@@ -17,11 +17,11 @@ class PluginNotFoundError(Exception):
 
 
 class PluginWeb(object):
-    
+
     def __init__(self, plugin):
         self.name = plugin.__class__.__name__
         self.short_description = plugin.__class__.__short_description__
-        
+
         try:
             self.long_description = plugin.__long_description__
         except AttributeError:
@@ -34,7 +34,7 @@ class PluginFileFieldWidget(Input):
         self.file_extension = kwargs.pop('file_extension', None)
         super(PluginFileFieldWidget, self).__init__(*args, **kwargs)
 
-    def render(self, name, value, attrs=None, **kwargs):
+    def render(self, name, value, attrs=None, renderer=None, **kwargs):
         if value is not None and type(value) == list:
             value = PrintableList(value)
         return loader.render_to_string('plugins/filefield.html', {'name': name, 'value': value, 'id': attrs['id'], 'attr': attrs, 'file_extension': self.file_extension})
@@ -47,7 +47,7 @@ class PluginSelectFieldWidget(Input):
         self.sorted_options = sorted(self.options.items(), key=operator.itemgetter(1))
         super(PluginSelectFieldWidget, self).__init__(*args, **kwargs)
 
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         return loader.render_to_string('plugins/selectfield.html', {'name': name, 'value': value, 'attrs': attrs,
                                                                     'options': self.sorted_options})
 
@@ -61,8 +61,8 @@ class SolrFieldWidget(Input):
         self.predefined_facets = kwargs.pop('predefined_facets')
         self.editable = kwargs.pop('editable')
         super(SolrFieldWidget, self).__init__(*args, **kwargs)
-        
-    def render(self, name, value, attrs=None, choices=()):
+
+    def render(self, name, value, attrs=None, choices=(), renderer=None):
         return loader.render_to_string('plugins/solrfield.html', {'name': name, 'value': value, 'attrs': attrs,
                                                                   'facet': self.facet, 'group': self.group,
                                                                   'multiple': self.multiple,
@@ -71,11 +71,11 @@ class SolrFieldWidget(Input):
 
 
 class PluginRangeFieldWidget(Input):
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         if value is not None and type(value) == list:
             value = PrintableList(value)
         return loader.render_to_string('plugins/rangefield.html', {'name': name, 'value': value, 'id': attrs['id']})
-    
+
 
 class PasswordField(forms.CharField):
     def __init__(self, *args, **kwargs):
@@ -100,7 +100,7 @@ class PasswordField(forms.CharField):
 
 class PluginForm(forms.Form):
     caption_standard_names = ['caption', 'result_caption', 'web_caption', 'my_caption']
-    
+
     def get_caption_field(self, tool):
         # the caption field should not have a fixed name
         self.caption_field_name = None
@@ -113,34 +113,34 @@ class PluginForm(forms.Form):
                 self.caption_field_name = self.caption_standard_names[captionindex]
                 captionindex += 1
             else:
-                self.caption_field_name = '_' + self.caption_field_name    
-            # check whether the caption name appear in the list of parameters    
+                self.caption_field_name = '_' + self.caption_field_name
+            # check whether the caption name appear in the list of parameters
             criticalcaption = self.caption_field_name in tool.__parameters__
-    
+
     def __init__(self, *args, **kwargs):
         tool = kwargs.pop('tool')
         uid = kwargs.pop('uid')
         self._workdir =  Path(pm.config.get('base_dir_location'))
 
         super(PluginForm, self).__init__(*args, **kwargs)
-        
+
         # set the password field
         self.fields['password_hidden'] = PasswordField(uid=uid)
-        
+
         self.get_caption_field(tool)
 
         for key in tool.__parameters__:
-            
+
             param = tool.__parameters__.get_parameter(key)
             param_subtype = param.base_type
-            
+
             if param.mandatory:
                 required = True
-            else: 
+            else:
                 required = False
-            
+
             help_str = param.help
-            help_str = "<br />".join(help_str.split("\n")) 
+            help_str = "<br />".join(help_str.split("\n"))
             if isinstance(param, parameters.Bool):
                 self.fields[key] = forms.BooleanField(required=required, help_text=help_str,
                                                       widget=forms.RadioSelect(
@@ -152,7 +152,7 @@ class PluginForm(forms.Form):
                 self.fields[key] = forms.CharField(required=required, help_text=help_str,
                                                    widget=PluginSelectFieldWidget(options=param.options))
             elif isinstance(param, parameters.SolrField):
-                self.fields[key] = forms.CharField(required=required, help_text=help_str, 
+                self.fields[key] = forms.CharField(required=required, help_text=help_str,
                                                    widget=SolrFieldWidget(
                                                        facet=param.facet, group=param.group, editable=param.editable,
                                                        multiple=param.multiple,
@@ -174,8 +174,8 @@ class PluginForm(forms.Form):
                 self.fields[key] = forms.CharField(required=required, help_text=help_str)
             else:
                 self.fields[key] = forms.CharField(required=required, help_text=help_str)
-       
-        # Add the caption field, now 
+
+        # Add the caption field, now
         help_str = 'An additional caption to be displayed with the results.'
         if self.caption_field_name != self.caption_standard_names[0]:
             help_str += " Other tools name this field " + self.caption_standard_names[0] + ", this might be confusing."

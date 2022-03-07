@@ -25,7 +25,7 @@ class MiddlewareMixin(MiddlewareMixin):
 class ReloadPluginsMiddleware(MiddlewareMixin):
 
     def process_request(self, request):
-        pm.reloadPlugins(request.user.username)
+        pm.reload_plugins(request.user.username)
 
 
 class GlobalUserMiddleware(MiddlewareMixin):

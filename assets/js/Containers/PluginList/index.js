@@ -1,303 +1,323 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { Link, browserHistory } from 'react-router';
-import {connect} from 'react-redux';
+import React from "react";
+import PropTypes from "prop-types";
+import { browserHistory } from "react-router";
+import { connect } from "react-redux";
 import {
-    Row, Col, Button, ListGroup, ListGroupItem, Container, Modal, ButtonGroup, Input,
-    FormGroup, FormLabel, FormControl, InputGroup, Badge,
-} from 'react-bootstrap';
-import FileTree from '../../Components/FileTree';
-import {fetchDir, closeDir, changeRoot} from '../../Components/FileTree/actions';
-import {exportPlugin, loadPlugins, updateCategoryFilter, updateTagFilter, updateSearchFilter} from './actions';
-import _ from 'lodash';
-import SearchIcon from '@material-ui/icons/Search';
-import Checkbox from '@material-ui/core/Checkbox';
-import CircularProgress from '@material-ui/core/CircularProgress';
+  Row, Col, Button, ListGroup, ListGroupItem, Container, Modal, ButtonGroup, FormCheck,
+  FormGroup, FormLabel, FormControl, InputGroup
+} from "react-bootstrap";
 
-const styles = {
-    chip: {
-        cursor: 'pointer',
-        margin: 5,
-        padding: 6
-    }
+import _ from "lodash";
+
+import FileTree from "../../Components/FileTree";
+import { fetchDir, closeDir, changeRoot } from "../../Components/FileTree/actions";
+
+import Spinner from "../../Components/Spinner";
+
+import { exportPlugin, loadPlugins, updateCategoryFilter, updateTagFilter, updateSearchFilter } from "./actions";
+
+/*
+These are the hardcoded categories of this group. If a category is not listed here, the
+corresponding plugins will not be shown
+FIXME: Is this actually a good idea?
+*/
+const categoryTitle = {
+  decadal: "Decadal Evaluation",
+  statistical: "Statistical Analysis",
+  postproc: "Post-Processing",
+  support: "Support Plugins",
+  other: "Others"
 };
-
 
 class PluginList extends React.Component {
 
-    constructor(props) {
-        super(props);
-        this.state = {
-            showModal: false,
-            value: '',
-        };
+  constructor (props) {
+    super(props);
+    this.handleExport = this.handleImport.bind(this);
+    this.handleSearchFilter = this.handleSearchFilter.bind(this);
+    this.handlePluginValue = this.handlePluginValue.bind(this);
+    this.renderCategoryCheckbox = this.renderCategoryCheckbox.bind(this);
+
+    this.state = {
+      showModal: false,
+      value: "",
+    };
+  }
+
+  componentDidMount () {
+    this.props.dispatch(loadPlugins());
+  }
+
+  handleImport () {
+    this.props.dispatch(exportPlugin(this.state.value));
+    this.setState({ showModal: false });
+  }
+
+  handleSearchFilter (e) {
+    this.props.dispatch(updateSearchFilter(e.target.value));
+  }
+
+  handlePluginValue (e) {
+    this.setState({ value: e.target.value });
+  }
+
+  renderPluginBlock (filteredPlugins, category) {
+    const plugins = _.filter(filteredPlugins, (val) => {
+      return val[1].category.toLowerCase() === category;
+    });
+
+    if (plugins.length <= 0) {
+      return null;
     }
-
-    componentDidMount() {
-        this.props.dispatch(loadPlugins());
-    }
-
-    handleExport() {
-        this.props.dispatch(exportPlugin(this.state.value));
-        this.setState({showModal: false})
-    }
-
-    render() {
-
-        let {exported, tags, categories, categoriesFilter, tagsFilter, filteredPlugins, searchFilter,
-             pluginsLoaded} = this.props.pluginList;
-        const {nodes, root} = this.props.fileTree;
-        const {currentUser, dispatch} = this.props;
-
-        let decadalPlugins = _.filter(filteredPlugins, (val) => {
-            return val[1].category === 'decadal';
-        });
-
-        let statisticPlugins = _.filter(filteredPlugins, (val) => {
-            return val[1].category === 'statistical';
-        });
-
-        let postprocPlugins = _.filter(filteredPlugins, (val) => {
-            return val[1].category === 'postproc';
-        });
-
-        let supportPlugins = _.filter(filteredPlugins, (val) => {
-            return val[1].category === 'support';
-        });
-
-        let otherPlugins = _.filter(filteredPlugins, (val) => {
-            return val[1].category.toLowerCase() === 'other';
-        });
-
-        let categoryTitle = {
-            decadal: 'Decadal Evaluation',
-            statistical: 'Statistical Analysis',
-            postproc: 'Post-Processing',
-            support: 'Support Plugins',
-            other: 'Others'
-        };
-
-        let childs = nodes.map(n =>
-            <FileTree node={n}
-                      key={n.name}
-                      extension="py"
-                      handleOpen={(e, path) => {e.preventDefault(); this.props.dispatch(fetchDir(path, "py"))}}
-                      handleClose={(e, path) => {e.preventDefault(); this.props.dispatch(closeDir(path))}}
-                      handleFileClick={(e, path) => {e.preventDefault(); this.setState({value:path})}}/>
-        );
-
-        if (!pluginsLoaded) {
+    return (
+      <ListGroup className="mb-3" key={category + "plugins"}>
+        <ListGroupItem>
+          <h3>{categoryTitle[category]}</h3>
+        </ListGroupItem>
+        {
+          plugins.map(val => {
             return (
-                <Container style={{textAlign: 'center'}}>
-                    <CircularProgress />
-                </Container>
-            )
+              <ListGroupItem
+                action
+                onClick={
+                  (e) => {
+                    e.preventDefault(); browserHistory.push(`/plugins/${val[0]}/detail/`);
+                  }
+                }
+                href={`/plugins/${val[0]}/detail/`}
+                key={val[0]}
+              >
+                <div className="fs-5">{val[1].name}</div>
+                {
+                  val[1].user_exported ?
+                    <span className="text-danger">You have plugged in this tool.<br /></span> : null
+                }
+                {val[1].description}
+              </ListGroupItem>
+            );
+          })
         }
+      </ListGroup>
+    );
+  }
 
-        return (
-            <Container>
-                <Row>
-                    <Col md={6}><h2>Plugins</h2></Col>
-                    <Col md={6} style={{paddingTop: 10}}>
-                        {!currentUser.isGuest ?
-                        <Button bsStyle="info" className="pull-right"
-                                onClick={() => exported ? this.props.dispatch(exportPlugin()) : this.setState({showModal: true})}>
-                            {exported ? 'Remove exported Plugin' : 'Plug-my-Plugin'}
-                        </Button> : null}
-                    </Col>
-                </Row>
-                <Row>
-                    <Col md={8}  style={{marginTop: 20}}>
-                        {decadalPlugins.length > 0 ?
-                                <ListGroup fill>
-                                    {decadalPlugins.map(val => {
-                                        return (
-                                            <ListGroupItem header={val[1].name}
-                                                           onClick={(e) => {e.preventDefault(); browserHistory.push(`/plugins/${val[0]}/detail/`)}}
-                                                           href={`/plugins/${val[0]}/detail/`}
-                                                           key={val[0]}>
-                                                {val[1].user_exported ?
-                                                    <span
-                                                        style={{color:'red'}}>You have plugged in this tool.<br/><br/></span> : null}
-                                                {val[1].description}
-                                            </ListGroupItem>
-                                        )
-                                    })}
-                                </ListGroup> : null}
-
-                        {statisticPlugins.length > 0 ?
-                                <ListGroup fill>
-                                    {statisticPlugins.map(val => {
-                                        return (
-                                            <ListGroupItem header={val[1].name}
-                                                           onClick={(e) => {e.preventDefault(); browserHistory.push(`/plugins/${val[0]}/detail/`)}}
-                                                           href={`/plugins/${val[0]}/detail/`}
-                                                           key={val[0]}>
-                                                {val[1].user_exported ?
-                                                    <span
-                                                        style={{color:'red'}}>You have plugged in this tool.<br/><br/></span> : null}
-                                                {val[1].description}
-                                            </ListGroupItem>
-                                        )
-                                    })}
-                                </ListGroup>: null}
-
-                        {postprocPlugins.length > 0 ?
-                                <ListGroup fill>
-                                    {postprocPlugins.map(val => {
-                                        return (
-                                            <ListGroupItem header={val[1].name}
-                                                           onClick={(e) => {e.preventDefault(); browserHistory.push(`/plugins/${val[0]}/detail/`)}}
-                                                           href={`/plugins/${val[0]}/detail/`}
-                                                           key={val[0]}>
-                                                {val[1].user_exported ?
-                                                    <span
-                                                        style={{color:'red'}}>You have plugged in this tool.<br/><br/></span> : null}
-                                                {val[1].description}
-                                            </ListGroupItem>
-                                        )
-                                    })}
-                                </ListGroup>: null}
-
-                        {supportPlugins.length > 0 ?
-                                <ListGroup fill>
-                                    {supportPlugins.map(val => {
-                                        return (
-                                            <ListGroupItem header={val[1].name}
-                                                           onClick={(e) => {e.preventDefault(); browserHistory.push(`/plugins/${val[0]}/detail/`)}}
-                                                           href={`/plugins/${val[0]}/detail/`}
-                                                           key={val[0]}>
-                                                {val[1].user_exported ?
-                                                    <span
-                                                        style={{color:'red'}}>You have plugged in this tool.<br/><br/></span> : null}
-                                                {val[1].description}
-                                            </ListGroupItem>
-                                        )
-                                    })}
-                                </ListGroup> : null}
-
-                        {otherPlugins.length > 0 ?
-                                <ListGroup fill>
-                                    {otherPlugins.map(val => {
-                                        return (
-                                            <ListGroupItem header={val[1].name}
-                                                           onClick={(e) => {e.preventDefault(); browserHistory.push(`/plugins/${val[0]}/detail/`)}}
-                                                           href={`/plugins/${val[0]}/detail/`}
-                                                           key={val[0]}>
-                                                {val[1].user_exported ?
-                                                    <span
-                                                        style={{color:'red'}}>You have plugged in this tool.<br/><br/></span> : null}
-                                                {val[1].description}
-                                            </ListGroupItem>
-                                        )
-                                    })}
-                                </ListGroup> : null}
-                    </Col>
-                    <Col md={4}>
-                        <InputGroup style={{marginTop: 20}}>
-                            <FormControl type="text" ref="searchInput" value={searchFilter}
-                                         onChange={() => dispatch(updateSearchFilter(ReactDOM.findDOMNode(this.refs.searchInput).value))}
-                                         placeholder="Search for plugins"/>
-                            <InputGroup.Addon style={{padding: 0, paddingLeft: 8, paddingRight: 8}}>
-                                <SearchIcon />
-                            </InputGroup.Addon>
-                        </InputGroup>
-
-                        <div style={{marginTop:10}}>
-                            <FormLabel>Categories:</FormLabel>
-                            <div>
-                                {categories.decadal ?
-                                <Checkbox label={`${categoryTitle['decadal']} (${categories['decadal'].length})`}
-                                                         onCheck={() => dispatch(updateCategoryFilter('decadal'))}
-                                                         checked={_.includes(categoriesFilter, 'decadal')}
-                                                         key={'decadal-cat'}/> : null}
-                                {categories.statistical ?
-                                <Checkbox label={`${categoryTitle['statistical']} (${categories['statistical'].length})`}
-                                                         onCheck={() => dispatch(updateCategoryFilter('statistical'))}
-                                                         checked={_.includes(categoriesFilter, 'statistical')}
-                                                         key={'statistical-cat'}/> : null}
-                                {categories.postproc ?
-                                <Checkbox label={`${categoryTitle['postproc']} (${categories['postproc'].length})`}
-                                                         onCheck={() => dispatch(updateCategoryFilter('postproc'))}
-                                                         checked={_.includes(categoriesFilter, 'postproc')}
-                                                         key={'postproc-cat'}/> : null}
-                                {categories.support ?
-                                <Checkbox label={`${categoryTitle['support']} (${categories['support'].length})`}
-                                                         onCheck={() => dispatch(updateCategoryFilter('support'))}
-                                                         checked={_.includes(categoriesFilter, 'support')}
-                                                         key={'support-cat'}/> : null}
-                                {categories.other ?
-                                <Checkbox label={`${categoryTitle['other']} (${categories['other'].length})`}
-                                                         onCheck={() => dispatch(updateCategoryFilter('other'))}
-                                                         checked={_.includes(categoriesFilter, 'other')}
-                                                         key={'other-cat'}/> : null}
-
-                            </div>
-                        </div>
-
-                        <div style={{marginTop:10}}>
-                            <FormLabel>Tags:</FormLabel>
-                            <div>
-                                {
-                                    tags.map(tag => {
-                                        return <Col md={4} style={{paddingLeft:0}} key={tag}>
-                                            <FormLabel bsStyle={_.includes(tagsFilter, tag) ? "success" : 'default'}
-                                                   style={styles.chip}
-                                                   onClick={() => dispatch(updateTagFilter(tag))}
-                                                   >
-                                                {tag}
-                                            </FormLabel></Col>
-                                    })
-                                }
-
-                            </div>
-                        </div>
-                    </Col>
-
-                </Row>
-
-                <Modal show={this.state.showModal}
-                       onShow={() => this.props.dispatch(changeRoot({id: 'home', path: currentUser.home}, 'py'))}
-                       onHide={() => this.setState({showModal: false})}>
-                    <Modal.Header closeButton>
-                        <Modal.Title>Plug-in your own plugin</Modal.Title>
-                    </Modal.Header>
-
-                    <Modal.Body>
-                        <p>Here you can plugin your own plugin</p>
-                        <ButtonGroup style={{marginBottom: 10}}>
-                            <Button bsStyle="primary" active={root.id === 'home'}
-                                    onClick={() => this.props.dispatch(changeRoot({id: 'home', path: currentUser.home}, 'py'))}>
-                                Home
-                            </Button>
-                            <Button bsStyle="primary" active={root.id === 'scratch'}
-                                    onClick={() => this.props.dispatch(changeRoot({id: 'scratch', path: currentUser.scratch}, 'py'))}>
-                                Scratch
-                            </Button>
-                        </ButtonGroup>
-                        {childs}
-                        <FormGroup style={{marginTop: 10}}>
-                            <FormLabel>File to plugin</FormLabel>
-                            <FormControl type="text" ref="input" value={this.state.value}
-                                         onChange={() => this.setState({value: ReactDOM.findDOMNode(this.refs.input).value})}/>
-                        </FormGroup>
-                    </Modal.Body>
-
-                    <Modal.Footer>
-                        <Button bsStyle="primary" onClick={() => this.handleExport()}>Export Plugin</Button>
-                    </Modal.Footer>
-
-                </Modal>
-
-            </Container>
-        )
+  renderCategoryCheckbox (categories, categoriesFilter, categoryName) {
+    if (!categories[categoryName]) {
+      return null;
     }
+
+    return (
+      <FormCheck key={categoryName + "checkbox"}>
+        <FormCheck.Input
+          type="checkbox"
+          onChange={() => this.props.dispatch(updateCategoryFilter(categoryName))}
+          checked={_.includes(categoriesFilter, categoryName)}
+          id={categoryName + "-cat"}
+        />
+        <FormCheck.Label
+          htmlFor={categoryName + "-cat"}
+        >
+          {categoryTitle[categoryName]} ({categories[categoryName].length})
+        </FormCheck.Label>
+      </FormCheck>
+    );
+  }
+
+  render () {
+    const {
+      exported,
+      tags,
+      categories,
+      categoriesFilter,
+      tagsFilter,
+      filteredPlugins,
+      searchFilter,
+      pluginsLoaded
+    } = this.props.pluginList;
+
+    const { nodes, root, error } = this.props.fileTree;
+    const { currentUser, dispatch } = this.props;
+    let children;
+    if (nodes && nodes.length > 0) {
+      children = nodes.map(n => {
+        return (
+          <FileTree
+            node={n}
+            key={n.name}
+            extension="py"
+            handleOpen={
+              (e, path) => {
+                e.preventDefault(); this.props.dispatch(fetchDir(path, "py"));
+              }
+            }
+            handleClose={
+              (e, path) => {
+                e.preventDefault(); this.props.dispatch(closeDir(path));
+              }
+            }
+            handleFileClick={
+              (e, path) => {
+                e.preventDefault(); this.setState({ value:path });
+              }
+            }
+          />
+        );
+      });
+    } else if (error) {
+      children = (
+        <div className="text-danger">
+          {error}
+        </div>
+      );
+    }
+
+    if (!pluginsLoaded) {
+      return (
+        <Spinner />
+      );
+    }
+    return (
+      <Container>
+        <Row>
+          <Col md={6}><h2>Plugins</h2></Col>
+          <Col md={6} className="pt-2">
+            {
+              !currentUser.isGuest ?
+                <Button
+                  variant="info" className="float-end"
+                  onClick={() => (exported ? this.props.dispatch(exportPlugin()) : this.setState({ showModal: true }))}
+                >
+                  {exported ? "Remove imported Plugin" : "Plug-my-Plugin"}
+                </Button> : null
+            }
+          </Col>
+        </Row>
+
+        <Row>
+          <Col md={8} className="mt-3">
+            {
+              Object.keys(categoryTitle).map(key => {
+                return this.renderPluginBlock(filteredPlugins, key);
+              })
+            }
+          </Col>
+
+          <Col md={4}>
+            <InputGroup className="mt-3">
+              <FormControl
+                type="text" value={searchFilter}
+                onChange={this.handleSearchFilter}
+                placeholder="Search for plugins"
+              />
+            </InputGroup>
+
+            <div className="mt-2">
+              <FormLabel>Categories:</FormLabel>
+              <div>
+                {
+                  Object.keys(categoryTitle).map(key => {
+                    return this.renderCategoryCheckbox(categories, categoriesFilter, key);
+                  })
+                }
+              </div>
+            </div>
+            <div className="mt-2">
+              <FormLabel>Tags:</FormLabel>
+              <div className="d-flex flex-wrap justify-content-between">
+                {
+                  tags.map(tag => {
+                    return (
+                      <Button
+                        className="badge mb-2 me-2" variant={_.includes(tagsFilter, tag) ? "success" : "secondary"}
+                        key={tag}
+                        onClick={() => dispatch(updateTagFilter(tag))}
+                      >
+                        {tag}
+                      </Button>
+                    );
+                  })
+                }
+              </div>
+            </div>
+          </Col>
+        </Row>
+
+        <Modal
+          show={this.state.showModal}
+          onShow={() => this.props.dispatch(changeRoot({ id: "home", path: currentUser.home }, "py"))}
+          onHide={() => this.setState({ showModal: false })}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Plug-in your own plugin</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p>Here you can plugin your own plugin</p>
+            <ButtonGroup className="mb-2">
+              <Button
+                variant="primary" active={root.id === "home"}
+                onClick={() => this.props.dispatch(changeRoot({ id: "home", path: currentUser.home }, "py"))}
+              >
+                Home
+              </Button>
+              <Button
+                variant="primary" active={root.id === "scratch"}
+                onClick={() => this.props.dispatch(changeRoot({ id: "scratch", path: currentUser.scratch }, "py"))}
+              >
+                Scratch
+              </Button>
+            </ButtonGroup>
+            {children}
+            <FormGroup style={{ marginTop: 10 }}>
+              <FormLabel>File to plugin</FormLabel>
+              <FormControl
+                type="text" value={this.state.value}
+                onChange={this.handlePluginValue}
+              />
+            </FormGroup>
+          </Modal.Body>
+
+          <Modal.Footer>
+            <Button variant="primary" onClick={() => this.handleExport()}>Import Plugin</Button>
+          </Modal.Footer>
+        </Modal>
+      </Container>
+    );
+  }
 }
 
+PluginList.propTypes = {
+  pluginList: PropTypes.shape({
+    exported: PropTypes.bool,
+    tags: PropTypes.array,
+    categories: PropTypes.object,
+    categoriesFilter: PropTypes.array,
+    tagsFilter: PropTypes.array,
+    filteredPlugins: PropTypes.array,
+    searchFilter: PropTypes.string,
+    pluginsLoaded: PropTypes.bool
+  }),
+  fileTree: PropTypes.shape({
+    nodes: PropTypes.array,
+    root: PropTypes.shape({
+      id: PropTypes.string
+    }),
+    error: PropTypes.string
+  }),
+  currentUser: PropTypes.shape({
+    id: PropTypes.number,
+    username: PropTypes.string,
+    email: PropTypes.string,
+    isGuest: PropTypes.bool,
+    home: PropTypes.string,
+    scratch: PropTypes.string
+  }),
+  dispatch: PropTypes.func.isRequired
+};
+
 const mapStateToProps = state => ({
-    pluginList: state.pluginListReducer,
-    fileTree: state.fileTreeReducer,
-    currentUser: state.appReducer.currentUser
+  pluginList: state.pluginListReducer,
+  fileTree: state.fileTreeReducer,
+  currentUser: state.appReducer.currentUser
 });
 
 export default connect(mapStateToProps)(PluginList);

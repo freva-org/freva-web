@@ -4,21 +4,17 @@
 {% block page_class %}home-page{% endblock %}
 {% block content %}
 
-{% load bootstrap3 %}
-
 {# Load CSS and JavaScript #}
 
 {% load settingstags %}
-{% bootstrap_javascript %}
-
 
 <!-- Show an error message after accessing a protected page -->
 {% if login_failed and not request.GET.login_required%}
 <div class="container">
 	<div class="row">
 		<div class="col-md-12">
-			<div class="alert alert-danger">
-				<p> Wrong user name or password. </p>
+			<div class="alert alert-danger my-2">
+				 Wrong user name or password.
 			</div>
 		</div>
 	</div>
@@ -49,16 +45,17 @@ restartTour();
 	<div class="row">
 		<div class="col-md-12">
 			<div class="alert alert-danger">
-				<p> Please, login to access the requested page. </p>
+				Please, login to access the requested page.
 			</div>
 		</div>
 	</div>
 </div>
 {% endif %}
 <div class="container">
+
 <!-- Slider (Parallax Slider) -->
        <div class="row">
-         <div class="col-md-12">     
+         <div class="col-md-12">
             <div id="da-slider" class="da-slider">
 				<div class="da-slide">
 					<h2>Start analyses</h2>
@@ -82,62 +79,62 @@ restartTour();
 				</nav>
 			</div>
         </div>
-        </div>  
+        </div>
             <!-- Slider ends -->
 	<div class="bor"></div>
-	
+
 	<!-- Service starts -->
-            
+
             <div class="services">
                   <div class="row">
                      <div class="col-md-6">
-                     
+
                         <!-- Service #1 -->
                         <div class="service">
                            <!-- Icon & title. Font Awesome icon used. -->
-                           <h5><span><i class="glyphicon glyphicon-search"></i> {% settings_val 'HOMEPAGE_HEADING'%}</span></h5>
+                           <h5>{% settings_val 'HOMEPAGE_HEADING'%}</h5>
                            <p>{% settings_val 'HOMEPAGE_TEXT'%}</p>
                         </div>
-                        
+
                      </div>
                      <div class="col-md-6">
-                     
+
                         <!-- Service #2 -->
                         <div class="service">
                            <!-- Icon & title. Font Awesome icon used. -->
-                           <h5><span><i class="glyphicon glyphicon-search"></i>Freva - Free Evaluation System Framework</span></h5>
+                           <h5>Freva - Free Evaluation System Framework</h5>
                            <p>
-                           The Climate Informatics and Technologies research group provides a standardized data and evaluation system - 
+                           The Climate Informatics and Technologies research group provides a standardized data and evaluation system -
                            developed at the DKRZ and FUB in Germany. Freva provides efficient and
                            comprehensive access to the model data base as well as to evaluation data sets.
                            The application system is developed as an easy to use
                            low-end application minimizing technical requirements for users and tool developers.
 							</p>
-                        </div>                     
-                        
+                        </div>
+
                      </div>
 
                   </div>
             </div>
-            
+
             <!-- Serivce ends -->
 
 
   </div>
-  
+
   <!-- Modal Guest Dialog-->
   <div class="modal fade" id="guestModal" tabindex="-1" role="dialog" aria-labelledby="guestModal" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
           <h4 class="modal-title">Guest login</h4>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body" id="guest_text">
-          	
+
         	<div class="form-group">
         		<p class="help-block">Dear Guest,</p>
-        		<p class="help-block">welcome to the MiKlip homepage! 
+        		<p class="help-block">welcome to the MiKlip homepage!
         		You certainly have restricted permissions and not access to all features of this homepage.
         		</p>
         		<p class="help-block">
@@ -146,19 +143,19 @@ restartTour();
 			</div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Ok</button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal">Ok</button>
         </div>
       </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
   </div><!-- /.modal -->
- 
+
 <script type="text/javascript">
 			$(function() {
 				$('#da-slider').cslider({
 					autoplay	: true,
 					interval : 6000
 				});
-			
+
 			});
-		</script>	
+		</script>
 {% endblock %}

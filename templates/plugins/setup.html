@@ -7,7 +7,7 @@
 
     <script src="{{ STATIC_URL }}js/solr_search.js?{% now "U" %}"></script>
 
-    {% load bootstrap3 %}
+    {% load bootstrap5 %}
     {% load static %}
     <style>
         .files {
@@ -34,16 +34,15 @@
 
     {# Load CSS and JavaScript #}
 
-
-    {% bootstrap_javascript %}
-
-
     <div class="container">
         <!-- Example row of columns -->
         <div class="row">
             <div class="col-md-9">
                 <h1>{{ tool.name }}</h1>
                 <p>{{ tool.short_description }}</p>
+                {% if user_exported %}
+                    <div class="text-danger mb-2">You have plugged in this tool.</div>
+                {% endif %}
                 <form action="" method="post" name="plugin_form" id="plugin_form">
                     {% csrf_token %}
 
@@ -72,8 +71,8 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                     <h4 class="modal-title">Select a file</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="btn-group" data-toggle="buttons" style='margin-bottom:20px'>
@@ -93,7 +92,7 @@
                 <div class="modal-footer">
                     <input type="hidden" name="senderField" id="senderField" value="">
                     <input type="hidden" name="fileExtension" id="fileExtension" value="nc">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-default" data-bs-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-primary">Select file</button>
                 </div>
             </div><!-- /.modal-content -->
@@ -107,8 +106,8 @@
         <div class="modal-dialog solr-modal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                     <h4 class="modal-title">Search database</h4>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="visual_search"></div>
@@ -117,7 +116,7 @@
 
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-default" data-bs-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-primary" id="solr_select_file">Select file</button>
                 </div>
             </div><!-- /.modal-content -->
@@ -132,8 +131,8 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                         <h4 class="modal-title">Guest login</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body" id="guest_text">
 
@@ -146,7 +145,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default tourbtn" data-dismiss="modal"
+                        <button type="button" class="btn btn-secondary tourbtn" data-bs-dismiss="modal"
                                 onclick='window.location.href="/history";'>Ok
                         </button>
                     </div>
@@ -163,8 +162,8 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                         <h4 class="modal-title">Enter password</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body" id="browsefield">
 
@@ -183,15 +182,16 @@
                         </div>
                         <div class="row">
                             <div class="col-md-12" id="similarResults">
-                                <center><p>Loading similar results!</p><img src="{{ STATIC_URL }}img/ajax-loader.gif"/>
-                                </center>
+                                <div class="spinner-border text-center" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
                             </div>
                         </div>
 
 
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-default" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary" id="submit_analysis">Submit analysis</button>
                         </form>
                     </div>
@@ -289,7 +289,7 @@
                     index_pw = index;
             });
             form_vals.splice(index_pw, 1);
-            $('#' + container).html('<p>Loading similar results!</p><img src="{{STATIC_URL}}img/ajax-loader.gif" style="margin-left:50px;"/>');
+            $('#' + container).html('<div class="text-center"><p>Loading similar results!</p><div class="spinner-border" role="status"> <span class="visually-hidden">Loading...</span> </div></div> ');
             $.ajax({
                 url: '/plugins/{{tool.name}}/similar-results/',
                 data: form_vals,
@@ -370,14 +370,13 @@
                 $('#runButton').removeAttr('disabled');
                 $('.tourbtn').removeAttr('disabled');
                 $('#runButton').on('click', function (e) {
-                    $('#guestModal').modal({show: true, backdrop: 'static'});
+                    $('#guestModal').modal("show");
                 });
             {% elif error_message %}
                 $('.btn').attr('disabled', 'disabled'); // {{ disable_buttons }}
                 $('#okBtn').removeAttr('disabled');
 
             {% else %}
-
                 $('#runButton').on('click', function (e) {
                     searchResults('similarResults'); //This triggers the search for similar results
                     $('#myModalPw').modal('show');
@@ -402,18 +401,6 @@
                 searchResults('similarDiv');
             });
             searchResults('similarDiv');
-
-
-            $('#simAffix').affix({
-                offset: {
-                    top: 200,
-                    bottom: function () {
-                        return (this.bottom = $('.footer').outerHeight(true))
-                    }
-                }
-            });
-
-
         });
 
 

@@ -5,13 +5,9 @@
 {% block content %}
 <!-- This code is taken from http://twitter.github.com/bootstrap/examples/hero.html -->
 
-{% load bootstrap3 %}
 {% load dialogtags %}
 
 {# Load CSS and JavaScript #}
-{% bootstrap_javascript %}       
-
-
     <div class="container">
       <!-- Example row of columns -->
       <div class="row">
@@ -25,14 +21,14 @@
 	 	 		<a class="btn btn-primary" onClick="toogleConfig('config_table');toogleConfig('copy_button');" id="config_button">Show configuration</a>
 	 	 		<a class="btn btn-primary" href="{% url 'plugins:setup' history_object.tool history_object.id%}" id="config_button">Edit configuration</a>
 	 	 		{% if history_object.status > 2 and history_object.slurm_output != 0%}
-	 	 			
+
 	 	 			<a class="btn btn-danger mybtn-cancel" id="cancelButton_{{h_item.id}}" onClick="cancelDialog.show({{history_object.id}})">Cancel job</a>
 	 				{# Render a Bootstrap password/cancel dialog #}
 	 	 			{% cancel_dialog %}
-	 	 		
+
 	 	 		{%endif%}
-	 	 	
-	 	 	
+
+
 	 	 	</div>
 	 	 	<div class="col-md-12">
 		 	 	<table class="table col-md-12" id="config_table" style="display:none; margin-top:10px;">
@@ -49,7 +45,7 @@
       {% if history_object.status > 2 %}
       <script>
       function doUpdate() {
-      
+
 		  var tailServiceUrl = '{% url 'history:tailFile' history_object.id %}';
 		  $.ajax({type: "GET", url : tailServiceUrl,
 		          success: function (data) {
@@ -84,13 +80,13 @@
                         <p>Status:</p>
                         {%endifnotequal%}
 		        <div id="logOutputDiv" class="well well-lg" style="height:450px; overflow-y:scroll; overflow-x: hidden;">
-	
+
 		        {% for line in file_content %}
-		        
+
 		        	{{line}}<br>
-		        
+
 		        {%endfor%}
-		        
+
 		        </div>
 	        </div>
 	      </div>
@@ -98,7 +94,7 @@
 
 <script>
   	function toogleConfig(id){
-  		
+
   		if($('#'+id).is(":hidden")){
   			$('#'+id).show();
   			$('#config_button').html('Hide configuration');
@@ -107,7 +103,7 @@
   		  	$('#config_button').html('Show configuration');
   		}
   	}
-  	
+
 	$(document).ready(function() {
 	    $("#btn_clipboard").click(
 	    function copyToClipboard(text) {
@@ -120,9 +116,7 @@
 		});
 		$('#logOutputDiv').scrollTop($("#logOutputDiv")[0].scrollHeight);
 	});
-	
-	
-	
+
 </script>
 
 {% endblock %}

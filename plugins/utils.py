@@ -34,16 +34,13 @@ def get_scheduler_hosts(user):
         return settings.SCHEDULER_HOSTS
 
 
-def get_plugin_or_404(plugin_name, user=None, user_name=None):
+def get_plugin_or_404(plugin_name, user=None):
 
     try:
-        if user:
-            user_name = user.getName()
-        return pm.getPluginInstance(plugin_name, user, user_name)
+        return pm.get_plugin_instance(plugin_name, user)
     except SyntaxError:
         raise 
     except:
-        raise
         raise Http404
     
 
@@ -98,3 +95,14 @@ def ssh_call(username, password, command, hostnames=['127.0.0.1']):
     ssh.close()
     
     return stdin, stdout, stderr
+
+def plugin_metadata_as_dict(plugin_metadata):
+    return {
+            "name": plugin_metadata.name,
+            "plugin_class": plugin_metadata.plugin_class,
+            "plugin_module": plugin_metadata.plugin_module,
+            "description": plugin_metadata.description,
+            "user_exported": plugin_metadata.user_exported,
+            "category": plugin_metadata.category,
+            "tags": plugin_metadata.tags
+           }

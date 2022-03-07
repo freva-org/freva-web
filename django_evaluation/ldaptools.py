@@ -46,7 +46,7 @@ class LdapUserInformation(object):
             ldap.set_option(ldap.OPT_X_TLS_CACERTDIR, settings.CA_CERT_DIR)
         except:
             pass
-        con = self._establish_ldap_connection(return_uri=False)
+        con = self._establish_ldap_connection()
         # bind with the simple user
         try:
             con.simple_bind_s(settings.LDAP_USER_DN, settings.LDAP_USER_PW)
@@ -88,7 +88,8 @@ class LdapUserInformation(object):
         return self._connect_to_ldap()
 
     def __del__(self, *args, **kwargs):
-        self._con.unbind_s()
+        if self._con:
+            self._con.unbind_s()
 
 
 class FUUserInformation(LdapUserInformation):

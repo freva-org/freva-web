@@ -1,37 +1,28 @@
 {% load resulttags %}
 
-<div class='container'  style="border: 2px solid #eee;padding: 5px; margin: 2px" id='cont_{{class_id}}'>
+<div class='container card p-2 mb-2 shadow-sm' id='cont_{{class_id}}'>
 <div class="col-md-12">
-{% ifequal class_id 'new' %}
-    <div class="col-md-11">
-        <input class="form-control class_{{class_id}} mybtn-edit" id='dummyinput' tabindex=-1></input>
-    </div>
-    <div class="col-md-1">
-        <a class="btn btn-info class_{{class_id}} mybtn-edit" id='btn_edit_{{class_id}}'>New</a>
-    </div>
+{% if class_id == "new" %}
+    <input class="form-control class_{{class_id}} mybtn-edit" id='dummyinput' placeholder="Insert new note" tabindex=-1></input>
     {% else %}
-	{% ifequal htag.type|slugify tagType.note_public|slugify %}
-		{% if user.isGuest %}
-	            <h4>#{{htag.id}} <span id="h4_text_{{class_id}}">Commentary by <span id='user_{{class_id}}'>{{htag.uid.first_name}} {{htag.uid.last_name}}</span></span></h4>
-		{% else %}
-	            <h4>#{{htag.id}} <span id="h4_text_{{class_id}}">Commentary by <span id='user_{{class_id}}'>{{htag.uid.first_name}} {{htag.uid.last_name}} ({{htag.uid}})</span></span></h4>
-		{% endif %}
+    {% if htag.type|slugify == tagType.note_public|slugify %}
+        {% if user.isGuest %}
+                <h4>#{{htag.id}} <span id="h4_text_{{class_id}}">Commentary by <span id='user_{{class_id}}'>{{htag.uid.first_name}} {{htag.uid.last_name}}</span></span></h4>
+        {% else %}
+                <h4>#{{htag.id}} <span id="h4_text_{{class_id}}">Commentary by <span id='user_{{class_id}}'>{{htag.uid.first_name}} {{htag.uid.last_name}} ({{htag.uid}})</span></span></h4>
+        {% endif %}
         {% else %}
             <h4>#{{htag.id}} <span id="h4_text_{{class_id}}">Private comment</span></h4>
-        {% endifequal %}
+        {% endif %}
         <div class="col-md-12">
         <span class='class_{{class_id}}' id='text_{{class_id}}'>{{htag.text|linebreaks|escape}}</span>
         </div>
-        {% ifequal htag.uid user %}
+        {% if htag.uid == user %}
 
-        <div class="col-md-offset-10 col-md-1">
         <a class="btn btn-danger class_{{class_id}} mybtn-edit"  id='btn_delete_{{class_id}}'>Delete</a>
-        </div>
-        <div class="col-md-1">
-        <a class="btn btn-info class_{{class_id}} mybtn-edit"  id='btn_edit_{{class_id}}'>Edit</a>
-        </div>
-        {% endifequal %}
-    {% endifequal %}
+        <a class="btn btn-warning class_{{class_id}} mybtn-edit"  id='btn_edit_{{class_id}}'>Edit</a>
+        {% endif%}
+    {% endif%}
     {% if class_id == "new" or  htag.uid == user %}
     <div class='class_{{class_id}} col-md-12' style='display:none'>
         <form role='form'> <!-- class='form-inline'> -->
@@ -39,7 +30,7 @@
                 <label for='enterNewNote'>Note:</label>
                 <textarea class="form-control" id='textarea_{{class_id}}' rows="5"></textarea>
             </div> <!-- form-group -->
-		<div class="row">
+        <div class="row">
             <div class='col-md-6 form-group'>
                 <label for='publish_note'>Display your comment to other users?</label>
                 <div class="radio">
@@ -55,129 +46,123 @@
                     </label>
                 </div> <!-- radio -->
             </div> <!-- form-group -->
-	    <div class="col-md-6">
-	  	<div class="alert alert-danger alert-dismissible" role="alert" id='alert_empty_{{class_id}}'>
-        	<button type="button" class="close" data-dismiss="alert"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
-        	<strong>Empty comment!<br></strong> To delete a comment use cancel and delete instead.
-        	</div> <!-- alert -->
-	    </div>
-		</div> <!-- row -->
-            <div class="col-md-2">
+        <div class="col-md-6">
+        <div class="alert alert-danger alert-dismissible" role="alert" id='alert_empty_{{class_id}}'>
+            <button type="button" class="close" data-dismiss="alert"><span class="sr-only">Close</span></button>
+            <strong>Empty comment!<br></strong> To delete a comment use cancel and delete instead.
+            </div> <!-- alert -->
+        </div>
+        </div> <!-- row -->
             <a class="btn btn-danger" id='btn_cancel_{{class_id}}'>Cancel</a>
-            </div>
-            <div class="col-md-offset-9 col-md-1">
-                <a class="btn btn-success" id='btn_save_{{class_id}}'>Save</a>
-            </div>
+            <a class="btn btn-success" id='btn_save_{{class_id}}'>Save</a>
         </form>
     </div> <!-- new_node -->
     {% endif %}
-</div> <!-- col-md-12 --> 
+</div> <!-- col-md-12 -->
 </div> <!-- container -->
 
 <script>
-        $(document).ready(function(){
-                if('{{htag.uid}}'=='{{user}}') {
-			$('#user_{{class_id}}').text('you');
-		}
+    $(document).ready(function(){
+        if('{{htag.uid}}'=='{{user}}') {
+            $('#user_{{class_id}}').text('you');
+        }
 
-		{% ifnotequal class_id 'new' %}
-		$("input[name='radiogrp_{{class_id}}'][value='{{htag.type}}']").attr("checked","checked");
-                $('#textarea_{{class_id}}').val('{{htag.text|escape|escapejs}}');
-		{% else %}
-		$("input[name='radiogrp_{{class_id}}'][value='{{htag.type}}']").attr("checked","checked");
-		$("input[name='radiogrp_{{class_id}}'][value='{{tagType.note_public}}']").attr("checked","checked");
-		{% endifnotequal %}
+        {% if class_id != "new" %}
+            $("input[name='radiogrp_{{class_id}}'][value='{{htag.type}}']").attr("checked","checked");
+            $('#textarea_{{class_id}}').val('{{htag.text|escape|escapejs}}');
+        {% else %}
+            $("input[name='radiogrp_{{class_id}}'][value='{{htag.type}}']").attr("checked","checked");
+            $("input[name='radiogrp_{{class_id}}'][value='{{tagType.note_public}}']").attr("checked","checked");
+        {% endif %}
 
-		{% if class_id != "new" and  htag.uid == user %}
-                $('#btn_delete_{{class_id}}').on('click', function(){
-                        var data = {'text':$('#textarea_{{class_id}}').val(),
-                                    'type': {{tagType.note_deleted}} };
-                        var url = '{% url 'history:edit-historytag' history_id htag.id %}';
+        {% if class_id != "new" and  htag.uid == user %}
+            $('#btn_delete_{{class_id}}').on('click', function(){
+                    var data = {
+                            'text':$('#textarea_{{class_id}}').val(),
+                            'type': {{tagType.note_deleted}}
+                        };
+                    var url = '{% url 'history:edit-historytag' history_id htag.id %}';
 
+                    $.post(url, data, function(resp){
+                        $('#cont_{{class_id}}').hide()
+                        // Implementation of doCount in results.html
+                        doCount()
+                    });
+
+                    $('#caption_modal').modal('hide');
+            });
+        {% endif %}
+
+
+        function click_edit_{{class_id}}() {
+            var text = $('#textarea_{{class_id}}').val();
+            $('.class_{{class_id}}').toggle();
+            $('.mybtn-edit').attr("disabled", "disabled");
+
+            $('#alert_empty_{{class_id}}').hide();
+
+            // This is a workaround to set the focus at the end
+            // of the textarea
+            $('#textarea_{{class_id}}').focus().val('').val(text);
+        }
+
+
+        {% if class_id == "new" or  htag.uid == user %}
+			$('#btn_cancel_{{class_id}}').on('click', function(){
+				$('.class_{{class_id}}').toggle();
+				$('.mybtn-edit').removeAttr("disabled");
+
+                {% if class_id == "new" %}
+                    $('#textarea_{{class_id}}').val('');
+                {% else %}
+                    $('#textarea_{{class_id}}').val('{{htag.text|escape|escapejs}}');
+                {% endif %}
+            });
+            $('#btn_edit_{{class_id}}').on('click', click_edit_{{class_id}});
+
+            {% if class_id == "new" %}
+                $('#dummyinput').on('focus', click_edit_{{class_id}});
+            {% endif %}
+
+            $('#btn_save_{{class_id}}').on('click', function(){
+                var text=$('#textarea_{{class_id}}').val();
+
+                if( text.trim() == '' ) {
+                    $('#alert_empty_{{class_id}}').show();
+                    $('#textarea_{{class_id}}').focus();
+                } else {
+                    $('.mybtn-edit').removeAttr("disabled");
+                    $('.class_{{class_id}}').toggle();
+                    var kind = $( "input:radio[name='radiogrp_{{class_id}}']:checked" ).val();
+
+                    var data = {'text':$('#textarea_{{class_id}}').val(), 'type': kind };
+
+                    {% if class_id == "new"  %}
+                        var url = '{% url 'history:edit-historytag' history_id '0' %}';
                         $.post(url, data, function(resp){
-				$('#cont_{{class_id}}').hide()
+                            var url = '{% url 'history:result-comments' history_id %}';
+                            $('#loadComments').load(url)
+                            doCount()
+                        });
+                    {% else %}
+                        var url = '{% url 'history:edit-historytag' history_id htag.id %}';
+                        $.post(url, data, function(resp){
+                            $('#text_{{class_id}}').html(resp);
                         });
 
-                        $('#caption_modal').modal('hide');
-                });
- 		{% endif %}
+                        if(kind == {{tagType.note_public}}) {
+                            $('#h4_text_{{class_id}}').text('Commentary by you');
+                        } else {
+                            $('#h4_text_{{class_id}}').text('Private comment');
+                        }
+                    {% endif %}
 
+                    $('#caption_modal').modal('hide');
+                }
+            });
+        {% endif %}
 
-		function click_edit_{{class_id}}() {
-				var text = $('#textarea_{{class_id}}').val();
-				$('.class_{{class_id}}').toggle();
-        	        	$('.mybtn-edit').attr("disabled", "disabled");
-
-				$('#alert_empty_{{class_id}}').hide();
-
-				// This is a workaround to set the focus at the end
-				// of the textarea
-                		$('#textarea_{{class_id}}').focus().val('').val(text);
-			}
-
-                
-		{% if class_id == "new" or  htag.uid == user %}
-                $('#btn_cancel_{{class_id}}').on('click', function(){
-			$('.class_{{class_id}}').toggle();
-                        $('.mybtn-edit').removeAttr("disabled");
-
-                        {% ifequal class_id 'new' %}
-                        $('#textarea_{{class_id}}').val('');
-                        {% else %}
-                        $('#textarea_{{class_id}}').val('{{htag.text|escape|escapejs}}');
-                        {% endifequal %}
-		});
-
-                $('#btn_edit_{{class_id}}').on('click', click_edit_{{class_id}});
-
-		{% ifequal class_id 'new' %}
-                $('#dummyinput').on('focus', click_edit_{{class_id}});
-		{% endifequal %}
-
-                $('#btn_save_{{class_id}}').on('click', function(){
-			var text=$('#textarea_{{class_id}}').val();
-			if( text.trim() == '' ) {
-				$('#alert_empty_{{class_id}}').show();
-				$('#textarea_{{class_id}}').focus();
-			}
-			else {
-
-	                        $('.mybtn-edit').removeAttr("disabled");
-				$('.class_{{class_id}}').toggle();
-	       			var kind = $( "input:radio[name='radiogrp_{{class_id}}']:checked" ).val();
-	
-	                        var data = {'text':$('#textarea_{{class_id}}').val(),
-	                                    'type': kind };
-	
-	                        {% ifequal class_id 'new'  %}
-	                        var url = '{% url 'history:edit-historytag' history_id '0' %}';
-	                        $.post(url, data, function(resp){
-	                                var url = '{% url 'history:result-comments' history_id %}';
-				                    $('#loadComments').load(url)
-	                        });
-	   
-	                	//$('#cont_new').on('click', click_cont_new);
-				reactivate_cont_new();
-	                        {% else %}
-	                        var url = '{% url 'history:edit-historytag' history_id htag.id %}';
-	                         $.post(url, data, function(resp){
-					$('#text_{{class_id}}').html(resp);
-	                        });
-	                        
-	                        if(kind == {{tagType.note_public}}) {
-	                            $('#h4_text_{{class_id}}').text('Commentary by you');
-	                        }
-	                        else {
-	                            $('#h4_text_{{class_id}}').text('Private comment');
-	                        }
-	                       {% endifequal %}
-	
-	                        $('#caption_modal').modal('hide');
-			}
-		});
-		{% endif %}        
-	                                
-        });    
+        });
 
 </script>
 

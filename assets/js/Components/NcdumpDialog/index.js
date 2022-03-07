@@ -1,68 +1,57 @@
-import React from 'react';
-import ReactHtmlParser, { processNodes, convertNodeToElement, htmlparser2 } from 'react-html-parser';
-import ReactDOM from 'react-dom';
-import {Modal, Button, FormControl, Alert} from 'react-bootstrap';
-import CircularProgress from '@material-ui/core/CircularProgress';
+import React from "react";
+import PropTypes from "prop-types";
+import { Modal, Button } from "react-bootstrap";
 
+import Spinner from "../Spinner";
 
 class NcdumpDialog extends React.Component {
 
-    constructor(props) {
-        super(props);
-        this.state = {pw: ''};
+  submitNcdump () {
+    this.props.submitNcdump(this.props.file);
+  }
 
-        this.handleChange = this.handleChange.bind(this);
-    }
+  render () {
+    const { show, onClose, status, output, file } = this.props;
+    return (
+      <Modal
+        show={show} size="lg" dialogClassName="ncdump-modal"
+        onHide={() => onClose()}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title className="fs-5">Metadata for {file}</Modal.Title>
+        </Modal.Header>
 
-    submitNcdump() {
-        const {pw} = this.state;
-        this.props.submitNcdump(this.props.file, pw);
-    }
+        <Modal.Body>
+          {status === "loading" ? <Spinner /> : null}
 
-    handleChange(e) {
-        const val = ReactDOM.findDOMNode(this.refs.ncdumpPW).value;
-        this.setState({pw: val});
-    }
+          {
+            output ?
+              <div>
+                {output.error_msg ? <div>{output.error_msg}</div> : <pre className="d-flex justify-content-center" dangerouslySetInnerHTML={{ __html: output.ncdump }}></pre>}
+              </div> : null
+          }
 
-    render() {
-        const {show, onClose, status, output, file} = this.props;
-        return (
-            <Modal show={show} bsSize="large" dialogClassName="ncdump-modal"
-                   onShow={() => {if (this.state.pw !== '') this.submitNcdump()}}
-                   onHide={() => onClose()}>
-                <Modal.Header closeButton>
-                    <Modal.Title>{status === 'ready' ? `Metadata for ${file}` : 'Enter your password'}</Modal.Title>
-                </Modal.Header>
+        </Modal.Body>
 
-                <Modal.Body>
-                    <span style={status === 'pw' || status === 'pw_fail' ? {} : {display: 'none'}}>
-                        {status === 'pw_fail' ? <Alert bsStyle="danger"><strong>Wrong password!</strong> Please try again.</Alert> : null}
-                        <p>To start Ncdump you have to re-enter your password</p>
-                        <form method="post" id="passForm" name="passForm">
-                            <FormControl id={`username`} type="text" ref={`username`} name="password" style={{display: 'none'}}/>
-                            <FormControl id={`search`} type="password" ref={`ncdumpPW`} name="password"
-                                         onChange={this.handleChange} value={this.state.pw}/>
-                        </form>
-                    </span>
-                    {status === 'loading' ?
-                    <div style={{textAlign: 'center'}}>
-                        <CircularProgress />
-                    </div> : null}
+        <Modal.Footer>
+          <Button variant="primary" onClick={() => this.submitNcdump()}>Start Ncdump</Button>
+        </Modal.Footer>
 
-                    {output ?
-                        <div>
-                            {output.error_msg ? <div>{output.error_msg}</div> : <pre>{ReactHtmlParser(output.ncdump)}</pre>}
-                        </div>  :  null}
-
-                </Modal.Body>
-
-                <Modal.Footer>
-                    <Button bsStyle="primary" onClick={() => this.submitNcdump()}>Start Ncdump</Button>
-                </Modal.Footer>
-
-            </Modal>
-        )
-    }
+      </Modal>
+    );
+  }
 }
+
+NcdumpDialog.propTypes = {
+  show: PropTypes.bool,
+  submitNcdump: PropTypes.func.isRequired,
+  onClose: PropTypes.func,
+  status: PropTypes.string,
+  output: PropTypes.shape({
+    ncdump: PropTypes.string,
+    error_msg: PropTypes.string
+  }),
+  file: PropTypes.string
+};
 
 export default NcdumpDialog;

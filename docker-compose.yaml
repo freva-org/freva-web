@@ -1,0 +1,19 @@
+version: "3.9"
+services:
+  db:
+    image: mariadb:latest
+    environment:
+      MYSQL_USER: freva
+      MYSQL_PASSWORD: T3st
+      MYSQL_DATABASE: freva
+      MYSQL_ROOT_PASSWORD: test_password_please_ignore
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./docker/db/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql:ro
+  solr:
+    build: docker/solr
+    ports:
+      - "8983:8983"
+    volumes:
+      - ./docker/solr/init.sh:/docker-entrypoint-initdb.d/init.sh

@@ -10,12 +10,15 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'first_name', 'isGuest', 'home', 'scratch')
+        fields = ("id", "username", "email", "first_name", "isGuest", "home", "scratch")
 
     def get_home(self, instance):
-        if instance.username == 'guest':
-            return 'Guest has no home'
-        return pwd.getpwnam(instance.username).pw_dir
+        if instance.username == "guest":
+            return None
+        try:
+            return pwd.getpwnam(instance.username).pw_dir
+        except KeyError:
+            return None
 
     def get_scratch(self, instance):
-        return config.get('scratch_dir').replace('$USER', instance.username)
+        return config.get("scratch_dir").replace("$USER", instance.username)

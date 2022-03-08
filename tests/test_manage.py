@@ -9,13 +9,6 @@ def test_chek(eval_config):
     assert res.returncode == 0
 
 
-def test_migrate(eval_config):
-    """Test the python manage.py migrate cmd."""
-    cmd = f"python manage.py migrate --fake-initial"
-    res = run(shlex.split(cmd), check=False, stdout=PIPE, stderr=PIPE)
-    assert res.returncode == 0
-
-
 def test_collectstatic(eval_config):
     """Test the python manage.py collectstatic command."""
     cmd = f"python manage.py collectstatic -n --noinput"

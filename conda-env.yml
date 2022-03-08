@@ -2,7 +2,7 @@ name: freva-web
 channels:
   - conda-forge
 dependencies:
-  - python=3.9
+  - python=3.10
   - django
   - pytest-env
   - pandas
@@ -23,6 +23,7 @@ dependencies:
       - types-toml
       - hurry.filesize
       - xarray
+      - git+https://gitlab.dkrz.de/freva/evaluation_system.git
   - sphinx
   - pymysql
   - imagemagick

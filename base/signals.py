@@ -16,41 +16,50 @@ def send_mail_after_guest_login(sender, user, request, **kwargs):
     for admin in settings.ADMINS:
         admin_mail_addresses.append(admin[1])
 
-    is_guest = user.groups.filter(name='Guest')
+    is_guest = user.groups.filter(name="Guest")
 
     if is_guest and settings.SEND_MAIL_AT_GUEST_LOGIN:
         try:
             ip = get_real_ip(request)
         # TODO: Exception too broad!
         except:
-            ip = ''
+            ip = ""
 
         if not ip:
             try:
                 ip = get_ip(request)
             # TODO: Exception too broad!
             except:
-                ip = ''
+                ip = ""
 
-        try: 
-            api_key = '28e6f13bda7c619201630b904b36a3c53b02a49b'
-            url = 'http://api.db-ip.com/addrinfo?addr=%s&api_key=%s' % (ip, api_key,)
+        try:
+            api_key = "28e6f13bda7c619201630b904b36a3c53b02a49b"
+            url = "http://api.db-ip.com/addrinfo?addr=%s&api_key=%s" % (
+                ip,
+                api_key,
+            )
             r = requests.get(url)
             val = r.json()
-            val = 'Country: %s\nState/Prov: %s\nCity: %s' % (val['country'], val['stateprov'], val['city'],)
+            val = "Country: %s\nState/Prov: %s\nCity: %s" % (
+                val["country"],
+                val["stateprov"],
+                val["city"],
+            )
         # TODO: Exception too broad!
         except:
-            val = ''
-        message = "Guest login from %s at %s" % (ip,
-                                                 datetime.now().isoformat())
-        message += '\n\n%s\n\nMore information https://db-ip.com/%s' % (val, ip)
-        print "Send: ", message, " to ", admin_mail_addresses
+            val = ""
+        message = "Guest login from %s at %s" % (ip, datetime.now().isoformat())
+        message += "\n\n%s\n\nMore information https://db-ip.com/%s" % (val, ip)
+        print("Send: ", message, " to ", admin_mail_addresses)
 
-        send_mail('[miklip-guest] Guest Login',
-                  message,
-                  settings.DEFAULT_FROM_EMAIL,
-                  admin_mail_addresses,
-                  fail_silently=True)
+        send_mail(
+            "[miklip-guest] Guest Login",
+            message,
+            settings.DEFAULT_FROM_EMAIL,
+            admin_mail_addresses,
+            fail_silently=True,
+        )
+
 
 # connect the function with 'user_logged_in' signal
 user_logged_in.connect(send_mail_after_guest_login)

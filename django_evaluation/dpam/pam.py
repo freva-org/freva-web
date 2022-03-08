@@ -9,7 +9,7 @@ a user against the Pluggable Authentication Modules (PAM) on the system.
 
 Implemented using ctypes, so no compilation is necessary.
 """
-__all__ = ['authenticate']
+__all__ = ["authenticate"]
 
 from ctypes import CDLL, POINTER, Structure, CFUNCTYPE, cast, pointer, sizeof
 from ctypes import c_void_p, c_uint, c_char_p, c_char, c_int
@@ -24,7 +24,7 @@ CALLOC.argtypes = [c_uint, c_uint]
 
 STRDUP = LIBC.strdup
 STRDUP.argstypes = [c_char_p]
-STRDUP.restype = POINTER(c_char) # NOT c_char_p !!!!
+STRDUP.restype = POINTER(c_char)  # NOT c_char_p !!!!
 
 # Various constants
 PAM_PROMPT_ECHO_OFF = 1
@@ -32,51 +32,55 @@ PAM_PROMPT_ECHO_ON = 2
 PAM_ERROR_MSG = 3
 PAM_TEXT_INFO = 4
 
+
 class PamHandle(Structure):
     """wrapper class for pam_handle_t"""
-    _fields_ = [
-            ("handle", c_void_p)
-            ]
+
+    _fields_ = [("handle", c_void_p)]
 
     def __init__(self):
         Structure.__init__(self)
         self.handle = 0
 
+
 class PamMessage(Structure):
     """wrapper class for pam_message structure"""
+
     _fields_ = [
-            ("msg_style", c_int),
-            ("msg", c_char_p),
-            ]
+        ("msg_style", c_int),
+        ("msg", c_char_p),
+    ]
 
     def __repr__(self):
         return "<PamMessage %i '%s'>" % (self.msg_style, self.msg)
 
+
 class PamResponse(Structure):
     """wrapper class for pam_response structure"""
+
     _fields_ = [
-            ("resp", c_char_p),
-            ("resp_retcode", c_int),
-            ]
+        ("resp", c_char_p),
+        ("resp_retcode", c_int),
+    ]
 
     def __repr__(self):
         return "<PamResponse %i '%s'>" % (self.resp_retcode, self.resp)
 
-CONV_FUNC = CFUNCTYPE(c_int,
-        c_int, POINTER(POINTER(PamMessage)),
-               POINTER(POINTER(PamResponse)), c_void_p)
+
+CONV_FUNC = CFUNCTYPE(
+    c_int, c_int, POINTER(POINTER(PamMessage)), POINTER(POINTER(PamResponse)), c_void_p
+)
+
 
 class PamConv(Structure):
     """wrapper class for pam_conv structure"""
-    _fields_ = [
-            ("conv", CONV_FUNC),
-            ("appdata_ptr", c_void_p)
-            ]
+
+    _fields_ = [("conv", CONV_FUNC), ("appdata_ptr", c_void_p)]
+
 
 PAM_START = LIBPAM.pam_start
 PAM_START.restype = c_int
-PAM_START.argtypes = [c_char_p, c_char_p, POINTER(PamConv),
-        POINTER(PamHandle)]
+PAM_START.argtypes = [c_char_p, c_char_p, POINTER(PamConv), POINTER(PamHandle)]
 
 PAM_AUTHENTICATE = LIBPAM.pam_authenticate
 PAM_AUTHENTICATE.restype = c_int
@@ -91,8 +95,7 @@ PAM_END.restype = c_int
 PAM_END.argtypes = [PamHandle, c_int]
 
 
-
-def authenticate(username, password, service='login',  enable_acct_mgrt=False):
+def authenticate(username, password, service="login", enable_acct_mgrt=False):
     """Returns True if the given username and password authenticate for the
     given service.  Returns False otherwise
 
@@ -137,6 +140,8 @@ def authenticate(username, password, service='login',  enable_acct_mgrt=False):
 
     return retval == 0
 
+
 if __name__ == "__main__":
     import getpass
-    print authenticate(getpass.getuser(), getpass.getpass())
+
+    print(authenticate(getpass.getuser(), getpass.getpass()))

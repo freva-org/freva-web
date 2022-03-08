@@ -17,7 +17,6 @@ class PluginNotFoundError(Exception):
 
 
 class PluginWeb(object):
-
     def __init__(self, plugin):
         self.name = plugin.__class__.__name__
         self.short_description = plugin.__class__.__short_description__
@@ -29,77 +28,106 @@ class PluginWeb(object):
 
 
 class PluginFileFieldWidget(Input):
-
     def __init__(self, *args, **kwargs):
-        self.file_extension = kwargs.pop('file_extension', None)
+        self.file_extension = kwargs.pop("file_extension", None)
         super(PluginFileFieldWidget, self).__init__(*args, **kwargs)
 
     def render(self, name, value, attrs=None, renderer=None, **kwargs):
         if value is not None and type(value) == list:
             value = PrintableList(value)
-        return loader.render_to_string('plugins/filefield.html', {'name': name, 'value': value, 'id': attrs['id'], 'attr': attrs, 'file_extension': self.file_extension})
+        return loader.render_to_string(
+            "plugins/filefield.html",
+            {
+                "name": name,
+                "value": value,
+                "id": attrs["id"],
+                "attr": attrs,
+                "file_extension": self.file_extension,
+            },
+        )
 
 
 class PluginSelectFieldWidget(Input):
     def __init__(self, *args, **kwargs):
-        self.options = kwargs.pop('options')
+        self.options = kwargs.pop("options")
         import operator
+
         self.sorted_options = sorted(self.options.items(), key=operator.itemgetter(1))
         super(PluginSelectFieldWidget, self).__init__(*args, **kwargs)
 
     def render(self, name, value, attrs=None, renderer=None):
-        return loader.render_to_string('plugins/selectfield.html', {'name': name, 'value': value, 'attrs': attrs,
-                                                                    'options': self.sorted_options})
+        return loader.render_to_string(
+            "plugins/selectfield.html",
+            {
+                "name": name,
+                "value": value,
+                "attrs": attrs,
+                "options": self.sorted_options,
+            },
+        )
 
 
 class SolrFieldWidget(Input):
-
     def __init__(self, *args, **kwargs):
-        self.facet = kwargs.pop('facet')
-        self.group = kwargs.pop('group')
-        self.multiple = kwargs.pop('multiple')
-        self.predefined_facets = kwargs.pop('predefined_facets')
-        self.editable = kwargs.pop('editable')
+        self.facet = kwargs.pop("facet")
+        self.group = kwargs.pop("group")
+        self.multiple = kwargs.pop("multiple")
+        self.predefined_facets = kwargs.pop("predefined_facets")
+        self.editable = kwargs.pop("editable")
         super(SolrFieldWidget, self).__init__(*args, **kwargs)
 
     def render(self, name, value, attrs=None, choices=(), renderer=None):
-        return loader.render_to_string('plugins/solrfield.html', {'name': name, 'value': value, 'attrs': attrs,
-                                                                  'facet': self.facet, 'group': self.group,
-                                                                  'multiple': self.multiple,
-                                                                  'predefined_facets': self.predefined_facets,
-                                                                  'editable': self.editable})
+        return loader.render_to_string(
+            "plugins/solrfield.html",
+            {
+                "name": name,
+                "value": value,
+                "attrs": attrs,
+                "facet": self.facet,
+                "group": self.group,
+                "multiple": self.multiple,
+                "predefined_facets": self.predefined_facets,
+                "editable": self.editable,
+            },
+        )
 
 
 class PluginRangeFieldWidget(Input):
     def render(self, name, value, attrs=None, renderer=None):
         if value is not None and type(value) == list:
             value = PrintableList(value)
-        return loader.render_to_string('plugins/rangefield.html', {'name': name, 'value': value, 'id': attrs['id']})
+        return loader.render_to_string(
+            "plugins/rangefield.html", {"name": name, "value": value, "id": attrs["id"]}
+        )
 
 
 class PasswordField(forms.CharField):
     def __init__(self, *args, **kwargs):
-        widget = kwargs.get('widget', forms.HiddenInput)
+        widget = kwargs.get("widget", forms.HiddenInput)
         super(PasswordField, self).__init__(widget=widget)
 
-        self._user = kwargs.pop('uid')
+        self._user = kwargs.pop("uid")
 
     def validate(self, value):
-        password_type = getattr(settings, 'FORM_PASSWORD_CHECK', 'LDAP')
-        if password_type == 'LDAP':
+        password_type = getattr(settings, "FORM_PASSWORD_CHECK", "LDAP")
+        if password_type == "LDAP":
             u = auth.authenticate(username=self._user, password=value)
             if u is None:
-                raise exceptions.ValidationError('You\'ve entered a wrong password!', code='invalid_password')
-        elif password_type == 'ssh':
+                raise exceptions.ValidationError(
+                    "You've entered a wrong password!", code="invalid_password"
+                )
+        elif password_type == "ssh":
             try:
-                ssh_call(self._user, value, 'ls', settings.SCHEDULER_HOSTS)
+                ssh_call(self._user, value, "ls", settings.SCHEDULER_HOSTS)
             except:
-                raise exceptions.ValidationError('You\'ve entered a wrong password!', code='invalid_password')
+                raise exceptions.ValidationError(
+                    "You've entered a wrong password!", code="invalid_password"
+                )
         super(PasswordField, self).validate(value)
 
 
 class PluginForm(forms.Form):
-    caption_standard_names = ['caption', 'result_caption', 'web_caption', 'my_caption']
+    caption_standard_names = ["caption", "result_caption", "web_caption", "my_caption"]
 
     def get_caption_field(self, tool):
         # the caption field should not have a fixed name
@@ -113,19 +141,19 @@ class PluginForm(forms.Form):
                 self.caption_field_name = self.caption_standard_names[captionindex]
                 captionindex += 1
             else:
-                self.caption_field_name = '_' + self.caption_field_name
+                self.caption_field_name = "_" + self.caption_field_name
             # check whether the caption name appear in the list of parameters
             criticalcaption = self.caption_field_name in tool.__parameters__
 
     def __init__(self, *args, **kwargs):
-        tool = kwargs.pop('tool')
-        uid = kwargs.pop('uid')
-        self._workdir =  Path(pm.config.get('base_dir_location'))
+        tool = kwargs.pop("tool")
+        uid = kwargs.pop("uid")
+        self._workdir = Path(pm.config.get("base_dir_location"))
 
         super(PluginForm, self).__init__(*args, **kwargs)
 
         # set the password field
-        self.fields['password_hidden'] = PasswordField(uid=uid)
+        self.fields["password_hidden"] = PasswordField(uid=uid)
 
         self.get_caption_field(tool)
 
@@ -142,49 +170,82 @@ class PluginForm(forms.Form):
             help_str = param.help
             help_str = "<br />".join(help_str.split("\n"))
             if isinstance(param, parameters.Bool):
-                self.fields[key] = forms.BooleanField(required=required, help_text=help_str,
-                                                      widget=forms.RadioSelect(
-                                                          choices=(('False', 'False'), ('True', 'True'))))
+                self.fields[key] = forms.BooleanField(
+                    required=required,
+                    help_text=help_str,
+                    widget=forms.RadioSelect(
+                        choices=(("False", "False"), ("True", "True"))
+                    ),
+                )
             elif isinstance(param, parameters.Range):
-                self.fields[key] = forms.CharField(required=required, help_text=help_str,
-                                                   widget=PluginRangeFieldWidget({}))
+                self.fields[key] = forms.CharField(
+                    required=required,
+                    help_text=help_str,
+                    widget=PluginRangeFieldWidget({}),
+                )
             elif isinstance(param, parameters.SelectField):
-                self.fields[key] = forms.CharField(required=required, help_text=help_str,
-                                                   widget=PluginSelectFieldWidget(options=param.options))
+                self.fields[key] = forms.CharField(
+                    required=required,
+                    help_text=help_str,
+                    widget=PluginSelectFieldWidget(options=param.options),
+                )
             elif isinstance(param, parameters.SolrField):
-                self.fields[key] = forms.CharField(required=required, help_text=help_str,
-                                                   widget=SolrFieldWidget(
-                                                       facet=param.facet, group=param.group, editable=param.editable,
-                                                       multiple=param.multiple,
-                                                       predefined_facets=param.predefined_facets))
+                self.fields[key] = forms.CharField(
+                    required=required,
+                    help_text=help_str,
+                    widget=SolrFieldWidget(
+                        facet=param.facet,
+                        group=param.group,
+                        editable=param.editable,
+                        multiple=param.multiple,
+                        predefined_facets=param.predefined_facets,
+                    ),
+                )
             elif param_subtype == int:
-                self.fields[key] = forms.IntegerField(required=required, help_text=help_str)
+                self.fields[key] = forms.IntegerField(
+                    required=required, help_text=help_str
+                )
             elif param_subtype == float:
-                self.fields[key] = forms.FloatField(required=required, help_text=help_str)
+                self.fields[key] = forms.FloatField(
+                    required=required, help_text=help_str
+                )
             elif isinstance(param, parameters.File):
-                self.fields[key] = forms.CharField(required=required, help_text=help_str,
-                                                   widget=PluginFileFieldWidget(file_extension=param.file_extension))
+                self.fields[key] = forms.CharField(
+                    required=required,
+                    help_text=help_str,
+                    widget=PluginFileFieldWidget(file_extension=param.file_extension),
+                )
             elif isinstance(param, parameters.Directory):
                 if self.initial.get(key, None):
                     rel_path = Path(self.initial[key]).relative_to(self._workdir)
                     add_warn = '<br><span style="color:red">Warning! This is not your directory.</span>'
                     if find_owner(self.initial[key]) == uid or rel_path.parts[0] == uid:
-                        add_warn = ''
+                        add_warn = ""
                     help_str += add_warn
-                self.fields[key] = forms.CharField(required=required, help_text=help_str)
+                self.fields[key] = forms.CharField(
+                    required=required, help_text=help_str
+                )
             else:
-                self.fields[key] = forms.CharField(required=required, help_text=help_str)
+                self.fields[key] = forms.CharField(
+                    required=required, help_text=help_str
+                )
 
         # Add the caption field, now
-        help_str = 'An additional caption to be displayed with the results.'
+        help_str = "An additional caption to be displayed with the results."
         if self.caption_field_name != self.caption_standard_names[0]:
-            help_str += " Other tools name this field " + self.caption_standard_names[0] + ", this might be confusing."
-        self.fields[self.caption_field_name] = forms.CharField(required=False, help_text=help_str)
+            help_str += (
+                " Other tools name this field "
+                + self.caption_standard_names[0]
+                + ", this might be confusing."
+            )
+        self.fields[self.caption_field_name] = forms.CharField(
+            required=False, help_text=help_str
+        )
 
         # add the "unique_output" field
-        self.fields['unique_output_id'] = forms.BooleanField(
+        self.fields["unique_output_id"] = forms.BooleanField(
             required=False,
-            help_text='If true append the freva run id to every output folder',
-            widget=forms.RadioSelect(choices=(('False', 'False'), ('True', 'True'))),
-            initial=True
+            help_text="If true append the freva run id to every output folder",
+            widget=forms.RadioSelect(choices=(("False", "False"), ("True", "True"))),
+            initial=True,
         )

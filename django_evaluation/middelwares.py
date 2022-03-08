@@ -8,22 +8,24 @@ except ImportError:
     from django.utils._threading_local import local
 
 _thread_locals = local()
+
+
 class MiddlewareMixin(MiddlewareMixin):
     def __init__(self, get_response=None):
         super(MiddlewareMixin, self).__init__(get_response=get_response)
 
     def __call__(self, request):
         response = None
-        if hasattr(self, 'process_request'):
+        if hasattr(self, "process_request"):
             response = self.process_request(request)
         if not response:
             response = self.get_response(request)
-        if hasattr(self, 'process_response'):
+        if hasattr(self, "process_response"):
             response = self.process_response(request, response)
         return response
 
-class ReloadPluginsMiddleware(MiddlewareMixin):
 
+class ReloadPluginsMiddleware(MiddlewareMixin):
     def process_request(self, request):
         pm.reload_plugins(request.user.username)
 
@@ -36,15 +38,13 @@ class GlobalUserMiddleware(MiddlewareMixin):
         from app_name.middleware import get_current_user
         user = get_current_user()
     """
+
     def process_request(self, request):
-        setattr(
-            _thread_locals,
-            'user_{0}'.format(current_thread().name),
-            request.user)
+        setattr(_thread_locals, "user_{0}".format(current_thread().name), request.user)
 
     def process_response(self, request, response):
 
-        key = 'user_{0}'.format(current_thread().name)
+        key = "user_{0}".format(current_thread().name)
 
         if not hasattr(_thread_locals, key):
             return response
@@ -55,8 +55,4 @@ class GlobalUserMiddleware(MiddlewareMixin):
 
 
 def get_current_user():
-    return getattr(
-        _thread_locals,
-        'user_{0}'.format(current_thread().name),
-        None
-    )
+    return getattr(_thread_locals, "user_{0}".format(current_thread().name), None)

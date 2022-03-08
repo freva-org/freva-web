@@ -182,7 +182,7 @@ class PluginList extends React.Component {
           <Col md={6}><h2>Plugins</h2></Col>
           <Col md={6} className="pt-2">
             {
-              !currentUser.isGuest ?
+              !currentUser.isGuest && currentUser.home ?
                 <Button
                   variant="info" className="float-end"
                   onClick={() => (exported ? this.props.dispatch(exportPlugin()) : this.setState({ showModal: true }))}

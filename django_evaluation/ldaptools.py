@@ -14,7 +14,7 @@ class LdapUserInformation(object):
     _con = None
     miklip_user = []
     user_info = []
-    user_info_dict = {}   
+    user_info_dict = {}
 
     @staticmethod
     def _establish_ldap_connection():
@@ -33,7 +33,6 @@ class LdapUserInformation(object):
                 continue
             return con
         raise error
-
 
     def _connect_to_ldap(self):
         """
@@ -64,21 +63,21 @@ class LdapUserInformation(object):
         Returns the user info and loads it whenever necessary
         """
         if not self.user_info:
-            caches['default']
-            self.user_info = cache.get('LDAP_user_info')
+            caches["default"]
+            self.user_info = cache.get("LDAP_user_info")
 
             if not self.user_info:
                 self.load_from_ldap()
-                cache.set('LDAP_user_info', self.user_info, 3600)
+                cache.set("LDAP_user_info", self.user_info, 3600)
         if uid:
             if not self.user_info_dict:
-                caches['default']
-                self.user_info_dict = cache.get('LDAP_user_info_dict')
+                caches["default"]
+                self.user_info_dict = cache.get("LDAP_user_info_dict")
                 if not self.user_info_dict:
                     self.user_info_dict = {}
                     for user in self.user_info:
                         self.user_info_dict[user[0]] = user
-                    cache.set('LDAP_user_info_dict', self.user_info_dict, 3600)
+                    cache.set("LDAP_user_info_dict", self.user_info_dict, 3600)
             return self.user_info_dict.get(uid, None)
         else:
             return self.user_info
@@ -93,14 +92,12 @@ class LdapUserInformation(object):
 
 
 class FUUserInformation(LdapUserInformation):
-
     def load_from_ldap(self):
         # search all users belonging
         con = self.connection
-        res = con.search_s(settings.LDAP_GROUP_BASE,
-                          ldap.SCOPE_SUBTREE,
-                          'objectClass=person'
-                          )
+        res = con.search_s(
+            settings.LDAP_GROUP_BASE, ldap.SCOPE_SUBTREE, "objectClass=person"
+        )
 
         self.miklip_user = []
         user_info = []
@@ -108,26 +105,26 @@ class FUUserInformation(LdapUserInformation):
 
         # fill the users list
         for user in user_list:
-            uid = user[1]['uid'][0]
-            name = user[1]['cn'][0].split(' ')
+            uid = user[1]["uid"][0]
+            name = user[1]["cn"][0].split(" ")
             try:
                 prename = name[1]
             except:
-                prename = ''
-            try: 
+                prename = ""
+            try:
                 lastname = name[0]
             except:
-                lastname = ''
-            mail = user[1].get('mail', None)[0]
-            gecos = user[1].get('gecos', None)
+                lastname = ""
+            mail = user[1].get("mail", None)[0]
+            gecos = user[1].get("gecos", None)
 
             if mail:
                 email = mail
                 user_info.append((uid, prename, lastname, email))
             elif gecos:
-                tmp = gecos[0].split(',')
+                tmp = gecos[0].split(",")
                 for val in tmp:
-                    if '@' in val:
+                    if "@" in val:
                         email = val
                         user_info.append((uid, prename, lastname, email))
                         break
@@ -140,23 +137,23 @@ class DWDUserInformation(LdapUserInformation):
     """
     A classt to get additional User information at DWD
     """
+
     def load_from_ldap(self):
         # search all users belonging
         con = self.connection
-        res = con.search_s(settings.LDAP_GROUP_BASE,
-                          ldap.SCOPE_SUBTREE,
-                          'objectClass=Person'
-                          )
+        res = con.search_s(
+            settings.LDAP_GROUP_BASE, ldap.SCOPE_SUBTREE, "objectClass=Person"
+        )
         self.miklip_user = []
         user_info = []
         user_list = res
 
         # fill the users list
         for user in user_list:
-            uid = user[1].get('uid', [None])[0]
-            lastname = user[1].get('sn', [None])[0]
-            prename = user[1].get('givenName', [None])[0]
-            mail = user[1].get('dwdmailRoutingAddress', [None])[0]
+            uid = user[1].get("uid", [None])[0]
+            lastname = user[1].get("sn", [None])[0]
+            prename = user[1].get("givenName", [None])[0]
+            mail = user[1].get("dwdmailRoutingAddress", [None])[0]
 
             if mail and uid:
                 user_info.append((uid, lastname, prename, mail))
@@ -165,28 +162,30 @@ class DWDUserInformation(LdapUserInformation):
         return self.user_info
 
 
-
 class MiklipUserInformation(LdapUserInformation):
     """
     A class to access additional LDAP information using the
     agent user and no binding with the logged in user
-    """       
-    ldap_keys = ['sn', 'givenName', 'uid', 'mail', 'mailForwardingAddress']    
+    """
+
+    ldap_keys = ["sn", "givenName", "uid", "mail", "mailForwardingAddress"]
 
     def load_from_ldap(self):
         """
         Loads the miklip user ids and the info belonging to the user
         """
         con = self.connection
-        res = con.search_s(settings.LDAP_GROUP_BASE,
-                          ldap.SCOPE_SUBTREE,
-                          attrlist=['member'],
-                          filterstr=settings.LDAP_MIKLIP_GROUP_FILTER)
+        res = con.search_s(
+            settings.LDAP_GROUP_BASE,
+            ldap.SCOPE_SUBTREE,
+            attrlist=["member"],
+            filterstr=settings.LDAP_MIKLIP_GROUP_FILTER,
+        )
         self.miklip_user = []
         user_info = []
         # test print of the first search
-        user_list = res[0][1]['member']
-             
+        user_list = res[0][1]["member"]
+
         # fill the users list
         for user in user_list:
             # look up the user entries in the LDAP System
@@ -195,43 +194,54 @@ class MiklipUserInformation(LdapUserInformation):
                 uid = user.decode().split(",")[0]
             except AttributeError:
                 uid = user.split(",")[0]
-            res = con.search_s(settings.LDAP_USER_BASE,
-                              ldap.SCOPE_SUBTREE,
-                              attrlist=self.ldap_keys,
-                              filterstr=f'{uid}') 
+            res = con.search_s(
+                settings.LDAP_USER_BASE,
+                ldap.SCOPE_SUBTREE,
+                attrlist=self.ldap_keys,
+                filterstr=f"{uid}",
+            )
             if res:
                 try:
-                    res_str = {k: list(map(bytes.decode, v)) for (k, v) in res[0][1].items()} 
+                    res_str = {
+                        k: list(map(bytes.decode, v)) for (k, v) in res[0][1].items()
+                    }
                 except TypeError:
-                    res_str = {k: v for (k, v) in res[0][1].items()} 
-                mail = res_str.get('mail', None)
-                forward = res_str.get('mailForwardingAddress', None)
+                    res_str = {k: v for (k, v) in res[0][1].items()}
+                mail = res_str.get("mail", None)
+                forward = res_str.get("mailForwardingAddress", None)
                 user_id = uid.split("=")[-1]
                 # user info needs elements user_id, first_name, last_name, email
                 if forward:
-                    user_info.append((user_id,
-                                      ' '.join(res_str.get('sn','')),
-                                      ' '.join(res_str.get('givenName', '')),
-                                      forward[-1],))
+                    user_info.append(
+                        (
+                            user_id,
+                            " ".join(res_str.get("sn", "")),
+                            " ".join(res_str.get("givenName", "")),
+                            forward[-1],
+                        )
+                    )
                 elif mail:
-                    user_info.append((user_id,
-                                      ' '.join(res_str.get('sn','')),
-                                      ' '.join(res_str.get('givenName', '')),
-                                      mail[-1],))
+                    user_info.append(
+                        (
+                            user_id,
+                            " ".join(res_str.get("sn", "")),
+                            " ".join(res_str.get("givenName", "")),
+                            mail[-1],
+                        )
+                    )
         self.user_info = sorted(user_info, key=lambda tup: tup[1])
         return self.user_info
 
 
 class UCARUserInformation(LdapUserInformation):
-
     def load_from_ldap(self):
-        info = grp.getgrnam('freva')
+        info = grp.getgrnam("freva")
         users = info.gr_mem
         user_info = []
         for user in users:
             tmp = pwd.getpwnam(user)
-            name = tmp.pw_gecos.split(' ')
-            user_info.append((user, name[1], name[0], '%s@ucar.edu' % user))                
+            name = tmp.pw_gecos.split(" ")
+            user_info.append((user, name[1], name[0], "%s@ucar.edu" % user))
         self.user_info = sorted(user_info, key=lambda tup: tup[1])
         return self.user_info
 
@@ -241,14 +251,17 @@ def get_ldap_object():
     Returns an instance of the ldap class specified in django settings
     """
     try:
-        parts = settings.LDAP_MODEL.split('.')
+        parts = settings.LDAP_MODEL.split(".")
         model_name = parts[-1]
-        module = '.'.join(parts[:-1])
+        module = ".".join(parts[:-1])
     except (ValueError, AttributeError):
-        raise ImproperlyConfigured('LDAP_MODEL must be of the form '
-                                   '"module.model_name" (i.e. django_evaluation.ldaptools.MiklipUserInformation')
+        raise ImproperlyConfigured(
+            "LDAP_MODEL must be of the form "
+            '"module.model_name" (i.e. django_evaluation.ldaptools.MiklipUserInformation'
+        )
     m = importlib.import_module(module)
     return getattr(m, model_name)()
+
 
 # This is for backward compatibility
 miklip_user_information = get_ldap_object

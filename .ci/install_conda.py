@@ -39,6 +39,9 @@ def parse_args() -> argparse.Namespace:
         "install_prefix", type=Path, help="Install prefix for the environment."
     )
     ap.add_argument(
+        "conda_env_file", type=Path, help="Path to the conda environment file."
+    )
+    ap.add_argument(
         "--arch",
         type=str,
         default="Linux-x86_64",
@@ -97,18 +100,13 @@ class CondaInstaller:
         self.run_cmd(cmd)
         return tmp_env / "bin" / "conda"
 
-    @property
-    def conda_env_file(self) -> Path:
-        """Return the conda environement file."""
-        return Path(__file__).parent.parent / "conda-env.yml"
-
-    def create_conda(self, install_prefix: Path) -> None:
+    def create_conda(self, install_prefix: Path, conda_env_file: Path) -> None:
         """Create the conda environment."""
         with TemporaryDirectory(prefix="conda") as td:
             conda_exec_path = self.download_temp_conda(td)
             cmd = (
                 f"{conda_exec_path} env create -q -p {install_prefix} "
-                f"-f {self.conda_env_file} --force"
+                f"-f {conda_env_file.expanduser().absolute()} --force"
             )
             logger.info(f"Creating conda environment:\n{cmd}")
             self.run_cmd(cmd)
@@ -123,4 +121,4 @@ class CondaInstaller:
 if __name__ == "__main__":
     args = parse_args()
     Inst = CondaInstaller(arch=args.arch, silent=args.silent)
-    Inst.create_conda(args.install_prefix)
+    Inst.create_conda(args.install_prefix, args.conda_env_file)

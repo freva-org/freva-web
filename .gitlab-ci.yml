@@ -9,7 +9,7 @@ test_latest:
   before_script:
     - /usr/bin/python3 .ci/install_conda.py /opt/anaconda3 -s
   script:
-    - /opt/anaconda3/bin/conda run -n $CONDA_ENV make lint
-    - /opt/anaconda3/bin/conda run -n $CONDA_ENV make tests
+    - /opt/anaconda3/bin/conda run make lint
+    - /opt/anaconda3/bin/conda run make tests
   artifacts:
     when: always

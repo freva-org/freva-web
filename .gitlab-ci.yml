@@ -4,15 +4,12 @@ stages:
 test_latest:
   stage: test
   image: registry.gitlab.dkrz.de/freva/evaluation_system/freva_build:freva-dev
-  variables:
-    CONDA: "Miniconda3-latest"
   tags:
     - docker, specific
   before_script:
-    - conda env create -f conda-env.yml
+    - /usr/bin/python3 .ci/install_conda.py /tmp/anaconda3 conda-env.yml -s
   script:
-    - conda run -n $CONDA_ENV make lint
-    # Do the unit tests
-    # - /tmp/freva_web/bin/python -m pytest -v tests
+    - /tmp/anaconda3/bin/conda run make lint
+    - /tmp/anaconda3/bin/conda run make tests
   artifacts:
     when: always

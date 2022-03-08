@@ -9,6 +9,7 @@ conda/*
 evaluation_system.conf
 
 .*
+!.ci
 !.gitignore
 !.envrc
 !.gitlab-ci.yml

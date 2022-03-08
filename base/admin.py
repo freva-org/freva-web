@@ -9,15 +9,17 @@ admin.site.unregister(User)
 
 class CustomUserAdmin(UserAdmin):
     save_on_top = True
-    list_display = ('username', 'email', 'is_staff', 'date_joined', 'last_login')
-    date_hierachy = 'date_joined'
-    ordering = ['-date_joined']	
+    list_display = ("username", "email", "is_staff", "date_joined", "last_login")
+    date_hierachy = "date_joined"
+    ordering = ["-date_joined"]
+
 
 admin.site.register(User, CustomUserAdmin)
 
 
 class PermissionAdmin(admin.ModelAdmin):
-    
-    list_display = ('id', 'name', 'codename')
-    
+
+    list_display = ("id", "name", "codename")
+
+
 admin.site.register(Permission, PermissionAdmin)

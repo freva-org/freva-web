@@ -3,5 +3,5 @@ import externaluser.views
 
 
 urlpatterns = [
-    url(r'^register/$', externaluser.views.external_register, name='external_register')
+    url(r"^register/$", externaluser.views.external_register, name="external_register")
 ]

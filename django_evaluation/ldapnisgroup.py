@@ -10,7 +10,7 @@ class LDAPNisGroupType(LDAPGroupType):
     the DKRZ architecture based on NIS
     """
 
-    def __init__(self, name_attr='cn'):
+    def __init__(self, name_attr="cn"):
         """
         This constructor calls the constructor of the parent class only
         """
@@ -36,17 +36,17 @@ class LDAPNisGroupType(LDAPGroupType):
 
         result = []
 
-        SEARCH_BASE = 'ou=netgroup,o=ldap,o=root'
-        uid = str(ldap_user.attrs['uid'][0])
-        ldap_filter = '(nisNetgroupTriple=\(,%s,\))' % uid
-        attrs = ['cn']
+        SEARCH_BASE = "ou=netgroup,o=ldap,o=root"
+        uid = str(ldap_user.attrs["uid"][0])
+        ldap_filter = "(nisNetgroupTriple=\(,%s,\))" % uid
+        attrs = ["cn"]
 
-        s = ldap_user.connection.search_s(SEARCH_BASE, ldap.SCOPE_SUBTREE,
-                                           ldap_filter,
-                                           attrs)
+        s = ldap_user.connection.search_s(
+            SEARCH_BASE, ldap.SCOPE_SUBTREE, ldap_filter, attrs
+        )
 
         for entry in s:
-            result.append(entry[1]['cn'][0])
+            result.append(entry[1]["cn"][0])
 
         django_groups = []
         for g in Group.objects.all():
@@ -67,18 +67,17 @@ class LDAPNisGroupType(LDAPGroupType):
         for group_dn in the results.
         """
 
-        SEARCH_BASE = 'ou=netgroup,o=ldap,o=root'
-        uid = str(ldap_user.attrs['uid'][0])
-        ldap_filter = '(&(nisNetgroupTriple=\(,%s,\))(cn=%s))' % (uid, group_dn)
-        attrs = ['cn']
+        SEARCH_BASE = "ou=netgroup,o=ldap,o=root"
+        uid = str(ldap_user.attrs["uid"][0])
+        ldap_filter = "(&(nisNetgroupTriple=\(,%s,\))(cn=%s))" % (uid, group_dn)
+        attrs = ["cn"]
 
         try:
-            s = ldap_user.connection.search_s(SEARCH_BASE,
-                                               ldap.SCOPE_SUBTREE,
-                                               ldap_filter,
-                                               attrs)
-        except Exception, e:
-            raise Http404, str(e)
+            s = ldap_user.connection.search_s(
+                SEARCH_BASE, ldap.SCOPE_SUBTREE, ldap_filter, attrs
+            )
+        except Exception as e:
+            raise Http404(str(e))
 
         return len(s) > 0
 

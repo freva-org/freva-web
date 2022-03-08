@@ -24,7 +24,9 @@ class PluginSerializer(serializers.Serializer):
 
     def get_docpage(self, plugin):
         try:
-            docu_flatpage = FlatPage.objects.get(title__iexact=plugin.__class__.__name__)
+            docu_flatpage = FlatPage.objects.get(
+                title__iexact=plugin.__class__.__name__
+            )
             return docu_flatpage.url
         except FlatPage.DoesNotExist:
             return None

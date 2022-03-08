@@ -23,6 +23,7 @@ dependencies:
       - types-toml
       - hurry.filesize
       - xarray
+      - git+https://gitlab.dkrz.de/freva/evaluation_system.git
   - sphinx
   - pymysql
   - imagemagick
@@ -47,6 +48,7 @@ dependencies:
   - django-nose
   - python-ldap
   - mock
+  - nodejs
   - pygtail
   - requests
   - toml

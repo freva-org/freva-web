@@ -16,6 +16,7 @@ framework.
 import os
 import sys
 import site
+
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__) + "../../")
 
 
@@ -24,12 +25,12 @@ PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__) + "../../")
 
 # Remember original sys.path.
 prev_sys_path = list(sys.path)
-ALLDIRS = ['/usr/local/conda/lib/python3.9/site-packages']
+ALLDIRS = ["/usr/local/conda/lib/python3.9/site-packages"]
 # Remember original sys.path.
 prev_sys_path = list(sys.path)
 # Add each new site-packages directory.
 for directory in ALLDIRS:
-  site.addsitedir(directory)
+    site.addsitedir(directory)
 
 # Reorder sys.path so the new directories are at the front.
 new_sys_path = []
@@ -46,4 +47,5 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "django_evaluation.settings")
 # file. This includes Django's development server, if the WSGI_APPLICATION
 # setting points here.
 from django.core.wsgi import get_wsgi_application
+
 application = get_wsgi_application()

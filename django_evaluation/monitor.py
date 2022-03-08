@@ -24,15 +24,15 @@ def _restart(path=None):
     a super-user.
     """
     _queue.put(True)
-    
+
     if path is None:
-        prefix = '(pid=%d)' % os.getpid()
-        print >> sys.stderr, 'Restart process %s by super-user.' % prefix
+        prefix = "(pid=%d)" % os.getpid()
+        print >> sys.stderr, "Restart process %s by super-user." % prefix
     else:
-        prefix = 'monitor (pid=%d):' % os.getpid()
-        print >> sys.stderr, '%s Change detected to \'%s\'.' % (prefix, path)
-        print >> sys.stderr, '%s Triggering process restart.' % prefix
-        
+        prefix = "monitor (pid=%d):" % os.getpid()
+        print >> sys.stderr, "%s Change detected to '%s'." % (prefix, path)
+        print >> sys.stderr, "%s Triggering process restart." % prefix
+
     os.kill(os.getpid(), signal.SIGINT)
 
 
@@ -74,12 +74,12 @@ def _monitor():
         # Check modification times on all files in sys.modules.
 
         for module in sys.modules.values():
-            if not hasattr(module, '__file__'):
+            if not hasattr(module, "__file__"):
                 continue
-            path = getattr(module, '__file__')
+            path = getattr(module, "__file__")
             if not path:
                 continue
-            if os.path.splitext(path)[1] in ['.pyc', '.pyo', '.pyd']:
+            if os.path.splitext(path)[1] in [".pyc", ".pyo", ".pyd"]:
                 path = path[:-1]
             if _modified(path):
                 return _restart(path)
@@ -98,6 +98,7 @@ def _monitor():
         except:
             pass
 
+
 _thread = threading.Thread(target=_monitor)
 _thread.setDaemon(True)
 
@@ -111,6 +112,7 @@ def _exiting():
         _thread.join()
     except RuntimeError:
         pass
+
 
 atexit.register(_exiting)
 
@@ -128,8 +130,8 @@ def start(interval=1.0):
     global _running
     _lock.acquire()
     if not _running:
-        prefix = 'monitor (pid=%d):' % os.getpid()
-        sys.stderr.write('%s Starting change monitor.\n' % prefix)
+        prefix = "monitor (pid=%d):" % os.getpid()
+        sys.stderr.write("%s Starting change monitor.\n" % prefix)
         _running = True
         _thread.start()
     _lock.release()

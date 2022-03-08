@@ -14,19 +14,19 @@ def settings_val(value):
 
 @register.simple_tag
 def setting_to_list(value):
-    
+
     setting_value = getattr(settings, value)
-    result = ''
+    result = ""
     for val in setting_value:
-        result += '<li>%s' % val
+        result += "<li>%s" % val
     return result
+
 
 @register.simple_tag
 def get_menu_entries(entry):
     return getattr(settings, entry, None)
 
 
-
 @register.simple_tag
 def external_group():
-    return getattr(settings, 'EXTERNAL_GROUP', None)
+    return getattr(settings, "EXTERNAL_GROUP", None)

@@ -13,7 +13,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ("id", "username", "email", "first_name", "isGuest", "home", "scratch")
 
     def get_home(self, instance):
-        if instance.username == "guest":
+        if instance.username.lower() == "guest":
             return None
         try:
             return pwd.getpwnam(instance.username).pw_dir

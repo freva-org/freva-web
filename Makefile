@@ -1,3 +1,4 @@
+.PHONY: tests
 
 run:
 	python manage.py runserver
@@ -7,4 +8,7 @@ dummy-data:
 	python3 docker/solr/ingest_dummy_data.py
 
 lint:
-	black --check .
+	black -t py39 --check .
+
+tests:
+	pytest -vv $(PWD) tests/

@@ -72,12 +72,13 @@ class PluginList extends React.Component {
     return (
       <ListGroup className="mb-3" key={category + "plugins"}>
         <ListGroupItem>
-          <h3>{categoryTitle[category]}</h3>
+          <h3 className="mb-0">{categoryTitle[category]}</h3>
         </ListGroupItem>
         {
           plugins.map(val => {
             return (
               <ListGroupItem
+                className="shadow-sm"
                 action
                 onClick={
                   (e) => {

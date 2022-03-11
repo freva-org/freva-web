@@ -427,7 +427,7 @@ class Resultbrowser extends React.Component {
           {
             Object.keys(selectedFacets).length !== 0 ?
               <Col md={12}>
-                <Card>
+                <Card className="shadow-sm">
                   <a
                     className="m-3" href="#" onClick={
                       (e) => {

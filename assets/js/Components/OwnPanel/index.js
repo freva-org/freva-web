@@ -3,44 +3,35 @@ import PropTypes from "prop-types";
 import { Accordion, Button, Card, useAccordionButton } from "react-bootstrap";
 import { FaTimes } from "react-icons/fa";
 
-function CustomToggle ({ children, eventKey, collapse, removeFacet }) {
-  const decoratedOnClick = useAccordionButton(eventKey, () => {
-    collapse();
+function OwnPanel (props) {
+  const decoratedOnClick = useAccordionButton(props.eventKey, () => {
+    props.collapse();
   });
 
-  const dropFacetAndCollapse = useAccordionButton(eventKey, () => {
-    removeFacet();
-    collapse();
+  const dropFacetAndCollapse = useAccordionButton(props.eventKey, () => {
+    props.removeFacet();
+    props.collapse();
   });
 
   return (
-    <React.Fragment>
-      <Button
-        type="button"
-        variant="link"
-        className="ps-0 pe-1"
+    <Card className="my-3 shadow-sm">
+      <div
+        className="btn btn-outline-secondary border-0 p-3 rounded-top text-start card-header shadow-sm button-div"
         onClick={decoratedOnClick}
       >
-        {children}
-      </Button>
-      {removeFacet ? <Button variant="link" className="link-danger p-0 lh-1" onClick={dropFacetAndCollapse}> <FaTimes /> </Button> : null}
-    </React.Fragment>
-  );
-}
-
-CustomToggle.propTypes = {
-  collapse: PropTypes.func.isRequired,
-  eventKey: PropTypes.string.isRequired,
-  removeFacet: PropTypes.func,
-  children: PropTypes.node
-};
-
-function OwnPanel (props) {
-  return (
-    <Card className="my-3">
-      <Card.Header>
-        <CustomToggle eventKey={props.eventKey} collapse={props.collapse} removeFacet={props.removeFacet}> {props.header} </CustomToggle>
-      </Card.Header>
+        {props.header}
+        {
+          props.removeFacet ?
+            <Button
+              variant="danger"
+              className="icon-btn rounded-circle ms-1 lh-1"
+              onClick={dropFacetAndCollapse}
+            >
+              <FaTimes />
+            </Button> :
+            null
+        }
+      </div>
       <Accordion.Collapse className="p-3" eventKey={props.eventKey}>
         {props.children}
       </Accordion.Collapse>

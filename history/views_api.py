@@ -1,10 +1,9 @@
 import json
 import re
-import time
 
 from collections import Counter, OrderedDict
 from operator import itemgetter
-from datetime import datetime
+from functools import reduce
 
 from history.models import History, Result
 from rest_framework.views import APIView
@@ -49,11 +48,21 @@ class ResultFacets(APIView, FilterAbstract):
     filter_method = "iregex"
     filter_field = "configuration"
 
+    def prepare_dummy_output(self):
+        return {facet: {} for facet in self.facets}
+
+    def extend_facet_dict(self, facet_dict, facets, facet_name):
+        for i in facets:
+            facet_dict[facet_name][i] = (
+                1
+                if i.lower() not in facet_dict[facet_name]
+                else facet_dict[facet_name][i.lower()] + 1
+            )
+
     def prepare_facets(self, request, format=None):
         queryset = History.objects.all()
         queryset = queryset.filter(flag__lt=3, status__lt=2)
         params = request.query_params
-
         modRequest = {}
         for key, value in params.items():
             if key == "plugin":
@@ -69,54 +78,39 @@ class ResultFacets(APIView, FilterAbstract):
                 modRequest[key] = r'"%s([0-9]{0,1})": "%s"' % (key, value)
         queryset = self.generate_filter(queryset, modRequest)
 
-        structure = OrderedDict()
-        start = time.time()
+        facet_structure = []
         queryset = queryset.values_list("id", "tool", "configuration")
-        items_dic = []
+        filtered_results = []
 
-        start = time.time()
         for id, tool, item in queryset:
-            newItem = json.loads(item)
-            if len(set(newItem.keys()) & set(self.facets)) == 0:
+            single_result = json.loads(item)
+            if len(set(single_result.keys()) & set(self.facets)) == 0:
                 continue
-            newItem.update({"plugin": tool})
-            items_dic.append(newItem)
-        structure_temp = {}
+            single_result.update({"plugin": tool})
+            filtered_results.append(single_result)
 
+        # prepare emptyFacets;
+        temporary_facet_structure = self.prepare_dummy_output()
         # create a dictionary - tags: list of attributes
         # counts tags: total number of attributes
-        start = time.time()
-        for fac in self.facets:
-            structure[fac] = []
-            structure_temp[fac] = []
-            for item in items_dic:
-                regex = re.compile(r'"(%s)([0-9]{0,1})":' % fac)
-                matches = regex.findall(json.dumps(item))
-                matchlist = []
-                for match in matches:
-                    matchJoin = "".join(match)
-                    if item[matchJoin] is None:
-                        continue
-                    value = item[matchJoin].lower()
-                    if value not in matchlist:
-                        value = item[matchJoin].lower()
-                        if value == "\*":
-                            value = "*"
-                        structure_temp[fac].extend(
-                            [
-                                value,
-                            ]
-                        )
-                        matchlist.append(value)
-                    else:
-                        continue
-            for key, num in OrderedDict(
-                sorted(Counter(structure_temp[fac]).items())
-            ).items():
-                structure[fac].append(key)
-                structure[fac].append(num)
+        facet_set = set(self.facets)
+        for item in filtered_results:
+            for facet_name, facet_value in item.items():
+                if facet_name not in facet_set:
+                    continue
+                # cast facet_value to string in case there are some unpleasant surprises with
+                # unexcpected datatypes
+                self.extend_facet_dict(
+                    temporary_facet_structure, [str(facet_value)], facet_name
+                )
 
-        return {"data": structure, "metadata": None}
+        facet_structure = {}
+        for facet_name, facet_values in temporary_facet_structure.items():
+            facet_structure[facet_name] = []
+            for facet, count in facet_values.items():
+                facet_structure[facet_name].extend([facet, count])
+
+        return {"data": facet_structure, "metadata": None}
 
     def get(self, request, format=None):
         result = cache.get(request.get_full_path())

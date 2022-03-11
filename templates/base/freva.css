@@ -24,11 +24,11 @@ background: {{main_color}} !important;
    border-color: {{border_color}};
 }
 
-.navbar button{
+.navbar .navbar-button {
 background:{{hover_color}} !important;
 }
 
-.navbar button:hover{
+.navbar .navbar-button:hover{
 background:{{hover_color}} !important;
 }
 

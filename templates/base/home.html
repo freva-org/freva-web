@@ -40,76 +40,84 @@
     </div>
   </div>
 {% endif %}
-<div class="container">
 
 <!-- Slider (Parallax Slider) -->
-       <div class="row">
-         <div class="col-md-12">
-            <div id="da-slider" class="da-slider">
-				<div class="da-slide">
-					<h2>Start analyses</h2>
-					<p>You can easily start all analysis in the evaluation system online. Just fill out the form a click "Run".</p>
-					<div class="da-img"><img src="{{ STATIC_URL }}img/parallax/1.png" alt="image01" /></div>
-				</div>
-				<div class="da-slide">
-					<h2>View results</h2>
-					<p>When the results are ready, you can click through the plots directly on the webpage. </p>
-					<div class="da-img"><img src="{{ STATIC_URL }}img/parallax/2.png" alt="image01" /></div>
-				</div>
-				<div class="da-slide">
-					<h2>View history</h2>
-					<p>In the history section you can see all analysis you have done. You can also view and edit the configuration.</p>
-					<div class="da-img"><img src="{{ STATIC_URL }}img/parallax/3.png" alt="image01" /></div>
-				</div>
-
-				<nav class="da-arrows">
-					<span class="da-arrows-prev"></span>
-					<span class="da-arrows-next"></span>
-				</nav>
-			</div>
-        </div>
-        </div>
-            <!-- Slider ends -->
-	<div class="bor"></div>
-
-	<!-- Service starts -->
-
-            <div class="services">
-                  <div class="row">
-                     <div class="col-md-6">
-
-                        <!-- Service #1 -->
-                        <div class="service">
-                           <!-- Icon & title. Font Awesome icon used. -->
-                           <h5>{% settings_val 'HOMEPAGE_HEADING'%}</h5>
-                           <p>{% settings_val 'HOMEPAGE_TEXT'%}</p>
-                        </div>
-
-                     </div>
-                     <div class="col-md-6">
-
-                        <!-- Service #2 -->
-                        <div class="service">
-                           <!-- Icon & title. Font Awesome icon used. -->
-                           <h5>Freva - Free Evaluation System Framework</h5>
-                           <p>
-                           The Climate Informatics and Technologies research group provides a standardized data and evaluation system -
-                           developed at the DKRZ and FUB in Germany. Freva provides efficient and
-                           comprehensive access to the model data base as well as to evaluation data sets.
-                           The application system is developed as an easy to use
-                           low-end application minimizing technical requirements for users and tool developers.
-							</p>
-                        </div>
-
-                     </div>
-
-                  </div>
-            </div>
-
-            <!-- Serivce ends -->
-
-
+<div id="home-carousel" class="carousel slide mb-3 shadow carousel-fade" data-bs-ride="carousel">
+  <div class="carousel-indicators">
+    <button type="button" data-bs-target="#home-carousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+    <button type="button" data-bs-target="#home-carousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
+    <button type="button" data-bs-target="#home-carousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
   </div>
+    <div class="carousel-inner">
+      <div class="carousel-item active">
+        <div class="d-flex align-items-center freva-slider freva-slider-pic1">
+          <div class="container">
+            <div class="col-xs-12 col-md-5 lead dark-transparent-textbox p-5 rounded">
+            <h1 class="display-5">Start analyses</h1>
+              You can easily start all analysis in the evaluation system online.
+              Just fill out the form a click "Run".
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="carousel-item">
+        <div class="d-flex align-items-center freva-slider freva-slider-pic2">
+          <div class="container">
+            <div class="col-xs-12 col-md-5 lead dark-transparent-textbox p-5 rounded">
+              <h1 class="display-5">View results</h1>
+              When the results are ready, you can click through the plots directly on the webpage.
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="carousel-item">
+        <div class="d-flex align-items-center freva-slider freva-slider-pic3">
+            <div class="container">
+              <div class="col-xs-12 col-md-5 lead dark-transparent-textbox p-5 rounded">
+              <h1 class="display-5">View history</h1>
+                In the history section you can see all analysis you have done.
+                You can also view and edit the configuration.
+              </div>
+            </div>
+        </div>
+      </div>
+    </div>
+    <button class="carousel-control-prev" type="button" data-bs-target="#home-carousel" data-bs-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#home-carousel" data-bs-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
+</div>
+
+<div class="container mb-3">
+  <!-- Service starts -->
+  <div class="row">
+        <!-- Service #1 -->
+        <div class="col card shadow p-3 m-3 bg-light">
+          <!-- Icon & title. Font Awesome icon used. -->
+          <h5>{% settings_val 'HOMEPAGE_HEADING'%}</h5>
+          <hr class="border-dark"/>
+          <p>{% settings_val 'HOMEPAGE_TEXT'%}</p>
+        </div>
+        <!-- Service #2 -->
+        <div class="col card shadow p-3 m-3 bg-light">
+          <!-- Icon & title. Font Awesome icon used. -->
+          <h5>Freva - Free Evaluation System Framework</h5>
+          <hr class="border-dark"/>
+          <p>
+            The Climate Informatics and Technologies research group provides a standardized data and evaluation system -
+            developed at the DKRZ and FUB in Germany. Freva provides efficient and
+            comprehensive access to the model data base as well as to evaluation data sets.
+            The application system is developed as an easy to use
+            low-end application minimizing technical requirements for users and tool developers.
+          </p>
+        </div>
+  </div>
+  <!-- Serivce ends -->
+</div>
 
   <!-- Modal Guest Dialog-->
   <div class="modal fade" id="guestModal" tabindex="-1" role="dialog" aria-labelledby="guestModal" aria-hidden="true">
@@ -120,16 +128,15 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body" id="guest_text">
-
-        	<div class="form-group">
-        		<p class="help-block">Dear Guest,</p>
-        		<p class="help-block">welcome to the MiKlip homepage!
-        		You certainly have restricted permissions and not access to all features of this homepage.
-        		</p>
-        		<p class="help-block">
+          <div class="form-group">
+            <p class="help-block">Dear Guest,</p>
+            <p class="help-block">welcome to the MiKlip homepage!
+            You certainly have restricted permissions and not access to all features of this homepage.
+            </p>
+            <p class="help-block">
                         We invite you to explore the homepage and the evaluation system. Enjoy the browsing!
-                        </p>
-			</div>
+            </p>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-primary" data-dismiss="modal">Ok</button>
@@ -137,14 +144,4 @@
       </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
   </div><!-- /.modal -->
-
-<script type="text/javascript">
-			$(function() {
-				$('#da-slider').cslider({
-					autoplay	: true,
-					interval : 6000
-				});
-
-			});
-		</script>
 {% endblock %}

@@ -1,11 +1,9 @@
 import json
 import re
 
-from collections import Counter, OrderedDict
 from operator import itemgetter
-from functools import reduce
 
-from history.models import History, Result
+from history.models import History
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.conf import settings
@@ -32,7 +30,6 @@ class FilterAbstract(object):
         }
 
     def generate_filter(self, queryset, params):
-
         if hasattr(self, "predefined_filter"):
             queryset = queryset.filter(**self.get_filter_field(self.predefined_filter))
 
@@ -41,6 +38,16 @@ class FilterAbstract(object):
                 queryset = queryset.filter(**self.get_filter_field(params[fac]))
 
         return queryset
+
+
+def prepare_facet_filter(params):
+    mod_request = {}
+    for key, value in params.items():
+        # the value we are looking for is either part of list (inside brackets and quotes)
+        # or stands by itself
+        value = f'\[.*"{value}".*\]|{value}'
+        mod_request[key] = r'"%s([0-9]{0,1})": "%s"' % (key, value)
+    return mod_request
 
 
 class ResultFacets(APIView, FilterAbstract):
@@ -60,24 +67,13 @@ class ResultFacets(APIView, FilterAbstract):
             )
 
     def prepare_facets(self, request, format=None):
-        queryset = History.objects.all()
-        queryset = queryset.filter(flag__lt=3, status__lt=2)
-        params = request.query_params
-        modRequest = {}
-        for key, value in params.items():
-            if key == "plugin":
-                queryset = queryset.filter(tool=value)
-            else:
-                value = value.replace("\\", "\\\\\\\\")
-                value = value.replace("*", "\*")
-                value = value.replace(".", "\.")
-                value = value.replace("[", "\[")
-                value = value.replace("]", "\]")
-                if value == "\*" or value == "\\\\\\\\\*":
-                    value = "(\*|\\\\\\\\\*)"
-                modRequest[key] = r'"%s([0-9]{0,1})": "%s"' % (key, value)
-        queryset = self.generate_filter(queryset, modRequest)
-
+        queryset = History.objects.filter(flag__lt=3, status__lt=2)
+        params = request.query_params.copy()
+        if "plugin" in params:
+            queryset = queryset.filter(tool=params["plugin"])
+            del params["plugin"]
+        mod_request = prepare_facet_filter(params)
+        queryset = self.generate_filter(queryset, mod_request)
         facet_structure = []
         queryset = queryset.values_list("id", "tool", "configuration")
         filtered_results = []
@@ -96,13 +92,18 @@ class ResultFacets(APIView, FilterAbstract):
         facet_set = set(self.facets)
         for item in filtered_results:
             for facet_name, facet_value in item.items():
-                if facet_name not in facet_set:
+                if facet_name not in facet_set or not facet_value:
                     continue
-                # cast facet_value to string in case there are some unpleasant surprises with
-                # unexcpected datatypes
-                self.extend_facet_dict(
-                    temporary_facet_structure, [str(facet_value)], facet_name
-                )
+                if isinstance(facet_value, list):
+                    self.extend_facet_dict(
+                        temporary_facet_structure,
+                        facet_value,
+                        facet_name,
+                    )
+                else:
+                    self.extend_facet_dict(
+                        temporary_facet_structure, [(facet_value)], facet_name
+                    )
 
         facet_structure = {}
         for facet_name, facet_values in temporary_facet_structure.items():
@@ -154,9 +155,11 @@ class ResultFiles(APIView, FilterAbstract):
         - apply offset, sortName, sortOrder and searchText on cache results
         """
 
-        queryset = History.objects.all().order_by("-timestamp")
+        queryset = History.objects.filter(flag__lt=3, status__lt=2).order_by(
+            "-timestamp"
+        )
         full_path = request.get_full_path()
-        params = request.query_params
+        params = request.query_params.copy()
 
         # filter- caching without options
         options = ["limit", "offset", "sortName", "sortOrder", "searchText"]
@@ -167,28 +170,17 @@ class ResultFiles(APIView, FilterAbstract):
             full_path = re.sub(r"&%s=(\d+|\w+)" % item, "", full_path)
 
         # new entries in database?
-        max_entry = queryset.filter(flag__lt=3, status__lt=2).order_by("id").last()
+        max_entry = queryset.filter(flag__lt=3, status__lt=2).latest("id")
         max_id = max_entry.id if max_entry else 0
         cache_max_id = cache.get("{}_{}".format(full_path, max_id), 0)
-
-        # regex are tricky - some replacements
-        mod_request = {}
-        for key, value in params.items():
-            if key == "plugin":
-                queryset = queryset.filter(tool=value)
-            else:
-                value = value.replace("\\", "\\\\\\\\")
-                value = value.replace("*", "\*")
-                value = value.replace(".", "\.")
-                value = value.replace("[", "\[")
-                value = value.replace("]", "\]")
-                if value == "\*" or value == "\\\\\\\\\*":
-                    value = "(\*|\\\\\\\\\*)"
-                mod_request[key] = r'"%s([0-9]{0,1})": "%s"' % (key, value)
 
         # append new entries
         data = cache.get(full_path, list())
         if max_id > cache_max_id or not data:
+            if "plugin" in params:
+                queryset = queryset.filter(tool=params["plugin"])
+                del params["plugin"]
+            mod_request = prepare_facet_filter(params)
             cache.set("{}_{}".format(full_path, max_id), max_id, None)
             queryset = queryset.filter(flag__lt=3, status__lt=2, id__gt=cache_max_id)
             queryset = self.generate_filter(queryset, mod_request)

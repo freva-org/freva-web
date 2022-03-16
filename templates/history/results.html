@@ -42,7 +42,13 @@
        {% if not request.user.isGuest %}
        <div class="row mb-3">
             <div class="col-md-12">
-                <a class="btn btn-primary" href="{% url 'plugins:setup' history_object.tool history_object.id%}" id="config_button">Edit configuration</a>
+                {% if is_plugin_available %}
+                    <a class="btn btn-primary" href="{% url 'plugins:setup' history_object.tool history_object.id%}" id="config_button">Edit configuration</a>
+                {% else %}
+                    <div class="alert alert-warning">
+                        This result has been produced with an user-imported plugin. Configuration changes are not possible.
+                    </div>
+                {% endif %}
                 {% if documentation %}
                     <a class="btn btn-success" href="{{documentation.url}}">Documentation</a>
                 {%endif%}

@@ -15,9 +15,8 @@
 
 @import url('style_test.css');
 
-@import url('slider.css');
 /*
- * Andrej: FML, this is a url in base/urls.py ...
- * */
+ * freva.cs is NOT a file, it is a url in base/urls.py
+ */
 @import url('/freva.cs');
 @import url('app.css');

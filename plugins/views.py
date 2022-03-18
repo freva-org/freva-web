@@ -8,6 +8,7 @@ from django.views.decorators.debug import sensitive_variables, sensitive_post_pa
 from django.views.decorators.http import require_POST
 from django.contrib.flatpages.models import FlatPage
 from django.utils.safestring import mark_safe
+from pathlib import Path
 
 import evaluation_system.api.plugin_manager as pm
 
@@ -303,16 +304,39 @@ def setup(request, plugin_name, row_id=None):
 
 @login_required()
 def dirlist(request):
-    r = ['<ul class="jqueryFileTree" style="display: none;">']
-    files = list()
-    # we can specify an ending in GET request
-    file_type = request.GET.get("file_type", "nc")
     try:
-        r = ['<ul class="jqueryFileTree" style="display: none;">']
-        d = urllib.parse.unquote(request.POST.get("dir"))
-        for f in sorted(os.listdir(d)):
+        user = User(request.user.username)
+        home_dir = user.getUserHome()
+        scratch_dir = user.getUserScratch()
+    except Exception as e:
+        # This user has no access to the underlying system and therefore
+        # must not be able to get a file listing
+        return HttpResponse(
+            '<div class="alert alert-danger">You are not allowed to see the folder listing</div>'
+        )
+
+    base_directory = Path(urllib.parse.unquote(request.POST.get("dir"))).resolve()
+
+    if not base_directory.is_relative_to(
+        home_dir
+    ) and not base_directory.is_relative_to(scratch_dir):
+        # user is trying to get a listing of a folder he is not allowed to see
+        return HttpResponse(
+            '<div class="alert alert-danger">Invalid base folder requested</div>'
+        )
+    elif not base_directory.exists():
+        return HttpResponse(
+            f'<div class="alert alert-warning">The directory {base_directory} does not exists. Please create it on a HPC login-node first</div>'
+        )
+
+    # we can specify an ending in GET request
+    files = list()
+    file_type = request.GET.get("file_type", "nc")
+    r = ['<ul class="jqueryFileTree" style="display: none;">']
+    try:
+        for f in sorted(os.listdir(base_directory)):
             if f[0] != ".":
-                ff = os.path.join(d, f)
+                ff = os.path.join(base_directory, f)
                 if os.path.isdir(ff):
                     r.append(
                         '<li class="directory collapsed"><a href="#" rel="%s/">%s</a></li>'
@@ -325,25 +349,58 @@ def dirlist(request):
                             '<li class="file ext_%s"><a href="#" rel="%s">%s</a></li>'
                             % (e, ff, f)
                         )
-        r = r + files
-        r.append("</ul>")
     except Exception as e:
         r.append("Could not load directory: %s" % str(e))
-        r.append("</ul>")
+    r = r + files
+    r.append("</ul>")
     return HttpResponse("".join(r))
 
 
 @login_required()
 def list_dir(request):
+    try:
+        user = User(request.user.username)
+        home_dir = user.getUserHome()
+        scratch_dir = user.getUserScratch()
+    except Exception as e:
+        # This user has no access to the underlying system and therefore
+        # must not be able to get a file listing
+        return HttpResponse(
+            json.dumps(
+                {
+                    "status": "You are not allowed to see the folder listing",
+                    "folders": [],
+                }
+            )
+        )
+
+    # we can specify an ending in GET request
+    base_directory = Path(urllib.parse.unquote(request.GET.get("dir"))).resolve()
+    if not base_directory.is_relative_to(
+        home_dir
+    ) and not base_directory.is_relative_to(scratch_dir):
+        # user is trying to get a listing of a folder he is not allowed to see
+        return HttpResponse(
+            json.dumps({"status": "Invalid base folder requested", "folders": []})
+        )
+    elif not base_directory.exists():
+        return HttpResponse(
+            json.dumps(
+                {
+                    "status": f"The directory {base_directory} does not exists. Please create it on a HPC login-node first",
+                    "folders": [],
+                }
+            )
+        )
+
     files = []
     folders = []
     # we can specify an ending in GET request
     file_type = request.GET.get("file_type", "pdf")
     try:
-        d = urllib.parse.unquote(request.GET.get("dir"))
-        for f in sorted(os.listdir(d)):
+        for f in sorted(os.listdir(base_directory)):
             if f[0] != ".":
-                ff = os.path.join(d, f)
+                ff = os.path.join(base_directory, f)
                 if os.path.isdir(ff):
                     folders.append(dict(type="folder", path=ff, name=f))
                 else:

@@ -96,13 +96,12 @@ class ResultFacets(APIView, FilterAbstract):
         facet_set = set(self.facets)
         for item in filtered_results:
             for facet_name, facet_value in item.items():
-                if facet_name not in facet_set:
-                    continue
-                # cast facet_value to string in case there are some unpleasant surprises with
-                # unexcpected datatypes
-                self.extend_facet_dict(
-                    temporary_facet_structure, [str(facet_value)], facet_name
-                )
+                if facet_name in facet_set:
+                    # cast facet_value to string in case there are some unpleasant surprises with
+                    # unexcpected datatypes
+                    self.extend_facet_dict(
+                        temporary_facet_structure, [str(facet_value)], facet_name
+                    )
 
         facet_structure = {}
         for facet_name, facet_values in temporary_facet_structure.items():

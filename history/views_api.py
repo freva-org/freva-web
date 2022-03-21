@@ -35,18 +35,34 @@ class FilterAbstract(object):
 
         for fac in params.keys():
             if not hasattr(self, "facets") or fac in self.facets:
-                queryset = queryset.filter(**self.get_filter_field(params[fac]))
+                for facet_value in params[fac]:
+                    queryset = queryset.filter(**self.get_filter_field(facet_value))
 
         return queryset
 
 
 def prepare_facet_filter(params):
+    """The result-browser offers a facet-like functionality
+    on the frontend by filtering JSON-configurations inside the
+    SQL-Database.
+    The facetting is based on RegEx-Filtering. prepare_facet_filter
+    creates and returns all needed RegExes per facet.
+
+    Args:
+        params (dict): search parameters which were supplied via URL.
+                       Mapping string -> list of strings
+
+    Returns:
+        dict: Mapping string -> list of strings
+    """
     mod_request = {}
-    for key, value in params.items():
-        # the value we are looking for is either part of list (inside brackets and quotes)
-        # or stands by itself
-        value = f'\[.*"{value}".*\]|{value}'
-        mod_request[key] = r'"%s([0-9]{0,1})": "%s"' % (key, value)
+    for key, facet_values in params.items():
+        mod_request[key] = []
+        for value in facet_values:
+            # the value we are looking for is either part of list (inside brackets and quotes)
+            # or stands by itself
+            value = f'(\[.*"{value}".*\])|("{value}")'
+            mod_request[key].append(r'"%s([0-9]{0,1})": %s' % (key, value))
     return mod_request
 
 
@@ -68,10 +84,15 @@ class ResultFacets(APIView, FilterAbstract):
 
     def prepare_facets(self, request, format=None):
         queryset = History.objects.filter(flag__lt=3, status__lt=2)
-        params = request.query_params.copy()
+        query_params = request.query_params
+        # query_params is not a normal dict and if you try
+        # to select a key which was defined multiple times
+        # inside the url (e.g. &variable=tas&variable=pr)
+        # it will only provide us with the last value.
+        # therefore a different approach to get all values..
+        params = {key: query_params.getlist(key) for key in query_params}
         if "plugin" in params:
-            queryset = queryset.filter(tool=params["plugin"])
-            del params["plugin"]
+            queryset = queryset.filter(tool=params["plugin"].pop()[0])
         mod_request = prepare_facet_filter(params)
         queryset = self.generate_filter(queryset, mod_request)
         facet_structure = []
@@ -92,18 +113,17 @@ class ResultFacets(APIView, FilterAbstract):
         facet_set = set(self.facets)
         for item in filtered_results:
             for facet_name, facet_value in item.items():
-                if facet_name not in facet_set or not facet_value:
-                    continue
-                if isinstance(facet_value, list):
-                    self.extend_facet_dict(
-                        temporary_facet_structure,
-                        facet_value,
-                        facet_name,
-                    )
-                else:
-                    self.extend_facet_dict(
-                        temporary_facet_structure, [(facet_value)], facet_name
-                    )
+                if facet_name in facet_set and facet_value:
+                    if isinstance(facet_value, list):
+                        self.extend_facet_dict(
+                            temporary_facet_structure,
+                            facet_value,
+                            facet_name,
+                        )
+                    else:
+                        self.extend_facet_dict(
+                            temporary_facet_structure, [str(facet_value)], facet_name
+                        )
 
         facet_structure = {}
         for facet_name, facet_values in temporary_facet_structure.items():
@@ -159,14 +179,15 @@ class ResultFiles(APIView, FilterAbstract):
             "-timestamp"
         )
         full_path = request.get_full_path()
-        params = request.query_params.copy()
+        query_params = request.query_params
+        params = {key: query_params.getlist(key) for key in query_params}
 
         # filter- caching without options
         options = ["limit", "offset", "sortName", "sortOrder", "searchText"]
         queries = {}
         for item in options:
             if item in params:
-                queries[item] = params[item]
+                queries[item] = params[item][0]
             full_path = re.sub(r"&%s=(\d+|\w+)" % item, "", full_path)
 
         # new entries in database?
@@ -178,8 +199,7 @@ class ResultFiles(APIView, FilterAbstract):
         data = cache.get(full_path, list())
         if max_id > cache_max_id or not data:
             if "plugin" in params:
-                queryset = queryset.filter(tool=params["plugin"])
-                del params["plugin"]
+                queryset = queryset.filter(tool=params["plugin"].pop()[0])
             mod_request = prepare_facet_filter(params)
             cache.set("{}_{}".format(full_path, max_id), max_id, None)
             queryset = queryset.filter(flag__lt=3, status__lt=2, id__gt=cache_max_id)

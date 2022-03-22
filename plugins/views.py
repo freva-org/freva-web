@@ -316,10 +316,10 @@ def dirlist(request):
         )
 
     base_directory = Path(urllib.parse.unquote(request.POST.get("dir"))).resolve()
-
-    if not base_directory.is_relative_to(
-        home_dir
-    ) and not base_directory.is_relative_to(scratch_dir):
+    base_dir_str = str(base_directory) + os.sep
+    if not base_dir_str.startswith(
+        os.path.abspath(home_dir) + os.sep
+    ) and not base_dir_str.startswith(os.path.abspath(scratch_dir) + os.sep):
         # user is trying to get a listing of a folder he is not allowed to see
         return HttpResponse(
             '<div class="alert alert-danger">Invalid base folder requested</div>'
@@ -376,9 +376,10 @@ def list_dir(request):
 
     # we can specify an ending in GET request
     base_directory = Path(urllib.parse.unquote(request.GET.get("dir"))).resolve()
-    if not base_directory.is_relative_to(
-        home_dir
-    ) and not base_directory.is_relative_to(scratch_dir):
+    base_dir_str = str(base_directory) + os.sep
+    if not base_dir_str.startswith(
+        os.path.abspath(home_dir) + os.sep
+    ) and not base_dir_str.startswith(os.path.abspath(scratch_dir) + os.sep):
         # user is trying to get a listing of a folder he is not allowed to see
         return HttpResponse(
             json.dumps({"status": "Invalid base folder requested", "folders": []})

@@ -29,7 +29,7 @@ class AccordionItemBody extends React.Component {
       }
       if (metadata && metadata[item]) {
         return (
-          <div className="pe-2" key={item}>
+          <div className="col-sm-6 col-md-3" key={item}>
             <OverlayTrigger overlay={<Tooltip>{metadata[item]}</Tooltip>}>
               <a
                 href="#" onClick={
@@ -44,7 +44,7 @@ class AccordionItemBody extends React.Component {
         );
       }
       return (
-        <div className="pe-2" key={item}>
+        <div className="col-sm-6 col-md-3" key={item}>
           <a
             href="#" onClick={
               (e) => {
@@ -82,7 +82,7 @@ class AccordionItemBody extends React.Component {
           className="mb-2" id="search" type="text" placeholder={`Search ${eventKey} name`}
           onChange={this.handleChange}
         />
-        <div className="d-flex justify-content-start flex-wrap">
+        <div className="row">
           {filteredItems}
         </div>
       </div>

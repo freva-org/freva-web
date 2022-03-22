@@ -70,14 +70,15 @@ class PluginList extends React.Component {
       return null;
     }
     return (
-      <ListGroup className="mb-3" key={category + "plugins"}>
-        <ListGroupItem>
-          <h3>{categoryTitle[category]}</h3>
-        </ListGroupItem>
+      <ListGroup className="mb-3 card" key={category + "plugins"}>
+        <div className="card-header">
+          <h3 className="mb-0">{categoryTitle[category]}</h3>
+        </div>
         {
           plugins.map(val => {
             return (
               <ListGroupItem
+                className="shadow-sm card-body border-0 border-bottom"
                 action
                 onClick={
                   (e) => {

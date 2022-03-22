@@ -8,14 +8,10 @@ views for the solr application
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-from django.utils.safestring import mark_safe
-from django.views.decorators.debug import sensitive_post_parameters
 
 from evaluation_system.model.solr import SolrFindFiles
 from django.conf import settings
-from paramiko import AuthenticationException
 
-from plugins.utils import ssh_call, get_scheduler_hosts
 import json
 import logging
 
@@ -32,18 +28,17 @@ def databrowser(request):
 @login_required()
 def solr_search(request):
     args = dict(request.GET)
-    latest = True
     try:
         facets = request.GET["facet"]
     except KeyError:
         facets = False
 
-    # get page and strange "_" argument
-    try:
-        page_limit = args.pop("page_limit")
-        _token = args.pop("_")
-    except KeyError:
-        page_limit = 10
+    # remove page_limit and the "_" argument
+    # from out argument list in order to iterate through
+    # it later. "_" is added by the jquery-ajax function
+    # to prevent requests from caching
+    args.pop("page_limit", None)
+    args.pop("_", None)
 
     if not request.user.has_perm("history.browse_full_data"):
         restrictions = settings.SOLR_RESTRICTIONS
@@ -124,9 +119,7 @@ def solr_search(request):
         else:
             if "experiment_prefix" in args:
                 args["experiment"] = args.pop("experiment_prefix")[0] + "*"
-            print("args nochmal", args)
             results = SolrFindFiles.facets(facets=facets, **args)
-            print("results", results)
             results = reorder_results(results)
     else:
         results = SolrFindFiles.search(_retrieve_metadata=True, **args)

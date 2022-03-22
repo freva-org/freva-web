@@ -16,8 +16,7 @@ import os
 import evaluation_system.api.plugin_manager as pm
 from evaluation_system.model.db import UserDB
 from evaluation_system.model.user import User
-from evaluation_system.misc import config
-
+from evaluation_system.misc.exceptions import PluginManagerException
 from evaluation_system.model.history.models import History, ResultTag
 from django_evaluation import settings
 from plugins.utils import ssh_call, get_scheduler_hosts
@@ -25,7 +24,6 @@ from plugins.utils import ssh_call, get_scheduler_hosts
 from history.utils import FileDict, sendmail_to_follower
 
 from django.shortcuts import get_object_or_404
-from django.core.mail import EmailMessage
 from django.db.models import Q
 from django.urls import reverse
 
@@ -66,14 +64,21 @@ class HistoryDatatable(Datatable):
         # default text and format (scheduled jobs)
         request = kwargs.get("view").request
         information = "Information to scheduled job:"
-        css_class = "class='btn btn-primary btn-sm ttbtn'"
+
+        config_disabled = ""
+        plugin = pm.get_plugins(request.user.username).get(instance.tool, None)
+        if not plugin:
+            config_disabled = "disabled"
+
+        css_class = f"class='btn btn-primary btn-sm ttbtn'"
         button_text = "Info"
 
         # change things for manually started jobs slightly
         if instance.slurm_output == "0":
             information = "Restricted information to manually started job:"
-            css_class = "class='btn btn-info btn-sm ttbtn'"
+            css_class = f"class='btn btn-info btn-sm ttbtn'"
             button_text = "Info"
+        is_plugin_available = True
 
         try:
             url = reverse("history:jobinfo", args=[instance.id])
@@ -129,7 +134,7 @@ class HistoryDatatable(Datatable):
             return escape(str(e))
 
         second_button_text = "Edit Config"
-        second_button_style = 'class="btn btn-success btn-sm"'
+        second_button_style = f'class="btn btn-success btn-sm {config_disabled}"'
 
         try:
             url = reverse("plugins:setup", args=[instance.tool, instance.id])
@@ -150,7 +155,9 @@ class HistoryDatatable(Datatable):
         ]:
             result_text = "Progress"
             second_button_text = "Cancel Job"
-            second_button_style = 'class="btn btn-danger btn-sm mybtn-cancel"'
+            second_button_style = (
+                'class="btn btn-danger btn-sm mybtn-cancel {config_disabled}"'
+            )
 
             second_button_href = 'onclick="cancelDialog.show(%i);"' % instance.id
 
@@ -335,8 +342,13 @@ def results(request, id, show_output_only=False):
     except:
         user = User()
 
-    plugin = pm.get_plugin_instance(history_object.tool, user=user)
-    developer = plugin.tool_developer
+    is_plugin_available = True
+    try:
+        plugin = pm.get_plugin_instance(history_object.tool, user=user)
+        developer = plugin.tool_developer
+    except PluginManagerException:
+        developer = None
+        is_plugin_available = False
     # check if the user has the permission to access the result
     flag = history_object.flag
 
@@ -515,6 +527,7 @@ def results(request, id, show_output_only=False):
             "notes": htag_notes,
             "follow": follow_string,
             "developer": developer,
+            "is_plugin_available": is_plugin_available,
         },
     )
 

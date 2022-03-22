@@ -1,12 +1,9 @@
 import json
 import re
-import time
 
-from collections import Counter, OrderedDict
 from operator import itemgetter
-from datetime import datetime
 
-from history.models import History, Result
+from history.models import History
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.conf import settings
@@ -33,15 +30,40 @@ class FilterAbstract(object):
         }
 
     def generate_filter(self, queryset, params):
-
         if hasattr(self, "predefined_filter"):
             queryset = queryset.filter(**self.get_filter_field(self.predefined_filter))
 
         for fac in params.keys():
             if not hasattr(self, "facets") or fac in self.facets:
-                queryset = queryset.filter(**self.get_filter_field(params[fac]))
+                for facet_value in params[fac]:
+                    queryset = queryset.filter(**self.get_filter_field(facet_value))
 
         return queryset
+
+
+def prepare_facet_filter(params):
+    """The result-browser offers a facet-like functionality
+    on the frontend by filtering JSON-configurations inside the
+    SQL-Database.
+    The facetting is based on RegEx-Filtering. prepare_facet_filter
+    creates and returns all needed RegExes per facet.
+
+    Args:
+        params (dict): search parameters which were supplied via URL.
+                       Mapping string -> list of strings
+
+    Returns:
+        dict: Mapping string -> list of strings
+    """
+    mod_request = {}
+    for key, facet_values in params.items():
+        mod_request[key] = []
+        for value in facet_values:
+            # the value we are looking for is either part of list (inside brackets and quotes)
+            # or stands by itself
+            value = f'(\[.*"{value}".*\])|("{value}")'
+            mod_request[key].append(r'"%s([0-9]{0,1})": %s' % (key, value))
+    return mod_request
 
 
 class ResultFacets(APIView, FilterAbstract):
@@ -49,74 +71,67 @@ class ResultFacets(APIView, FilterAbstract):
     filter_method = "iregex"
     filter_field = "configuration"
 
+    def prepare_dummy_output(self):
+        return {facet: {} for facet in self.facets}
+
+    def extend_facet_dict(self, facet_dict, facets, facet_name):
+        for i in facets:
+            facet_dict[facet_name][i] = (
+                1
+                if i.lower() not in facet_dict[facet_name]
+                else facet_dict[facet_name][i.lower()] + 1
+            )
+
     def prepare_facets(self, request, format=None):
-        queryset = History.objects.all()
-        queryset = queryset.filter(flag__lt=3, status__lt=2)
-        params = request.query_params
-
-        modRequest = {}
-        for key, value in params.items():
-            if key == "plugin":
-                queryset = queryset.filter(tool=value)
-            else:
-                value = value.replace("\\", "\\\\\\\\")
-                value = value.replace("*", "\*")
-                value = value.replace(".", "\.")
-                value = value.replace("[", "\[")
-                value = value.replace("]", "\]")
-                if value == "\*" or value == "\\\\\\\\\*":
-                    value = "(\*|\\\\\\\\\*)"
-                modRequest[key] = r'"%s([0-9]{0,1})": "%s"' % (key, value)
-        queryset = self.generate_filter(queryset, modRequest)
-
-        structure = OrderedDict()
-        start = time.time()
+        queryset = History.objects.filter(flag__lt=3, status__lt=2)
+        query_params = request.query_params
+        # query_params is not a normal dict and if you try
+        # to select a key which was defined multiple times
+        # inside the url (e.g. &variable=tas&variable=pr)
+        # it will only provide us with the last value.
+        # therefore a different approach to get all values..
+        params = {key: query_params.getlist(key) for key in query_params}
+        if "plugin" in params:
+            queryset = queryset.filter(tool=params["plugin"].pop()[0])
+        mod_request = prepare_facet_filter(params)
+        queryset = self.generate_filter(queryset, mod_request)
+        facet_structure = []
         queryset = queryset.values_list("id", "tool", "configuration")
-        items_dic = []
+        filtered_results = []
 
-        start = time.time()
         for id, tool, item in queryset:
-            newItem = json.loads(item)
-            if len(set(newItem.keys()) & set(self.facets)) == 0:
+            single_result = json.loads(item)
+            if len(set(single_result.keys()) & set(self.facets)) == 0:
                 continue
-            newItem.update({"plugin": tool})
-            items_dic.append(newItem)
-        structure_temp = {}
+            single_result.update({"plugin": tool})
+            filtered_results.append(single_result)
 
+        # prepare emptyFacets;
+        temporary_facet_structure = self.prepare_dummy_output()
         # create a dictionary - tags: list of attributes
         # counts tags: total number of attributes
-        start = time.time()
-        for fac in self.facets:
-            structure[fac] = []
-            structure_temp[fac] = []
-            for item in items_dic:
-                regex = re.compile(r'"(%s)([0-9]{0,1})":' % fac)
-                matches = regex.findall(json.dumps(item))
-                matchlist = []
-                for match in matches:
-                    matchJoin = "".join(match)
-                    if item[matchJoin] is None:
-                        continue
-                    value = item[matchJoin].lower()
-                    if value not in matchlist:
-                        value = item[matchJoin].lower()
-                        if value == "\*":
-                            value = "*"
-                        structure_temp[fac].extend(
-                            [
-                                value,
-                            ]
+        facet_set = set(self.facets)
+        for item in filtered_results:
+            for facet_name, facet_value in item.items():
+                if facet_name in facet_set and facet_value:
+                    if isinstance(facet_value, list):
+                        self.extend_facet_dict(
+                            temporary_facet_structure,
+                            facet_value,
+                            facet_name,
                         )
-                        matchlist.append(value)
                     else:
-                        continue
-            for key, num in OrderedDict(
-                sorted(Counter(structure_temp[fac]).items())
-            ).items():
-                structure[fac].append(key)
-                structure[fac].append(num)
+                        self.extend_facet_dict(
+                            temporary_facet_structure, [str(facet_value)], facet_name
+                        )
 
-        return {"data": structure, "metadata": None}
+        facet_structure = {}
+        for facet_name, facet_values in temporary_facet_structure.items():
+            facet_structure[facet_name] = []
+            for facet, count in facet_values.items():
+                facet_structure[facet_name].extend([facet, count])
+
+        return {"data": facet_structure, "metadata": None}
 
     def get(self, request, format=None):
         result = cache.get(request.get_full_path())
@@ -160,41 +175,32 @@ class ResultFiles(APIView, FilterAbstract):
         - apply offset, sortName, sortOrder and searchText on cache results
         """
 
-        queryset = History.objects.all().order_by("-timestamp")
+        queryset = History.objects.filter(flag__lt=3, status__lt=2).order_by(
+            "-timestamp"
+        )
         full_path = request.get_full_path()
-        params = request.query_params
+        query_params = request.query_params
+        params = {key: query_params.getlist(key) for key in query_params}
 
         # filter- caching without options
         options = ["limit", "offset", "sortName", "sortOrder", "searchText"]
         queries = {}
         for item in options:
             if item in params:
-                queries[item] = params[item]
+                queries[item] = params[item][0]
             full_path = re.sub(r"&%s=(\d+|\w+)" % item, "", full_path)
 
         # new entries in database?
-        max_entry = queryset.filter(flag__lt=3, status__lt=2).order_by("id").last()
+        max_entry = queryset.filter(flag__lt=3, status__lt=2).latest("id")
         max_id = max_entry.id if max_entry else 0
         cache_max_id = cache.get("{}_{}".format(full_path, max_id), 0)
-
-        # regex are tricky - some replacements
-        mod_request = {}
-        for key, value in params.items():
-            if key == "plugin":
-                queryset = queryset.filter(tool=value)
-            else:
-                value = value.replace("\\", "\\\\\\\\")
-                value = value.replace("*", "\*")
-                value = value.replace(".", "\.")
-                value = value.replace("[", "\[")
-                value = value.replace("]", "\]")
-                if value == "\*" or value == "\\\\\\\\\*":
-                    value = "(\*|\\\\\\\\\*)"
-                mod_request[key] = r'"%s([0-9]{0,1})": "%s"' % (key, value)
 
         # append new entries
         data = cache.get(full_path, list())
         if max_id > cache_max_id or not data:
+            if "plugin" in params:
+                queryset = queryset.filter(tool=params["plugin"].pop()[0])
+            mod_request = prepare_facet_filter(params)
             cache.set("{}_{}".format(full_path, max_id), max_id, None)
             queryset = queryset.filter(flag__lt=3, status__lt=2, id__gt=cache_max_id)
             queryset = self.generate_filter(queryset, mod_request)

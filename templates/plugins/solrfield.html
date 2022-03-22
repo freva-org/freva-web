@@ -1,80 +1,86 @@
 {% load custom_filters %}
 
-<input type="hidden" class="col-md-12 col-xs-12"  value="{% if value %}{{ value }}{%endif%}" id="{{ attrs.id }}" name="{{name}}" style="margin:0px; padding:0px;" data-facet="{{facet}}" data-group="{{group}}" data-multiple="{{multiple}}">
+
+<input
+    type="hidden"
+    class="col-md-12 col-xs-12"
+    value="{% if value %}{{ value|safe }}{%endif%}"
+    id="{{ attrs.id }}"
+    name="{{name}}"
+    style="margin:0px; padding:0px;"
+    data-facet="{{facet}}"
+    data-group="{{group}}"
+    data-multiple="{{multiple}}"
+>
 
 <script>
-$(document).ready(function() { 
-	$("#{{ attrs.id }}").select2({
-		{% if not editable %}
-		   minimumResultsForSearch: -1,
-		{% endif %}
-		placeholder: "Select a {{ facet }}",
-		allowClear: true,
-		initSelection : function (element, callback) {
-        		if('{{multiple}}'=='True'){
-				var data = [];
-                		var vals = element.val().split(",")
-				$.each(vals, function(key,value){ 
-                    			data.push({
-                        			id: value,
-                        			text: value
-                    			});
-             			});
-			}else
-				var data = {id: element.val(), text: element.val()};
-			callback(data);    			},
-		{% if multiple %}
-		multiple:true,
-		{%endif%}
-		
-		ajax: { // instead of writing the function to execute the request we use Select2's convenient helper
-				//url: "/solr/solr-search",
-				dataType: 'json',
-				url: function (term, page) {
-					term=term.replace('/','');
-					tmp_data = {
-						facet : '{{facet}}',
-						{%if editable %}
-						{{facet}}: term+'*', // search term
-						{%endif%}
-						page_limit: 10,
-						
-					};
-					tmp_data2 = getActiveFacets('{{facet}}','{{group}}');
-					var res = '/solr/solr-search?';
-					$.each(tmp_data, function(index,value){
-						res += index+'='+value+'&';
-						
-					});
-					res += tmp_data2 + '{{predefined_facets|dict_to_url}}';
-					return res;
-				},
-				results: function (data, page) { // parse the results into the format expected by Select2.
-					
-					var res_data = [];
-					$.each(data['data']['{{facet}}'], function(index,value){
-						//console.log(index+':'+value);
-						if(index%2 == 0){
-						var tmp = {'id':value,'text':value};
-						res_data.push(tmp);
-						}	
-					});
-					//console.log(res_data);
-					return {results: res_data};
-				},
-},
-				//Allow manually entered text in drop down.
-       createSearchChoice:function(term, data) {
-         if ( $(data).filter( function() {
-           return this.text.localeCompare(term)===0;
-         }).length===0) {
-           return {id:term, text:term};
-         }
-       },
-//			  },
-	});
-	
-	//console.log($('input[data-group="1"]'));
+$(document).ready(function() {
+    $("#{{ attrs.id }}").select2({
+        {% if not editable %}
+           minimumResultsForSearch: -1,
+        {% endif %}
+        placeholder: "Select a {{ facet }}",
+        allowClear: true,
+        initSelection : function (element, callback) {
+            if('{{multiple}}'=='True'){
+                var data = [];
+                var vals = element.val().split(",")
+                $.each(vals, function(key,value){
+                    data.push({
+                        id: value,
+                        text: value
+                    });
+                });
+            } else {
+                var data = {id: element.val(), text: element.val()};
+            }
+            callback(data);
+        },
+        {% if multiple %}
+            multiple:true,
+        {%endif%}
 
+        ajax: { // instead of writing the function to execute the request we use Select2's convenient helper
+            dataType: 'json',
+            url: function (term, page) {
+                term=term.replace('/','');
+                tmp_data = {
+                    facet : '{{facet}}',
+                    {%if editable %}
+                    {{facet}}: term+'*', // search term
+                    {%endif%}
+                    page_limit: 10,
+                };
+                tmp_data2 = getActiveFacets('{{facet}}','{{group}}');
+                var res = '/solr/solr-search?';
+                $.each(tmp_data, function(index,value){
+                    res += index+'='+value+'&';
+                });
+                res += tmp_data2 + '{{predefined_facets|dict_to_url}}';
+                return res;
+            },
+            results: function (data, page) { // parse the results into the format expected by Select2.
+
+                var res_data = [];
+                $.each(data['data']['{{facet}}'], function(index,value){
+                    //console.log(index+':'+value);
+                    if(index%2 == 0){
+                    var tmp = {'id':value,'text':value};
+                    res_data.push(tmp);
+                    }
+                });
+                //console.log(res_data);
+                return {results: res_data};
+            },
+        },
+        //Allow manually entered text in drop down.
+        createSearchChoice:function(term, data) {
+            if ( $(data).filter( function() {
+                    return this.text.localeCompare(term) === 0;
+                }).length === 0) {
+                    return {id:term, text:term};
+            }
+        },
+    });
 });
-</script>	
+</script>

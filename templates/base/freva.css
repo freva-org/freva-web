@@ -24,11 +24,11 @@ background: {{main_color}} !important;
    border-color: {{border_color}};
 }
 
-.navbar button{
+.navbar .navbar-button {
 background:{{hover_color}} !important;
 }
 
-.navbar button:hover{
+.navbar .navbar-button:hover{
 background:{{hover_color}} !important;
 }
 
@@ -96,24 +96,13 @@ background:{{main_color}};
 border-bottom:2px solid {{main_color}};
 }
 
+#home-carousel {
+   border-bottom:5px solid {{main_color}};
+}
+
 /* Events - Accordion*/
 
 .events .accordion-heading h5{
-background:{{main_color}};
-}
-
-/* Slider */
-
-.da-slider{
-border-top: 4px solid {{main_color}};
-border-bottom: 4px solid {{main_color}};
-}
-
-.da-slide h2{
-color:{{main_color}};
-}
-
-.da-slide .da-link{
 background:{{main_color}};
 }
 

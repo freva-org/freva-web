@@ -3,7 +3,7 @@ import _ from "lodash";
 import * as constants from "./constants";
 
 const resultbrowserInitialState = {
-  facets: {},
+  facets: null,
   files: [],
   numResults: null,
   selectedFacets: {},

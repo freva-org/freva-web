@@ -1,6 +1,12 @@
 
 let visualSearch;
 const cache = {};
+
+/*
+ * Used inside freva for file-browsing in solr when creating a new
+ * plugin run
+ */
+
 let solr;
 
 solr = new function () {

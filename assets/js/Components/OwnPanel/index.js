@@ -24,7 +24,7 @@ function OwnPanel (props) {
           props.removeFacet ?
             <Button
               variant="danger"
-              className="icon-btn rounded-circle ms-1 lh-1"
+              className="icon-btn rounded-circle m-1 mt-0 lh-1"
               onClick={dropFacetAndCollapse}
             >
               <FaTimes />

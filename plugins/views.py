@@ -17,6 +17,7 @@ from evaluation_system.misc import config
 
 from plugins.utils import (
     get_plugin_or_404,
+    is_path_relative_to,
     ssh_call,
     get_scheduler_hosts,
 )
@@ -316,10 +317,9 @@ def dirlist(request):
         )
 
     base_directory = Path(urllib.parse.unquote(request.POST.get("dir"))).resolve()
-    base_dir_str = str(base_directory) + os.sep
-    if not base_dir_str.startswith(
-        os.path.abspath(home_dir) + os.sep
-    ) and not base_dir_str.startswith(os.path.abspath(scratch_dir) + os.sep):
+    if not is_path_relative_to(base_directory, home_dir) and not is_path_relative_to(
+        base_directory, scratch_dir
+    ):
         # user is trying to get a listing of a folder he is not allowed to see
         return HttpResponse(
             '<div class="alert alert-danger">Invalid base folder requested</div>'
@@ -376,10 +376,9 @@ def list_dir(request):
 
     # we can specify an ending in GET request
     base_directory = Path(urllib.parse.unquote(request.GET.get("dir"))).resolve()
-    base_dir_str = str(base_directory) + os.sep
-    if not base_dir_str.startswith(
-        os.path.abspath(home_dir) + os.sep
-    ) and not base_dir_str.startswith(os.path.abspath(scratch_dir) + os.sep):
+    if not is_path_relative_to(base_directory, home_dir) and not is_path_relative_to(
+        base_directory, scratch_dir
+    ):
         # user is trying to get a listing of a folder he is not allowed to see
         return HttpResponse(
             json.dumps({"status": "Invalid base folder requested", "folders": []})

@@ -99,6 +99,14 @@ def ssh_call(username, password, command, hostnames=["127.0.0.1"]):
     return stdin, stdout, stderr
 
 
+def is_path_relative_to(path, other):
+    try:
+        path.relative_to(other)
+        return True
+    except ValueError:
+        return False
+
+
 def plugin_metadata_as_dict(plugin_metadata):
     return {
         "name": plugin_metadata.name,

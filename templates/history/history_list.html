@@ -121,15 +121,15 @@ html.wait, html.wait * { cursor: wait !important; }
           <form class="" role="delete">
              <input id="setflag" type="hidden" name="setflag" value="">
              <input id="rowids" type="hidden" name="rowids" value="">
-             <a class="btn btn-danger" id="btn-delete">Delete</a>
+             <a class="btn btn-danger" id="btn-delete">Hide</a>
              <a class="btn btn-secondary" id="btn-select-all">Select all</a>
           </form>
           <form class="d-flex justify-content-between" role="form" action="{% url 'history:history' uid %}" method="get">
            <label for="filter_flag" class="col-form-label mx-2 fw-bold">Filter entries:</label>
             <div class="form-group">
                <select id="filter_flag" class="form-control" name="flag">
-                 <option value = "-1">non-deleted</option>
-                 <option value = "3">deleted</option>
+                 <option value = "-1">non-hidden</option>
+                 <option value = "3">hidden</option>
                </select>
             </div>
             <label for="filter_status" class="col-form-label mx-2 fw-bold">Process Status:</label>
@@ -278,6 +278,14 @@ $(document).ready(function() {
                 createdCell: configCell
             },
         ],
+        preDrawCallback: function() {
+                let el = $('div.dataTables_filter label');
+                if(!el.parent('form').length) {
+                    el.wrapAll('<form></form>').parent()
+                    .attr('autocomplete', false)
+                    .attr('autofill', false);
+                }
+            },
         columns: [
           null,
           null,
@@ -369,7 +377,7 @@ $(document).ready(function() {
 
           var flag = 0;
 
-          if($('#btn-delete').text() == 'Delete') {
+          if($('#btn-delete').text() == 'Hide') {
               flag = 3;
           }
 
@@ -401,9 +409,9 @@ $(document).ready(function() {
 //
 //
    if("{{flag}}" == 3) {
-      $('#btn-delete').text('Undelete');
+      $('#btn-delete').text('Unhide');
    } else {
-      $('#btn-delete').text('Delete');
+      $('#btn-delete').text('Hide');
    }
 //}
 //);

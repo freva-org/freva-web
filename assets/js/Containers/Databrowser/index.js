@@ -120,7 +120,7 @@ class Databrowser extends React.Component {
     const { dispatch } = this.props;
 
     // Wait until facets are loaded
-    if (facets.length === 0) {
+    if (!facets) {
       return (
         <Spinner />
       );

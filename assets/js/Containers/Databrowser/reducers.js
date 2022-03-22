@@ -3,7 +3,7 @@ import _ from "lodash";
 import * as constants from "./constants";
 
 const databrowserInitialState = {
-  facets: {},
+  facets: null,
   files: [],
   numFiles: 0,
   selectedFacets: {},

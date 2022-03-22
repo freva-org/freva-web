@@ -84,7 +84,7 @@ if isinstance(CONTACTS, str):
 ##########
 # Here you can customize the footer and texts on the startpage
 ##########
-INSTITUTION_NAME = web_config.get("INSTITUTION_NAME", "FreVa")
+INSTITUTION_NAME = web_config.get("INSTITUTION_NAME", "Freva")
 ##################################################
 ##################################################
 # SETTING FOR LDAP

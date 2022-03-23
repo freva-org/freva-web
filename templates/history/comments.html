@@ -1,9 +1,9 @@
 {% load resulttags %}
 
 {% if not request.user.isGuest %}
-{% comment_field request.user history_id None %}
+    {% comment_field request.user history_id None %}
 {% endif %}
 
 {% for note in notes.all %}
-	{% comment_field request.user history_id note %}
+    {% comment_field request.user history_id note %}
 {% endfor %}

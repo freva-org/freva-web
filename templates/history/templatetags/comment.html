@@ -1,64 +1,64 @@
 {% load resulttags %}
 
 <div class='container card p-2 mb-2 shadow-sm' id='cont_{{class_id}}'>
-<div class="col-md-12">
-{% if class_id == "new" %}
-    <input class="form-control class_{{class_id}} mybtn-edit" id='dummyinput' placeholder="Insert new note" tabindex=-1></input>
-    {% else %}
-    {% if htag.type|slugify == tagType.note_public|slugify %}
-        {% if user.isGuest %}
-                <h4>#{{htag.id}} <span id="h4_text_{{class_id}}">Commentary by <span id='user_{{class_id}}'>{{htag.uid.first_name}} {{htag.uid.last_name}}</span></span></h4>
+    <div class="col-md-12">
+        {% if class_id == "new" %}
+            <input class="form-control class_{{class_id}} mybtn-edit" id='dummyinput' placeholder="Insert new note" tabindex=-1></input>
         {% else %}
-                <h4>#{{htag.id}} <span id="h4_text_{{class_id}}">Commentary by <span id='user_{{class_id}}'>{{htag.uid.first_name}} {{htag.uid.last_name}} ({{htag.uid}})</span></span></h4>
-        {% endif %}
-        {% else %}
-            <h4>#{{htag.id}} <span id="h4_text_{{class_id}}">Private comment</span></h4>
-        {% endif %}
-        <div class="col-md-12">
-        <span class='class_{{class_id}}' id='text_{{class_id}}'>{{htag.text|linebreaks|escape}}</span>
-        </div>
-        {% if htag.uid == user %}
+            {% if htag.type|slugify == tagType.note_public|slugify %}
+                {% if user.isGuest %}
+                    <h4>#{{htag.id}} <span id="h4_text_{{class_id}}">Commentary by <span id='user_{{class_id}}'>{{htag.uid.first_name}} {{htag.uid.last_name}}</span></span></h4>
+                {% else %}
+                    <h4>#{{htag.id}} <span id="h4_text_{{class_id}}">Commentary by <span id='user_{{class_id}}'>{{htag.uid.first_name}} {{htag.uid.last_name}} ({{htag.uid}})</span></span></h4>
+                {% endif %}
+            {% else %}
+                <h4>#{{htag.id}} <span id="h4_text_{{class_id}}">Private comment</span></h4>
+            {% endif %}
+            <div class="col-md-12">
+                <span class='class_{{class_id}}' id='text_{{class_id}}'>{{htag.text|linebreaks|escape}}</span>
+            </div>
+            {% if htag.uid == user %}
 
-        <a class="btn btn-danger class_{{class_id}} mybtn-edit"  id='btn_delete_{{class_id}}'>Delete</a>
-        <a class="btn btn-warning class_{{class_id}} mybtn-edit"  id='btn_edit_{{class_id}}'>Edit</a>
+                <a class="btn btn-danger class_{{class_id}} mybtn-edit"  id='btn_delete_{{class_id}}'>Delete</a>
+                <a class="btn btn-warning class_{{class_id}} mybtn-edit"  id='btn_edit_{{class_id}}'>Edit</a>
+            {% endif%}
         {% endif%}
-    {% endif%}
-    {% if class_id == "new" or  htag.uid == user %}
-    <div class='class_{{class_id}} col-md-12' style='display:none'>
-        <form role='form'> <!-- class='form-inline'> -->
-            <div class='form-group'>
-                <label for='enterNewNote'>Note:</label>
-                <textarea class="form-control" id='textarea_{{class_id}}' rows="5"></textarea>
-            </div> <!-- form-group -->
-        <div class="row">
-            <div class='col-md-6 form-group'>
-                <label for='publish_note'>Display your comment to other users?</label>
-                <div class="radio">
-                    <label>
-                        <input type="radio" name="radiogrp_{{class_id}}" id="optionPublish_{{class_id}}" value="{{tagType.note_public}}" checked>
-                        Yes, show comment to <strong>authorized users</strong>
-                    </label>
-                </div> <!-- radio -->
-                <div class="radio">
-                    <label>
-                        <input type="radio" name="radiogrp_{{class_id}}" id="optionPrivate_{{class_id}}" value="{{tagType.note_private}}">
-                        No, keep this comment <strong>private</strong>
-                    </label>
-                </div> <!-- radio -->
-            </div> <!-- form-group -->
-        <div class="col-md-6">
-        <div class="alert alert-danger alert-dismissible" role="alert" id='alert_empty_{{class_id}}'>
-            <button type="button" class="close" data-dismiss="alert"><span class="sr-only">Close</span></button>
-            <strong>Empty comment!<br></strong> To delete a comment use cancel and delete instead.
-            </div> <!-- alert -->
-        </div>
-        </div> <!-- row -->
-            <a class="btn btn-danger" id='btn_cancel_{{class_id}}'>Cancel</a>
-            <a class="btn btn-success" id='btn_save_{{class_id}}'>Save</a>
-        </form>
-    </div> <!-- new_node -->
-    {% endif %}
-</div> <!-- col-md-12 -->
+        {% if class_id == "new" or  htag.uid == user %}
+            <div class='class_{{class_id}} col-md-12' style='display:none'>
+                <form role='form'> <!-- class='form-inline'> -->
+                    <div class='form-group'>
+                        <label for='enterNewNote'>Note:</label>
+                        <textarea class="form-control" id='textarea_{{class_id}}' rows="5"></textarea>
+                    </div> <!-- form-group -->
+                    <div class="row">
+                        <div class='col-md-6 form-group'>
+                            <label for='publish_note'>Display your comment to other users?</label>
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="radiogrp_{{class_id}}" id="optionPublish_{{class_id}}" value="{{tagType.note_public}}" checked>
+                                    Yes, show comment to <strong>authorized users</strong>
+                                </label>
+                            </div> <!-- radio -->
+                            <div class="radio">
+                                <label>
+                                    <input type="radio" name="radiogrp_{{class_id}}" id="optionPrivate_{{class_id}}" value="{{tagType.note_private}}">
+                                    No, keep this comment <strong>private</strong>
+                                </label>
+                            </div> <!-- radio -->
+                        </div> <!-- form-group -->
+                        <div class="col-md-6">
+                            <div class="alert alert-danger alert-dismissible" role="alert" id='alert_empty_{{class_id}}'>
+                                <button type="button" class="close" data-dismiss="alert"><span class="sr-only">Close</span></button>
+                                <strong>Empty comment!<br></strong> To delete a comment use cancel and delete instead.
+                            </div> <!-- alert -->
+                        </div>
+                    </div> <!-- row -->
+                    <a class="btn btn-danger" id='btn_cancel_{{class_id}}'>Cancel</a>
+                    <a class="btn btn-success" id='btn_save_{{class_id}}'>Save</a>
+                </form>
+            </div> <!-- new_node -->
+        {% endif %}
+    </div> <!-- col-md-12 -->
 </div> <!-- container -->
 
 <script>
@@ -77,19 +77,19 @@
 
         {% if class_id != "new" and  htag.uid == user %}
             $('#btn_delete_{{class_id}}').on('click', function(){
-                    var data = {
-                            'text':$('#textarea_{{class_id}}').val(),
-                            'type': {{tagType.note_deleted}}
-                        };
-                    var url = '{% url 'history:edit-historytag' history_id htag.id %}';
+                var data = {
+                    'text':$('#textarea_{{class_id}}').val(),
+                    'type': {{tagType.note_deleted}}
+                };
+                var url = '{% url 'history:edit-historytag' history_id htag.id %}';
 
-                    $.post(url, data, function(resp){
-                        $('#cont_{{class_id}}').hide()
-                        // Implementation of doCount in results.html
-                        doCount()
-                    });
+                $.post(url, data, function(resp){
+                    $('#cont_{{class_id}}').hide()
+                    // Implementation of doCount in results.html
+                    doCount()
+                });
 
-                    $('#caption_modal').modal('hide');
+                $('#caption_modal').modal('hide');
             });
         {% endif %}
 
@@ -108,9 +108,9 @@
 
 
         {% if class_id == "new" or  htag.uid == user %}
-			$('#btn_cancel_{{class_id}}').on('click', function(){
-				$('.class_{{class_id}}').toggle();
-				$('.mybtn-edit').removeAttr("disabled");
+            $('#btn_cancel_{{class_id}}').on('click', function(){
+                $('.class_{{class_id}}').toggle();
+                $('.mybtn-edit').removeAttr("disabled");
 
                 {% if class_id == "new" %}
                     $('#textarea_{{class_id}}').val('');
@@ -162,7 +162,7 @@
             });
         {% endif %}
 
-        });
+    });
 
 </script>
 

@@ -5,25 +5,21 @@
 {% block page_class %}home-page{% endblock %}
 {% block content %}
 
-{% load bootstrap5 %}
+    {% load bootstrap5 %}
 
-{% bootstrap_javascript %}
+    {% bootstrap_javascript %}
 
-  <div class="container alert alert-info">
-  <div class="row">
-  <div class="col-md-12">
-            <h1>Not found <span>:(</span></h1>
-            <p>Sorry, but the page you were trying to view does not exist.</p>
-            <p>It looks like this was the result of either:</p>
-            <ul>
-                <li>a mistyped address</li>
-                <li>an out-of-date link</li>
-            </ul>
-            <script>
-                var GOOG_FIXURL_LANG = (navigator.language || '').slice(0,2),GOOG_FIXURL_SITE = location.host;
-            </script>
-            <script src="http://linkhelp.clients.google.com/tbproxy/lh/wm/fixurl.js"></script>
+    <div class="container alert alert-info">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>Not found <span>:(</span></h1>
+                <p>Sorry, but the page you were trying to view does not exist.</p>
+                <p>It looks like this was the result of either:</p>
+                <ul>
+                    <li>a mistyped address</li>
+                    <li>an out-of-date link</li>
+                </ul>
+            </div>
         </div>
-        </div>
-        </div>
-  {% endblock %}
+    </div>
+{% endblock %}

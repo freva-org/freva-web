@@ -5,32 +5,32 @@
 {% block page_class %}home-page{% endblock %}
 {% block content %}
 
-{% load bootstrap5 %}
-{% load dialogtags %}
+    {% load bootstrap5 %}
+    {% load dialogtags %}
 
-{# Load CSS and JavaScript #}
-{% bootstrap_javascript %}  
+    {# Load CSS and JavaScript #}
+    {% bootstrap_javascript %}
 
-<div class="container">
-<!-- Example row of columns -->
-<div class="row">
-<div class="col-md-12">
-<div class="jumbotron">
- {% if success %}
-  <h1>Unfollow succeeded</h1>
-  <p>You do not follow the results of evaluation {{history_id}}, anymore.</p>
-  <p>When you came here accidentally or you changed your mind, please press the follow button on the results page.</p> 
-  <p><a class="btn btn-primary btn-lg" role="button" href={% url 'history:results' history_id %}>Results</a></p>
-  {% else %}
-  <h1>Unfollowing failed</h1>
-  <p>Your request to unfollow the results of evaluation {{history_id}} failed.</p>
-  <p>You can try to unfollow by clicking the button at the results page</p>
-  <p><a class="btn btn-primary btn-lg" role="button" href={% url 'history:results' history_id %}>Results</a></p>
-  {% endif %}
-</div>
-</div> <!-- col-md-12 -->
-</div> <!-- row -->
-</div> <!-- container -->
+    <div class="container">
+        <!-- Example row of columns -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="jumbotron">
+                    {% if success %}
+                        <h1>Unfollow succeeded</h1>
+                        <p>You do not follow the results of evaluation {{history_id}}, anymore.</p>
+                        <p>When you came here accidentally or you changed your mind, please press the follow button on the results page.</p>
+                        <p><a class="btn btn-primary btn-lg" role="button" href={% url 'history:results' history_id %}>Results</a></p>
+                    {% else %}
+                        <h1>Unfollowing failed</h1>
+                        <p>Your request to unfollow the results of evaluation {{history_id}} failed.</p>
+                        <p>You can try to unfollow by clicking the button at the results page</p>
+                        <p><a class="btn btn-primary btn-lg" role="button" href={% url 'history:results' history_id %}>Results</a></p>
+                    {% endif %}
+                </div>
+            </div> <!-- col-md-12 -->
+        </div> <!-- row -->
+    </div> <!-- container -->
 {% endblock %}
 
- 
+

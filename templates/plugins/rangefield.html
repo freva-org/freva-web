@@ -1,34 +1,34 @@
 <style>
 
-.tooltip ul{
-	text-align:left;
-}
-.tooltip-inner {
-   max-width: 500px;
-}
+    .tooltip ul{
+        text-align:left;
+    }
+    .tooltip-inner {
+        max-width: 500px;
+    }
 
 </style>
 
 <div class="input-group">
-	<span class="input-group-addon" style="cursor:help;" id="tooltip_{{ id }}" data-placement="top" data-toggle="tooltip" 
-		title="<p>This is a 'Range-Field'<br>You have various input options:</p>
-			   <ul>
-			      <li>a range: 1960:5:2000</li>
-			      <li>a comma separated list: 1960,1965,...,2000</li>
-			      <li>exclude numbers: 1960:1970<strong>-1965</strong></li>
-			      <li>combine the above: 1965,1970:2:2000-1978,1988</li>
-			   </ul>
-			   <p>Everything after the <strong>'-'</strong> is removed from the list.</p>">
-			   
-		<strong>?</strong>
-	</span>
-	<input type="text" class="form-control" value="{% if value %}{{ value }}{%endif%}" id="{{ id }}" placeholder="{{name}}" name="{{name}}">
+    <span class="input-group-addon" style="cursor:help;" id="tooltip_{{ id }}" data-placement="top" data-toggle="tooltip"
+        title="<p>This is a 'Range-Field'<br>You have various input options:</p>
+        <ul>
+            <li>a range: 1960:5:2000</li>
+            <li>a comma separated list: 1960,1965,...,2000</li>
+            <li>exclude numbers: 1960:1970<strong>-1965</strong></li>
+            <li>combine the above: 1965,1970:2:2000-1978,1988</li>
+        </ul>
+        <p>Everything after the <strong>'-'</strong> is removed from the list.</p>">
+
+        <strong>?</strong>
+    </span>
+    <input type="text" class="form-control" value="{% if value %}{{ value }}{%endif%}" id="{{ id }}" placeholder="{{name}}" name="{{name}}">
 
 </div>
 
 
 <script>
-$(document).ready(function(){
-	$('#tooltip_{{ id }}').tooltip({html:true});	
-});
+    $(document).ready(function(){
+        $('#tooltip_{{ id }}').tooltip({html:true});
+    });
 </script>

@@ -102,7 +102,7 @@
 
     <!-- Modal Solr_search-->
     <div class="modal fade" id="myModal_solr" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
-         aria-hidden="true">
+        aria-hidden="true">
         <div class="modal-dialog solr-modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -127,7 +127,7 @@
     {% if restricted_user %}
         <!-- Modal Guest Dialog-->
         <div class="modal fade" id="guestModal" tabindex="-1" role="dialog" aria-labelledby="guestModal"
-             aria-hidden="true">
+            aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -146,7 +146,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary tourbtn" data-bs-dismiss="modal"
-                                onclick='window.location.href="/history";'>Ok
+                            onclick='window.location.href="/history";'>Ok
                         </button>
                     </div>
                 </div><!-- /.modal-content -->
@@ -158,7 +158,7 @@
 
         <!-- Modal Passwort Dialog-->
         <div class="modal fade" id="myModalPw" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
-             aria-hidden="true">
+            aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -177,22 +177,22 @@
                             <form name="passForm" id="passForm" action="/" method="post">
                                 <input id="username" type="text" name="username" style="display:none;">
                                 <input id="password_temp" class="form-control" type="password" name="password_temp"
-                                       style="width: 90%;">
+                                    style="width: 90%;">
 
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12" id="similarResults">
-                                <div class="spinner-border text-center" role="status">
-                                    <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12" id="similarResults">
+                                    <div class="spinner-border text-center" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
                                 </div>
                             </div>
+
+
                         </div>
-
-
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary" id="submit_analysis">Submit analysis</button>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary" id="submit_analysis">Submit analysis</button>
                         </form>
                     </div>
                 </div><!-- /.modal-content -->
@@ -286,7 +286,7 @@
             var index_pw;
             $.each(form_vals, function (index, value) {
                 if (value.name == 'password_hidden')
-                    index_pw = index;
+                index_pw = index;
             });
             form_vals.splice(index_pw, 1);
             $('#' + container).html('<div class="text-center"><p>Loading similar results!</p><div class="spinner-border" role="status"> <span class="visually-hidden">Loading...</span> </div></div> ');
@@ -297,7 +297,7 @@
                 dataType: 'json',
                 success: function (data) {
                     if (data.length == 0)
-                        result = 'No similar results found';
+                    result = 'No similar results found';
                     else {
                         result = '<table width="100%" style="text-align:center;" cellpadding="10"><tr>';
                         var i = 0;
@@ -307,14 +307,14 @@
                                 result += similarDialog(val, i);
                                 if (i == 3)result += '</tr><tr>';
                             } else
-                                result += similarHtml(val, i);
+                            result += similarHtml(val, i);
                         });
                         result += '</tr></table>';
                         if (result.length > 0) {
                             if (container == 'similarResults')
-                                result = 'This analysis has already be done by other users. Here you can view their results. <br>' + result;
+                            result = 'This analysis has already be done by other users. Here you can view their results. <br>' + result;
                             else
-                                result = 'Similar results: <br>' + result;
+                            result = 'Similar results: <br>' + result;
                         }
                     }
                     $('#' + container).html(result);
@@ -328,18 +328,18 @@
 
         function similarHtml(res, i) {
             if (res['preview'] != '')
-                img = '<a href="/history/' + res['pk'] + '/results/" target="_blank"><img src="{{PREVIEW_URL}}' + res['preview'] + '" width="200"/></a><br/>';
+            img = '<a href="/history/' + res['pk'] + '/results/" target="_blank"><img src="{{PREVIEW_URL}}' + res['preview'] + '" width="200"/></a><br/>';
             else
-                img = '';
+            img = '';
             html = img + '<a href="/history/' + res['pk'] + '/results/" target="_blank">' + res['tool'] + ' result #' + res['pk'] + '</a> by ' + res['uid'] + '<br/><br/>';
             return html;
         }
 
         function similarDialog(res, i) {
             if (res['preview'] != '')
-                img = '<a href="/history/' + res['pk'] + '/results/" target="_blank"><img src="{{PREVIEW_URL}}' + res['preview'] + '" width="130"/></a><br/>';
+            img = '<a href="/history/' + res['pk'] + '/results/" target="_blank"><img src="{{PREVIEW_URL}}' + res['preview'] + '" width="130"/></a><br/>';
             else
-                img = '';
+            img = '';
             html = '<td>' + img + '<a href="/history/' + res['pk'] + '/results/" target="_blank">Result #' + res['pk'] + '</a> by ' + res['uid'] + '</td>';
             return html;
         }

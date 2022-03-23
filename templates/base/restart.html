@@ -4,29 +4,29 @@
 {% block page_class %}home-page{% endblock %}
 {% block content %}
 
-{% load bootstrap5 %}
+    {% load bootstrap5 %}
 
-{% bootstrap_javascript %}
+    {% bootstrap_javascript %}
 
 
-<div class="container">
-<div class="row">
-<div class="col-md-12">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
 
-        	<h1>Restart</h1>
-          <p>Would you like to restart the web server?</p>
-          <form action="restart" method="post" name="plugin_form" id="plugin_form">
-          	{% csrf_token %}		
-			
-		<input name="restart" type="hidden" value="1">
-			
-	        <button class="btn-lg btn-primary btn-block btn" id="restart" type="submit">
-	                        Restart
-	          </button>
-	  </form>
-</div>
-</div>
-</div>
+                <h1>Restart</h1>
+                <p>Would you like to restart the web server?</p>
+                <form action="restart" method="post" name="plugin_form" id="plugin_form">
+                    {% csrf_token %}
+
+                    <input name="restart" type="hidden" value="1">
+
+                    <button class="btn-lg btn-primary btn-block btn" id="restart" type="submit">
+                        Restart
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
 
 
 

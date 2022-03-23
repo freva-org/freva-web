@@ -5,149 +5,149 @@
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
 <!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
-<head>
-  <meta charset="utf-8">
+    <head>
+        <meta charset="utf-8">
 
-  <!-- Use the .htaccess and remove these lines to avoid edge case issues.
+        <!-- Use the .htaccess and remove these lines to avoid edge case issues.
        More info: h5bp.com/i/378 -->
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-  <title>{% block page_title %}{{ _("Your Site") }}{% endblock %}</title>
-  <meta name="description" content="{% block meta_description %}{% endblock %}">
-  <meta name="author" content="{% block meta_author %}{% endblock %}">
+        <title>{% block page_title %}{{ _("Your Site") }}{% endblock %}</title>
+        <meta name="description" content="{% block meta_description %}{% endblock %}">
+        <meta name="author" content="{% block meta_author %}{% endblock %}">
 
-  <!-- Mobile viewport optimized: h5bp.com/viewport -->
-  <meta name="viewport" content="width=device-width">
+        <!-- Mobile viewport optimized: h5bp.com/viewport -->
+        <meta name="viewport" content="width=device-width">
 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-  <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/MurCSS.css" />
-  {% block css_files %}
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}css/MurCSS.css" />
+        {% block css_files %}
 
-  {% bootstrap_css %}
-  <link rel="stylesheet" href="{{ STATIC_URL }}css/style.css">
+            {% bootstrap_css %}
+            <link rel="stylesheet" href="{{ STATIC_URL }}css/style.css">
 
-  <link rel="stylesheet" href="{{ STATIC_URL }}jqueryfiletree/jqueryFileTree.css">
+            <link rel="stylesheet" href="{{ STATIC_URL }}jqueryfiletree/jqueryFileTree.css">
 
-  <link rel="stylesheet" href="{{ STATIC_URL }}fancybox/jquery.fancybox.css">
+            <link rel="stylesheet" href="{{ STATIC_URL }}fancybox/jquery.fancybox.css">
 
-  <link rel="stylesheet" href="{{ STATIC_URL }}js/documentcloud-visualsearch-4550d61/build-min/visualsearch-datauri.css">
+            <link rel="stylesheet" href="{{ STATIC_URL }}js/documentcloud-visualsearch-4550d61/build-min/visualsearch-datauri.css">
 
-  <link rel="stylesheet" href="{{ STATIC_URL }}select2/select2.css">
+            <link rel="stylesheet" href="{{ STATIC_URL }}select2/select2.css">
 
-  <link href="{{STATIC_URL}}js/bootstrap-tour/build/css/bootstrap-tour.min.css" rel="stylesheet">
+            <link href="{{STATIC_URL}}js/bootstrap-tour/build/css/bootstrap-tour.min.css" rel="stylesheet">
 
-  <link rel="shortcut icon" href="{{STATIC_URL}}img/freva-favicon.png?av={% now "U" %}"/>
-  {% endblock %}
-  {% block css %}{% endblock %}
-  <style>
-    body {
-      padding-top: 60px;
-      padding-bottom: 40px;
-    }
-    .tour {
-      max-width: 500px;
-      width: auto;
-    }
-  </style>
-  <!-- More ideas for your <head> here: h5bp.com/d/head-Tips -->
+            <link rel="shortcut icon" href="{{STATIC_URL}}img/freva-favicon.png?av={% now "U" %}"/>
+        {% endblock %}
+        {% block css %}{% endblock %}
+        <style>
+            body {
+                padding-top: 60px;
+                padding-bottom: 40px;
+            }
+            .tour {
+                max-width: 500px;
+                width: auto;
+            }
+        </style>
+        <!-- More ideas for your <head> here: h5bp.com/d/head-Tips -->
 
-  <!-- All JavaScript at the bottom, except this Modernizr build.
+        <!-- All JavaScript at the bottom, except this Modernizr build.
        Modernizr enables HTML5 elements & feature detects for optimal performance.
        Create your own custom Modernizr build: www.modernizr.com/download/ -->
-  <script src="{{ STATIC_URL }}js/libs/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+        <script src="{{ STATIC_URL }}js/libs/modernizr-2.6.2-respond-1.1.0.min.js"></script>
 
-  <!-- JavaScript at the bottom for fast page loading -->
+        <!-- JavaScript at the bottom for fast page loading -->
 
-  {% bootstrap_javascript%}
-  <script src="{{ STATIC_URL }}js/documentcloud-visualsearch-4550d61/build-min/dependencies.js" type="text/javascript"></script>
+        {% bootstrap_javascript%}
+        <script src="{{ STATIC_URL }}js/documentcloud-visualsearch-4550d61/build-min/dependencies.js" type="text/javascript"></script>
 
-  <script src="{{ STATIC_URL }}js/documentcloud-visualsearch-4550d61/build-min/visualsearch.js" type="text/javascript"></script>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+        <script src="{{ STATIC_URL }}js/documentcloud-visualsearch-4550d61/build-min/visualsearch.js" type="text/javascript"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 
-  <script src="{{ STATIC_URL }}jqueryfiletree/jqueryFileTree.js"></script>
+        <script src="{{ STATIC_URL }}jqueryfiletree/jqueryFileTree.js"></script>
 
-  <script src="{{ STATIC_URL }}fancybox/jquery.fancybox.js"></script>
+        <script src="{{ STATIC_URL }}fancybox/jquery.fancybox.js"></script>
 
-  <script src="{{ STATIC_URL }}select2/select2.js"></script>
+        <script src="{{ STATIC_URL }}select2/select2.js"></script>
 
-  <script src="{{ STATIC_URL }}lazyload/jquery.lazyload.min.js"></script>
+        <script src="{{ STATIC_URL }}lazyload/jquery.lazyload.min.js"></script>
 
 
-  <script src="{{ STATIC_URL }}js/bootstrap-tour/build/js/bootstrap-tour.min.js"></script>
+        <script src="{{ STATIC_URL }}js/bootstrap-tour/build/js/bootstrap-tour.min.js"></script>
 
-  <!-- end scripts -->
+        <!-- end scripts -->
 
-  <!--<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" ></script> -->
-  <script type="text/javascript" async
-    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-  </script>
-  <style type="text/css">
-.MathJax_MathML {text-indent: 0;}
-</style>
+        <!--<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" ></script> -->
+        <script type="text/javascript" async
+            src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+        </script>
+        <style type="text/css">
+            .MathJax_MathML {text-indent: 0;}
+        </style>
 
-</head>
-<body class="body" >
-{% block body %}
-  <!-- Prompt IE 6 users to install Chrome Frame. Remove this if you support IE 6.
+    </head>
+    <body class="body" >
+        {% block body %}
+            <!-- Prompt IE 6 users to install Chrome Frame. Remove this if you support IE 6.
        chromium.org/developers/how-tos/chrome-frame-getting-started -->
-  <!--[if lt IE 7]>
+            <!--[if lt IE 7]>
     <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
   <![endif]-->
 
 
-  <div role="main">
-	{% block menu %}{% endblock %}
+            <div role="main">
+                {% block menu %}{% endblock %}
 
-    <div id="maincontent">{% block content %}{% endblock %}</div>
+                <div id="maincontent">{% block content %}{% endblock %}</div>
 
-    {% block footer %}{% endblock %}
-  </div>
+                {% block footer %}{% endblock %}
+            </div>
 
-  <!-- Asynchronous Google Analytics snippet. Change UA-XXXXX-X to be your site's ID.
+            <!-- Asynchronous Google Analytics snippet. Change UA-XXXXX-X to be your site's ID.
        mathiasbynens.be/notes/async-analytics-snippet -->
-  <script>
-    var _gaq=[['_setAccount','UA-47972081-1'],['_trackPageview']];
-    (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-    g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
-    s.parentNode.insertBefore(g,s)}(document,'script'));
+            <script>
+                var _gaq=[['_setAccount','UA-47972081-1'],['_trackPageview']];
+                (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+                    g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+                    s.parentNode.insertBefore(g,s)}(document,'script'));
 
-    $(document).ajaxSend(function(event, xhr, settings) {
-	    function getCookie(name) {
-	        var cookieValue = null;
-	        if (document.cookie && document.cookie != '') {
-	            var cookies = document.cookie.split(';');
-	            for (var i = 0; i < cookies.length; i++) {
-	                var cookie = jQuery.trim(cookies[i]);
-	                // Does this cookie string begin with the name we want?
-	                if (cookie.substring(0, name.length + 1) == (name + '=')) {
-	                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-	                    break;
-	                }
-	            }
-	        }
-	        return cookieValue;
-	    }
-	    function sameOrigin(url) {
-	        // url could be relative or scheme relative or absolute
-	        var host = document.location.host; // host + port
-	        var protocol = document.location.protocol;
-	        var sr_origin = '//' + host;
-	        var origin = protocol + sr_origin;
-	        // Allow absolute or scheme relative URLs to same origin
-	        return (url == origin || url.slice(0, origin.length + 1) == origin + '/') ||
-	            (url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') ||
-	            // or any other URL that isn't scheme relative or absolute i.e relative.
-	            !(/^(\/\/|http:|https:).*/.test(url));
-	    }
-	    function safeMethod(method) {
-	        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-	    }
+                $(document).ajaxSend(function(event, xhr, settings) {
+                    function getCookie(name) {
+                        var cookieValue = null;
+                        if (document.cookie && document.cookie != '') {
+                            var cookies = document.cookie.split(';');
+                            for (var i = 0; i < cookies.length; i++) {
+                                var cookie = jQuery.trim(cookies[i]);
+                                // Does this cookie string begin with the name we want?
+                                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                                    break;
+                                }
+                            }
+                        }
+                        return cookieValue;
+                    }
+                    function sameOrigin(url) {
+                        // url could be relative or scheme relative or absolute
+                        var host = document.location.host; // host + port
+                        var protocol = document.location.protocol;
+                        var sr_origin = '//' + host;
+                        var origin = protocol + sr_origin;
+                        // Allow absolute or scheme relative URLs to same origin
+                        return (url == origin || url.slice(0, origin.length + 1) == origin + '/') ||
+                        (url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') ||
+                        // or any other URL that isn't scheme relative or absolute i.e relative.
+                        !(/^(\/\/|http:|https:).*/.test(url));
+                    }
+                    function safeMethod(method) {
+                        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+                    }
 
-	    if (!safeMethod(settings.type) && sameOrigin(settings.url)) {
-	        xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-	    }
-	});
-  </script>
-{% endblock %}
-</body>
+                    if (!safeMethod(settings.type) && sameOrigin(settings.url)) {
+                        xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                    }
+                });
+            </script>
+        {% endblock %}
+    </body>
 </html>

@@ -5,33 +5,33 @@
 {% block content %}
 
 
-<div class="container">
-<div class="row">
-<div class="col-md-12">
-<!-- Show the wiki page in an iFrame -->
-<iframe  class="col-md-12" style="height:500px;border:none;padding:0" src="{{shell_url}}"  id="iframe">
-Your browser does not support embedded frames.
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <!-- Show the wiki page in an iFrame -->
+                <iframe  class="col-md-12" style="height:500px;border:none;padding:0" src="{{shell_url}}"  id="iframe">
+                    Your browser does not support embedded frames.
 
-Click <a href="{{shell_url}}">here</a> to open the wiki. 
-</iframe>
-</div>
-</div>
-</div>
+                    Click <a href="{{shell_url}}">here</a> to open the wiki.
+                </iframe>
+            </div>
+        </div>
+    </div>
 
-<script>
-// resize iframe to display area
- $(function() {
-   window.updateIframe = function() {
-     var h = $("#maincontent").height();
-     var h = this.contentWindow.document.body.offsetHeight;
-     $("#iframe").height(h);
-   }
-//   window.updateIframe();
-//   window.resizeTo(window.updateIframe);
- });
+    <script>
+        // resize iframe to display area
+        $(function() {
+            window.updateIframe = function() {
+                var h = $("#maincontent").height();
+                var h = this.contentWindow.document.body.offsetHeight;
+                $("#iframe").height(h);
+            }
+            //   window.updateIframe();
+            //   window.resizeTo(window.updateIframe);
+        });
 
 
 
- </script>
+    </script>
 
 {% endblock %}

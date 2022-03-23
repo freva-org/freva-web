@@ -5,22 +5,19 @@
 {% block page_title %}{{plugin.name}} - Evaluation System{% endblock %}
 {% block page_class %}home-page{% endblock %}
 {% block content %}
-     
-
-
     <div class="container">
-      <!-- Example row of columns -->
-      <div class="row">
-        <div class="col-md-12">
-          <h2>{{ plugin.name }}</h2>
-          <p>{{ plugin.long_description|urlize|linebreaksbr }}</p>
-          <a href="{% url 'plugins:setup' plugin.name.lower %}" class="btn btn-primary">Start analysis</a>
-		  <a href="{% url 'history:history' %}?plugin={{plugin.name.lower}}" class="btn btn-primary">Show history</a>
-		  {% if docu %}
-		  <a href="{{docu.url}}" class="btn btn-primary">Documentation</a>	
-		  {% endif %}
-		  {% mail_to_developer plugin.name %}
+        <!-- Example row of columns -->
+        <div class="row">
+            <div class="col-md-12">
+                <h2>{{ plugin.name }}</h2>
+                <p>{{ plugin.long_description|urlize|linebreaksbr }}</p>
+                <a href="{% url 'plugins:setup' plugin.name.lower %}" class="btn btn-primary">Start analysis</a>
+                <a href="{% url 'history:history' %}?plugin={{plugin.name.lower}}" class="btn btn-primary">Show history</a>
+                {% if docu %}
+                    <a href="{{docu.url}}" class="btn btn-primary">Documentation</a>
+                {% endif %}
+                {% mail_to_developer plugin.name %}
+            </div>
         </div>
-      </div>
- 	</div>
+    </div>
 {% endblock %}

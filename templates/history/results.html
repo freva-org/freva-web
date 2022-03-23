@@ -3,367 +3,368 @@
 {% block page_title %}{{ result_caption }} results - Evaluation System{% endblock %}
 {% block page_class %}home-page{% endblock %}
 {% block content %}
-<!-- This code is taken from http://twitter.github.com/bootstrap/examples/hero.html -->
+    <!-- This code is taken from http://twitter.github.com/bootstrap/examples/hero.html -->
 
-{% load resulttags %}
-{% load dialogtags %}
+    {% load resulttags %}
+    {% load dialogtags %}
 
     <div class="container">
-      <!-- Example row of columns -->
-      <div class="row">
-          <div class="col-md-12">
-            <h1 id='result_caption'>{{ result_caption }}</h1>
-            <p>Analysis from {{ history_object.timestamp|date:"d.m.y H:i:s" }} done by <a href="{% url 'history:history' history_object.uid %}">{{history_object.uid}}</a></p>
-          </div>
-      </div>
-       <div class="row">
+        <!-- Example row of columns -->
+        <div class="row">
+            <div class="col-md-12">
+                <h1 id='result_caption'>{{ result_caption }}</h1>
+                <p>Analysis from {{ history_object.timestamp|date:"d.m.y H:i:s" }} done by <a href="{% url 'history:history' history_object.uid %}">{{history_object.uid}}</a></p>
+            </div>
+        </div>
+        <div class="row">
 
-         <div class="alert alert-success alert-dismissible" role="alert" id='alert_send_developer_success' style='display:none'>
-            Mail sent to {{developer.name}}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-         </div> <!-- alert success -->
+            <div class="alert alert-success alert-dismissible" role="alert" id='alert_send_developer_success' style='display:none'>
+                Mail sent to {{developer.name}}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div> <!-- alert success -->
 
-        <div class="alert alert-success alert-dismissible" role="alert" id='alert_follow' style='display:none'>
+            <div class="alert alert-success alert-dismissible" role="alert" id='alert_follow' style='display:none'>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 <strong>Following!</strong> You get notified by email, when somebody generated content for this result.
-        </div> <!-- alert follow -->
-        <div class="alert alert-warning alert-dismissible" role="alert" id='alert_unfollow' style='display:none'>
+            </div> <!-- alert follow -->
+            <div class="alert alert-warning alert-dismissible" role="alert" id='alert_unfollow' style='display:none'>
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 <strong>Unfollowing!</strong> You will not get further email notifications for this result.
-        </div> <!-- alert unfollow -->
-    </div> <!-- row -->
-       <div class="row">
-       {# Render a Bootstrap sendmail dialog #}
-       {% if request.user == history_object.uid %}
-       {% sendmail_dialog request.build_absolute_uri request.user.isGuest %}
-       {% endif %}
-       </div> <!-- row -->
+            </div> <!-- alert unfollow -->
+        </div> <!-- row -->
+        <div class="row">
+            {# Render a Bootstrap sendmail dialog #}
+            {% if request.user == history_object.uid %}
+                {% sendmail_dialog request.build_absolute_uri request.user.isGuest %}
+            {% endif %}
+        </div> <!-- row -->
 
-       {% if not request.user.isGuest %}
-       <div class="row mb-3">
-            <div class="col-md-12">
-                {% if is_plugin_available %}
-                    <a class="btn btn-primary" href="{% url 'plugins:setup' history_object.tool history_object.id%}" id="config_button">Edit configuration</a>
-                {% else %}
-                    <div class="alert alert-warning">
-                        This result has been produced with an user-imported plugin. Configuration changes are not possible.
-                    </div>
-                {% endif %}
-                {% if documentation %}
-                    <a class="btn btn-success" href="{{documentation.url}}">Documentation</a>
-                {%endif%}
-                {% if history_object.status > 2 and history_object.slurm_output != '0' and history_object.uid == request.user %}
+        {% if not request.user.isGuest %}
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    {% if is_plugin_available %}
+                        <a class="btn btn-primary" href="{% url 'plugins:setup' history_object.tool history_object.id%}" id="config_button">Edit configuration</a>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            This result has been produced with an user-imported plugin. Configuration changes are not possible.
+                        </div>
+                    {% endif %}
+                    {% if documentation %}
+                        <a class="btn btn-success" href="{{documentation.url}}">Documentation</a>
+                    {%endif%}
+                    {% if history_object.status > 2 and history_object.slurm_output != '0' and history_object.uid == request.user %}
 
-                <a class="btn btn-danger mybtn-cancel" id="cancelButton_{{h_item.id}}" onClick="cancelDialog.show({{history_object.id}})">Cancel job</a>
-                {# Render a Bootstrap password/cancel dialog #}
-                {% cancel_dialog %}
-                {%endif%}
+                        <a class="btn btn-danger mybtn-cancel" id="cancelButton_{{h_item.id}}" onClick="cancelDialog.show({{history_object.id}})">Cancel job</a>
+                        {# Render a Bootstrap password/cancel dialog #}
+                        {% cancel_dialog %}
+                    {%endif%}
                     <a class="btn btn-secondary mybtn-sendmail" id="sendButton_{{h_item.id}}" onClick="$('#sendmail_modal').modal('show')">Share Results</a>
 
-                <a class="btn btn-secondary mybtn-caption" id="captionButton_{{h_item.id}}" onClick="$('#caption_modal').modal('show')">Set Caption</a>
-                {# Render a Bootstrap caption dialog #}
-                {% caption_dialog result_caption default_caption history_object request.user %}
+                    <a class="btn btn-secondary mybtn-caption" id="captionButton_{{h_item.id}}" onClick="$('#caption_modal').modal('show')">Set Caption</a>
+                    {# Render a Bootstrap caption dialog #}
+                    {% caption_dialog result_caption default_caption history_object request.user %}
 
-                        <a class="btn btn-warning" id="followButton"><span id='followText'>{{follow}}</span></a>
-                {%if developer %}
-                    {% mail_to_developer history_object.tool request.build_absolute_uri %}
-                {%endif%}
-            </div>
-          </div>
-        {%endif%}
-
-<!-- Configuration -->
-<div class="card mb-3">
-    <div class="btn btn-outline-secondary border-0 p-3 rounded-top text-start card-header shadow-sm button-div"  data-bs-toggle="collapse" href="#collapseConfig">
-        <span>
-            Configuration
-        </span>
-    </div>
-    <div id="collapseConfig" class="panel-collapse collapse">
-      <div class="card-body mb-3">
-            <div class="col-md-12">
-                <table class="table col-md-12" id="config_table" style="margin-top:10px;">
-                <tr>
-                <th colspan="2">Tool configuration</th>
-                </tr>
-                {% for key,value in history_object.config_dict.items %}
-                    <tr>
-                        <td>{{key}}:</td>
-                        <td>{{value|mask_uid:request.user.isGuest}}</td>
-                    </tr>
-                {% endfor %}
-                <tr class='additional' style='display:none;'>
-                <th colspan="2">Additional Information</th>
-                </tr>
-                <tr class='additional' style='display:none;'>
-                <td>Analyze command:</td>
-                <td>{{analyze_command|mask_uid:request.user.isGuest}}</td>
-                </tr>
-                <tr class='additional' style='display:none;'>
-                <td>Tool repository:</td>
-                <td>{{tool_repos}}</td>
-                <tr class='additional' style='display:none;'>
-                <td>Tool internal version:</td>
-                <td>{{tool_version}}</td>
-                </tr>
-                <tr class='additional' style='display:none;'>
-                <td>System repository:</td>
-                <td>{{api_repos}}</td>
-                </tr>
-                <tr class='additional' style='display:none;'>
-                <td>System internal version:</td>
-                <td>{{api_version}}</td>
-                </tr>
-                </table>
-           </div> <!-- col-md-12 -->
-            <a class="btn btn-info" onClick="$('.additional').toggle()">Additional information</a>
-            <a class="btn btn-info"
-            onClick="window.prompt('Copy to clipboard: Ctrl+C, Enter', '{{analyze_command | mask_uid:request.user.isGuest | escapejs}}');"
-            id="copy_button"">
-                Copy analyze command
-            </a>
-
-      </div><!-- panel-body -->
-    </div><!-- panel-collapse collapse-->
-  </div><!-- panel panel-default-->
-
-
-<!-- Slurm File -->
-<div class="card mb-3">
-    <div class="btn btn-outline-secondary border-0 p-3 rounded-top text-start card-header shadow-sm button-div"  data-bs-toggle="collapse" href="#collapseOutput">
-        <span>
-          Program&#039;s output
-        </span>
-    </div>
-    <div id="collapseOutput" class="collapse">
-      <div>
-      {% if file_content %}
-      {% if history_object.status > 2 %}
-      <script>
-      function doUpdate() {
-          var tailServiceUrl = '{% url 'history:tailFile' history_object.id %}';
-          $.ajax({type: "GET", url : tailServiceUrl,
-                  success: function (data) {
-                     if (!data)
-                     {
-                        window.location.reload(true)
-                     }
-                     if (data.length > 0)
-                     {
-                        var output = '';
-                        $.each(data, function(index,value){
-                            output += value;
-                        });
-                        $("#logOutputDiv").append(output);
-                        $('#logOutputDiv').stop().animate({
-                          scrollTop: $("#logOutputDiv")[0].scrollHeight
-                        }, 800);
-                     }
-                     setTimeout("doUpdate()", 5000);
-                   }});
-        }
-        setTimeout("doUpdate()", 2000);
-        </script>
-        {% endif %}
-
-          <div class="row">
-            <div class="col-md-12">
-                {% if history_object.status > 2 %}
-                <p class="p-2">The tool is still running. Here you can see the output:</p>
-                {% endif %}
-                <div id="logOutputDiv" class="well well-lg" style="height:450px; overflow-y:scroll; overflow-x: hidden;">
-
-                {% for line in file_content %}
-
-                    {{line}}<br>
-
-                {%endfor%}
-
+                    <a class="btn btn-warning" id="followButton"><span id='followText'>{{follow}}</span></a>
+                    {%if developer %}
+                        {% mail_to_developer history_object.tool request.build_absolute_uri %}
+                    {%endif%}
                 </div>
             </div>
-          </div>
-          {%else%}
-          </div>
-          <div class="row">
-             <div class="col-md-12">
-                <p>Process status is <strong>{{ history_object.status_name }}</strong><br/>Because you did not use batchmode we can't display any information</p>
-             </div>
-
-          {%endif%}
-
-
-      </div><!-- panel-body -->
-    </div><!-- panel-collapse collapse-->
-  </div><!-- panel panel-default-->
-
-<!-- Notes -->
-<div class="card mb-3">
-    <div class="btn btn-outline-secondary border-0 p-3 rounded-top text-start card-header shadow-sm button-div"  data-bs-toggle="collapse" href="#collapseNotes">
-        <span data-bs-toggle="collapse" href="#collapseNotes">
-            Notes <span id='note_count'>(0)</span>
-        </span>
-    </div>
-    <div id="collapseNotes" class="panel-collapse collapse">
-        <div class="card-body" id='loadComments'>
-        </div><!-- panel-body -->
-    </div><!-- panel-collapse collapse-->
-  </div><!-- panel panel-default-->
-
-
-<!-- Results -->
-<div class="card mb-3">
-    <div class="btn btn-outline-secondary border-0 p-3 rounded-top text-start card-header shadow-sm button-div"  data-bs-toggle="collapse" href="#collapseResults">
-        <span data-bs-toggle="collapse" href="#collapseResults">
-
-        {% if history_object.status > 0 %}
-            No Results (Process status: {{history_object.status_name}})
-        {% else %}
-            Results
         {%endif%}
-        </span>
-    </div>
-    <div id="collapseResults" class="panel-collapse collapse">
-      <div class="card-body">
-        <div class="row">
-         {%if not file_list %}
-                {% if history_object.status == history_object.processStatus.finished_no_output %}
-                    <div class="col-md-3">
-                        <p>There was no output produced!</p>
-                    </div>
-                {% endif %}
-                    <div class="col-md-3">
-                        <p>{{history_object.tool}} produced no plots.</p>
-                    </div>
-                   <div class="col-md-12">
-                   </div>
 
-
-            {%else%}
-
-            <div class="col-md-12">
-                <ul class="jqueryFileTree">
-                {{ file_list|preview_tree|mask_safe_uid:request.user.isGuest }}
-                </ul>
+        <!-- Configuration -->
+        <div class="card mb-3">
+            <div class="btn btn-outline-secondary border-0 p-3 rounded-top text-start card-header shadow-sm button-div"  data-bs-toggle="collapse" href="#collapseConfig">
+                <span>
+                    Configuration
+                </span>
             </div>
-            {%endif%}
+            <div id="collapseConfig" class="panel-collapse collapse">
+                <div class="card-body mb-3">
+                    <div class="col-md-12">
+                        <table class="table col-md-12" id="config_table" style="margin-top:10px;">
+                            <tr>
+                                <th colspan="2">Tool configuration</th>
+                            </tr>
+                            {% for key,value in history_object.config_dict.items %}
+                                <tr>
+                                    <td>{{key}}:</td>
+                                    <td>{{value|mask_uid:request.user.isGuest}}</td>
+                                </tr>
+                            {% endfor %}
+                            <tr class='additional' style='display:none;'>
+                                <th colspan="2">Additional Information</th>
+                            </tr>
+                            <tr class='additional' style='display:none;'>
+                                <td>Analyze command:</td>
+                                <td>{{analyze_command|mask_uid:request.user.isGuest}}</td>
+                            </tr>
+                            <tr class='additional' style='display:none;'>
+                                <td>Tool repository:</td>
+                                <td>{{tool_repos}}</td>
+                                <tr class='additional' style='display:none;'>
+                                    <td>Tool internal version:</td>
+                                    <td>{{tool_version}}</td>
+                                </tr>
+                                <tr class='additional' style='display:none;'>
+                                    <td>System repository:</td>
+                                    <td>{{api_repos}}</td>
+                                </tr>
+                                <tr class='additional' style='display:none;'>
+                                    <td>System internal version:</td>
+                                    <td>{{api_version}}</td>
+                                </tr>
+                            </table>
+                        </div> <!-- col-md-12 -->
+                        <a class="btn btn-info" onClick="$('.additional').toggle()">Additional information</a>
+                        <a class="btn btn-info"
+                            onClick="window.prompt('Copy to clipboard: Ctrl+C, Enter', '{{analyze_command | mask_uid:request.user.isGuest | escapejs}}');"
+                            id="copy_button">
+                            Copy analyze command
+                        </a>
+
+                    </div><!-- panel-body -->
+                </div><!-- panel-collapse collapse-->
+            </div><!-- panel panel-default-->
+
+
+            <!-- Slurm File -->
+            <div class="card mb-3">
+                <div class="btn btn-outline-secondary border-0 p-3 rounded-top text-start card-header shadow-sm button-div"  data-bs-toggle="collapse" href="#collapseOutput">
+                    <span>
+                        Program&#039;s output
+                    </span>
+                </div>
+                <div id="collapseOutput" class="collapse">
+                    <div>
+                        {% if file_content %}
+                            {% if history_object.status > 2 %}
+                                <script>
+                                    function doUpdate() {
+                                        var tailServiceUrl = '{% url 'history:tailFile' history_object.id %}';
+                                        $.ajax({type: "GET", url : tailServiceUrl,
+                                            success: function (data) {
+                                                if (!data)
+                                                {
+                                                    window.location.reload(true)
+                                                }
+                                                if (data.length > 0)
+                                                {
+                                                    var output = '';
+                                                    $.each(data, function(index,value){
+                                                        output += value;
+                                                    });
+                                                    $("#logOutputDiv").append(output);
+                                                    $('#logOutputDiv').stop().animate({
+                                                        scrollTop: $("#logOutputDiv")[0].scrollHeight
+                                                    }, 800);
+                                                }
+                                                setTimeout("doUpdate()", 5000);
+                                            }});
+                                    }
+                                    setTimeout("doUpdate()", 2000);
+                                </script>
+                            {% endif %}
+
+                            <div class="row">
+                                <div class="col-md-12">
+                                    {% if history_object.status > 2 %}
+                                        <p class="p-2">The tool is still running. Here you can see the output:</p>
+                                    {% endif %}
+                                    <div id="logOutputDiv" class="well well-lg" style="height:450px; overflow-y:scroll; overflow-x: hidden;">
+
+                                        {% for line in file_content %}
+
+                                            {{line}}<br>
+
+                                        {%endfor%}
+
+                                    </div>
+                                </div>
+                            </div>
+                        {%else%}
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <p>Process status is <strong>{{ history_object.status_name }}</strong><br/>Because you did not use batchmode we can't display any information</p>
+                                </div>
+
+                        {%endif%}
+
+
+                    </div><!-- panel-body -->
+                </div><!-- panel-collapse collapse-->
+            </div><!-- panel panel-default-->
+
+            <!-- Notes -->
+            <div class="card mb-3">
+                <div class="btn btn-outline-secondary border-0 p-3 rounded-top text-start card-header shadow-sm button-div"  data-bs-toggle="collapse" href="#collapseNotes">
+                    <span data-bs-toggle="collapse" href="#collapseNotes">
+                        Notes <span id='note_count'>(0)</span>
+                    </span>
+                </div>
+                <div id="collapseNotes" class="panel-collapse collapse">
+                    <div class="card-body" id='loadComments'>
+                    </div><!-- panel-body -->
+                </div><!-- panel-collapse collapse-->
+            </div><!-- panel panel-default-->
+
+
+            <!-- Results -->
+            <div class="card mb-3">
+                <div class="btn btn-outline-secondary border-0 p-3 rounded-top text-start card-header shadow-sm button-div"  data-bs-toggle="collapse" href="#collapseResults">
+                    <span data-bs-toggle="collapse" href="#collapseResults">
+
+                        {% if history_object.status > 0 %}
+                            No Results (Process status: {{history_object.status_name}})
+                        {% else %}
+                            Results
+                        {%endif%}
+                    </span>
+                </div>
+                <div id="collapseResults" class="panel-collapse collapse">
+                    <div class="card-body">
+                        <div class="row">
+                            {%if not file_list %}
+                                {% if history_object.status == history_object.processStatus.finished_no_output %}
+                                    <div class="col-md-3">
+                                        <p>There was no output produced!</p>
+                                    </div>
+                                {% endif %}
+                                <div class="col-md-3">
+                                    <p>{{history_object.tool}} produced no plots.</p>
+                                </div>
+                                <div class="col-md-12">
+                                </div>
+
+
+                            {%else%}
+
+                                <div class="col-md-12">
+                                    <ul class="jqueryFileTree">
+                                        {{ file_list|preview_tree|mask_safe_uid:request.user.isGuest }}
+                                    </ul>
+                                </div>
+                            {%endif%}
+                        </div>
+
+                    </div><!-- panel-body -->
+                </div><!-- panel-collapse collapse-->
+            </div><!-- panel panel-default-->
         </div>
+    </div>
 
-      </div><!-- panel-body -->
-    </div><!-- panel-collapse collapse-->
-  </div><!-- panel panel-default-->
-</div>
+    <script>
+        function doCount() {
+            var url = '{% url 'history:count-notes' history_object.id 0 %}';
+            $.ajax({
+                type: "GET",
+                url : url,
+                success: function (data) {
+                    $('#note_count').text('(' + data + ')');
+                }
+            });
+        }
 
-<script>
-    function doCount() {
-        var url = '{% url 'history:count-notes' history_object.id 0 %}';
-        $.ajax({
-            type: "GET",
-            url : url,
-            success: function (data) {
-                $('#note_count').text('(' + data + ')');
-            }
-        });
-    }
-
-    function capitalizeFirst(string) {
-        return string.charAt(0).toUpperCase() + string.slice(1);
-    }
+        function capitalizeFirst(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
 
 
-    $(document).ready(function() {
+        $(document).ready(function() {
 
-        doCount();
+            doCount();
 
-        $('#collapseNotes').on('show.bs.collapse', function() {
-            var url='{% url 'history:result-comments' history_object.id %}';
-            $('#loadComments').load(url);
-        });
-
-
-        $("img").lazyload({
-            effect : "fadeIn",
-            threshold : 200,
-            placeholder:  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwcHgiIGhlaWdodD0iMTAwcHgiIHZpZXdCb3g9IjAgMCA0MDAgMzAwIgogICAgIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHN0eWxlPgogIEBrZXlmcmFtZXMgc3Bpbm5lci1ib3JkZXIgewogICAgdG8geyB0cmFuc2Zvcm06IHJvdGF0ZSgzNjBkZWcpOyB9CiAgfQogIGRpdiB7CglkaXNwbGF5OiBpbmxpbmUtYmxvY2s7Cgl3aWR0aDogMnJlbTsKCWhlaWdodDogMnJlbTsKCXZlcnRpY2FsLWFsaWduOiB0ZXh0LWJvdHRvbTsKCWJvcmRlcjogLjI1ZW0gc29saWQgY3VycmVudENvbG9yOwogIAlib3JkZXItcmlnaHQtY29sb3I6IGN1cnJlbnRjb2xvcjsKCWJvcmRlci1yaWdodC1jb2xvcjogdHJhbnNwYXJlbnQ7Cglib3JkZXItcmFkaXVzOiA1MCU7Cgktd2Via2l0LWFuaW1hdGlvbjogc3Bpbm5lci1ib3JkZXIgLjc1cyBsaW5lYXIgaW5maW5pdGU7CglhbmltYXRpb246IHNwaW5uZXItYm9yZGVyIC43NXMgbGluZWFyIGluZmluaXRlOwogIH0KCiAgPC9zdHlsZT4KICA8c3dpdGNoPgogICAgPGZvcmVpZ25PYmplY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiCiAgICAgICAgICAgICAgICAgICByZXF1aXJlZEV4dGVuc2lvbnM9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGh0bWwiPgogICAgICA8Ym9keSB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94aHRtbCI+Cgk8Y2VudGVyPgoJCTxkaXYgY2xhc3M9InNwaW5uZXItYm9yZGVyIiByb2xlPSJzdGF0dXMiPgogIAkgIAkgIDxzcGFuIHN0eWxlPSJkaXNwbGF5Om5vbmU7Ij5Mb2FkaW5nLi4uPC9zcGFuPgoJCTwvZGl2PgoJPC9jZW50ZXI+CiAgICAgIDwvYm9keT4KICAgIDwvZm9yZWlnbk9iamVjdD4KICA8L3N3aXRjaD4KPC9zdmc+Cg=="
-        });
+            $('#collapseNotes').on('show.bs.collapse', function() {
+                var url='{% url 'history:result-comments' history_object.id %}';
+                $('#loadComments').load(url);
+            });
 
 
-        $('#followButton').on('click', function() {
-            text = $('#followText').text().toLowerCase();
-            if(text == "follow"){
-                $.ajax({
-                    type: "GET",
-                    url: "{% url 'history:follow' history_object.id%}",
-                    async: false,
-                    data: "button=1",
-                    success: function(text) {
-                        if(text.toLowerCase() == "unfollow") {
-                            $('#followText').text(text);
-                            $('#alert_follow').show();
-                            $('#alert_unfollow').hide();
+            $("img").lazyload({
+                effect : "fadeIn",
+                threshold : 200,
+                placeholder:  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwcHgiIGhlaWdodD0iMTAwcHgiIHZpZXdCb3g9IjAgMCA0MDAgMzAwIgogICAgIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHN0eWxlPgogIEBrZXlmcmFtZXMgc3Bpbm5lci1ib3JkZXIgewogICAgdG8geyB0cmFuc2Zvcm06IHJvdGF0ZSgzNjBkZWcpOyB9CiAgfQogIGRpdiB7CglkaXNwbGF5OiBpbmxpbmUtYmxvY2s7Cgl3aWR0aDogMnJlbTsKCWhlaWdodDogMnJlbTsKCXZlcnRpY2FsLWFsaWduOiB0ZXh0LWJvdHRvbTsKCWJvcmRlcjogLjI1ZW0gc29saWQgY3VycmVudENvbG9yOwogIAlib3JkZXItcmlnaHQtY29sb3I6IGN1cnJlbnRjb2xvcjsKCWJvcmRlci1yaWdodC1jb2xvcjogdHJhbnNwYXJlbnQ7Cglib3JkZXItcmFkaXVzOiA1MCU7Cgktd2Via2l0LWFuaW1hdGlvbjogc3Bpbm5lci1ib3JkZXIgLjc1cyBsaW5lYXIgaW5maW5pdGU7CglhbmltYXRpb246IHNwaW5uZXItYm9yZGVyIC43NXMgbGluZWFyIGluZmluaXRlOwogIH0KCiAgPC9zdHlsZT4KICA8c3dpdGNoPgogICAgPGZvcmVpZ25PYmplY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiCiAgICAgICAgICAgICAgICAgICByZXF1aXJlZEV4dGVuc2lvbnM9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGh0bWwiPgogICAgICA8Ym9keSB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94aHRtbCI+Cgk8Y2VudGVyPgoJCTxkaXYgY2xhc3M9InNwaW5uZXItYm9yZGVyIiByb2xlPSJzdGF0dXMiPgogIAkgIAkgIDxzcGFuIHN0eWxlPSJkaXNwbGF5Om5vbmU7Ij5Mb2FkaW5nLi4uPC9zcGFuPgoJCTwvZGl2PgoJPC9jZW50ZXI+CiAgICAgIDwvYm9keT4KICAgIDwvZm9yZWlnbk9iamVjdD4KICA8L3N3aXRjaD4KPC9zdmc+Cg=="
+            });
+
+
+            $('#followButton').on('click', function() {
+                text = $('#followText').text().toLowerCase();
+                if(text == "follow"){
+                    $.ajax({
+                        type: "GET",
+                        url: "{% url 'history:follow' history_object.id%}",
+                        async: false,
+                        data: "button=1",
+                        success: function(text) {
+                            if(text.toLowerCase() == "unfollow") {
+                                $('#followText').text(text);
+                                $('#alert_follow').show();
+                                $('#alert_unfollow').hide();
+                            }
+                            // show only info, when following worked
                         }
-                        // show only info, when following worked
+                    });
+
+                } else {
+                    $.ajax({
+                        type: "GET",
+                        url: "{% url 'history:unfollow' history_object.id%}",
+                        async: false,
+                        data: "button=1",
+                        success: function(text) {
+                            if(text.toLowerCase() == "follow") {
+                                $('#followText').text(text);
+                                $('#alert_unfollow').show();
+                                $('#alert_follow').hide();
+                            }
+                            // show only info, when following worked
+                        }
+                    });
+
+                }
+
+            });
+
+            $('.jqueryFileTree a').on('click', function(target) {
+                if($(target.target).hasClass('pdf_download')) {
+                    return;
+                }
+                var list_el = $(target.target).parent();
+                list_el.toggleClass("expanded");
+                list_el.toggleClass("collapsed");
+                var next_list = $(target.target).next();
+
+                var children = $(next_list.parent()).children();
+                var len = children.length;
+                var ret = false;
+
+                if(list_el.hasClass('fancybox')) {
+                    ret = true;
+                }
+
+                for (var i = 0; i < len; i++) {
+                    if(!$(children[i]).hasClass('a')) {
+                        $($(children[i]).children()).toggle();
                     }
-                });
-
-            } else {
-                $.ajax({
-                    type: "GET",
-                    url: "{% url 'history:unfollow' history_object.id%}",
-                    async: false,
-                    data: "button=1",
-                    success: function(text) {
-                        if(text.toLowerCase() == "follow") {
-                            $('#followText').text(text);
-                            $('#alert_unfollow').show();
-                            $('#alert_follow').hide();
-                        }
-                        // show only info, when following worked
-                        }
-                   });
-
                 }
 
+                // Trigger scroll event, that lazy load plugins gets fired
+                $(window).trigger("scroll");
+
+                return ret; //don't activate the link
+            });
+
+            $(".fancybox").fancybox({
+                openEffect  : 'none',
+                closeEffect : 'none'
+            });
+
+            {% if request.user != history_object.uid %}
+                $('#sendButton_{{h_item.id}}').attr('disabled', true);
+                $('#captionButton_{{h_item.id}}').attr('disabled', true);
+            {% endif %}
         });
-
-        $('.jqueryFileTree a').on('click', function(target) {
-            if($(target.target).hasClass('pdf_download')) {
-                return;
-            }
-            var list_el = $(target.target).parent();
-            list_el.toggleClass("expanded");
-            list_el.toggleClass("collapsed");
-            var next_list = $(target.target).next();
-
-            var children = $(next_list.parent()).children();
-            var len = children.length;
-            var ret = false;
-
-            if(list_el.hasClass('fancybox')) {
-                ret = true;
-            }
-
-            for (var i = 0; i < len; i++) {
-                if(!$(children[i]).hasClass('a')) {
-                    $($(children[i]).children()).toggle();
-                }
-            }
-
-            // Trigger scroll event, that lazy load plugins gets fired
-            $(window).trigger("scroll");
-
-            return ret; //don't activate the link
-        });
-
-        $(".fancybox").fancybox({
-            openEffect  : 'none',
-            closeEffect : 'none'
-        });
-
-        {% if request.user != history_object.uid %}
-        $('#sendButton_{{h_item.id}}').attr('disabled', true);
-        $('#captionButton_{{h_item.id}}').attr('disabled', true);
-        {% endif %}
-    });
-</script>
+    </script>
 
 {% endblock %}

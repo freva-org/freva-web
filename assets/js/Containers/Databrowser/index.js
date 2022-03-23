@@ -120,7 +120,7 @@ class Databrowser extends React.Component {
     const { dispatch } = this.props;
 
     // Wait until facets are loaded
-    if (facets.length === 0) {
+    if (!facets) {
       return (
         <Spinner />
       );
@@ -139,8 +139,9 @@ class Databrowser extends React.Component {
           {
             Object.keys(selectedFacets).length !== 0 ?
               <Col md={12}>
-                <Card className="p-2">
+                <Card className="shadow-sm">
                   <a
+                    className="m-3"
                     href="#" onClick={
                       (e) => {
                         e.preventDefault(); dispatch(clearAllFacets());
@@ -157,11 +158,11 @@ class Databrowser extends React.Component {
               {facetPanels}
             </Accordion>
 
-            <Card className="mt-2 p-2">
-              freva --databrowser
+            <Card className="mt-2 p-3 d-block shadow-sm">
+              freva databrowser
               {
                 _.map(selectedFacets, (value, key) => {
-                  return <span key={`command-${key}`}> {key}=<strong>{value}</strong></span>;
+                  return <React.Fragment key={`command-${key}`}> {key}=<strong>{value}</strong></React.Fragment>;
                 })
               }
             </Card>

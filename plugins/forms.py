@@ -9,7 +9,6 @@ from pathlib import Path
 from plugins.utils import ssh_call, get_scheduler_hosts, find_owner
 from evaluation_system.misc.utils import PrintableList
 from django.conf import settings
-import os
 
 
 class PluginNotFoundError(Exception):
@@ -81,7 +80,7 @@ class SolrFieldWidget(Input):
             "plugins/solrfield.html",
             {
                 "name": name,
-                "value": value,
+                "value": ",".join(value) if isinstance(value, list) else value,
                 "attrs": attrs,
                 "facet": self.facet,
                 "group": self.group,

@@ -59,25 +59,30 @@
             {% csrf_token %}
             <div class="form-group" style="padding-left:0px;">
               <div class="input-group">
-                <button class="btn text-white" type="button" id='guest_credentials'
+                <button class="btn text-white navbar-button" type="button" id='guest_credentials'
                   title='Press to insert the credentials for the guest login.' data-bs-toggle="tooltip"
                   data-bs-placement="top" data-container='body'>
                   Guest?
                 </button>
                 <input name="user" type="text" placeholder="Username" class="form-control" id='in_user'>
                 <input name="password" type="password" placeholder="Password" class="form-control" id='in_pwd'>
-                <input name="next" type="hidden" id="next_page">
-            <button type="submit" class="btn text-white">Sign in</button>
+                <input name="next" type="hidden" id="next_page" value="{% firstof request.path '/' %}">
+                <button type="submit" class="btn text-white navbar-button">Sign in</button>
             {% external_group as show_external%}
             {%if show_external %}
-            <button class="btn text-white" id="signup">Sign Up</button>
+              <button class="btn text-white navbar-button" id="signup">Sign Up</button>
             {%endif%}
+
               </div><!-- /input-group -->
             </div>
           </form>
           {% else %}
           <ul class="navbar-nav fs-6">
-            <li class="nav-item"> <a class="nav-link" href="{% url 'base:logout' %}">logout ({{ request.user.username }})</a></li>
+            <li class="nav-item">
+              <form action="{% url 'base:logout' %}" method="post" id="logout-link">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-link nav-link" name="something">logout ({{ request.user.username }})</button>
+              </form>
           </ul>
           {% endif %}
         </div>
@@ -86,9 +91,7 @@
   </div>
 </div>
 
-
 <script>
-
   $(document).ready(function () {
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {

@@ -8,42 +8,40 @@ from django.views.decorators.debug import sensitive_variables, sensitive_post_pa
 from django_evaluation.monitor import _restart
 from django.conf import settings
 from django.urls import reverse
-from subprocess import Popen, STDOUT, PIPE
 from django_evaluation.utils import settings_login_required
-from django.core.exceptions import PermissionDenied
 from evaluation_system.misc import config
+from django.utils.http import url_has_allowed_host_and_scheme
 
 
 @sensitive_variables("passwd")
 @sensitive_post_parameters("password")
 def home(request):
     """Default view for the root"""
-
     login_failed = False
-
     guest_login = None
 
     next_page = request.GET.get("next", None)
     forward = request.POST.get("next", None)
     if not request.user.is_authenticated:
         try:
-            user = request.POST.get("user", "")
+            username = request.POST.get("user", "")
             passwd = request.POST.get("password", "")
-            if user:
-                u = auth.authenticate(username=user, password=passwd)
-                if u:
-                    auth.login(request, u)
-
-                    guest_login = u.groups.filter(name="Guest")
-
-                    if forward:
+            if username:
+                user_object = auth.authenticate(username=username, password=passwd)
+                if user_object:
+                    auth.login(request, user_object)
+                    guest_login = user_object.isGuest()
+                    if forward and url_has_allowed_host_and_scheme(
+                        forward, allowed_hosts=request.get_host()
+                    ):
                         return HttpResponseRedirect(forward)
+                    else:
+                        return HttpResponseRedirect("/")
 
                 else:
                     raise Exception("Login failed")
 
         except Exception as e:
-
             # do not forget the forward after failed login
             if forward:
                 next_page = forward
@@ -141,8 +139,7 @@ def logout(request):
     Logout view.
     """
     auth.logout(request)
-
-    return render(request, "base/home.html", {"k": "logged out"})
+    return HttpResponseRedirect("/")
 
 
 @login_required()

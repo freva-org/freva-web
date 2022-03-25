@@ -2,7 +2,7 @@
 {% block plain %}
 Dear {{user.first_name}},
 
-your freva account is active now. 
+your freva account is active now.
 You can login on {{website}} using your username and password
 
 Username: freva_{{user.username}}

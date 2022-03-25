@@ -21,7 +21,7 @@ background: {{main_color}} !important;
 }
 
 .nav .open>a, .nav .open>a:hover, .nav .open>a:focus {
-   border-color: {{border_color}};
+border-color: {{border_color}};
 }
 
 .navbar .navbar-button {
@@ -97,7 +97,7 @@ border-bottom:2px solid {{main_color}};
 }
 
 #home-carousel {
-   border-bottom:5px solid {{main_color}};
+border-bottom:5px solid {{main_color}};
 }
 
 /* Events - Accordion*/

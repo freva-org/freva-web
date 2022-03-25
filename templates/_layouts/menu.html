@@ -2,114 +2,114 @@
 
 {% block menu %}
 
-{% load settingstags %}
+    {% load settingstags %}
 
-<style>
-  @media (max-width: 768px) {
-    .navbar-collapse {
-      max-height: 100%;
-    }
-  }
-</style>
-<!-- Header starts -->
+    <style>
+        @media (max-width: 768px) {
+            .navbar-collapse {
+                max-height: 100%;
+            }
+        }
+    </style>
+    <!-- Header starts -->
 
-<header style="padding-top:0px;">
-  <div class="container">
-    <div class="row justify-content-between">
-      <div class="col-md-4 col-sm-6">
-        <!-- Logo and site link -->
-        <div class="logo">
-          <!-- <h1><a href="{% url 'base:home' %}"><img src="{{ STATIC_URL }}img/miklip-logo.png" style="width:100%;"/></a></h1> -->
-          <h1><a href="{% url 'base:home' %}"><img src="{% settings_val 'INSTITUTION_LOGO' %}"
-                style="width:100%;" /></a></h1>
-        </div>
-      </div>
-      <div class="col-md-2 col-sm-4 float-right d-none d-sm-block" style="padding-top:20px;">
-        <!-- Logo and site link -->
-        <div class="logo">
-          <!-- <h1><a href="{% url 'base:home' %}"><img src="{{ STATIC_URL }}img/miklip-logo.png" style="width:100%;"/></a></h1> -->
-          <h1><a href="{% url 'base:home' %}"><img src="{% settings_val 'FREVA_LOGO' %}" style="width:100%;" /></a></h1>
-        </div>
-      </div>
-    </div>
-  </div>
-</header>
-
-<!-- Header ends -->
-
-<!-- Navigation Starts -->
-
-<div class="navbar-container mb-2" role="banner">
-  <div class="container" id="navigation">
-    <nav class="navbar navbar-expand-lg navbar-dark w-100 justify-content-between">
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div id="navbarSupportedContent" class="fs-6 collapse navbar-collapse">
-        {% get_menu_entries 'MENU_ENTRIES' as menu_entries %}
-        <ul class="navbar-nav me-auto">
-          {% for item in menu_entries %}
-          <li class="nav-item"><a id={{item.html_id}} class="nav-link {% if request.path == item.url %} active {% endif %}" active href={{item.url}}>{{item.name}}</a></li>
-          {% endfor %}
-        </ul>
-        <div class="d-flex">
-          {% if not request.user.is_authenticated %}
-          <form class="navbar-form d-flex justify-around-content" method="post" action="{% url 'base:home' %}">
-            {% csrf_token %}
-            <div class="form-group" style="padding-left:0px;">
-              <div class="input-group">
-                <button class="btn text-white navbar-button" type="button" id='guest_credentials'
-                  title='Press to insert the credentials for the guest login.' data-bs-toggle="tooltip"
-                  data-bs-placement="top" data-container='body'>
-                  Guest?
-                </button>
-                <input name="user" type="text" placeholder="Username" class="form-control" id='in_user'>
-                <input name="password" type="password" placeholder="Password" class="form-control" id='in_pwd'>
-                <input name="next" type="hidden" id="next_page" value="{% firstof request.path '/' %}">
-                <button type="submit" class="btn text-white navbar-button">Sign in</button>
-            {% external_group as show_external%}
-            {%if show_external %}
-              <button class="btn text-white navbar-button" id="signup">Sign Up</button>
-            {%endif%}
-
-              </div><!-- /input-group -->
+    <header style="padding-top:0px;">
+        <div class="container">
+            <div class="row justify-content-between">
+                <div class="col-md-4 col-sm-6">
+                    <!-- Logo and site link -->
+                    <div class="logo">
+                        <!-- <h1><a href="{% url 'base:home' %}"><img src="{{ STATIC_URL }}img/miklip-logo.png" style="width:100%;"/></a></h1> -->
+                        <h1><a href="{% url 'base:home' %}"><img src="{% settings_val 'INSTITUTION_LOGO' %}"
+                            style="width:100%;" /></a></h1>
+                    </div>
+                </div>
+                <div class="col-md-2 col-sm-4 float-right d-none d-sm-block" style="padding-top:20px;">
+                    <!-- Logo and site link -->
+                    <div class="logo">
+                        <!-- <h1><a href="{% url 'base:home' %}"><img src="{{ STATIC_URL }}img/miklip-logo.png" style="width:100%;"/></a></h1> -->
+                        <h1><a href="{% url 'base:home' %}"><img src="{% settings_val 'FREVA_LOGO' %}" style="width:100%;" /></a></h1>
+                    </div>
+                </div>
             </div>
-          </form>
-          {% else %}
-          <ul class="navbar-nav fs-6">
-            <li class="nav-item">
-              <form action="{% url 'base:logout' %}" method="post" id="logout-link">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-link nav-link" name="something">logout ({{ request.user.username }})</button>
-              </form>
-          </ul>
-          {% endif %}
         </div>
-      </div>
-    </nav>
-  </div>
-</div>
+    </header>
 
-<script>
-  $(document).ready(function () {
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-      return new bootstrap.Tooltip(tooltipTriggerEl)
-    })
-    $('#guest_credentials').on('click', function () {
-      $('#in_user').val('guest');
-      $('#in_pwd').val('miklip');
-    });
+    <!-- Header ends -->
 
-    $('#signup').on('click', function () {
-      document.location = "{%url 'external:external_register'%}";
-      return false;
-    });
+    <!-- Navigation Starts -->
 
-  });
-</script>
-<!-- Navigation Ends -->
+    <div class="navbar-container mb-2" role="banner">
+        <div class="container" id="navigation">
+            <nav class="navbar navbar-expand-lg navbar-dark w-100 justify-content-between">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div id="navbarSupportedContent" class="fs-6 collapse navbar-collapse">
+                    {% get_menu_entries 'MENU_ENTRIES' as menu_entries %}
+                    <ul class="navbar-nav me-auto">
+                        {% for item in menu_entries %}
+                            <li class="nav-item"><a id={{item.html_id}} class="nav-link {% if request.path == item.url %} active {% endif %}" active href={{item.url}}>{{item.name}}</a></li>
+                        {% endfor %}
+                    </ul>
+                    <div class="d-flex">
+                        {% if not request.user.is_authenticated %}
+                            <form class="navbar-form d-flex justify-around-content" method="post" action="{% url 'base:home' %}">
+                                {% csrf_token %}
+                                <div class="form-group" style="padding-left:0px;">
+                                    <div class="input-group">
+                                        <button class="btn text-white navbar-button" type="button" id='guest_credentials'
+                                            title='Press to insert the credentials for the guest login.' data-bs-toggle="tooltip"
+                                            data-bs-placement="top" data-container='body'>
+                                            Guest?
+                                        </button>
+                                        <input name="user" type="text" placeholder="Username" class="form-control" id='in_user'>
+                                        <input name="password" type="password" placeholder="Password" class="form-control" id='in_pwd'>
+                                        <input name="next" type="hidden" id="next_page" value="{% firstof request.path '/' %}">
+                                        <button type="submit" class="btn text-white navbar-button">Sign in</button>
+                                        {% external_group as show_external%}
+                                        {%if show_external %}
+                                            <button class="btn text-white navbar-button" id="signup">Sign Up</button>
+                                        {%endif%}
+
+                                    </div><!-- /input-group -->
+                                </div>
+                            </form>
+                        {% else %}
+                            <ul class="navbar-nav fs-6">
+                                <li class="nav-item">
+                                    <form action="{% url 'base:logout' %}" method="post" id="logout-link">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-link nav-link" name="something">logout ({{ request.user.username }})</button>
+                                    </form>
+                                </ul>
+                        {% endif %}
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl)
+            })
+            $('#guest_credentials').on('click', function () {
+                $('#in_user').val('guest');
+                $('#in_pwd').val('miklip');
+            });
+
+            $('#signup').on('click', function () {
+                document.location = "{%url 'external:external_register'%}";
+                return false;
+            });
+
+        });
+    </script>
+    <!-- Navigation Ends -->
 
 
 {% endblock %}
@@ -117,56 +117,56 @@
 
 {% block footer %}
 
-<!-- Footer -->
-<footer>
-  <div class="container">
-    <div class="row">
-      <div class="col-md-4">
-        <!-- Widget 1 -->
-        <div class="widget">
-          <h4>About Us</h4>
-          <!--    INTEGRAted data and evaluation system for decadal scale predicTION. -->
-          <p>
-            {% settings_val 'ABOUT_US_TEXT' %}
-          </p>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <!-- widget 2 -->
-        <div class="widget">
-          <h4>Contact</h4>
-          <ul>
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <!-- Widget 1 -->
+                    <div class="widget">
+                        <h4>About Us</h4>
+                        <!--    INTEGRAted data and evaluation system for decadal scale predicTION. -->
+                        <p>
+                            {% settings_val 'ABOUT_US_TEXT' %}
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <!-- widget 2 -->
+                    <div class="widget">
+                        <h4>Contact</h4>
+                        <ul>
 
-            {% get_menu_entries 'CONTACTS' as contacts %}
-            {% for item in contacts %}
-            <li>{{ item }}</li>
-            {% endfor %} (Also for password reset)
-          </ul>
+                            {% get_menu_entries 'CONTACTS' as contacts %}
+                            {% for item in contacts %}
+                                <li>{{ item }}</li>
+                            {% endfor %} (Also for password reset)
+                        </ul>
 
-        </div>
-      </div>
-      <div class="col-md-4">
-        <!-- Widget 3 -->
-        <div class="widget">
-          <h4>Imprint</h4>
-          <ul>
-            {% get_menu_entries 'IMPRINT' as imprint %}
-            {% for item in imprint %}
-            <li>{{ item }}</li>
-            {% endfor %}
-          </ul>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <!-- Widget 3 -->
+                    <div class="widget">
+                        <h4>Imprint</h4>
+                        <ul>
+                            {% get_menu_entries 'IMPRINT' as imprint %}
+                            {% for item in imprint %}
+                                <li>{{ item }}</li>
+                            {% endfor %}
+                        </ul>
 
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <hr />
+                <div class="col-md-12">
+                    <p class="copy pull-left">
+                        Created by <a href="https://github.com/FREVA-CLINT/Freva" target="_blank">Freva</a></p>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-    <div class="row">
-      <hr />
-      <div class="col-md-12">
-        <p class="copy pull-left">
-          Created by <a href="https://github.com/FREVA-CLINT/Freva" target="_blank">Freva</a></p>
-      </div>
-    </div>
-  </div>
-</footer>
+    </footer>
 
 {% endblock %}

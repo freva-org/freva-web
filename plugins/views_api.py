@@ -7,6 +7,7 @@ import evaluation_system.api.plugin_manager as pm
 from evaluation_system.model.user import User
 from evaluation_system.misc import config
 from django_evaluation.ldaptools import get_ldap_object
+from plugins.LdapUser import LdapUser
 from plugins.utils import get_plugin_or_404, plugin_metadata_as_dict
 from .forms import PluginWeb
 from .serializers import PluginSerializer
@@ -30,7 +31,7 @@ class PluginDetail(APIView):
         pm.reload_plugins(request.user.username)
         user = None
         try:
-            user = User(request.user.username)
+            user = LdapUser(request.user.username)
         except:
             user = User()
         plugin = get_plugin_or_404(plugin_name, user=user)
@@ -94,7 +95,7 @@ class SendMailToDeveloper(APIView):
         if url:
             text = text + "\nThis email has been send from this url: " + url
         try:
-            user = User(request.user.username)
+            user = LdapUser(request.user.username)
         except:
             user = User()
 

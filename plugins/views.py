@@ -14,6 +14,7 @@ import evaluation_system.api.plugin_manager as pm
 
 from evaluation_system.model.user import User
 from evaluation_system.misc import config
+from plugins.LdapUser import LdapUser
 
 from plugins.utils import (
     get_plugin_or_404,
@@ -70,7 +71,7 @@ def search_similar_results(request, plugin_name=None, history_id=None):
         hist_objects = History.objects.filter(uid=request.user).filter(tool=plugin_name)
     else:
         try:
-            user = User(request.user.username)
+            user = LdapUser(request.user.username)
         except:
             user = User()
         if history_id is not None:
@@ -112,22 +113,13 @@ def setup(request, plugin_name, row_id=None):
 
     if user_can_submit:
         try:
-            user = User(request.user.username, request.user.email)
+            user = LdapUser(request.user.username)
         except:
             user = User()
     else:
         user = User()
 
-    home_dir = user.getUserHome()
-    scratch_dir = None
-
-    try:
-        scratch_dir = user.getUserScratch()
-    except:
-        pass
-
     plugin = get_plugin_or_404(plugin_name, user=user)
-    plugin_web = PluginWeb(plugin)
 
     error_msg = pm.get_error_warning(plugin_name)[0]
 
@@ -286,6 +278,14 @@ def setup(request, plugin_name, row_id=None):
 
     plugin_dict = pm.get_plugin_metadata(plugin_name, user_name=request.user.username)
 
+    home_dir = user.getUserHome()
+    scratch_dir = None
+    try:
+        scratch_dir = user.getUserScratch()
+    except:
+        pass
+    plugin_web = PluginWeb(plugin)
+
     return render(
         request,
         "plugins/setup.html",
@@ -306,10 +306,11 @@ def setup(request, plugin_name, row_id=None):
 @login_required()
 def dirlist(request):
     try:
-        user = User(request.user.username)
+        user = LdapUser(request.user.username)
         home_dir = user.getUserHome()
         scratch_dir = user.getUserScratch()
     except Exception as e:
+        logging.exception(e)
         # This user has no access to the underlying system and therefore
         # must not be able to get a file listing
         return HttpResponse(
@@ -359,7 +360,7 @@ def dirlist(request):
 @login_required()
 def list_dir(request):
     try:
-        user = User(request.user.username)
+        user = LdapUser(request.user.username)
         home_dir = user.getUserHome()
         scratch_dir = user.getUserScratch()
     except Exception as e:

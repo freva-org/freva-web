@@ -179,14 +179,18 @@
             var dt_table_api;
 
             const createdCell = function(cell, cellData, rowData) {
-                const elementIndex = rowData["1"];
-                const popover = new DarkEditable(cell, {
-                    type: "text",
-                    url: "{% url 'history:set-caption' 42%}".replace(/42/, elementIndex.toString()),
-                    name: "caption",
-                    value: rowData[4],
-                    pk: elementIndex
-                });
+                const username = rowData["2"];
+                const requestUsername = "{{request.user}}"
+                if (requestUsername === username) {
+                    const elementIndex = rowData["1"];
+                    const popover = new DarkEditable(cell, {
+                        type: "text",
+                        url: "{% url 'history:set-caption' 42%}".replace(/42/, elementIndex.toString()),
+                        name: "caption",
+                        value: rowData[4],
+                        pk: elementIndex
+                    });
+                }
             }
 
             const getUrlParameter = function(sParam) {

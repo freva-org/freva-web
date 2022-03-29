@@ -177,13 +177,15 @@ class PluginList extends React.Component {
         <Spinner />
       );
     }
+    const defaultSelection = currentUser.home ? { id: "home", path: currentUser.home } : { id: "scratch", path: currentUser.scratch };
+
     return (
       <Container>
         <Row>
           <Col md={6}><h2>Plugins</h2></Col>
           <Col md={6} className="pt-2">
             {
-              !currentUser.isGuest && currentUser.home ?
+              !currentUser.isGuest && (currentUser.home || currentUser.scratch) ?
                 <Button
                   variant="info" className="float-end"
                   onClick={() => (exported ? this.props.dispatch(exportPlugin()) : this.setState({ showModal: true }))}
@@ -245,7 +247,7 @@ class PluginList extends React.Component {
 
         <Modal
           show={this.state.showModal}
-          onShow={() => this.props.dispatch(changeRoot({ id: "home", path: currentUser.home }, "py"))}
+          onShow={() => this.props.dispatch(changeRoot(defaultSelection, "py"))}
           onHide={() => this.setState({ showModal: false })}
         >
           <Modal.Header closeButton>
@@ -254,18 +256,24 @@ class PluginList extends React.Component {
           <Modal.Body>
             <p>Here you can plugin your own plugin</p>
             <ButtonGroup className="mb-2">
-              <Button
-                variant="primary" active={root.id === "home"}
-                onClick={() => this.props.dispatch(changeRoot({ id: "home", path: currentUser.home }, "py"))}
-              >
-                Home
-              </Button>
-              <Button
-                variant="primary" active={root.id === "scratch"}
-                onClick={() => this.props.dispatch(changeRoot({ id: "scratch", path: currentUser.scratch }, "py"))}
-              >
-                Scratch
-              </Button>
+              {
+                currentUser.home &&
+                <Button
+                  variant="primary" active={root.id === "home"}
+                  onClick={() => this.props.dispatch(changeRoot({ id: "home", path: currentUser.home }, "py"))}
+                >
+                  Home
+                </Button>
+              }
+              {
+                currentUser.scratch &&
+                <Button
+                  variant="primary" active={root.id === "scratch"}
+                  onClick={() => this.props.dispatch(changeRoot({ id: "scratch", path: currentUser.scratch }, "py"))}
+                >
+                  Scratch
+                </Button>
+              }
             </ButtonGroup>
             {children}
             <FormGroup style={{ marginTop: 10 }}>

@@ -14,7 +14,8 @@ import evaluation_system.api.plugin_manager as pm
 
 from evaluation_system.model.user import User
 from evaluation_system.misc import config
-from plugins.LdapUser import LdapUser
+from django_evaluation.settings.local import HOME_DIRS_AVAILABLE
+from base.LdapUser import LdapUser
 
 from plugins.utils import (
     get_plugin_or_404,
@@ -278,12 +279,11 @@ def setup(request, plugin_name, row_id=None):
 
     plugin_dict = pm.get_plugin_metadata(plugin_name, user_name=request.user.username)
 
-    home_dir = user.getUserHome()
-    scratch_dir = None
+    home_dir = user.getUserHome() if HOME_DIRS_AVAILABLE else None
     try:
         scratch_dir = user.getUserScratch()
     except:
-        pass
+        scratch_dir = None
     plugin_web = PluginWeb(plugin)
 
     return render(

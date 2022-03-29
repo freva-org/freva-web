@@ -7,7 +7,7 @@ import evaluation_system.api.plugin_manager as pm
 from evaluation_system.model.user import User
 from evaluation_system.misc import config
 from django_evaluation.ldaptools import get_ldap_object
-from plugins.LdapUser import LdapUser
+from base.LdapUser import LdapUser
 from plugins.utils import get_plugin_or_404, plugin_metadata_as_dict
 from .forms import PluginWeb
 from .serializers import PluginSerializer

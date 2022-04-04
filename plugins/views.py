@@ -14,6 +14,9 @@ import evaluation_system.api.plugin_manager as pm
 
 from evaluation_system.model.user import User
 from evaluation_system.misc import config
+from django_evaluation.settings.local import HOME_DIRS_AVAILABLE
+from base.exceptions import UserNotFoundError
+from base.LdapUser import LdapUser
 
 from plugins.utils import (
     get_plugin_or_404,
@@ -70,8 +73,8 @@ def search_similar_results(request, plugin_name=None, history_id=None):
         hist_objects = History.objects.filter(uid=request.user).filter(tool=plugin_name)
     else:
         try:
-            user = User(request.user.username)
-        except:
+            user = LdapUser(request.user.username)
+        except UserNotFoundError:
             user = User()
         if history_id is not None:
             o = Configuration.objects.filter(history_id_id=history_id)
@@ -112,22 +115,13 @@ def setup(request, plugin_name, row_id=None):
 
     if user_can_submit:
         try:
-            user = User(request.user.username, request.user.email)
-        except:
+            user = LdapUser(request.user.username)
+        except UserNotFoundError:
             user = User()
     else:
         user = User()
 
-    home_dir = user.getUserHome()
-    scratch_dir = None
-
-    try:
-        scratch_dir = user.getUserScratch()
-    except:
-        pass
-
     plugin = get_plugin_or_404(plugin_name, user=user)
-    plugin_web = PluginWeb(plugin)
 
     error_msg = pm.get_error_warning(plugin_name)[0]
 
@@ -286,6 +280,13 @@ def setup(request, plugin_name, row_id=None):
 
     plugin_dict = pm.get_plugin_metadata(plugin_name, user_name=request.user.username)
 
+    home_dir = user.getUserHome() if HOME_DIRS_AVAILABLE else None
+    try:
+        scratch_dir = user.getUserScratch()
+    except:
+        scratch_dir = None
+    plugin_web = PluginWeb(plugin)
+
     return render(
         request,
         "plugins/setup.html",
@@ -306,10 +307,11 @@ def setup(request, plugin_name, row_id=None):
 @login_required()
 def dirlist(request):
     try:
-        user = User(request.user.username)
+        user = LdapUser(request.user.username)
         home_dir = user.getUserHome()
         scratch_dir = user.getUserScratch()
-    except Exception as e:
+    except UserNotFoundError as e:
+        logging.exception(e)
         # This user has no access to the underlying system and therefore
         # must not be able to get a file listing
         return HttpResponse(
@@ -359,10 +361,10 @@ def dirlist(request):
 @login_required()
 def list_dir(request):
     try:
-        user = User(request.user.username)
+        user = LdapUser(request.user.username)
         home_dir = user.getUserHome()
         scratch_dir = user.getUserScratch()
-    except Exception as e:
+    except UserNotFoundError:
         # This user has no access to the underlying system and therefore
         # must not be able to get a file listing
         return HttpResponse(

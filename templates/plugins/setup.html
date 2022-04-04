@@ -76,9 +76,11 @@
                 </div>
                 <div class="modal-body">
                     <div class="btn-group" data-toggle="buttons" style='margin-bottom:20px'>
-                        <label class="btn btn-primary active">
-                            <input type="radio" name="browse_options" id="browse_home" value="home" checked>Home
-                        </label>
+                        {% if user_home%}
+                            <label class="btn btn-primary active">
+                                <input type="radio" name="browse_options" id="browse_home" value="home" checked>Home
+                            </label>
+                        {% endif %}
                         {% if user_scratch %}
                             <label class="btn btn-primary">
                                 <input type="radio" name="browse_options" id="browse_scratch" value="scratch">Work

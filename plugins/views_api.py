@@ -7,6 +7,7 @@ import evaluation_system.api.plugin_manager as pm
 from evaluation_system.model.user import User
 from evaluation_system.misc import config
 from django_evaluation.ldaptools import get_ldap_object
+from base.exceptions import UserNotFoundError
 from base.LdapUser import LdapUser
 from plugins.utils import get_plugin_or_404, plugin_metadata_as_dict
 from .forms import PluginWeb
@@ -32,7 +33,7 @@ class PluginDetail(APIView):
         user = None
         try:
             user = LdapUser(request.user.username)
-        except:
+        except UserNotFoundError:
             user = User()
         plugin = get_plugin_or_404(plugin_name, user=user)
         plugin_dict = pm.get_plugin_metadata(
@@ -96,7 +97,7 @@ class SendMailToDeveloper(APIView):
             text = text + "\nThis email has been send from this url: " + url
         try:
             user = LdapUser(request.user.username)
-        except:
+        except UserNotFoundError:
             user = User()
 
         my_email = request.user.email

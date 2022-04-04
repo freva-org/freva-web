@@ -15,6 +15,7 @@ import evaluation_system.api.plugin_manager as pm
 from evaluation_system.model.user import User
 from evaluation_system.misc import config
 from django_evaluation.settings.local import HOME_DIRS_AVAILABLE
+from base.exceptions import UserNotFoundError
 from base.LdapUser import LdapUser
 
 from plugins.utils import (
@@ -73,7 +74,7 @@ def search_similar_results(request, plugin_name=None, history_id=None):
     else:
         try:
             user = LdapUser(request.user.username)
-        except:
+        except UserNotFoundError:
             user = User()
         if history_id is not None:
             o = Configuration.objects.filter(history_id_id=history_id)
@@ -115,7 +116,7 @@ def setup(request, plugin_name, row_id=None):
     if user_can_submit:
         try:
             user = LdapUser(request.user.username)
-        except:
+        except UserNotFoundError:
             user = User()
     else:
         user = User()
@@ -309,7 +310,7 @@ def dirlist(request):
         user = LdapUser(request.user.username)
         home_dir = user.getUserHome()
         scratch_dir = user.getUserScratch()
-    except Exception as e:
+    except UserNotFoundError as e:
         logging.exception(e)
         # This user has no access to the underlying system and therefore
         # must not be able to get a file listing
@@ -363,7 +364,7 @@ def list_dir(request):
         user = LdapUser(request.user.username)
         home_dir = user.getUserHome()
         scratch_dir = user.getUserScratch()
-    except Exception as e:
+    except UserNotFoundError:
         # This user has no access to the underlying system and therefore
         # must not be able to get a file listing
         return HttpResponse(

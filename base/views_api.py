@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from django.contrib.auth.models import User
 
 from base.LdapUser import LdapUser
+from base.exceptions import UserNotFoundError
 from .serializers import UserSerializer
 
 
@@ -21,7 +22,7 @@ class AuthenticatedUser(APIView):
         if request.user.is_authenticated:
             try:
                 user = LdapUser(request.user.username)
-            except:
+            except UserNotFoundError:
                 user = None
             return Response(
                 self.serializer_class(request.user, context={"user": user}).data

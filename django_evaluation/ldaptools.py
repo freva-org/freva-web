@@ -86,8 +86,7 @@ class LdapUserInformation(object):
                         self.user_info_dict[user[0]] = user
                     cache.set("LDAP_user_info_dict", self.user_info_dict, 3600)
             return self.user_info_dict.get(uid, None)
-        else:
-            return self.user_info
+        return None
 
     @property
     def connection(self):

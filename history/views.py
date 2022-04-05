@@ -18,6 +18,8 @@ from evaluation_system.model.db import UserDB
 from evaluation_system.model.user import User
 from evaluation_system.misc.exceptions import PluginManagerException
 from evaluation_system.model.history.models import History, ResultTag
+from base.LdapUser import LdapUser
+from base.exceptions import UserNotFoundError
 from django_evaluation import settings
 from plugins.utils import ssh_call, get_scheduler_hosts
 
@@ -338,8 +340,8 @@ def results(request, id, show_output_only=False):
     # get history object
     history_object = get_object_or_404(History, id=id)
     try:
-        user = User(request.user.username)
-    except:
+        user = LdapUser(request.user.username)
+    except UserNotFoundError:
         user = User()
 
     is_plugin_available = True

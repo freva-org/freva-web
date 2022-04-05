@@ -68,11 +68,6 @@
                                         <input name="password" type="password" placeholder="Password" class="form-control" id='in_pwd'>
                                         <input name="next" type="hidden" id="next_page" value="{% firstof request.path '/' %}">
                                         <button type="submit" class="btn text-white navbar-button">Sign in</button>
-                                        {% external_group as show_external%}
-                                        {%if show_external %}
-                                            <button class="btn text-white navbar-button" id="signup">Sign Up</button>
-                                        {%endif%}
-
                                     </div><!-- /input-group -->
                                 </div>
                             </form>
@@ -101,12 +96,6 @@
                 $('#in_user').val('guest');
                 $('#in_pwd').val('miklip');
             });
-
-            $('#signup').on('click', function () {
-                document.location = "{%url 'external:external_register'%}";
-                return false;
-            });
-
         });
     </script>
     <!-- Navigation Ends -->

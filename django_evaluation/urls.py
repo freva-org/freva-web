@@ -6,7 +6,7 @@ from django.conf.urls import static
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib import admin
 from django.views.generic import RedirectView
-from base.views_api import UserViewSet, AuthenticatedUser
+from base.views_api import AuthenticatedUser
 from plugins.views_api import (
     PluginsList,
     ExportPlugin,
@@ -15,10 +15,6 @@ from plugins.views_api import (
 )
 from history.views_api import ResultFacets, ResultFiles
 from solr.views_api import ncdump
-from rest_framework import routers
-
-router = routers.SimpleRouter()
-router.register(r"users", UserViewSet)
 
 admin.autodiscover()
 
@@ -61,7 +57,6 @@ urlpatterns = [
         ResultFiles.as_view(),
         name="api-history-files",
     ),
-    # url(r'^api/', include(router.urls, namespace='api')),
 ]
 
 if settings.DEBUG:

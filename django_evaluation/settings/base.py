@@ -158,7 +158,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.contrib.flatpages.middleware.FlatpageFallbackMiddleware",
-    "django_evaluation.middelwares.GlobalUserMiddleware",
     "django_evaluation.middelwares.ReloadPluginsMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",

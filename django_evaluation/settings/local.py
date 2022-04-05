@@ -184,6 +184,9 @@ AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",
     "django_auth_ldap.backend.LDAPBackend",
 )
+
+HOME_DIRS_AVAILABLE = web_config.get("HOME_DIRS_AVAILABLE", False)
+
 # SECURITY WARNING: don't run with debug turned on in production!
 # Debugging displays nice error messages, but leaks memory. Set this to False
 # on all server instances and True only for development.

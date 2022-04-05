@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-import pwd
-from evaluation_system.misc import config
+
+from django_evaluation.settings.local import HOME_DIRS_AVAILABLE
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -13,12 +13,15 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ("id", "username", "email", "first_name", "isGuest", "home", "scratch")
 
     def get_home(self, instance):
-        if instance.username.lower() == "guest":
+        if instance.username.lower() == "guest" or not HOME_DIRS_AVAILABLE:
             return None
-        try:
-            return pwd.getpwnam(instance.username).pw_dir
-        except KeyError:
-            return None
+        ldap_user = self.context.get("user")
+        if ldap_user:
+            return ldap_user.getUserHome()
+        return None
 
     def get_scratch(self, instance):
-        return config.get("scratch_dir").replace("$USER", instance.username)
+        ldap_user = self.context.get("user")
+        if ldap_user:
+            return ldap_user.getUserScratch()
+        return None

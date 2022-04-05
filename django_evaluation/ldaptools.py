@@ -8,6 +8,14 @@ from abc import ABCMeta, abstractmethod
 import grp
 import pwd
 
+"""
+FIXME: 28.03.2022
+As of now only the `MiklipUserInformation` (which is basically a DKRZ-User) is working
+properly as it has `home-directory` as an additional information.
+
+The whole file needs refactoring.
+"""
+
 
 class LdapUserInformation(object):
     __metaclass__ = ABCMeta
@@ -65,7 +73,6 @@ class LdapUserInformation(object):
         if not self.user_info:
             caches["default"]
             self.user_info = cache.get("LDAP_user_info")
-
             if not self.user_info:
                 self.load_from_ldap()
                 cache.set("LDAP_user_info", self.user_info, 3600)
@@ -168,7 +175,14 @@ class MiklipUserInformation(LdapUserInformation):
     agent user and no binding with the logged in user
     """
 
-    ldap_keys = ["sn", "givenName", "uid", "mail", "mailForwardingAddress"]
+    ldap_keys = [
+        "sn",
+        "givenName",
+        "uid",
+        "mail",
+        "mailForwardingAddress",
+        "homeDirectory",
+    ]
 
     def load_from_ldap(self):
         """
@@ -218,6 +232,7 @@ class MiklipUserInformation(LdapUserInformation):
                             " ".join(res_str.get("sn", "")),
                             " ".join(res_str.get("givenName", "")),
                             forward[-1],
+                            " ".join(res_str.get("homeDirectory", "")),
                         )
                     )
                 elif mail:
@@ -227,6 +242,7 @@ class MiklipUserInformation(LdapUserInformation):
                             " ".join(res_str.get("sn", "")),
                             " ".join(res_str.get("givenName", "")),
                             mail[-1],
+                            " ".join(res_str.get("homeDirectory", "")),
                         )
                     )
         self.user_info = sorted(user_info, key=lambda tup: tup[1])

@@ -92,7 +92,7 @@ class ResultFacets(APIView, FilterAbstract):
         # therefore a different approach to get all values..
         params = {key: query_params.getlist(key) for key in query_params}
         if "plugin" in params:
-            queryset = queryset.filter(tool=params["plugin"].pop()[0])
+            queryset = queryset.filter(tool=params["plugin"].pop())
         mod_request = prepare_facet_filter(params)
         queryset = self.generate_filter(queryset, mod_request)
         facet_structure = []
@@ -199,7 +199,7 @@ class ResultFiles(APIView, FilterAbstract):
         data = cache.get(full_path, list())
         if max_id > cache_max_id or not data:
             if "plugin" in params:
-                queryset = queryset.filter(tool=params["plugin"].pop()[0])
+                queryset = queryset.filter(tool=params["plugin"].pop())
             mod_request = prepare_facet_filter(params)
             cache.set("{}_{}".format(full_path, max_id), max_id, None)
             queryset = queryset.filter(flag__lt=3, status__lt=2, id__gt=cache_max_id)

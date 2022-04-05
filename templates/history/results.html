@@ -54,17 +54,20 @@
                     {%endif%}
                     {% if history_object.status > 2 and history_object.slurm_output != '0' and history_object.uid == request.user %}
 
-                        <a class="btn btn-danger mybtn-cancel" id="cancelButton_{{h_item.id}}" onClick="cancelDialog.show({{history_object.id}})">Cancel job</a>
+                        <button class="btn btn-danger mybtn-cancel" id="cancelButton" onClick="cancelDialog.show({{history_object.id}})">Cancel job</button>
                         {# Render a Bootstrap password/cancel dialog #}
                         {% cancel_dialog %}
                     {%endif%}
-                    <a class="btn btn-secondary mybtn-sendmail" id="sendButton_{{h_item.id}}" onClick="$('#sendmail_modal').modal('show')">Share Results</a>
 
-                    <a class="btn btn-secondary mybtn-caption" id="captionButton_{{h_item.id}}" onClick="$('#caption_modal').modal('show')">Set Caption</a>
+                    {% if request.user == history_object.uid %}
+                        <button class="btn btn-secondary mybtn-sendmail" id="sendButton" onClick="$('#sendmail_modal').modal('show')">Share Results</button>
+
+                        <button class="btn btn-secondary mybtn-caption" id="captionButton" onClick="$('#caption_modal').modal('show')">Set Caption</button>
+                    {%endif%}
                     {# Render a Bootstrap caption dialog #}
                     {% caption_dialog result_caption default_caption history_object request.user %}
 
-                    <a class="btn btn-warning" id="followButton"><span id='followText'>{{follow}}</span></a>
+                    <button class="btn btn-warning" id="followButton"><span id='followText'>{{follow}}</span></button>
                     {%if developer %}
                         {% mail_to_developer history_object.tool request.build_absolute_uri %}
                     {%endif%}
@@ -359,11 +362,6 @@
                 openEffect  : 'none',
                 closeEffect : 'none'
             });
-
-            {% if request.user != history_object.uid %}
-                $('#sendButton_{{h_item.id}}').attr('disabled', true);
-                $('#captionButton_{{h_item.id}}').attr('disabled', true);
-            {% endif %}
         });
     </script>
 

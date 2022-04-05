@@ -68,7 +68,6 @@ INSTALLED_APPS = (
     "plugins",
     "history",
     "solr",
-    "externaluser",
 )
 
 # Place bcrypt first in the list, so it will be the default password hashing

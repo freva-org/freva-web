@@ -163,37 +163,11 @@ def setup(request, plugin_name, row_id=None):
 
             logging.error(hostnames)
             # compose the plugin command
-            try:
-                slurm_options = config.get_section("scheduler_options")
-            except:
-                slurm_options = False
-                try:
-                    old_row_id = (
-                        History.objects.filter(
-                            status=History.processStatus.running, uid=request.user
-                        )
-                        .order_by("-timestamp")[0]
-                        .id
-                    )
-                except:
-                    old_row_id = 0
-                # nohup output file
-                log_path = (
-                    "/kp/kp06/integra/mavis/misc4freva/db4freva/slurm/%s" % plugin_name
-                )
-                if not os.path.exists(log_path):
-                    os.makedirs(log_path)
-                    os.chmod(log_path, 0o777)
-                log_file = "%s/nohup-%s.out" % (log_path, time.time())
+
+            slurm_options = config.get_section("scheduler_options")
 
             # Get modules and files to source
-            # TODO: remove if claus when FU Operating system is fully migrated
-            if request.user.groups.filter(name="frevastud").exists():
-                load_module = (
-                    settings.LOAD_MODULE
-                )  #'source /etc/bash.bashrc > /dev/null; source /net/opt/system/modules/default/init/bash > /dev/null; module load modules_jessie > /dev/null; module load freva > /dev/null;'
-            else:
-                load_module = settings.LOAD_MODULE
+            load_module = settings.LOAD_MODULE
 
             if "EVALUATION_SYSTEM_PLUGINS_%s" % request.user in os.environ:
                 plugin_str = os.environ["EVALUATION_SYSTEM_PLUGINS_%s" % request.user]
@@ -207,9 +181,6 @@ def setup(request, plugin_name, row_id=None):
                 caption=caption,
                 unique_output=unique_output,
             )
-            # wrap command in nohup call
-            if not slurm_options:
-                command = "nohup %s > /dev/null 2>&1 > %s &" % (command, log_file)
 
             # finally send the ssh call
             stdout = ssh_call(
@@ -231,36 +202,18 @@ def setup(request, plugin_name, row_id=None):
             logging.debug("errors of analyze:" + str(err))
 
             # THIS IS HOW WE DETERMINE THE ID USING A SCHEDULER
-            if slurm_options:
-                substr = "Scheduled job with history"
-                # find first line containing the substr
-                scheduler_output = next(
-                    (s for s in out if substr in s), None
-                )  # returns 'abc123'
-                if scheduler_output:
-                    row_id = int(scheduler_output.split(" ")[-1])
-                else:
-                    raise Exception(
-                        "Unexpected output of analyze:\n[%s]\n[%s]\n%s"
-                        % (out, err, command)
-                    )
-
+            substr = "Scheduled job with history"
+            # find first line containing the substr
+            scheduler_output = next(
+                (s for s in out if substr in s), None
+            )  # returns 'abc123'
+            if scheduler_output:
+                row_id = int(scheduler_output.split(" ")[-1])
             else:
-                # IF WE SEND USING NOHUP WE DON'T GET ANY FEEDBACK ABOUT THE ID
-                # SO WE MAKE A GUESS THAT IT WAS THE LAST ISSUED BY A USER
-                # TODO: This is probably not robust enought, if user starts multiple runs
-                row_id = old_row_id
-                while row_id == old_row_id:
-                    try:
-                        obj = History.objects.filter(
-                            status=History.processStatus.running, uid=request.user
-                        ).order_by("-timestamp")[0]
-                        row_id = obj.id
-                    except:
-                        pass
-                    time.sleep(1)
-                obj.slurm_output = log_file
-                obj.save()
+                raise Exception(
+                    "Unexpected output of analyze:\n[%s]\n[%s]\n%s"
+                    % (out, err, command)
+                )
 
             return redirect(
                 "history:results", id=row_id

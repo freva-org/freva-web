@@ -5,13 +5,12 @@ from django.utils.html import conditional_escape
 from django.template.loader import render_to_string
 from base.LdapUser import LdapUser
 from base.exceptions import UserNotFoundError
-
 from django_evaluation import settings
 
 from history.utils import FileDict
 from history.models import HistoryTag
 
-from evaluation_system.model.user import User
+from evaluation_system.misc.exceptions import PluginManagerException
 
 import re
 
@@ -191,14 +190,10 @@ def mail_to_developer(tool_name, username, url):
 
     try:
         user = LdapUser(username)
-    except UserNotFoundError:
-        user = User()
-    tool = pm.get_plugin_instance(tool_name, user)
-
-    try:
+        tool = pm.get_plugin_instance(tool_name, user)
         developer = tool.tool_developer
-    except AttributeError:
-        developer = False
+    except (UserNotFoundError, PluginManagerException, AttributeError):
+        developer = None
 
     return {"tool_name": tool_name, "developer": developer, "current_url": url}
 

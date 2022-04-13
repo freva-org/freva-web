@@ -339,21 +339,16 @@ def results(request, id, show_output_only=False):
 
     # get history object
     history_object = get_object_or_404(History, id=id)
-    try:
-        user = LdapUser(request.user.username)
-    except UserNotFoundError:
-        user = User()
-
     is_plugin_available = True
     try:
+        user = LdapUser(request.user.username)
         plugin = pm.get_plugin_instance(history_object.tool, user=user)
         developer = plugin.tool_developer
-    except PluginManagerException:
+    except (UserNotFoundError, PluginManagerException, AttributeError):
         developer = None
         is_plugin_available = False
     # check if the user has the permission to access the result
     flag = history_object.flag
-
     if not flag == History.Flag.free:
         if not request.user.is_authenticated:
             from django.contrib.auth.views import redirect_to_login

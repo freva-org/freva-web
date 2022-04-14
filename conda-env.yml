@@ -68,3 +68,4 @@ dependencies:
   - bleach
   - mypy
   - black
+  - redis-py

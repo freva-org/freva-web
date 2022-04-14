@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import { Container, Row, Col, Accordion, Card, Tooltip, OverlayTrigger, Button } from "react-bootstrap";
+import { Container, Row, Col, Accordion, Card, Tooltip, OverlayTrigger, Button, Alert } from "react-bootstrap";
 
 import { FaInfoCircle } from "react-icons/fa";
 import _ from "lodash";
@@ -119,6 +119,15 @@ class Databrowser extends React.Component {
     const { facets, selectedFacets, activeFacet, ncdumpStatus, ncdumpOutput } = this.props.databrowser;
     const { dispatch } = this.props;
 
+    if (this.props.error) {
+      return (
+        <Container>
+          <Alert variant="danger">
+            <div className="fs-4">{this.props.error}</div>
+          </Alert>
+        </Container>
+      );
+    }
     // Wait until facets are loaded
     if (!facets) {
       return (
@@ -200,11 +209,13 @@ Databrowser.propTypes = {
     ncdumpOutput: PropTypes.status,
     metadata: PropTypes.object,
   }),
+  error: PropTypes.string,
   dispatch: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
-  databrowser: state.databrowserReducer
+  databrowser: state.databrowserReducer,
+  error: state.appReducer.error
 });
 
 export default connect(mapStateToProps)(Databrowser);

@@ -62,6 +62,14 @@ class LdapUserInformation(object):
         self._con = con
         return self._con
 
+    def _cache_ldap_users(self):
+        if not self.user_info:
+            caches["default"]
+            self.user_info = cache.get("LDAP_user_info")
+            if not self.user_info:
+                self.load_from_ldap()
+                cache.set("LDAP_user_info", self.user_info, 3600)
+
     @abstractmethod
     def load_from_ldap(self):
         pass
@@ -70,12 +78,8 @@ class LdapUserInformation(object):
         """
         Returns the user info and loads it whenever necessary
         """
-        if not self.user_info:
-            caches["default"]
-            self.user_info = cache.get("LDAP_user_info")
-            if not self.user_info:
-                self.load_from_ldap()
-                cache.set("LDAP_user_info", self.user_info, 3600)
+        self._cache_ldap_users()
+
         if uid:
             if not self.user_info_dict:
                 caches["default"]
@@ -86,8 +90,11 @@ class LdapUserInformation(object):
                         self.user_info_dict[user[0]] = user
                     cache.set("LDAP_user_info_dict", self.user_info_dict, 3600)
             return self.user_info_dict.get(uid, None)
-        else:
-            return self.user_info
+        return None
+
+    def get_all_users(self):
+        self._cache_ldap_users()
+        return self.user_info
 
     @property
     def connection(self):

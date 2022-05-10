@@ -9,10 +9,12 @@ color:{{main_color}};
 }
 
 a, a:visited{
+text-decoration: none;
 color:{{main_color}};
 }
 
 a:hover{
+text-decoration: underline;
 color:{{hover_color}};
 }
 

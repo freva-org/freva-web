@@ -3,6 +3,8 @@ import _ from "lodash";
 
 import { getCookie } from "../../utils";
 
+import * as globalStateConstants from "../App/constants";
+
 import * as constants from "./constants";
 
 export const selectResultFacet = (facet, value) => dispatch => {
@@ -14,7 +16,6 @@ export const selectResultFacet = (facet, value) => dispatch => {
     });
     dispatch(setActiveResultFacet(facet));
     dispatch(loadResultFacets());
-    //dispatch(loadResultFiles());
   },50);
 
 };
@@ -25,7 +26,6 @@ export const clearResultFacet = (facet) => dispatch => {
     facet
   });
   dispatch(loadResultFacets());
-  dispatch(loadResultFiles());
 };
 
 
@@ -40,7 +40,6 @@ export const clearAllResultFacets = (facet) => dispatch => {
     facet
   });
   dispatch(loadResultFacets());
-  dispatch(loadResultFiles());
 };
 
 export const setActiveResultFacet = (facet) => ({
@@ -57,76 +56,31 @@ export const loadResultFacets = () => (dispatch, getState) => {
   });
   const url = `/api/history/result-browser/?${params}`;
 
-  return fetch(url, {
-    credentials: "same-origin",
-    headers: {
-      "X-CSRFToken": getCookie("csrftoken"),
-      "Accept": "application/json",
-      "Content-Type": "application/json"
+  return new Promise((resolve) => {
+    return resolve(dispatch({ type: constants.START_LOADING_RESULT_FACETS }));
+  })
+    .then(() => {
+      return fetch(url, {
+        credentials: "same-origin",
+        headers: {
+          "X-CSRFToken": getCookie("csrftoken"),
+          "Accept": "application/json",
+          "Content-Type": "application/json"
+        }
+      });
     }
-  }).then(response => response.json())
+    ).then(response => response.json())
     .then(json => {
       return dispatch({
         type: constants.LOAD_RESULT_FACETS,
         payload: json
       });
-    });
-};
-
-export const loadResultFiles = () => (dispatch, getState) => {
-  const { selectedFacets, page, limit, sortName, sortOrder, searchText } = getState().resultbrowserReducer;
-  let params = "";
-  _.map(selectedFacets, (value, key) => {
-    params += `&${key}=${value}`;
-  });
-  const offset = (page - 1) * limit;
-  params += `&limit=${limit}&offset=${offset}`;
-  params += `&sortName=${sortName}&sortOrder=${sortOrder}`;
-  params += `&searchText=${searchText}`;
-
-  const url = `/api/history/result-browser-files/?${params}`;
-  return fetch(url, {
-    credentials: "same-origin",
-    headers: {
-      "X-CSRFToken": getCookie("csrftoken"),
-      "Accept": "application/json",
-      "Content-Type": "application/json"
-    }
-  }).then(response => response.json())
-    .then(json => {
+    })
+    .catch(() => {
+      dispatch({ type: constants.STOP_LOADING_RESULT_FACETS });
       return dispatch({
-        type: constants.LOAD_RESULT_FILES,
-        payload: json
+        type: globalStateConstants.SET_ERROR,
+        payload: "Internal Error: Could not load results"
       });
     });
 };
-
-export const selectActivePage = (page) => dispatch => {
-
-  dispatch({
-    type: constants.SELECT_ACTIVE_PAGE,
-    page
-  });
-  dispatch(loadResultFiles());
-
-};
-export const sortActivePage = (sortName,sortOrder) => dispatch => {
-
-  dispatch({
-    type: constants.SORT_ACTIVE_PAGE,
-    sortName,
-    sortOrder
-  });
-  dispatch(loadResultFiles());
-
-};
-
-export const searchInText = (searchText) => dispatch => {
-  dispatch({
-    type: constants.ON_SEARCH,
-    searchText
-  });
-  dispatch(loadResultFiles());
-};
-
-

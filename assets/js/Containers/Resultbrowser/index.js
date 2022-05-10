@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useRef } from "react";
 import PropTypes from "prop-types";
 
 import { connect } from "react-redux";
-import { Container, Row, Col, Accordion, Card, Form, Pagination, Table } from "react-bootstrap";
+import { Container, Row, Col, Accordion, Card, Form, Pagination, Table, Alert } from "react-bootstrap";
 
 import _ from "lodash";
 
@@ -20,23 +20,22 @@ import {
   clearAllResultFacets, setActiveResultFacet
 } from "./actions";
 
-let timer;
 
 function GlobalFilter ({
   globalFilter,
   setGlobalFilter,
 }) {
+  const debouncedSetGlobalFilter = useRef(_.debounce(setGlobalFilter, 300));
   const [value, setValue] = React.useState(globalFilter);
+
   const onChange = (value) => {
-    clearTimeout(timer);
     if (value.length > 2 || value.length === 0) {
-      timer = setTimeout(() => {
-        setGlobalFilter(value);
-      }, 500);
+      debouncedSetGlobalFilter.current(value);
     }
   };
 
 
+  // const dobouncedOnChange = _.debounce(onChange, 500);
   return (
     <input
       value={value || ""}
@@ -44,6 +43,7 @@ function GlobalFilter ({
       onChange={
         e => {
           setValue(e.target.value);
+          // dobouncedOnChange(e.target.value);
           onChange(e.target.value);
         }
       }
@@ -79,7 +79,7 @@ function ResultTable ({ columns, data, fetchData, loading, selectedFacets, pageC
     columns,
     data,
     selectedFacets,
-    initialState: { pageIndex: 0, pageSize: 10, sortBy: [], globalFilter: "" },
+    initialState: { pageIndex: 0, pageSize: 25, sortBy: [], globalFilter: "" },
     manualPagination: true,
     manualSortBy: true,
     manualGlobalFilter: true,
@@ -93,9 +93,10 @@ function ResultTable ({ columns, data, fetchData, loading, selectedFacets, pageC
     gotoPage(0);
   }, [selectedFacets]);
 
+  const debouncedFetchData = useRef(_.debounce(fetchData, 250));
   React.useEffect(() => {
     skipPageResetRef.current = true;
-    fetchData({ pageIndex, pageSize, sortBy, globalFilter, selectedFacets });
+    debouncedFetchData.current({ pageIndex, pageSize, sortBy, globalFilter, selectedFacets });
   }, [fetchData, pageIndex, pageSize, sortBy, globalFilter, selectedFacets]);
 
   React.useEffect(() => {
@@ -407,6 +408,16 @@ class Resultbrowser extends React.Component {
     const { facets, selectedFacets, activeFacet } = this.props.resultbrowser;
     const { dispatch } = this.props;
 
+    if (this.props.error) {
+      return (
+        <Container>
+          <Alert variant="danger">
+            <div className="fs-4">{this.props.error}</div>
+          </Alert>
+        </Container>
+      );
+    }
+
     // Wait until facets are loaded
     if (!facets) {
       return (
@@ -420,7 +431,9 @@ class Resultbrowser extends React.Component {
       <Container>
         <Row>
           <Col md={12}>
-            <h2>Resultbrowser</h2>
+            <h2>
+              Resultbrowser {this.props.resultbrowser.loadingFacets && <Spinner outerClassName="d-inline fs-6 align-bottom" />}
+            </h2>
           </Col>
         </Row>
         <Row>
@@ -457,13 +470,16 @@ Resultbrowser.propTypes = {
     facets: PropTypes.object,
     selectedFacets: PropTypes.object,
     activeFacet: PropTypes.string,
-    metadata: PropTypes.object
+    metadata: PropTypes.object,
+    loadingFacets: PropTypes.bool
   }),
+  error: PropTypes.string,
   dispatch: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = (state) => ({
-  resultbrowser: state.resultbrowserReducer
+  resultbrowser: state.resultbrowserReducer,
+  error: state.appReducer.error
 });
 
 export default connect(mapStateToProps) (Resultbrowser);

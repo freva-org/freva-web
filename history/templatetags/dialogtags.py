@@ -41,7 +41,7 @@ def mailfield(is_guest):
             if ldap_info:
                 info.append(ldap_info)
     else:
-        info = user_info.get_user_info()
+        info = user_info.get_all_users()
 
     data = []
 

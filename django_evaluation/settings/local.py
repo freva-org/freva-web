@@ -185,6 +185,16 @@ AUTHENTICATION_BACKENDS = (
     "django_auth_ldap.backend.LDAPBackend",
 )
 
+REDIS_HOST = web_config.get("REDIS_HOST", "127.0.0.1")
+REDIS_PORT = web_config.get("REDIS_PORT", 6379)
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}",
+    },
+}
+
 HOME_DIRS_AVAILABLE = web_config.get("HOME_DIRS_AVAILABLE", False)
 
 # SECURITY WARNING: don't run with debug turned on in production!

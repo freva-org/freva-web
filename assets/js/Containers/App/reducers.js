@@ -12,6 +12,9 @@ export const appReducer = (state = appReducerInitialState, action) => {
     case constants.SET_ERROR:
       return { ...state, error: action.payload };
     default:
-      return state;
+      // In our default case we reset the error on
+      // every new state change if the error has not been
+      // set.
+      return { ...state, error: "" };
   }
 };

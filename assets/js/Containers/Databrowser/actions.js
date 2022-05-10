@@ -3,6 +3,8 @@ import _ from "lodash";
 
 import { getCookie } from "../../utils";
 
+import * as globalStateConstants from "../App/constants";
+
 import * as constants from "./constants";
 
 export const selectFacet = (facet, value) => dispatch => {
@@ -73,6 +75,12 @@ export const loadFacets = () => (dispatch, getState) => {
         type: constants.LOAD_FACETS,
         payload: json
       });
+    })
+    .catch(() => {
+      return dispatch({
+        type: globalStateConstants.SET_ERROR,
+        payload: "Internal Error: Could not load results"
+      });
     });
 };
 
@@ -97,6 +105,12 @@ export const loadFiles = () => (dispatch, getState) => {
       return dispatch({
         type: constants.LOAD_FILES,
         payload: json
+      });
+    })
+    .catch(() => {
+      return dispatch({
+        type: globalStateConstants.SET_ERROR,
+        payload: "Internal Error: Could not load results"
       });
     });
 };

@@ -16,7 +16,7 @@ const databrowserInitialState = {
 export const databrowserReducer = (state = databrowserInitialState, action) => {
   switch (action.type) {
     case constants.LOAD_FACETS:
-      return { ...state, facets: action.payload.data };
+      return { ...state, error: "", facets: action.payload.data };
     case constants.SELECT_FACET: {
       const selectedFacets = { ...state.selectedFacets };
       selectedFacets[action.facet] = action.value;

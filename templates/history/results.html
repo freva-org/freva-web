@@ -69,7 +69,7 @@
 
                     <button class="btn btn-warning" id="followButton"><span id='followText'>{{follow}}</span></button>
                     {%if developer %}
-                        {% mail_to_developer history_object.tool request.build_absolute_uri %}
+                        {% mail_to_developer history_object.tool request.user.username request.build_absolute_uri %}
                     {%endif%}
                 </div>
             </div>

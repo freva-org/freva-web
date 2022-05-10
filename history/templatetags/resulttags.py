@@ -3,13 +3,14 @@ from django.utils.safestring import mark_safe
 from django.utils.encoding import force_str
 from django.utils.html import conditional_escape
 from django.template.loader import render_to_string
-
+from base.LdapUser import LdapUser
+from base.exceptions import UserNotFoundError
 from django_evaluation import settings
 
 from history.utils import FileDict
 from history.models import HistoryTag
 
-from evaluation_system.model.user import User
+from evaluation_system.misc.exceptions import PluginManagerException
 
 import re
 
@@ -183,21 +184,16 @@ user_mask = {}
 
 
 @register.inclusion_tag("history/templatetags/mail_to_developer.html")
-def mail_to_developer(tool_name, url):
+def mail_to_developer(tool_name, username, url):
 
     from evaluation_system.api import plugin_manager as pm
-    from django_evaluation.middelwares import get_current_user
 
     try:
-        user = User(str(get_current_user()))
-    except:
-        user = User()
-    tool = pm.get_plugin_instance(tool_name, user)
-
-    try:
+        user = LdapUser(username)
+        tool = pm.get_plugin_instance(tool_name, user)
         developer = tool.tool_developer
-    except AttributeError:
-        developer = False
+    except (UserNotFoundError, PluginManagerException, AttributeError):
+        developer = None
 
     return {"tool_name": tool_name, "developer": developer, "current_url": url}
 

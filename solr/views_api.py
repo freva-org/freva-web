@@ -1,58 +1,45 @@
-from django.http import HttpResponse
 from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from hurry.filesize import alternative, size
 from django.contrib.auth.decorators import login_required
-import xarray as xr
+from django.utils.safestring import mark_safe
+from django.http import JsonResponse
+from django.conf import settings
+from paramiko import AuthenticationException
+
+from plugins.utils import ssh_call, get_scheduler_hosts
 
 
 @api_view(["POST"])
 @login_required()
 def ncdump(request):
-    if request.user.isGuest():
-        return Response(
-            dict(
-                ncdump="",
-                error_msg="Guests are not allowed to perform ncdump",
-            ),
-            content_type="application/json",
-            status=200,
+    if not request.user.has_perm("history.browse_full_data") or request.user.isGuest():
+        ncdump_out = "Guest users are not allowed to use this command.<br/>Normally you would see the output of <strong>ncdump</strong> here."
+        return JsonResponse(
+            {"ncdump": "", "error_msg": mark_safe(ncdump_out)}, status=403
         )
 
-    input_file = [str(request.data.get("file"))]
-    kwargs = dict(
-        parallel=True,
-        coords="minimal",
-        data_vars="minimal",
-        compat="override",
-        combine="nested",
-        concat_dim="time",
-        chunks={"time": -1},
+    fn = request.data.get("file")
+    user_pw = request.data.get("pass")
+    command = "%s %s" % (
+        settings.NCDUMP_BINARY,
+        fn,
     )
+
     try:
-        dset = xr.open_mfdataset(input_file, **kwargs)
-    except Exception as e:
-        return Response(
-            dict(
-                ncdump="",
-                error_msg="Could not open dataset, file(s) might be corrupted",
-            ),
-            content_type="application/json",
-            status=200,
+        result = ssh_call(
+            request.user.username, user_pw, command, get_scheduler_hosts(request.user)
         )
-    fsize = size(dset.nbytes, system=alternative)
-    out_str = xr.core.formatting_html.dataset_repr(dset)
-    out_str = out_str.replace(
-        "<svg class='icon xr-icon-file-text2'>", "<i class='fa fa-file-text-o'>"
-    ).replace("numpy.", "")
-    out_str = out_str.replace(
-        "<svg class='icon xr-icon-database'>", "<i class='fa fa-database'>"
-    )
-    out_str = out_str.replace("xarray.Dataset", f"Dataset (byte-size: {fsize})")
-    out_str = out_str.replace("</use></svg>", "</use></i>")
+        ncdump_out = mark_safe(result[1].read().decode("utf-8"))
+        ncdump_err = mark_safe(result[2].read().decode("utf-8"))
 
-    return Response(
-        dict(ncdump=out_str, error_msg=""),
-        content_type="application/json",
-        status=200,
-    )
+        status = 500 if ncdump_err else 200
+        return JsonResponse(
+            {"ncdump": ncdump_out, "error_msg": ncdump_err}, status=status
+        )
+    except AuthenticationException:
+        return JsonResponse(
+            {"ncdump": "", "error_msg": "Authentication error"}, status=400
+        )
+    except Exception:
+        # We can't list everything what can go wrong here but the user definitely needs
+        # some error output. Therefore, we catch all exceptions
+        return JsonResponse({"ncdump": "", "error_msg": "Unexpected error"}, status=500)

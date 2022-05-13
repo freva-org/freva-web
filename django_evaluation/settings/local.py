@@ -212,7 +212,9 @@ if isinstance(ALLOWED_HOSTS, str):
 VENV_PYTHON_DIR = "/usr/bin/python3"
 # Path to miklip-logo
 MIKLIP_LOGO = STATIC_URL + "img/miklip-logo.png"
-NCDUMP_BINARY = "/work/ch1187/regiklim-ces/freva/xarray/bin/ncdump_fancy"
+NCDUMP_BINARY = web_config.get(
+    "NCDUMP_BINARY", "/work/ch1187/regiklim-ces/freva/xarray/bin/ncdump_fancy"
+)
 LOAD_MODULE = " "
 # result to show at guest tour
 GUEST_TOUR_RESULT = int(web_config.get("GUEST_TOUR_RESULT", 105))

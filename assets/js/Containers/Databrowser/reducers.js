@@ -11,6 +11,7 @@ const databrowserInitialState = {
   metadata: {},
   ncdumpStatus: "pw",
   ncdumpOutput: null,
+  ncdumpError: null,
 };
 
 export const databrowserReducer = (state = databrowserInitialState, action) => {
@@ -39,13 +40,13 @@ export const databrowserReducer = (state = databrowserInitialState, action) => {
     case constants.LOAD_FILES:
       return { ...state, files: action.payload.data, numFiles: action.payload.metadata.numFound };
     case constants.LOAD_NCDUMP_ERROR:
-      return { ...state, ncdumpStatus: "pw_fail" };
+      return { ...state, ncdumpStatus: "error", ncdumpError:  action.message };
     case constants.LOAD_NCDUMP:
       return { ...state, ncdumpStatus: "loading" };
     case constants.LOAD_NCDUMP_SUCCESS:
-      return { ...state, ncdumpStatus: "ready", ncdumpOutput: action.payload };
+      return { ...state, ncdumpStatus: "ready", ncdumpOutput: action.message, ncdumpError: null };
     case constants.RESET_NCDUMP:
-      return { ...state, ncdumpStatus: "pw", ncdumpOutput: null };
+      return { ...state, ncdumpStatus: "pw", ncdumpOutput: null, ncdumpError: null };
     default:
       return state;
   }

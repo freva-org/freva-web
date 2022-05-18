@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 import logging
+import sys
 import pymysql
 import ldap
 import django_auth_ldap.config as ldap_cfg
@@ -140,11 +141,11 @@ LDAP_MODEL = "django_evaluation.ldaptools.MiklipUserInformation"
 ##################################################
 ##################################################
 # the host to start the scheduler
-SCHEDULER_HOSTS = web_config.get("SCHEDULER_HOSTS", ["mistral.dkrz.de"])
+SCHEDULER_HOSTS = web_config.get("SCHEDULER_HOST", ["mistral.dkrz.de"])
 if isinstance(SCHEDULER_HOSTS, str):
     SCHEDULER_HOSTS = [SCHEDULER_HOSTS]
 # temporary directory for tailed scheduler files
-TAIL_TMP_DIR = os.path.join(PROJECT_ROOT, "tail/")  # '/tmp/tail_offset/'
+TAIL_TMP_DIR = "/tmp/tail/"
 # Additional locations of static files
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
@@ -214,6 +215,7 @@ VENV_PYTHON_DIR = "/usr/bin/python3"
 MIKLIP_LOGO = STATIC_URL + "img/miklip-logo.png"
 NCDUMP_BINARY = "/work/ch1187/regiklim-ces/freva/xarray/bin/ncdump_fancy"
 LOAD_MODULE = " "
+FREVA_BIN = web_config.get("FREVA_BIN", os.path.join(sys.exec_prefix, "bin"))
 # result to show at guest tour
 GUEST_TOUR_RESULT = int(web_config.get("GUEST_TOUR_RESULT", 105))
 SHELL_IN_A_BOX = "/shell/"

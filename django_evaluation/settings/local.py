@@ -44,7 +44,7 @@ if not DEV:
 _logo = _get_conf_key(
     web_config,
     "INSTITUTION_LOGO",
-    Path(PROJECT_ROOT) / "static" / "img/RegiKlim_logo.png",
+    Path(PROJECT_ROOT) / "static" / "img/thumb-placeholder.png",
 )
 INSTITUTION_LOGO = f"{STATIC_URL}/img/{_logo.name}"
 FREVA_LOGO = f"{STATIC_URL}/img/by_freva_transparent.png"
@@ -213,7 +213,7 @@ VENV_PYTHON_DIR = "/usr/bin/python3"
 MIKLIP_LOGO = STATIC_URL + "img/miklip-logo.png"
 LOAD_MODULE = " "
 FREVA_BIN = web_config.get("FREVA_BIN", os.path.join(sys.exec_prefix, "bin"))
-NCDUMP_BINARY = os.path.join(FREVA_BIN, "metadata-inspector")
+NCDUMP_BINARY = os.path.join(FREVA_BIN, "metadata-inspector") + " --html"
 # result to show at guest tour
 GUEST_TOUR_RESULT = int(web_config.get("GUEST_TOUR_RESULT", 105))
 SHELL_IN_A_BOX = "/shell/"

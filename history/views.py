@@ -407,7 +407,8 @@ def results(request, id, show_output_only=False):
             # every time something happened (frontend is polling for new data via /history/<id>/tail-file
             for line in pygtailwrapper(id, restart=True):
                 file_content.append(line)
-        except IOError:
+        except IOError as e:
+            logging.error(e)
             file_content = [
                 "WARNING:",
                 "This is not the content of the file '"

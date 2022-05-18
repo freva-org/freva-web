@@ -1,3 +1,4 @@
+import base64
 import evaluation_system.api.plugin_manager as pm
 from evaluation_system.misc import config
 from django.views.decorators.debug import sensitive_variables
@@ -59,7 +60,7 @@ def ssh_call(username, password, command, hostnames=["127.0.0.1"]):
     _hostnames = hostnames[:]
     hostname = _hostnames.pop()
     sentto = hostname
-    env_dict = {"LC_TELEPHONE": password}
+    env_dict = {"LC_TELEPHONE": base64.b64encode(password.encode()).decode()}
     while hostname:
         try:
             # create the ssh client

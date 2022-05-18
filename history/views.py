@@ -574,7 +574,7 @@ def cancel_slurmjob(request):
 
     from paramiko import AuthenticationException
 
-    config.reloadConfiguration()
+    eval_config.reloadConfiguration()
     history_item = History.objects.get(pk=request.POST["id"])
     if history_item.status < 3:
         return HttpResponse(

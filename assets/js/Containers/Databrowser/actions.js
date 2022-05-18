@@ -115,7 +115,7 @@ export const loadFiles = () => (dispatch, getState) => {
     });
 };
 
-export const loadNcdump = (fn) => dispatch => {
+export const loadNcdump = (fn, pw) => dispatch => {
   const url = "/api/solr/ncdump/";
   dispatch({ type: constants.LOAD_NCDUMP, fn });
   return fetch(url, {
@@ -127,17 +127,26 @@ export const loadNcdump = (fn) => dispatch => {
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      file: fn
+      file: fn,
+      pass: pw
     })
   }).then(resp => {
-
     if (!resp.ok) {
-      throw Error([resp.status, resp.statusText]);
+      /* eslint-disable */
+      return resp.json().then(json => {
+        console.log(resp.statusText)
+        if (json.error_msg) {
+          throw new Error(json.error_msg);
+        } else {
+          throw new Error(resp.statusText);
+        }
+      });
     }
-    const data = resp.json();
-    return data;
+    return resp.json();
   }).then(json => {
-    return dispatch({ type: constants.LOAD_NCDUMP_SUCCESS, payload: json });
+    return dispatch({ type: constants.LOAD_NCDUMP_SUCCESS, message: json.ncdump });
   }
-  ).catch(() => dispatch({ type: constants.LOAD_NCDUMP_ERROR }));
+  ).catch((error) => {
+    dispatch({ type: constants.LOAD_NCDUMP_ERROR, message: error.message });
+  });
 };

@@ -116,9 +116,8 @@ class Databrowser extends React.Component {
   }
 
   render () {
-    const { facets, selectedFacets, activeFacet, ncdumpStatus, ncdumpOutput } = this.props.databrowser;
+    const { facets, selectedFacets, activeFacet, ncdumpStatus, ncdumpOutput, ncdumpError } = this.props.databrowser;
     const { dispatch } = this.props;
-
     if (this.props.error) {
       return (
         <Container>
@@ -189,6 +188,7 @@ class Databrowser extends React.Component {
               submitNcdump={(fn, pw) => dispatch(loadNcdump(fn, pw))}
               status={ncdumpStatus}
               output={ncdumpOutput}
+              error={ncdumpError}
             />
           </Col>
         </Row>
@@ -206,7 +206,8 @@ Databrowser.propTypes = {
     selectedFacets: PropTypes.object,
     activeFacet: PropTypes.string,
     ncdumpStatus: PropTypes.string,
-    ncdumpOutput: PropTypes.status,
+    ncdumpOutput: PropTypes.string,
+    ncdumpError: PropTypes.string,
     metadata: PropTypes.object,
   }),
   error: PropTypes.string,

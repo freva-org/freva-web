@@ -362,6 +362,17 @@
                 openEffect  : 'none',
                 closeEffect : 'none'
             });
+
+            {% if "configuration" in collapse %}
+                $('#collapseConfig').collapse();
+            {% endif %}
+            {% if "output" in collapse %}
+                $('#collapseOutput').collapse();
+            {% endif %}
+            {% if "results" in collapse %}
+                $('#collapseResults').collapse();
+            {% endif %}
+
         });
     </script>
 

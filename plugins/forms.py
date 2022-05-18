@@ -6,7 +6,7 @@ from django.template import loader
 import evaluation_system.api.parameters as parameters
 from evaluation_system.api import plugin_manager as pm
 from pathlib import Path
-from plugins.utils import ssh_call, get_scheduler_hosts, find_owner
+from plugins.utils import ssh_call
 from evaluation_system.misc.utils import PrintableList
 from django.conf import settings
 
@@ -215,12 +215,6 @@ class PluginForm(forms.Form):
                     widget=PluginFileFieldWidget(file_extension=param.file_extension),
                 )
             elif isinstance(param, parameters.Directory):
-                if self.initial.get(key, None):
-                    rel_path = Path(self.initial[key]).relative_to(self._workdir)
-                    add_warn = '<br><span style="color:red">Warning! This is not your directory.</span>'
-                    if find_owner(self.initial[key]) == uid or rel_path.parts[0] == uid:
-                        add_warn = ""
-                    help_str += add_warn
                 self.fields[key] = forms.CharField(
                     required=required, help_text=help_str
                 )

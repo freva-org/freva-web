@@ -214,16 +214,6 @@ class PluginForm(forms.Form):
                     help_text=help_str,
                     widget=PluginFileFieldWidget(file_extension=param.file_extension),
                 )
-            elif isinstance(param, parameters.Directory):
-                if self.initial.get(key, None):
-                    rel_path = Path(self.initial[key]).relative_to(self._workdir)
-                    add_warn = '<br><span style="color:red">Warning! This is not your directory.</span>'
-                    if find_owner(self.initial[key]) == uid or rel_path.parts[0] == uid:
-                        add_warn = ""
-                    help_str += add_warn
-                self.fields[key] = forms.CharField(
-                    required=required, help_text=help_str
-                )
             else:
                 self.fields[key] = forms.CharField(
                     required=required, help_text=help_str

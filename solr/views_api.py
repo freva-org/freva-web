@@ -11,7 +11,7 @@ from plugins.utils import ssh_call, get_scheduler_hosts
 @api_view(["POST"])
 @login_required()
 def ncdump(request):
-    if not request.user.has_perm("history.browse_full_data") or request.user.isGuest():
+    if request.user.isGuest():
         ncdump_out = "Guest users are not allowed to use this command.<br/>Normally you would see the output of <strong>ncdump</strong> here."
         return JsonResponse(
             {"ncdump": "", "error_msg": mark_safe(ncdump_out)}, status=403

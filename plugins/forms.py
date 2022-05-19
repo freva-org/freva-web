@@ -6,7 +6,7 @@ from django.template import loader
 import evaluation_system.api.parameters as parameters
 from evaluation_system.api import plugin_manager as pm
 from pathlib import Path
-from plugins.utils import ssh_call, get_scheduler_hosts
+from plugins.utils import ssh_call
 from evaluation_system.misc.utils import PrintableList
 from django.conf import settings
 

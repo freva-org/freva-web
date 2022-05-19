@@ -481,8 +481,12 @@ def results(request, id, show_output_only=False):
     except ObjectDoesNotExist:
         tool_version = "Not available"
         api_version = "Not available"
-    result_caption = history_object.caption
-    if result_caption is None:
+
+    if history_object.caption:
+        result_caption = (
+            history_object.caption + "(" + history_object.tool.upper() + ")"
+        )
+    else:
         result_caption = history_object.tool.upper()
 
     htag_notes = None

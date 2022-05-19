@@ -246,6 +246,10 @@ function TableContainer ({ activeFacet, selectedFacets, closeAccordion }) {
         }
       },
       {
+        Header: "Id",
+        accessor: "id",
+      },
+      {
         Header: "Plugin",
         accessor: "tool",
       },

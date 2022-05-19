@@ -6,8 +6,6 @@ from django.http import Http404
 from django.conf import settings
 import paramiko
 import logging
-from os import stat, path
-from pwd import getpwuid
 
 
 def get_scheduler_hosts(user):

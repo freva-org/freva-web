@@ -8,7 +8,6 @@ from django.views.decorators.debug import sensitive_variables, sensitive_post_pa
 from django_evaluation.monitor import _restart
 from django.conf import settings
 from django.urls import reverse
-from django_evaluation.utils import settings_login_required
 from evaluation_system.misc import config
 from django.utils.http import url_has_allowed_host_and_scheme
 
@@ -98,7 +97,7 @@ def shell_in_a_box(request):
     return render(request, "base/shell-in-a-box.html", {"shell_url": shell_url})
 
 
-@settings_login_required("/contact")
+@login_required()
 def contact(request):
     """
     View rendering the iFrame for the wiki page.

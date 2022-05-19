@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 import logging
+import sys
 import pymysql
 import ldap
 import django_auth_ldap.config as ldap_cfg
@@ -43,7 +44,7 @@ if not DEV:
 _logo = _get_conf_key(
     web_config,
     "INSTITUTION_LOGO",
-    Path(PROJECT_ROOT) / "static" / "img/RegiKlim_logo.png",
+    Path(PROJECT_ROOT) / "static" / "img/thumb-placeholder.png",
 )
 INSTITUTION_LOGO = f"{STATIC_URL}/img/{_logo.name}"
 FREVA_LOGO = f"{STATIC_URL}/img/by_freva_transparent.png"
@@ -140,11 +141,11 @@ LDAP_MODEL = "django_evaluation.ldaptools.MiklipUserInformation"
 ##################################################
 ##################################################
 # the host to start the scheduler
-SCHEDULER_HOSTS = web_config.get("SCHEDULER_HOSTS", ["mistral.dkrz.de"])
+SCHEDULER_HOSTS = web_config.get("SCHEDULER_HOST", ["mistral.dkrz.de"])
 if isinstance(SCHEDULER_HOSTS, str):
     SCHEDULER_HOSTS = [SCHEDULER_HOSTS]
 # temporary directory for tailed scheduler files
-TAIL_TMP_DIR = os.path.join(PROJECT_ROOT, "tail/")  # '/tmp/tail_offset/'
+TAIL_TMP_DIR = "/tmp/tail/"
 # Additional locations of static files
 STATICFILES_DIRS = (
     # Put strings here, like "/home/html/static" or "C:/www/django/static".
@@ -203,19 +204,16 @@ HOME_DIRS_AVAILABLE = web_config.get("HOME_DIRS_AVAILABLE", False)
 DEBUG = TEMPLATE_DEBUG = True
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = web_config.get(
-    "ALLOWED_HOSTS", ["localhost", "127.0.0.1", "regiklim-dev.dkrz.de"]
-)
+ALLOWED_HOSTS = web_config.get("ALLOWED_HOSTS", ["localhost", "127.0.0.1"])
 if isinstance(ALLOWED_HOSTS, str):
     ALLOWED_HOSTS = [ALLOWED_HOSTS]
 # path to the site packages used:
 VENV_PYTHON_DIR = "/usr/bin/python3"
 # Path to miklip-logo
 MIKLIP_LOGO = STATIC_URL + "img/miklip-logo.png"
-NCDUMP_BINARY = web_config.get(
-    "NCDUMP_BINARY", "/work/ch1187/regiklim-ces/freva/xarray/bin/ncdump_fancy"
-)
 LOAD_MODULE = " "
+FREVA_BIN = web_config.get("FREVA_BIN", os.path.join(sys.exec_prefix, "bin"))
+NCDUMP_BINARY = os.path.join(FREVA_BIN, "metadata-inspector") + " --html"
 # result to show at guest tour
 GUEST_TOUR_RESULT = int(web_config.get("GUEST_TOUR_RESULT", 105))
 SHELL_IN_A_BOX = "/shell/"

@@ -214,10 +214,6 @@ class PluginForm(forms.Form):
                     help_text=help_str,
                     widget=PluginFileFieldWidget(file_extension=param.file_extension),
                 )
-            elif isinstance(param, parameters.Directory):
-                self.fields[key] = forms.CharField(
-                    required=required, help_text=help_str
-                )
             else:
                 self.fields[key] = forms.CharField(
                     required=required, help_text=help_str

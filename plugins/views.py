@@ -167,7 +167,9 @@ def setup(request, plugin_name, row_id=None):
             slurm_options = config.get_section("scheduler_options")
 
             # Get modules and files to source
-            load_module = settings.LOAD_MODULE
+            config.reloadConfiguration()
+            eval_str = f"EVALUATION_SYSTEM_CONFIG_FILE={config.CONFIG_FILE}"
+            exe_path= f"PATH={settings.FREVA_BIN}:$PATH"
 
             if "EVALUATION_SYSTEM_PLUGINS_%s" % request.user in os.environ:
                 plugin_str = os.environ["EVALUATION_SYSTEM_PLUGINS_%s" % request.user]
@@ -175,45 +177,51 @@ def setup(request, plugin_name, row_id=None):
             else:
                 export_user_plugin = ""
 
-            command = plugin.composeCommand(
+            command = " ".join(
+                    plugin.compose_command(
                 config_dict,
                 batchmode="web" if slurm_options else False,
                 caption=caption,
                 unique_output=unique_output,
+                )
             )
-
+            ssh_cmd = f'bash -c "{eval_str} {exe_path} freva-plugin {command}"'
+            logging.error(ssh_cmd)
             # finally send the ssh call
-            stdout = ssh_call(
+            _, stdout, stderr = ssh_call(
                 username=username,
                 password=password,
                 # we use "bash -c because users with other login shells can't use "export"
                 # not clear why we removed this in the first place...
-                command='bash -c "source /etc/bash.bashrc; %s"'
-                % (load_module + export_user_plugin + command),
+                command=ssh_cmd,
                 hostnames=hostnames,
             )
 
             # get the text form stdout
-            out = stdout[1].readlines()
-            err = stdout[2].readlines()
+            out = stdout.readlines()
+            err = stderr.readlines()
 
-            logging.debug("command:" + str(command))
+            logging.debug("command:" + str(ssh_cmd))
             logging.debug("output of analyze:" + str(out))
             logging.debug("errors of analyze:" + str(err))
-
+            if stdout.channel.recv_exit_status() != 0:
+                err_msg = '\n'.join(err)
+                raise RuntimeError(
+                    f"Command failed: {ssh_cmd}\nstderr: {err_msg}"
+                )
             # THIS IS HOW WE DETERMINE THE ID USING A SCHEDULER
             substr = "Scheduled job with history"
             # find first line containing the substr
             scheduler_output = next(
-                (s for s in out if substr in s), None
+                (s.strip("\n") for s in err if substr in s), ""
             )  # returns 'abc123'
-            if scheduler_output:
-                row_id = int(scheduler_output.split(" ")[-1])
-            else:
-                raise Exception(
-                    "Unexpected output of analyze:\n[%s]\n[%s]\n%s"
-                    % (out, err, command)
-                )
+            try:
+                row_id = int(scheduler_output.partition(":")[-1])
+            except Exception as error:
+                raise ValueError(
+                    "Could not read job id:\n[%s]\n[%s]\n%s"
+                    % ("\n".join(out), "\n".join(err), ssh_cmd)
+                ) from error
 
             return redirect(
                 "history:results", id=row_id

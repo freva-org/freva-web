@@ -1,3 +1,8 @@
+import json
+import logging
+import os
+from pathlib import Path
+
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
@@ -10,13 +15,13 @@ from datatableview import Datatable
 from datatableview.views import DatatableView
 from django.utils.html import escape
 
-import json
-import os
 
 import evaluation_system.api.plugin_manager as pm
 from evaluation_system.model.db import UserDB
+from evaluation_system.api.workload_manager import get_job_class
 from evaluation_system.model.user import User
 from evaluation_system.misc.exceptions import PluginManagerException
+from evaluation_system.misc import config as eval_config
 from evaluation_system.model.history.models import History, ResultTag
 from base.LdapUser import LdapUser
 from base.exceptions import UserNotFoundError
@@ -29,7 +34,6 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Q
 from django.urls import reverse
 
-import logging
 from history.models import HistoryTag
 from history.templatetags.resulttags import mask_uid
 
@@ -403,7 +407,8 @@ def results(request, id, show_output_only=False):
             # every time something happened (frontend is polling for new data via /history/<id>/tail-file
             for line in pygtailwrapper(id, restart=True):
                 file_content.append(line)
-        except IOError:
+        except IOError as e:
+            logging.error(e)
             file_content = [
                 "WARNING:",
                 "This is not the content of the file '"
@@ -569,25 +574,27 @@ def cancel_slurmjob(request):
 
     from paramiko import AuthenticationException
 
+    eval_config.reloadConfiguration()
     history_item = History.objects.get(pk=request.POST["id"])
     if history_item.status < 3:
         return HttpResponse(
             json.dumps("Job already finished"), content_type="application/json"
         )
 
-    slurm_id = history_item.slurmId()
-
-    try:
+    job_id = history_item.slurmId()
+    suffix = Path(history_item.slurm_output).suffix
+    scheduler_system = eval_config.get("scheduler_system")
+    if suffix == ".local" or scheduler_system == "local":
+        job_cls = get_job_class("local")
+        host_names = [history_item.host]
+    else:
+        job_cls = get_job_class(scheduler_system)
         host_names = get_scheduler_hosts(request.user)
-        source_machine = settings.LOAD_MODULE
+    try:
         result = ssh_call(
             username=request.user.username,
             password=request.POST["password"],
-            command='bash -c "%s module load slurm; scancel -Q %s;exit 0"'
-            % (
-                source_machine,
-                slurm_id,
-            ),
+            command=f"{job_cls.cancel_command} {job_id}",
             hostnames=host_names,
         )
         history_item.status = 2

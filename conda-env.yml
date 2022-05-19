@@ -24,6 +24,7 @@ dependencies:
       - hurry.filesize
       - xarray
       - git+https://gitlab.dkrz.de/freva/evaluation_system.git
+      - git+https://gitlab.dkrz.de/freva/metadata-inspektor.git
   - sphinx
   - pymysql
   - imagemagick

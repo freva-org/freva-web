@@ -1,3 +1,4 @@
+import base64
 import evaluation_system.api.plugin_manager as pm
 from evaluation_system.misc import config
 from django.views.decorators.debug import sensitive_variables
@@ -7,17 +8,6 @@ import paramiko
 import logging
 from os import stat, path
 from pwd import getpwuid
-
-
-def find_owner(filename):
-    """
-    Return the owner of a file or directory recursively
-    """
-    if path.exists(filename):
-        return getpwuid(stat(filename).st_uid).pw_name
-    if filename[0] != "/":
-        return True
-    return find_owner("/".join(filename.split("/")[:-1]))
 
 
 def get_scheduler_hosts(user):
@@ -59,7 +49,7 @@ def ssh_call(username, password, command, hostnames=["127.0.0.1"]):
     _hostnames = hostnames[:]
     hostname = _hostnames.pop()
     sentto = hostname
-    env_dict = {"LC_TELEPHONE": password}
+    env_dict = {"LC_TELEPHONE": base64.b64encode(password.encode()).decode()}
     while hostname:
         try:
             # create the ssh client

@@ -39,7 +39,7 @@ class DummyPlugin(PluginAbstract):
     _template = "${number} - $something - $other"
     tool_developer = {"name": "DummyUser", "email": "data@dkrz.de"}
 
-    def runTool(self, config_dict=None):
+    def run_tool(self, config_dict=None):
         DummyPlugin._runs.append(config_dict)
         print(f"Dummy tool was run with: {config_dict}")
         return {

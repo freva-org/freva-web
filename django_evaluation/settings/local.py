@@ -28,7 +28,7 @@ def _get_conf_key(config, key, alternative, is_file=True):
 
 
 try:
-    with (web_config_path) as f:
+    with open(web_config_path) as f:
         web_config = toml.load(f)
 except FileNotFoundError:
     web_config = {}

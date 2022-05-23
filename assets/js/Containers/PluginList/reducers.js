@@ -21,13 +21,13 @@ function sortObject (o) {
 const createCategories = plugins => {
   const categories = {};
   plugins.forEach(p => {
-    const newCat = p[1].category ? p[1].category : "other";
-    p[1].category = newCat;
+    const plugin = p[1];
+    const newCat = plugin.category;
     let cat = categories[newCat];
     if (cat) {
-      cat.push(p[1].name);
+      cat.push(plugin.name);
     } else {
-      cat = [p[1].name];
+      cat = [plugin.name];
     }
     categories[newCat] = cat;
   });
@@ -37,18 +37,19 @@ const createCategories = plugins => {
 const createTags = plugins => {
   let tags = [];
   plugins.forEach(p => {
-    if (p[1].tags) {
-      tags = tags.concat(p[1].tags);
+    const plugin = p[1];
+    if (plugin.tags) {
+      tags = tags.concat(plugin.tags);
     }
   });
-  return _.sortBy(_.uniq(tags));
+  return [...new Set(tags)].sort();
 };
 
 const filterPlugins = (plugins, categoriesFilter, tagsFilter, searchFilter) => {
   let filteredPlugins = plugins;
   // filter for categories
   if (categoriesFilter.length > 0) {
-    filteredPlugins = _.filter(filteredPlugins, (p) => {
+    filteredPlugins = filteredPlugins.filter(p => {
       return _.includes(categoriesFilter, p[1].category);
     });
   }
@@ -56,7 +57,7 @@ const filterPlugins = (plugins, categoriesFilter, tagsFilter, searchFilter) => {
   // filter for tags
   // tool must have ALL tags
   if (tagsFilter.length > 0) {
-    filteredPlugins = _.filter(filteredPlugins, (p) => {
+    filteredPlugins = filteredPlugins.filter(p => {
       for (let i = 0; i < tagsFilter.length; i++) {
         if (!_.includes(p[1].tags, tagsFilter[i])) {
           return false;
@@ -67,12 +68,14 @@ const filterPlugins = (plugins, categoriesFilter, tagsFilter, searchFilter) => {
   }
 
   // filter for string
-  filteredPlugins = _.filter(filteredPlugins, (p) => {
-    const title = _.includes(p[1].name.toLowerCase(), searchFilter.toLowerCase());
-    const description = _.includes(p[1].description.toLowerCase(), searchFilter.toLowerCase());
+  const searchWord = searchFilter.toLowerCase();
+  filteredPlugins = filteredPlugins.filter(p => {
+    const plugin = p[1];
+    const title = _.includes(plugin.name.toLowerCase(), searchWord);
+    const description = _.includes(plugin.description.toLowerCase(), searchWord);
     let tags = false;
-    if (p[1].tags) {
-      tags = _.includes(p[1].tags.join().toLowerCase(), searchFilter.toLowerCase());
+    if (plugin.tags) {
+      tags = _.includes(plugin.tags.join().toLowerCase(), searchWord);
     }
     return title || description || tags;
   });
@@ -89,6 +92,12 @@ export const pluginListReducer = (state = pluginListInitialState, action) => {
     case constants.LOAD_PLUGINS: {
       const exported = action.payload.some(v => {
         return v[1].user_exported;
+      });
+      action.payload.forEach(p => {
+        const plugin = p[1];
+        if (!constants.CATEGORY_TITLES[plugin.category]) {
+          plugin.category = "other";
+        }
       });
       return {
         ...state,

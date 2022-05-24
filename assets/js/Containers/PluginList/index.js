@@ -14,20 +14,10 @@ import { fetchDir, closeDir, changeRoot } from "../../Components/FileTree/action
 
 import Spinner from "../../Components/Spinner";
 
+import { CATEGORY_TITLES } from "./constants";
 import { exportPlugin, loadPlugins, updateCategoryFilter, updateTagFilter, updateSearchFilter } from "./actions";
 
-/*
-These are the hardcoded categories of this group. If a category is not listed here, the
-corresponding plugins will not be shown
-FIXME: Is this actually a good idea?
-*/
-const categoryTitle = {
-  decadal: "Decadal Evaluation",
-  statistical: "Statistical Analysis",
-  postproc: "Post-Processing",
-  support: "Support Plugins",
-  other: "Others"
-};
+
 
 class PluginList extends React.Component {
 
@@ -62,7 +52,7 @@ class PluginList extends React.Component {
   }
 
   renderPluginBlock (filteredPlugins, category) {
-    const plugins = _.filter(filteredPlugins, (val) => {
+    const plugins = filteredPlugins.filter(val => {
       return val[1].category.toLowerCase() === category;
     });
 
@@ -72,7 +62,7 @@ class PluginList extends React.Component {
     return (
       <ListGroup className="mb-3 card" key={category + "plugins"}>
         <div className="card-header">
-          <h3 className="mb-0">{categoryTitle[category]}</h3>
+          <h3 className="mb-0">{CATEGORY_TITLES[category]}</h3>
         </div>
         {
           plugins.map(val => {
@@ -118,7 +108,7 @@ class PluginList extends React.Component {
         <FormCheck.Label
           htmlFor={categoryName + "-cat"}
         >
-          {categoryTitle[categoryName]} ({categories[categoryName].length})
+          {CATEGORY_TITLES[categoryName]} ({categories[categoryName].length})
         </FormCheck.Label>
       </FormCheck>
     );
@@ -199,7 +189,7 @@ class PluginList extends React.Component {
         <Row>
           <Col md={8} className="mt-3">
             {
-              Object.keys(categoryTitle).map(key => {
+              Object.keys(CATEGORY_TITLES).map(key => {
                 return this.renderPluginBlock(filteredPlugins, key);
               })
             }
@@ -218,7 +208,7 @@ class PluginList extends React.Component {
               <FormLabel>Categories:</FormLabel>
               <div>
                 {
-                  Object.keys(categoryTitle).map(key => {
+                  Object.keys(CATEGORY_TITLES).map(key => {
                     return this.renderCategoryCheckbox(categories, categoriesFilter, key);
                   })
                 }

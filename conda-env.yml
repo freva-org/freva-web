@@ -70,3 +70,4 @@ dependencies:
   - mypy
   - black
   - redis-py
+  - gunicorn

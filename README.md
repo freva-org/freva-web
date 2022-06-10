@@ -113,3 +113,19 @@ npm run dev   # starts webpack-dev-server including hot-reloading
 ```bash
 python manage.py collectstatic  # get new js files
 ```
+
+# Production
+
+The production environment is based on gunicorn inside a docker and an Apache HTTPD as a reverse proxy in front of it
+
+```
+docker build -t gunicorn -f ./docker/production/gunicorn/Dockerfile .
+
+# set env for config and mount lustre. It should have the same pathnames as on the host system
+docker run -e EVALUATION_SYSTEM_CONFIG_FILE=/path/to/evaluation_system.conf-v /work/ch1187:/work/ch1187  -p 8000:8000 gunicorn
+
+# get httpd image
+docker pull httpd:2.4
+
+docker run -v "/path/to/freva-web/docker/production/apache/apache-conf":"/usr/local/apache2/conf/httpd.conf" -v "/path/to//server-cert.crt":"/etc/ssl/certs/server-cert.crt" -v "/path/to/server-key.key":"/etc/ssl/private/server-key.key" -e FREVA_HOST=www-regiklim.dkrz.de -p 80:80 -p 443:443 httpd:2.4
+```

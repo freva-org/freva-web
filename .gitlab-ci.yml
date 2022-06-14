@@ -25,7 +25,7 @@ build-image:
 
 test_latest:
   stage: test
-  image: registry.gitlab.dkrz.de/freva/evaluation_system/freva_build:freva-dev
+  image: registry.gitlab.dkrz.de/freva/evaluation_system/freva-dev:unittest
   tags:
     - docker, specific
   before_script:

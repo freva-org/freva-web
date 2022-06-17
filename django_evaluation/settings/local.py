@@ -77,7 +77,7 @@ IMPRINT = web_config.get(
         "Germany",
     ],
 )
-HOMEPAGE_HEADING = web_config.get("HOMEPATE_HEADING", "Lorem ipsum dolor.")
+HOMEPAGE_HEADING = web_config.get("HOMEPAGE_HEADING", "Lorem ipsum dolor.")
 ABOUT_US_TEXT = web_config.get("ABOUT_US_TEXT", "Hello world, this is freva.")
 CONTACTS = web_config.get("CONTACTS", ["help@freva.org"])
 if isinstance(CONTACTS, str):

@@ -1,12 +1,10 @@
 from pathlib import Path
 import os
-import logging
 import sys
 import pymysql
 import ldap
-import django_auth_ldap.config as ldap_cfg
 from django_auth_ldap.config import LDAPSearch, NestedGroupOfNamesType
-import configparser
+import shutil
 import toml
 from django.urls import reverse_lazy
 from evaluation_system.misc import config
@@ -27,6 +25,18 @@ def _get_conf_key(config, key, alternative, is_file=True):
     return Path(alternative)
 
 
+def _get_logo(logo_file, project_root):
+    if not logo_file or not Path(logo_file).exists():
+        return "/static/img/thumb-placeholder.png"
+    static_root = Path(project_root) / "static_root"
+    logo_file = Path(logo_file)
+    new_file = static_root / "img" / logo_file.name
+    if new_file.exists():
+        return f"/static/img/{logo_file.name}"
+    shutil.copy(logo_file, new_file)
+    return f"/static/img/{logo_file.name}"
+
+
 try:
     with open(web_config_path) as f:
         web_config = toml.load(f)
@@ -41,12 +51,8 @@ PROJECT_ROOT = os.environ.get("PROJECT_ROOT", None) or str(
 STATIC_URL = "/static/"
 if not DEV:
     STATIC_ROOT = str(Path(PROJECT_ROOT) / "static")
-_logo = _get_conf_key(
-    web_config,
-    "INSTITUTION_LOGO",
-    Path(PROJECT_ROOT) / "static" / "img/thumb-placeholder.png",
-)
-INSTITUTION_LOGO = f"{STATIC_URL}/img/{_logo.name}"
+
+INSTITUTION_LOGO = _get_logo(web_config.get("INSTITUTION_LOGO", ""), PROJECT_ROOT)
 FREVA_LOGO = f"{STATIC_URL}/img/by_freva_transparent.png"
 MAIN_COLOR = _get_conf_key(web_config, "MAIN_COLOR", "Tomato", False)
 BORDER_COLOR = _get_conf_key(web_config, "BORDER_COLOR", "#6c2e1f", False)
@@ -77,7 +83,7 @@ IMPRINT = web_config.get(
         "Germany",
     ],
 )
-HOMEPAGE_HEADING = web_config.get("HOMEPATE_HEADING", "Lorem ipsum dolor.")
+HOMEPAGE_HEADING = web_config.get("HOMEPAGE_HEADING", "Lorem ipsum dolor.")
 ABOUT_US_TEXT = web_config.get("ABOUT_US_TEXT", "Hello world, this is freva.")
 CONTACTS = web_config.get("CONTACTS", ["help@freva.org"])
 if isinstance(CONTACTS, str):
@@ -93,9 +99,7 @@ INSTITUTION_NAME = web_config.get("INSTITUTION_NAME", "Freva")
 ##################################################
 ##################################################
 # The server for LDAP configuration
-AUTH_LDAP_SERVER_URI = web_config.get(
-    "AUTH_LDAP_SERVER_URI", "ldap://mldap0.hpc.dkrz.de, ldap://mldap1.hpc.dkrz.de"
-)
+AUTH_LDAP_SERVER_URI = web_config.get("AUTH_LDAP_SERVER_URI", "ldap://idm-dmz.dkrz.de")
 AUTH_LDAP_START_TLS = web_config.get("AUTH_LDAP_START_TLS", True)
 # The directory with SSL certificates
 CA_CERT_DIR = str(web_config_path.parent)
@@ -201,12 +205,16 @@ HOME_DIRS_AVAILABLE = web_config.get("HOME_DIRS_AVAILABLE", False)
 # SECURITY WARNING: don't run with debug turned on in production!
 # Debugging displays nice error messages, but leaks memory. Set this to False
 # on all server instances and True only for development.
-DEBUG = TEMPLATE_DEBUG = True
+DEBUG = TEMPLATE_DEBUG = web_config.get("DEBUG", True)
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = web_config.get("ALLOWED_HOSTS", ["localhost", "127.0.0.1"])
 if isinstance(ALLOWED_HOSTS, str):
     ALLOWED_HOSTS = [ALLOWED_HOSTS]
+
+# Provide a full list of all valid hosts (including the http(s):// prefix) which are expected
+CSRF_TRUSTED_ORIGINS = web_config.get("CSRF_TRUSTED_ORIGINS", ["http://localhost"])
+
 # path to the site packages used:
 VENV_PYTHON_DIR = "/usr/bin/python3"
 # Path to miklip-logo

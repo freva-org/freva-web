@@ -169,7 +169,7 @@ def setup(request, plugin_name, row_id=None):
             # Get modules and files to source
             config.reloadConfiguration()
             eval_str = f"EVALUATION_SYSTEM_CONFIG_FILE={config.CONFIG_FILE}"
-            exe_path= f"PATH={settings.FREVA_BIN}:$PATH"
+            exe_path = f"PATH={settings.FREVA_BIN}:$PATH"
 
             if "EVALUATION_SYSTEM_PLUGINS_%s" % request.user in os.environ:
                 plugin_str = os.environ["EVALUATION_SYSTEM_PLUGINS_%s" % request.user]
@@ -178,11 +178,11 @@ def setup(request, plugin_name, row_id=None):
                 export_user_plugin = ""
 
             command = " ".join(
-                    plugin.compose_command(
-                config_dict,
-                batchmode="web" if slurm_options else False,
-                caption=caption,
-                unique_output=unique_output,
+                plugin.compose_command(
+                    config_dict,
+                    batchmode="web" if slurm_options else False,
+                    caption=caption,
+                    unique_output=unique_output,
                 )
             )
             ssh_cmd = f'bash -c "{eval_str} {exe_path} freva-plugin {command}"'
@@ -205,10 +205,8 @@ def setup(request, plugin_name, row_id=None):
             logging.debug("output of analyze:" + str(out))
             logging.debug("errors of analyze:" + str(err))
             if stdout.channel.recv_exit_status() != 0:
-                err_msg = '\n'.join(err)
-                raise RuntimeError(
-                    f"Command failed: {ssh_cmd}\nstderr: {err_msg}"
-                )
+                err_msg = "\n".join(err)
+                raise RuntimeError(f"Command failed: {ssh_cmd}\nstderr: {err_msg}")
             # THIS IS HOW WE DETERMINE THE ID USING A SCHEDULER
             substr = "Scheduled job with history"
             # find first line containing the substr

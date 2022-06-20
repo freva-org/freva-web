@@ -113,3 +113,16 @@ npm run dev   # starts webpack-dev-server including hot-reloading
 ```bash
 python manage.py collectstatic  # get new js files
 ```
+
+# Production
+
+The production environment is based on gunicorn inside a docker container
+
+```
+docker build -t gunicorn -f Dockerfile .
+
+# set env for config and mount lustre. It should have the same pathnames as on the host system
+docker run -e EVALUATION_SYSTEM_CONFIG_FILE=/path/to/evaluation_system.conf -v /work/ch1187:/work/ch1187 -p 8000:8000 gunicorn
+```
+
+It is recommended to use a reverse proxy (e.g. Apache) in front of it.

@@ -1,0 +1,3 @@
+[submodule "docker/config"]
+	path = docker/config
+	url = https://gitlab.dkrz.de/freva/freva-service-config.git

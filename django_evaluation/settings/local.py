@@ -1,10 +1,13 @@
 from pathlib import Path
 import os
+import logging
 import sys
+import shutil
 import pymysql
 import ldap
+import django_auth_ldap.config as ldap_cfg
 from django_auth_ldap.config import LDAPSearch, NestedGroupOfNamesType
-import shutil
+import configparser
 import toml
 from django.urls import reverse_lazy
 from evaluation_system.misc import config
@@ -25,10 +28,10 @@ def _get_conf_key(config, key, alternative, is_file=True):
     return Path(alternative)
 
 
-def _get_logo(logo_file, project_root):
+def _get_logo(logo_file):
     if not logo_file or not Path(logo_file).exists():
         return "/static/img/thumb-placeholder.png"
-    static_root = Path(project_root) / "static_root"
+    static_root = Path(__file__).absolute().parents[2] / "static_root"
     logo_file = Path(logo_file)
     new_file = static_root / "img" / logo_file.name
     if new_file.exists():
@@ -51,8 +54,7 @@ PROJECT_ROOT = os.environ.get("PROJECT_ROOT", None) or str(
 STATIC_URL = "/static/"
 if not DEV:
     STATIC_ROOT = str(Path(PROJECT_ROOT) / "static")
-
-INSTITUTION_LOGO = _get_logo(web_config.get("INSTITUTION_LOGO", ""), PROJECT_ROOT)
+INSTITUTION_LOGO = _get_logo(web_config.get("INSTITUTION_LOGO", ""))
 FREVA_LOGO = f"{STATIC_URL}/img/by_freva_transparent.png"
 MAIN_COLOR = _get_conf_key(web_config, "MAIN_COLOR", "Tomato", False)
 BORDER_COLOR = _get_conf_key(web_config, "BORDER_COLOR", "#6c2e1f", False)
@@ -104,7 +106,7 @@ AUTH_LDAP_START_TLS = web_config.get("AUTH_LDAP_START_TLS", True)
 # The directory with SSL certificates
 CA_CERT_DIR = str(web_config_path.parent)
 # the only allowd group
-ALLOWED_GROUP = web_config.get("ALLOWED_GROUP", "ch1187")
+ALLOWED_GROUP = web_config.get("ALLOWED_GROUP", "freva")
 # Require a ca certificate
 AUTH_LDAP_GLOBAL_OPTIONS = {
     ldap.OPT_X_TLS_REQUIRE_CERT: ldap.OPT_X_TLS_DEMAND,  # TPYE OF CERTIFICATION

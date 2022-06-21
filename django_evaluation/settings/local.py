@@ -104,7 +104,7 @@ AUTH_LDAP_START_TLS = web_config.get("AUTH_LDAP_START_TLS", True)
 # The directory with SSL certificates
 CA_CERT_DIR = str(web_config_path.parent)
 # the only allowd group
-ALLOWED_GROUP = web_config.get("ALLOWED_GROUP", "ch1187")
+ALLOWED_GROUP = web_config.get("ALLOWED_GROUP", "freva")
 # Require a ca certificate
 AUTH_LDAP_GLOBAL_OPTIONS = {
     ldap.OPT_X_TLS_REQUIRE_CERT: ldap.OPT_X_TLS_DEMAND,  # TPYE OF CERTIFICATION

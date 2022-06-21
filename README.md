@@ -1,36 +1,32 @@
-# Production system deployment
-
+# Freva web user interface (web ui)
 The deployment of a production system is done by a dedicated deployment
-repository that sets up the backend, frontend and all services. To deploy the
-web frontend in a production environment use the [deployment repository](https://gitlab.dkrz.de/freva/deployment)
+repository that sets up the backend, front end and all services. To deploy the
+web front end in a production environment use the
+[deployment repository](https://gitlab.dkrz.de/freva/deployment)
 
 # Setting up a development version:
 
-## Installation of the required packages
+To start development with freva clone the repository and its sub-modules:
 
-The frontend will build upon an installed [backend version](https://gitlab.dkrz.de/freva/evaluation_system).
-Hence you will need to install the backend first. We recommend creating a dedicated
-anaconda environment where both frontend and backend are installed.
+```
+git clone --recursive https://gitlab.dkrz.de/freva/freva_web.git
+```
+
+
+## Installation of the required packages and infrastructure
+
+The web ui is being deployed in a dedicated anaconda environment. Hence
+you need [anaconda](https://www.anaconda.com/products/distribution) to be
+installed on you computer. Once anaconda is set up the installation of all
+required packages is quite simple:
 
 ```bash
 conda env create -f conda-env.yml
-conda activate freva-web
 source .envrc
-conda env config vars set EVALUATION_SYSTEM_CONFIG_FILE=$EVALUATION_SYSTEM_CONFIG_FILE
-conda env config vars set PUBKEY=$EVALUATION_SYSTEM_CONFIG_FILE
-conda env config vars set DEV_MODE=1
-conda deactivate
-conda activate freva-web
 ```
 
-You will also need to clone the [evaluation system](https://gitlab.dkrz.de/freva/evaluation_system) repo and install
-it into the `freva-web` environment.
-
-```bash
-pip install -e <path to eval system repo>
-```
-
-The back- and frontend will need a connection to a solr and mariadb service. This services can be deployed using
+The web ui will need a connection to a solr and mariadb service.
+This services can be deployed using
 [`docker-compose`](https://docs.docker.com/compose/install/).
 
 ```bash
@@ -45,7 +41,7 @@ docker-compose down
 
 ### Running tests
 
-There are some rudimentaray tests that check the integration of `django` and the
+There are some rudimentary tests that check the integration of `django` and the
 `nodejs` building process. Assuming you have followed steps mentioned above and
 created a `freva-dev` cona miniconda environment you can run the tests after
 activating this environment:
@@ -57,7 +53,7 @@ python -m pytest -vv tests
 
 ## Django deployment
 
-you can check if django is working and corretly configured by:
+you can check if django is working and correctly configured by:
 
 ```bash
 python manage.py check
@@ -113,16 +109,3 @@ npm run dev   # starts webpack-dev-server including hot-reloading
 ```bash
 python manage.py collectstatic  # get new js files
 ```
-
-# Production
-
-The production environment is based on gunicorn inside a docker container
-
-```
-docker build -t gunicorn -f Dockerfile .
-
-# set env for config and mount lustre. It should have the same pathnames as on the host system
-docker run -e EVALUATION_SYSTEM_CONFIG_FILE=/path/to/evaluation_system.conf -v /work/ch1187:/work/ch1187 -p 8000:8000 gunicorn
-```
-
-It is recommended to use a reverse proxy (e.g. Apache) in front of it.

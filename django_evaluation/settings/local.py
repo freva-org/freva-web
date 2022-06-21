@@ -1,13 +1,10 @@
 from pathlib import Path
 import os
-import logging
 import sys
-import shutil
 import pymysql
 import ldap
-import django_auth_ldap.config as ldap_cfg
 from django_auth_ldap.config import LDAPSearch, NestedGroupOfNamesType
-import configparser
+import shutil
 import toml
 from django.urls import reverse_lazy
 from evaluation_system.misc import config
@@ -28,10 +25,10 @@ def _get_conf_key(config, key, alternative, is_file=True):
     return Path(alternative)
 
 
-def _get_logo(logo_file):
+def _get_logo(logo_file, project_root):
     if not logo_file or not Path(logo_file).exists():
         return "/static/img/thumb-placeholder.png"
-    static_root = Path(__file__).absolute().parents[2] / "static_root"
+    static_root = Path(project_root) / "static_root"
     logo_file = Path(logo_file)
     new_file = static_root / "img" / logo_file.name
     if new_file.exists():
@@ -54,7 +51,8 @@ PROJECT_ROOT = os.environ.get("PROJECT_ROOT", None) or str(
 STATIC_URL = "/static/"
 if not DEV:
     STATIC_ROOT = str(Path(PROJECT_ROOT) / "static")
-INSTITUTION_LOGO = _get_logo(web_config.get("INSTITUTION_LOGO", ""))
+
+INSTITUTION_LOGO = _get_logo(web_config.get("INSTITUTION_LOGO", ""), PROJECT_ROOT)
 FREVA_LOGO = f"{STATIC_URL}/img/by_freva_transparent.png"
 MAIN_COLOR = _get_conf_key(web_config, "MAIN_COLOR", "Tomato", False)
 BORDER_COLOR = _get_conf_key(web_config, "BORDER_COLOR", "#6c2e1f", False)

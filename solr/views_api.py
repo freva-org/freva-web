@@ -1,3 +1,5 @@
+import logging
+
 from rest_framework.decorators import api_view
 from django.contrib.auth.decorators import login_required
 from django.utils.safestring import mark_safe
@@ -43,4 +45,14 @@ def ncdump(request):
     except Exception as error:
         # We can't list everything what can go wrong here but the user definitely needs
         # some error output. Therefore, we catch all exceptions
-        return JsonResponse({"ncdump": "", "error_msg": f"{error}"}, status=500)
+        logging.error("Solr views api: %s", error)
+        return JsonResponse(
+            {
+                "ncdump": "",
+                "error_msg": (
+                    "Unexpected Error: If the problem persists "
+                    "please contact the admins."
+                ),
+            },
+            status=500,
+        )

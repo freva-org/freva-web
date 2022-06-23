@@ -19,22 +19,15 @@ def ncdump(request):
 
     fn = request.data.get("file")
     user_pw = request.data.get("pass")
-    command = "%s %s" % (
-        settings.NCDUMP_BINARY,
-        fn,
-    )
+    command = "%s %s" % (settings.NCDUMP_BINARY, fn,)
 
     try:
-        result = ssh_call(
+        stdout, _, _ = ssh_call(
             request.user.username, user_pw, command, get_scheduler_hosts(request.user)
         )
-        ncdump_out = mark_safe(result[1].read().decode("utf-8"))
-        ncdump_err = mark_safe(result[2].read().decode("utf-8"))
+        ncdump_out = mark_safe(stdout.read().decode("utf-8"))
 
-        status = 500 if ncdump_err else 200
-        return JsonResponse(
-            {"ncdump": ncdump_out, "error_msg": ncdump_err}, status=status
-        )
+        return JsonResponse({"ncdump": ncdump_out, "error_msg": ""}, status=200)
     except AuthenticationException:
         return JsonResponse(
             {"ncdump": "", "error_msg": "Authentication error"}, status=400

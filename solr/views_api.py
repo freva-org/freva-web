@@ -1,3 +1,5 @@
+import logging
+
 from rest_framework.decorators import api_view
 from django.contrib.auth.decorators import login_required
 from django.utils.safestring import mark_safe
@@ -25,13 +27,14 @@ def ncdump(request):
     )
 
     try:
-        result = ssh_call(
+        _, stdout, stderr = ssh_call(
             request.user.username, user_pw, command, get_scheduler_hosts(request.user)
         )
-        ncdump_out = mark_safe(result[1].read().decode("utf-8"))
-        ncdump_err = mark_safe(result[2].read().decode("utf-8"))
-
-        status = 500 if ncdump_err else 200
+        ncdump_out = mark_safe(stdout.read().decode("utf-8"))
+        ncdump_err = mark_safe(stdout.read().decode("utf-8"))
+        status = 200
+        if not ncdump_out:
+            status = 500
         return JsonResponse(
             {"ncdump": ncdump_out, "error_msg": ncdump_err}, status=status
         )
@@ -39,7 +42,17 @@ def ncdump(request):
         return JsonResponse(
             {"ncdump": "", "error_msg": "Authentication error"}, status=400
         )
-    except Exception:
+    except Exception as error:
         # We can't list everything what can go wrong here but the user definitely needs
         # some error output. Therefore, we catch all exceptions
-        return JsonResponse({"ncdump": "", "error_msg": "Unexpected error"}, status=500)
+        logging.error("Solr views api: %s", error)
+        return JsonResponse(
+            {
+                "ncdump": "",
+                "error_msg": (
+                    "Unexpected Error: If the problem persists "
+                    "please contact the admins."
+                ),
+            },
+            status=500,
+        )

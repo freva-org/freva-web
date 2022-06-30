@@ -11,7 +11,7 @@ ARG FREVA_WEB_DIR
 WORKDIR ${FREVA_WEB_DIR}
 COPY . .
 
-ENV PATH ${CONDA_ENV_DIR}/bin:$PATH:
+ENV PATH=$CONDA_ENV_DIR/bin:$PATH:
 
 RUN set -e \
   && mamba env create -p ${CONDA_ENV_DIR} -f conda-env.yml \

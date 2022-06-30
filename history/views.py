@@ -226,11 +226,13 @@ class HistoryTable(DatatableView):
         flag = int(self.request.GET.get("flag", -1))
         status = int(self.request.GET.get("status", -1))
         uid = self.kwargs.get("uid", self.request.user)
+        plugin = self.request.GET.get("plugin", None)
 
         context["STATUS_CHOICES"] = History.STATUS_CHOICES
         context["flag"] = flag
         context["status"] = status
         context["uid"] = uid
+        context["plugin"] = plugin
         return context
 
 

@@ -314,7 +314,7 @@
                 //stateSave: true,
                 ajax: {
                     url: "{{request.path}}",  //"{% url 'history:history' %}",
-                    data: {status: "{{status}}", flag: "{{flag}}"}
+                    data: {status: "{{status}}", flag: "{{flag}}" {% if plugin %}, plugin: "{{plugin}}"{% endif %}}
                 }
             });
             var dt_table_api = dt_table.api()

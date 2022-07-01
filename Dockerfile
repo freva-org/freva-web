@@ -11,13 +11,14 @@ ARG FREVA_WEB_DIR
 WORKDIR ${FREVA_WEB_DIR}
 COPY . .
 
-ENV PATH=${CONDA_ENV_DIR}/bin:$PATH:
+ENV PATH=$CONDA_ENV_DIR/bin:$PATH:
 
 RUN set -e \
   && mamba env create -p ${CONDA_ENV_DIR} -f conda-env.yml \
   && npm install && npm run build-production \
   && mamba clean -afy \
-  && rm -rf node_modules
+  && rm -rf node_modules \
+  && echo "export PATH=${PATH}" >> /root/.bashrc
 
 EXPOSE 8000
 

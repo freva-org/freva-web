@@ -206,7 +206,7 @@ class HistoryTable(DatatableView):
 
         status = int(self.request.GET.get("status", -1))
         flag = int(self.request.GET.get("flag", -1))
-        plugin = self.request.GET.get("plugin", None)
+        plugin = self.request.GET.get("plugin")
         if status >= 0:
             objects = objects.filter(status=status)
 
@@ -226,11 +226,13 @@ class HistoryTable(DatatableView):
         flag = int(self.request.GET.get("flag", -1))
         status = int(self.request.GET.get("status", -1))
         uid = self.kwargs.get("uid", self.request.user)
+        plugin = self.request.GET.get("plugin")
 
         context["STATUS_CHOICES"] = History.STATUS_CHOICES
         context["flag"] = flag
         context["status"] = status
         context["uid"] = uid
+        context["plugin"] = plugin
         return context
 
 

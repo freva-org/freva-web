@@ -3,11 +3,12 @@ import os
 import sys
 import pymysql
 import ldap
-from django_auth_ldap.config import LDAPSearch, NestedGroupOfNamesType
+from django_auth_ldap.config import LDAPSearch, NestedGroupOfNamesType, PosixGroupType
 import shutil
 import toml
 from django.urls import reverse_lazy
 from evaluation_system.misc import config
+from base.exceptions import UnknownLDAPGroupTypeError
 
 freva_share_path = Path(os.environ["EVALUATION_SYSTEM_CONFIG_FILE"]).parent
 web_config_path = freva_share_path / "web" / "freva_web_conf.toml"
@@ -53,7 +54,7 @@ if not DEV:
     STATIC_ROOT = str(Path(PROJECT_ROOT) / "static")
 
 INSTITUTION_LOGO = _get_logo(web_config.get("INSTITUTION_LOGO", ""), PROJECT_ROOT)
-FREVA_LOGO = f"{STATIC_URL}/img/by_freva_transparent.png"
+FREVA_LOGO = f"{STATIC_URL}img/by_freva_transparent.png"
 MAIN_COLOR = _get_conf_key(web_config, "MAIN_COLOR", "Tomato", False)
 BORDER_COLOR = _get_conf_key(web_config, "BORDER_COLOR", "#6c2e1f", False)
 HOVER_COLOR = _get_conf_key(web_config, "HOVER_COLOR", "#d0513a", False)
@@ -116,29 +117,51 @@ LDAP_USER_BASE = web_config.get("LDAP_USER_BASE", "cn=users,cn=accounts,dc=dkrz,
 LDAP_GROUP_BASE = web_config.get(
     "LDAP_GROUP_BASE", "cn=groups,cn=accounts,dc=dkrz,dc=de"
 )
-# Verify the user by bind to LDAP
-AUTH_LDAP_USER_DN_TEMPLATE = "uid=%%(user)s, %s" % LDAP_USER_BASE
+
+AUTH_LDAP_USER_SEARCH = LDAPSearch(LDAP_USER_BASE, ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
 # keep the authenticated user for group search
 AUTH_LDAP_BIND_AS_AUTHENTICATING_USER = True
 # ALLOWED_GROUP_MEMBER user only
-AUTH_LDAP_REQUIRE_GROUP = "cn=%s,cn=groups,cn=accounts,dc=dkrz,dc=de" % ALLOWED_GROUP
-AUTH_LDAP_USER_ATTR_MAP = {
-    "email": "mail",
-    "last_name": "sn",
-    "first_name": "givenname",
-}
-AUTH_LDAP_GROUP_SEARCH = LDAPSearch(
-    LDAP_GROUP_BASE, ldap.SCOPE_SUBTREE, "(objectClass=groupOfNames)"  # USE SUB
+AUTH_LDAP_REQUIRE_GROUP = web_config.get(
+    "AUTH_LDAP_REQUIRE_GROUP",
+    "cn=%s,cn=groups,cn=accounts,dc=dkrz,dc=de" % ALLOWED_GROUP,
 )
-AUTH_LDAP_GROUP_TYPE = NestedGroupOfNamesType()
+
+LDAP_FIRSTNAME_FIELD = web_config.get("LDAP_FIRSTNAME_FIELD", "givenname")
+LDAP_LASTNAME_FIELD = web_config.get("LDAP_LASTNAME_FIELD", "sn")
+LDAP_EMAIL_FIELD = web_config.get("LDAP_EMAIL_FIELD", "mail")
+LDAP_GROUP_CLASS = web_config.get("LDAP_GROUP_CLASS", "(objectClass=groupOfNames)")
+LDAP_GROUP_TYPE = web_config.get(
+    "LDAP_GROUP_TYPE", "nested"
+)  # accepted values: nested, posix
+
+if LDAP_GROUP_TYPE == "nested":
+    AUTH_LDAP_GROUP_TYPE = NestedGroupOfNamesType()
+elif LDAP_GROUP_TYPE == "posix":
+    AUTH_LDAP_GROUP_TYPE = PosixGroupType()
+else:
+    raise UnknownLDAPGroupTypeError()
+
+AUTH_LDAP_USER_ATTR_MAP = {
+    "email": LDAP_EMAIL_FIELD,
+    "last_name": LDAP_LASTNAME_FIELD,
+    "first_name": LDAP_FIRSTNAME_FIELD,
+}
+
+AUTH_LDAP_GROUP_SEARCH = LDAPSearch(
+    LDAP_GROUP_BASE, ldap.SCOPE_SUBTREE, LDAP_GROUP_CLASS
+)
+
 AUTH_LDAP_MIRROR_GROUPS = True
 # agent user for LDAP
 LDAP_USER_DN = web_config.get(
     "LDAP_USER_DN", "uid=dkrzagent,cn=sysaccounts,cn=etc,dc=dkrz,dc=de"
 )
 LDAP_USER_PW = web_config.get("LDAP_USER_PW", "dkrzprox")
-LDAP_MIKLIP_GROUP_FILTER = f"(cn={ALLOWED_GROUP})"
-LDAP_MODEL = "django_evaluation.ldaptools.MiklipUserInformation"
+LDAP__GROUP_FILTER = f"(cn={ALLOWED_GROUP})"
+LDAP_MODEL = web_config.get(
+    "LDAP_MODEL", "django_evaluation.ldaptools.MiklipUserInformation"
+)
 ##################################################
 ##################################################
 # END SETTING FOR LDAP

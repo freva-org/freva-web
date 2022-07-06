@@ -57,7 +57,8 @@ class LdapUserInformation(object):
         # bind with the simple user
         try:
             con.simple_bind_s(settings.LDAP_USER_DN, settings.LDAP_USER_PW)
-        except (ValueError, AttributeError):
+        except (ValueError, AttributeError, ldap.INVALID_CREDENTIALS):
+            # Try to connect without credentials
             con.simple_bind_s()
         self._con = con
         return self._con
@@ -106,21 +107,35 @@ class LdapUserInformation(object):
 
 
 class FUUserInformation(LdapUserInformation):
+    ldap_keys = ["uid", "mail", "cn", "homeDirectory", "gecos"]
+
     def load_from_ldap(self):
         # search all users belonging
         con = self.connection
         res = con.search_s(
-            settings.LDAP_GROUP_BASE, ldap.SCOPE_SUBTREE, "objectClass=person"
+            settings.LDAP_GROUP_BASE,
+            ldap.SCOPE_SUBTREE,
+            attrlist=["memberUid"],
+            filterstr=settings.LDAP_GROUP_FILTER,
         )
 
         self.miklip_user = []
         user_info = []
-        user_list = res
-
+        user_uids = res[0][1]["memberUid"]
         # fill the users list
-        for user in user_list:
-            uid = user[1]["uid"][0]
-            name = user[1]["cn"][0].split(" ")
+        for user in user_uids:
+            uid = user.decode()
+
+            res = con.search_s(
+                settings.LDAP_USER_BASE,
+                ldap.SCOPE_SUBTREE,
+                attrlist=self.ldap_keys,
+                filterstr=f"uid={uid}",
+            )
+            res_str = {k: v[0].decode() for (k, v) in res[0][1].items()}
+
+            uid = res_str["uid"]
+            name = res_str["cn"].split(" ")
             try:
                 prename = name[1]
             except:
@@ -129,18 +144,19 @@ class FUUserInformation(LdapUserInformation):
                 lastname = name[0]
             except:
                 lastname = ""
-            mail = user[1].get("mail", None)[0]
-            gecos = user[1].get("gecos", None)
+            mail = res_str.get("mail")
+            gecos = res_str.get("gecos")
+            home_dir = res_str.get("homeDirectory")
 
             if mail:
                 email = mail
-                user_info.append((uid, prename, lastname, email))
+                user_info.append((uid, prename, lastname, email, home_dir))
             elif gecos:
-                tmp = gecos[0].split(",")
+                tmp = gecos.split(",")
                 for val in tmp:
                     if "@" in val:
                         email = val
-                        user_info.append((uid, prename, lastname, email))
+                        user_info.append((uid, prename, lastname, email, home_dir))
                         break
 
         self.user_info = sorted(user_info, key=lambda tup: tup[1])
@@ -200,7 +216,7 @@ class MiklipUserInformation(LdapUserInformation):
             settings.LDAP_GROUP_BASE,
             ldap.SCOPE_SUBTREE,
             attrlist=["member"],
-            filterstr=settings.LDAP_MIKLIP_GROUP_FILTER,
+            filterstr=settings.LDAP_GROUP_FILTER,
         )
         self.miklip_user = []
         user_info = []

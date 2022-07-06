@@ -122,15 +122,12 @@ AUTH_LDAP_USER_SEARCH = LDAPSearch(LDAP_USER_BASE, ldap.SCOPE_SUBTREE, "(uid=%(u
 # keep the authenticated user for group search
 AUTH_LDAP_BIND_AS_AUTHENTICATING_USER = True
 # ALLOWED_GROUP_MEMBER user only
-AUTH_LDAP_REQUIRE_GROUP = web_config.get(
-    "AUTH_LDAP_REQUIRE_GROUP",
-    "cn=%s,cn=groups,cn=accounts,dc=dkrz,dc=de" % ALLOWED_GROUP,
-)
+AUTH_LDAP_REQUIRE_GROUP = f"cn={ALLOWED_GROUP},{LDAP_GROUP_BASE}"
 
 LDAP_FIRSTNAME_FIELD = web_config.get("LDAP_FIRSTNAME_FIELD", "givenname")
 LDAP_LASTNAME_FIELD = web_config.get("LDAP_LASTNAME_FIELD", "sn")
 LDAP_EMAIL_FIELD = web_config.get("LDAP_EMAIL_FIELD", "mail")
-LDAP_GROUP_CLASS = web_config.get("LDAP_GROUP_CLASS", "(objectClass=groupOfNames)")
+LDAP_GROUP_CLASS = f'(objectClass={web_config.get("LDAP_GROUP_CLASS", "groupOfNames")})'
 LDAP_GROUP_TYPE = web_config.get(
     "LDAP_GROUP_TYPE", "nested"
 )  # accepted values: nested, posix
@@ -158,7 +155,7 @@ LDAP_USER_DN = web_config.get(
     "LDAP_USER_DN", "uid=dkrzagent,cn=sysaccounts,cn=etc,dc=dkrz,dc=de"
 )
 LDAP_USER_PW = web_config.get("LDAP_USER_PW", "dkrzprox")
-LDAP__GROUP_FILTER = f"(cn={ALLOWED_GROUP})"
+LDAP_GROUP_FILTER = f"(cn={ALLOWED_GROUP})"
 LDAP_MODEL = web_config.get(
     "LDAP_MODEL", "django_evaluation.ldaptools.MiklipUserInformation"
 )

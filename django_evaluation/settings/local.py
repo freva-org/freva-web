@@ -156,9 +156,7 @@ LDAP_USER_DN = web_config.get(
 )
 LDAP_USER_PW = web_config.get("LDAP_USER_PW", "dkrzprox")
 LDAP_GROUP_FILTER = f"(cn={ALLOWED_GROUP})"
-LDAP_MODEL = web_config.get(
-    "LDAP_MODEL", "django_evaluation.ldaptools.MiklipUserInformation"
-)
+LDAP_MODEL = f'django_evaluation.ldaptools.{web_config.get("LDAP_MODEL", "MiklipUserInformation")}'
 ##################################################
 ##################################################
 # END SETTING FOR LDAP

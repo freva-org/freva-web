@@ -22,4 +22,4 @@ RUN set -e \
 
 EXPOSE 8000
 
-CMD ["gunicorn", "-b", "[::]:8000", "-w", "3", "django_evaluation.wsgi"]
+CMD ["gunicorn", "-b", "[::]:8000", "-w", "1", "django_evaluation.wsgi"]

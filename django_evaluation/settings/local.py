@@ -27,11 +27,15 @@ def _get_conf_key(config, key, alternative, is_file=True):
 
 
 def _get_logo(logo_file, project_root):
-    if not logo_file or not Path(logo_file).exists():
+    static_folder = Path(project_root) / "static"
+    if (
+        not logo_file
+        or not Path(logo_file).exists()
+        or not Path(static_folder).exists()
+    ):
         return "/static/img/thumb-placeholder.png"
-    static_root = Path(project_root) / "static_root"
     logo_file = Path(logo_file)
-    new_file = static_root / "img" / logo_file.name
+    new_file = static_folder / "img" / logo_file.name
     if new_file.exists():
         return f"/static/img/{logo_file.name}"
     shutil.copy(logo_file, new_file)

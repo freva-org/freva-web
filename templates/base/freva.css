@@ -217,9 +217,23 @@ color:{{main_color}};
 }
 
 footer{
-border-top:3px solid {{main_color}};
+  border-top:3px solid {{main_color}};
 }
 
-footer ul li{
-background-image:url('/static/css/img/list-y.png');
+footer hr {
+   border-top: 1px solid {{main_color}};
+   padding: 0px;
+   border-bottom: 1px solid #111;
+}
+
+footer ul li {
+  padding-left: 0px;
+}
+
+footer h4 {
+   font-size: 15px;
+   padding-bottom: 6px;
+   border-bottom: 1px solid {{main_color}};
+   margin-bottom: 4px;
+   color: #ccc;
 }

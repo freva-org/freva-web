@@ -44,8 +44,12 @@ def _get_logo(logo_file, project_root):
 
 def _set_favicon(html_color: str, project_root: Path) -> None:
     img_folder = Path(project_root) / "static" / "img"
-    svg_tmpl = img_folder / "favicon-tmpl.svg"
-    favicon = img_folder / "favicon.svg"
+    tmpl_folder = Path(project_root) / "static_root" / "img"
+    svg_tmpl = tmpl_folder / "favicon-tmpl.svg"
+    if img_folder.exists():
+        favicon = img_folder / "favicon.svg"
+    else:
+        favicon = tmpl_folder / "favicon.svg"
     with svg_tmpl.open() as f_obj:
         new_svg = f_obj.read().replace(
             'style="fill:#000000"', f'style="fill:{html_color}"'

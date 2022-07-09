@@ -42,6 +42,18 @@ def _get_logo(logo_file, project_root):
     return f"/static/img/{logo_file.name}"
 
 
+def _set_favicon(html_color: str, project_root: Path) -> None:
+    img_folder = Path(project_root) / "static" / "img"
+    svg_tmpl = img_folder / "favicon-tmpl.svg"
+    favicon = img_folder / "favicon.svg"
+    with svg_tmpl.open() as f_obj:
+        new_svg = f_obj.read().replace(
+            'style="fill:#000000"', f'style="fill:{html_color}"'
+        )
+    with favicon.open("w") as f_obj:
+        f_obj.write(new_svg)
+
+
 try:
     with open(web_config_path) as f:
         web_config = toml.load(f)
@@ -60,6 +72,7 @@ if not DEV:
 INSTITUTION_LOGO = _get_logo(web_config.get("INSTITUTION_LOGO", ""), PROJECT_ROOT)
 FREVA_LOGO = f"{STATIC_URL}img/by_freva_transparent.png"
 MAIN_COLOR = _get_conf_key(web_config, "MAIN_COLOR", "Tomato", False)
+_set_favicon(MAIN_COLOR, Path(PROJECT_ROOT))
 BORDER_COLOR = _get_conf_key(web_config, "BORDER_COLOR", "#6c2e1f", False)
 HOVER_COLOR = _get_conf_key(web_config, "HOVER_COLOR", "#d0513a", False)
 HOMEPAGE_TEXT = web_config.get(

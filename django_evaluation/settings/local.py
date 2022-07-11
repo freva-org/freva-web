@@ -31,7 +31,7 @@ def _get_logo(logo_file, project_root):
     if (
         not logo_file
         or not Path(logo_file).exists()
-        or not Path(static_folder).exists()
+        or not (static_folder / "img").exists()
     ):
         return "/static/img/thumb-placeholder.png"
     logo_file = Path(logo_file)

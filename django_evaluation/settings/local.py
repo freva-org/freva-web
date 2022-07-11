@@ -31,7 +31,7 @@ def _get_logo(logo_file, project_root):
     if (
         not logo_file
         or not Path(logo_file).exists()
-        or not Path(static_folder).exists()
+        or not (static_folder / "img").exists()
     ):
         return "/static/img/thumb-placeholder.png"
     logo_file = Path(logo_file)
@@ -40,6 +40,22 @@ def _get_logo(logo_file, project_root):
         return f"/static/img/{logo_file.name}"
     shutil.copy(logo_file, new_file)
     return f"/static/img/{logo_file.name}"
+
+
+def _set_favicon(html_color: str, project_root: Path) -> None:
+    img_folder = Path(project_root) / "static" / "img"
+    tmpl_folder = Path(project_root) / "static_root" / "img"
+    svg_tmpl = tmpl_folder / "favicon-tmpl.svg"
+    if img_folder.exists():
+        favicon = img_folder / "favicon.svg"
+    else:
+        favicon = tmpl_folder / "favicon.svg"
+    with svg_tmpl.open() as f_obj:
+        new_svg = f_obj.read().replace(
+            'style="fill:#000000"', f'style="fill:{html_color}"'
+        )
+    with favicon.open("w") as f_obj:
+        f_obj.write(new_svg)
 
 
 try:
@@ -60,6 +76,7 @@ if not DEV:
 INSTITUTION_LOGO = _get_logo(web_config.get("INSTITUTION_LOGO", ""), PROJECT_ROOT)
 FREVA_LOGO = f"{STATIC_URL}img/by_freva_transparent.png"
 MAIN_COLOR = _get_conf_key(web_config, "MAIN_COLOR", "Tomato", False)
+_set_favicon(MAIN_COLOR, Path(PROJECT_ROOT))
 BORDER_COLOR = _get_conf_key(web_config, "BORDER_COLOR", "#6c2e1f", False)
 HOVER_COLOR = _get_conf_key(web_config, "HOVER_COLOR", "#d0513a", False)
 HOMEPAGE_TEXT = web_config.get(
@@ -179,9 +196,6 @@ STATICFILES_DIRS = (
     os.path.join(PROJECT_ROOT, "static_root"),
     ("assets/bundles", os.path.join(PROJECT_ROOT, "assets", "bundles")),
 )
-if not DEV:
-    config.reloadConfiguration()
-    STATICFILES_DIRS += (("preview", config.get("preview_path")),)
 # List of finder classes that know how to find static files in
 # various locations.
 STATICFILES_FINDERS = (

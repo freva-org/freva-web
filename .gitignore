@@ -1,6 +1,7 @@
 *.pyc
 *.db
 virt
+static_root/img/favicon.svg
 freva_web.conf
 db
 node_modules

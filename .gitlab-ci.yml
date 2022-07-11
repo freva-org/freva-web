@@ -5,6 +5,7 @@ stages:
 
 build-image:
     stage: build
+    needs: []
     image:
         name: gcr.io/kaniko-project/executor:debug
         entrypoint: [""]
@@ -22,9 +23,11 @@ build-image:
         - docker, specific
     rules:
         - if: "$CI_COMMIT_BRANCH == 'main'"
+        - if: "$CI_COMMIT_BRANCH != 'main'"
 
 test_latest:
   stage: test
+  needs: []
   image: registry.gitlab.dkrz.de/freva/evaluation_system/freva-dev:unittest
   tags:
     - docker, specific

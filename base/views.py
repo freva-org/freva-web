@@ -78,7 +78,9 @@ def wiki(request):
     return render(
         request,
         "base/wiki.html",
-        {"page": "https://redmine.dkrz.de/projects/nukleus/wiki"},
+        {
+            "page": "https://freva.gitlab-pages.dkrz.de/evaluation_system/sphinx_docs/index.html"
+        },
     )
 
 

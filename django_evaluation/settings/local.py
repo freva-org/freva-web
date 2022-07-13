@@ -215,6 +215,12 @@ AUTHENTICATION_BACKENDS = (
 REDIS_HOST = web_config.get("REDIS_HOST", "127.0.0.1")
 REDIS_PORT = web_config.get("REDIS_PORT", 6379)
 
+EMAIL_HOST = web_config.get("EMAIL_HOST", "mailhost.dkrz.de")
+EMAIL_HOST_USER = web_config.get("EMAIL_HOST_USER", None)
+EMAIL_HOST_PASSWORD = web_config.get("EMAIL_HOST_PASSWORD", None)
+EMAIL_USE_TLS = True
+EMAIL_PORT = web_config.get("EMAIL_PORT", 25)
+
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.redis.RedisCache",

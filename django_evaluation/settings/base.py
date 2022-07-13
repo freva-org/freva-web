@@ -218,15 +218,7 @@ WSGI_APPLICATION = "django_evaluation.wsgi.application"
 
 INTERNAL_IPS = "127.0.0.1"
 
-SERVER_EMAIL = "miklip@met.fu-berlin.de"
-DEFAULT_FROM_EMAIL = "miklip@met.fu-berlin.de"
 SYSTEM_EMAIL_PREFIX = "[django_evaluation]"
-
-EMAIL_HOST = "smtp.gmail.com"
-EMAIL_HOST_USER = "miklip.integration@gmail.com"
-EMAIL_HOST_PASSWORD = "1nt3gr@tion"
-EMAIL_USE_TLS = True
-EMAIL_PORT = 587
 
 ## Log settings
 

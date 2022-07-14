@@ -1,6 +1,7 @@
 from django.contrib import admin
 from history.models import History, Configuration
 from django.contrib.auth.models import User
+from django.utils.html import format_html
 
 
 class HistoryAmdin(admin.ModelAdmin):
@@ -24,9 +25,8 @@ class HistoryAmdin(admin.ModelAdmin):
         return instance.uid.email
 
     def link_to_model(self, instance):
-        return (
-            '<a href="/history/%s/results/" target="_blank">Show Results</a>'
-            % instance.id
+        return format_html(
+            f'<a href="/history/{instance.id}/results/" target="_blank">Show Results</a>'
         )
 
     link_to_model.allow_tags = True

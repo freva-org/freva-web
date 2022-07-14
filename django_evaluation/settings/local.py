@@ -215,6 +215,9 @@ AUTHENTICATION_BACKENDS = (
 REDIS_HOST = web_config.get("REDIS_HOST", "127.0.0.1")
 REDIS_PORT = web_config.get("REDIS_PORT", 6379)
 
+SERVER_EMAIL = web_config.get("SERVER_EMAIL", "data@dkrz.de")
+DEFAULT_FROM_EMAIL = SERVER_EMAIL
+
 EMAIL_HOST = web_config.get("EMAIL_HOST", "mailhost.dkrz.de")
 EMAIL_HOST_USER = web_config.get("EMAIL_HOST_USER", None)
 EMAIL_HOST_PASSWORD = web_config.get("EMAIL_HOST_PASSWORD", None)

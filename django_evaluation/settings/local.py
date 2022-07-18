@@ -236,8 +236,6 @@ email_secrets = _read_secret()
 EMAIL_HOST_USER = email_secrets.get("username")
 EMAIL_HOST_PASSWORD = email_secrets.get("password")
 
-EMAIL_HOST_USER = web_config.get("EMAIL_HOST_USER", None)
-EMAIL_HOST_PASSWORD = web_config.get("EMAIL_HOST_PASSWORD", None)
 EMAIL_USE_TLS = True
 EMAIL_PORT = web_config.get("EMAIL_PORT", 25)
 

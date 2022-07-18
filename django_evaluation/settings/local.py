@@ -6,6 +6,7 @@ import ldap
 from django_auth_ldap.config import LDAPSearch, NestedGroupOfNamesType, PosixGroupType
 import shutil
 import toml
+import requests
 from django.urls import reverse_lazy
 from evaluation_system.misc import config
 from base.exceptions import UnknownLDAPGroupTypeError
@@ -40,6 +41,17 @@ def _get_logo(logo_file, project_root):
         return f"/static/img/{logo_file.name}"
     shutil.copy(logo_file, new_file)
     return f"/static/img/{logo_file.name}"
+
+
+def _read_secret(port: int = 5002, key: str = "email") -> dict[str, str]:
+    """Read the key-value pair secrets from vault server."""
+    sha = config._get_public_key(config.get("project_name"))
+    url = f"http://{config.get('db.host')}:{port}/vault/{key}/{sha}"
+    try:
+        req = requests.get(url).json()
+    except requests.exceptions.ConnectionError:
+        req = {}
+    return req
 
 
 try:
@@ -215,10 +227,15 @@ AUTHENTICATION_BACKENDS = (
 REDIS_HOST = web_config.get("REDIS_HOST", "127.0.0.1")
 REDIS_PORT = web_config.get("REDIS_PORT", 6379)
 
-SERVER_EMAIL = web_config.get("SERVER_EMAIL", "data@dkrz.de")
+SERVER_EMAIL = web_config.get("SERVER_EMAIL", "freva@dkrz.de")
 DEFAULT_FROM_EMAIL = SERVER_EMAIL
 
 EMAIL_HOST = web_config.get("EMAIL_HOST", "mailhost.dkrz.de")
+
+email_secrets = _read_secret()
+EMAIL_HOST_USER = email_secrets.get("username")
+EMAIL_HOST_PASSWORD = email_secrets.get("password")
+
 EMAIL_HOST_USER = web_config.get("EMAIL_HOST_USER", None)
 EMAIL_HOST_PASSWORD = web_config.get("EMAIL_HOST_PASSWORD", None)
 EMAIL_USE_TLS = True

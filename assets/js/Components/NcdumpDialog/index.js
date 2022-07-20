@@ -11,6 +11,12 @@ class NcdumpDialog extends React.Component {
     this.state = { pw: "" };
 
     this.handleChange = this.handleChange.bind(this);
+    this.submitNcdump = this.submitNcdump.bind(this);
+  }
+
+  submitForm (e) {
+    e.preventDefault();
+    this.submitNcdump();
   }
 
   submitNcdump () {
@@ -39,9 +45,8 @@ class NcdumpDialog extends React.Component {
             (status === "pw" || status === "error") &&
             <span>
               {status === "error" && <Alert variant="danger">{error}</Alert>}
-              <p>To start Ncdump you have to re-enter your password</p>
-              <form method="post" id="passForm" name="passForm">
-                <FormControl id="username" type="text" name="password" className="d-none" />
+              <p>To inspect metadata you have to re-enter your password</p>
+              <form onSubmit={this.submitNcdump} id="passForm" name="passForm">
                 <FormControl
                   id="search" type="password" name="password"
                   onChange={this.handleChange} value={this.state.pw}
@@ -60,7 +65,7 @@ class NcdumpDialog extends React.Component {
         </Modal.Body>
 
         <Modal.Footer>
-          <Button variant="primary" onClick={() => this.submitNcdump()}>Start Ncdump</Button>
+          <Button variant="primary" onClick={() => this.submitNcdump()}>Inspect metadata</Button>
         </Modal.Footer>
 
       </Modal>

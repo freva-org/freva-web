@@ -121,7 +121,7 @@ def contact(request):
         send_templated_mail(
             template_name="mail_to_admins",
             from_email=myemail,
-            recipient_list=[a[1] for a in settings.CONTACTS],
+            recipient_list=settings.CONTACTS,
             context={
                 "username": username,
                 "text": mail_text,

@@ -1136,3 +1136,9 @@ footer .widget {
       width: 100%;
    }
 }
+
+.xr-wrap { display: inherit !important }
+
+.modal-title {
+  overflow-wrap: anywhere;
+}

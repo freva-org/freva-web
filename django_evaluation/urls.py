@@ -27,9 +27,9 @@ urlpatterns = [
     url(r"^solr/", include(("solr.urls", "solr"), namespace="solr")),
     url(r"", include(("base.urls", "base"), namespace="base")),
     url(
-        r"^favicon\.ico$",
+        r"^favicon\.svg$",
         RedirectView.as_view(
-            url=settings.STATIC_URL + "img/freva-favicon.png", permanent=True
+            url=settings.STATIC_URL + "img/favicon.svg", permanent=True
         ),
     ),
     # API views

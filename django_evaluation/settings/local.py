@@ -119,9 +119,9 @@ IMPRINT = web_config.get(
 )
 HOMEPAGE_HEADING = web_config.get("HOMEPAGE_HEADING", "Lorem ipsum dolor.")
 ABOUT_US_TEXT = web_config.get("ABOUT_US_TEXT", "Hello world, this is freva.")
-CONTACTS = web_config.get("CONTACTS", ["help@freva.org"])
+CONTACTS = web_config.get("CONTACTS", ["freva@dkrz.de"])
 if isinstance(CONTACTS, str):
-    CONTACTS = [CONTACTS]
+    CONTACTS = [c for c in CONTACTS.split(",") if c.strip()]
 ##########
 # Here you can customize the footer and texts on the startpage
 ##########

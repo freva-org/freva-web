@@ -261,7 +261,7 @@ class PluginList extends React.Component {
                   variant="primary" active={root.id === "scratch"}
                   onClick={() => this.props.dispatch(changeRoot({ id: "scratch", path: currentUser.scratch }, "py"))}
                 >
-                  Scratch
+                  Workspace
                 </Button>
               }
             </ButtonGroup>

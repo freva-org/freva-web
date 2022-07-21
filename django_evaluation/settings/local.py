@@ -275,6 +275,9 @@ if isinstance(ALLOWED_HOSTS, str):
 # Provide a full list of all valid hosts (including the http(s):// prefix) which are expected
 CSRF_TRUSTED_ORIGINS = web_config.get("CSRF_TRUSTED_ORIGINS", ["http://localhost"])
 
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
 # path to the site packages used:
 VENV_PYTHON_DIR = "/usr/bin/python3"
 # Path to miklip-logo

@@ -228,10 +228,6 @@ SYSLOG_TAG = "http_app_django_evaluation"  # Make this unique to your project.
 
 SECRET_KEY = "hj1bkzobng0ck@0&%t509*1ki$#)i5y+i0)&=7zv@amu8pm5*t"
 
-# Recipients of traceback emails and other notifications.
-ADMINS = (("Martin Bergemann", "bergemann@dkrz.de"),)
-MANAGERS = ADMINS
-
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 DEBUG = TEMPLATE_DEBUG = True
@@ -346,7 +342,6 @@ MENU_ENTRIES = [
         "url": reverse_lazy("solr:data_browser"),
         "html_id": "browser_menu",
     },
-    # {'name':'Shell','url': reverse_lazy('base:shell_in_a_box'), 'html_id': 'shell_menu'},
     {"name": "Help", "url": reverse_lazy("plugins:about"), "html_id": "doc_menu"},
     {"name": "Contact", "url": reverse_lazy("base:contact"), "html_id": "contact_menu"},
 ]

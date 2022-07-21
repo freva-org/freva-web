@@ -92,7 +92,7 @@ class Databrowser extends React.Component {
                 _.map(files, (fn) => {
                   return (
                     <li className="ext_nc" key={fn} style={{ whiteSpace: "normal" }}>
-                      <OverlayTrigger overlay={<Tooltip>Click to execute &apos;ncdump -h&apos;<br />and view metadata</Tooltip>}>
+                      <OverlayTrigger overlay={<Tooltip>Click here to inspect metadata</Tooltip>}>
                         <Button
                           variant="link" className="p-0" onClick={
                             () => {

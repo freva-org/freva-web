@@ -1,9 +1,8 @@
-<div class="input-group">
+<div class="input-group {{attrs.class}} p-0">
     <button type="button" class="btn btn-primary" id="{{id}}_browse">Browse</button>
     <button type="button" class="btn btn-primary" id="{{id}}_solr">Search file</button>
-    <input type="text" class="form-control" {{attrs}} value="{% if value %}{{ value }}{%endif%}" id="{{ id }}" placeholder="{{name}}" name="{{name}}">
+    <input type="text" class="form-control border-0" value="{% if value %}{{ value }}{%endif%}" id="{{ id }}" placeholder="{{name}}" name="{{name}}">
 </div>
-
 
 <script>
     $(document).ready(function(){

@@ -1,9 +1,8 @@
 {% load custom_filters %}
 
-
 <input
     type="hidden"
-    class="col-md-12 col-xs-12"
+    class="col-md-12 col-xs-12 {{attrs.class}}"
     value="{% if value %}{{ value|safe }}{%endif%}"
     id="{{ attrs.id }}"
     name="{{name}}"

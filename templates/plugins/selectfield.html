@@ -5,7 +5,7 @@
         padding:0px;
     }
 </style>
-<select class="col-md-12" id="{{name}}" name="{{name}}" >
+<select class="col-md-12 {{attrs.class}}" id="{{name}}" name="{{name}}">
     <option></option>
     {% for key,val in options %}
         <option value="{{key}}" {%if val == value %}selected{%endif%}>{{val}}</option>

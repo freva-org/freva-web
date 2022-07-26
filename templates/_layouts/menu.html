@@ -1,4 +1,5 @@
 {% extends "_layouts/base.html" %}
+{% load flatpages %}
 
 {% block menu %}
 
@@ -109,44 +110,51 @@
     <!-- Footer -->
     <footer>
         <div class="container">
-            <div class="row">
-                <div class="col-md-4">
-                    <!-- Widget 1 -->
-                    <div class="widget">
-                        <h4>About Us</h4>
-                        <!--    INTEGRAted data and evaluation system for decadal scale predicTION. -->
-                        <p>
-                            {% settings_val 'ABOUT_US_TEXT' %}
-                        </p>
-                    </div>
+            {% get_flatpages '/legal/' as flatpages %}
+            {% if flatpages %}
+                <div class="row grid-4">
+            {% else %}
+                <div class="row grid-3">
+            {% endif %}
+                <!-- Widget 1 -->
+                <div class="widget">
+                    <h4>About Us</h4>
+                    <!--    INTEGRAted data and evaluation system for decadal scale predicTION. -->
+                    <p>
+                        {% settings_val 'ABOUT_US_TEXT' %}
+                    </p>
                 </div>
-                <div class="col-md-4">
-                    <!-- widget 2 -->
-                    <div class="widget">
-                        <h4>Contact</h4>
-                        <ul>
+                <!-- widget 2 -->
+                <div class="widget">
+                    <h4>Contact</h4>
+                    <ul>
+                        {% get_menu_entries 'CONTACTS' as contacts %}
+                        {% for item in contacts %}
+                        <li>{{ item }}</li>
+                        {% endfor %} (Also for password reset)
+                    </ul>
 
-                            {% get_menu_entries 'CONTACTS' as contacts %}
-                            {% for item in contacts %}
-                                <li>{{ item }}</li>
-                            {% endfor %} (Also for password reset)
-                        </ul>
-
-                    </div>
                 </div>
-                <div class="col-md-4">
-                    <!-- Widget 3 -->
+                <!-- Widget 3 -->
+                <div class="widget">
+                    <h4>Imprint</h4>
+                    <ul>
+                        {% get_menu_entries 'IMPRINT' as imprint %}
+                        {% for item in imprint %}
+                            <li>{{ item }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% if flatpages %}
                     <div class="widget">
-                        <h4>Imprint</h4>
+                        <h4 style="white-space: nowrap;">Terms &amp; Regulations</h4>
                         <ul>
-                            {% get_menu_entries 'IMPRINT' as imprint %}
-                            {% for item in imprint %}
-                                <li>{{ item }}</li>
+                            {% for page in flatpages %}
+                                <li><a href="{{ page.url }}">{{ page.title }}</a></li>
                             {% endfor %}
                         </ul>
-
                     </div>
-                </div>
+                {% endif %}
             </div>
             <div class="row">
                 <hr />
@@ -156,6 +164,7 @@
                 </div>
             </div>
         </div>
+
     </footer>
 
 {% endblock %}

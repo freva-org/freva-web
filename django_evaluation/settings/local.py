@@ -45,11 +45,11 @@ def _get_logo(logo_file, project_root):
 
 def _read_secret(port: int = 5002, key: str = "email") -> dict[str, str]:
     """Read the key-value pair secrets from vault server."""
-    sha = config._get_public_key(config.get("project_name"))
-    url = f"http://{config.get('db.host')}:{port}/vault/{key}/{sha}"
     try:
+        sha = config._get_public_key(config.get("project_name"))
+        url = f"http://{config.get('db.host')}:{port}/vault/{key}/{sha}"
         req = requests.get(url).json()
-    except requests.exceptions.ConnectionError:
+    except (requests.exceptions.ConnectionError, FileNotFoundError):
         req = {}
     return req
 

@@ -40,7 +40,7 @@ class PluginFileFieldWidget(Input):
                 "name": name,
                 "value": value,
                 "id": attrs["id"],
-                "attr": attrs,
+                "attrs": attrs,
                 "file_extension": self.file_extension,
             },
         )
@@ -96,7 +96,8 @@ class PluginRangeFieldWidget(Input):
         if value is not None and type(value) == list:
             value = PrintableList(value)
         return loader.render_to_string(
-            "plugins/rangefield.html", {"name": name, "value": value, "id": attrs["id"]}
+            "plugins/rangefield.html",
+            {"name": name, "value": value, "id": attrs["id"], attrs: attrs},
         )
 
 

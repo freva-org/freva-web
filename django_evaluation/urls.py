@@ -20,7 +20,6 @@ admin.autodiscover()
 
 urlpatterns = [
     url(r"^admin/doc/", include("django.contrib.admindocs.urls")),
-    url(r"^admin/$", admin.site.index),
     url(r"^admin/", admin.site.urls),
     url(r"^plugins/", include(("plugins.urls", "plugins"), namespace="plugins")),
     url(r"^history/", include(("history.urls", "history"), namespace="history")),

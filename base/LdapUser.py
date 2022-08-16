@@ -57,3 +57,8 @@ class LdapUser(User):
 
     def getEmail(self):
         return self._email
+
+    def __str__(self):
+        return (
+            f"User: {self._username} Mail: {self._email} Home: {self._home_directory}"
+        )

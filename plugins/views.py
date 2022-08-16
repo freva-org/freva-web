@@ -5,9 +5,6 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.views.decorators.debug import sensitive_variables, sensitive_post_parameters
-from django.views.decorators.http import require_POST
-from django.contrib.flatpages.models import FlatPage
-from django.utils.safestring import mark_safe
 from pathlib import Path
 
 import evaluation_system.api.plugin_manager as pm
@@ -28,7 +25,6 @@ from plugins.forms import PluginForm, PluginWeb
 from history.models import History, Configuration
 
 import logging
-import time
 import urllib
 import os
 import json

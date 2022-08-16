@@ -296,7 +296,7 @@ def follow_result(request, history_id):
         History.Flag.public,
         History.Flag.guest,
     ]:
-        user = str(request.user)
+        user = LdapUser(str(request.user))
         pm.follow_history_tag(history_object.id, user, "Web page: follow")
         retstr = "Unfollow"
 
@@ -315,9 +315,8 @@ def unfollow_result(request, history_id):
     success = False
 
     history_object = get_object_or_404(History, id=history_id)
-
-    user = str(request.user)
     try:
+        user = LdapUser(str(request.user))
         pm.unfollow_history_tag(history_object.id, user)
         retstr = "Follow"
         success = True
@@ -673,7 +672,7 @@ def edit_htag(request, history_id, tag_id):
             if tag_id == "0":
                 subject = "New comment"
                 message = (
-                    "%s added new comment to the results of the evaluation %s\n"
+                    "%s added a new comment to the results of the evaluation %s:\n"
                     % (name, history_id)
                 )
                 message += url
@@ -681,7 +680,7 @@ def edit_htag(request, history_id, tag_id):
             else:
                 subject = "Edited comment"
                 message = (
-                    "%s edited comment %s belonging to the results of the evaluation %s\n"
+                    "%s edited comment %s belonging to the results of the evaluation %s:\n"
                     % (name, tag_id, history_id)
                 )
                 message += url

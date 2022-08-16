@@ -20,6 +20,7 @@ dependencies:
   - mock
   - mod_wsgi
   - mypy
+  - mysqlclient
   - nbval
   - nodejs
   - nose

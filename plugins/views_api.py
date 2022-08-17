@@ -10,7 +10,6 @@ from django_evaluation.ldaptools import get_ldap_object
 from base.exceptions import UserNotFoundError
 from base.LdapUser import LdapUser
 from plugins.utils import get_plugin_or_404, plugin_metadata_as_dict
-from .forms import PluginWeb
 from .serializers import PluginSerializer
 from django.conf import settings
 

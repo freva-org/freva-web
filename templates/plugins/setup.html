@@ -30,6 +30,11 @@
             cursor: wait !important;
         }
 
+        .required-form::before{
+            content: "* ";
+            color: red;
+        }
+
     </style>
 
     {# Load CSS and JavaScript #}
@@ -62,8 +67,6 @@
                     <div id="similarDiv"></div>
                 </div>
             </div>
-
-
         </div>
     </div>
     <!-- Modal -->
@@ -329,25 +332,39 @@
         }
 
         function similarHtml(res, i) {
-            if (res['preview'] != '')
+            if (res['preview'] != '') {
             img = '<a href="/history/' + res['pk'] + '/results/" target="_blank"><img src="{{PREVIEW_URL}}' + res['preview'] + '" width="200"/></a><br/>';
-            else
-            img = '';
+            } else {
+                img = '';
+            }
             html = img + '<a href="/history/' + res['pk'] + '/results/" target="_blank">' + res['tool'] + ' result #' + res['pk'] + '</a> by ' + res['uid'] + '<br/><br/>';
             return html;
         }
 
         function similarDialog(res, i) {
-            if (res['preview'] != '')
-            img = '<a href="/history/' + res['pk'] + '/results/" target="_blank"><img src="{{PREVIEW_URL}}' + res['preview'] + '" width="130"/></a><br/>';
-            else
-            img = '';
+            if (res['preview'] != '') {
+                img = '<a href="/history/' + res['pk'] + '/results/" target="_blank"><img src="{{PREVIEW_URL}}' + res['preview'] + '" width="130"/></a><br/>';
+            } else {
+                img = '';
+            }
             html = '<td>' + img + '<a href="/history/' + res['pk'] + '/results/" target="_blank">Result #' + res['pk'] + '</a> by ' + res['uid'] + '</td>';
             return html;
         }
 
+        function setRequiredFields() {
+            const requiredElements = document.querySelectorAll("input.form-control[required]")
+            requiredElements.forEach(function(elem) {
+                const labels = document.querySelectorAll("[for='" + elem.id +"']")
+                if (labels && labels.length > 0) {
+                    const label = labels[0]
+                    label.classList.add("required-form")
+                }
+            })
+        }
+
         $(document).ready(function () {
             getActiveFacets();
+            setRequiredFields();
 
             activate_browse('{{user_home}}', $('#fileExtension').val());
 

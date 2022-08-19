@@ -57,6 +57,10 @@ def solr_search(request):
         args["start"] = int(request.GET["start"])
     if "rows" in args:
         args["rows"] = int(request.GET["rows"])
+    if "time_select" in args:
+        args["time_select"] = request.GET["time_select"]
+    if "time" in args:
+        args["time"] = request.GET["time"]
 
     metadata = None
 

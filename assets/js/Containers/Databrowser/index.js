@@ -1,10 +1,19 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import { Container, Row, Col, Accordion, Card, Tooltip, OverlayTrigger, Button, Alert } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Accordion,
+  Card,
+  Tooltip,
+  OverlayTrigger,
+  Button,
+  Alert,
+} from "react-bootstrap";
 
 import { FaInfoCircle } from "react-icons/fa";
-import _ from "lodash";
 
 import NcdumpDialog from "../../Components/NcdumpDialog";
 import AccordionItemBody from "../../Components/AccordionItemBody";
@@ -20,8 +29,17 @@ import {
   setMetadata,
   loadFiles,
   loadNcdump,
-  resetNcdump
+  resetNcdump,
+  clearTimeRange
 } from "./actions";
+
+import {
+  TIME_RANGE_FILE,
+  TIME_RANGE_STRICT,
+  TIME_RANGE_FLEXIBLE
+} from "./constants";
+
+import TimeRangeSelector from "./TimeRangeSelector";
 
 class Databrowser extends React.Component {
 
@@ -50,7 +68,9 @@ class Databrowser extends React.Component {
   renderFacetPanels () {
     const { facets, selectedFacets, activeFacet, metadata } = this.props.databrowser;
     const { dispatch } = this.props;
-    return _.map(facets, (value, key) => {
+
+    return Object.keys(facets).map((key) => {
+      const value = facets[key];
       let panelHeader;
       const isFacetSelected = !!selectedFacets[key];
       if (isFacetSelected) {
@@ -75,6 +95,35 @@ class Databrowser extends React.Component {
     });
   }
 
+  renderTimeSelectionPanel () {
+    const key = "time_range";
+    const { dispatch } = this.props;
+    const { dateSelector, minDate, maxDate, } = this.props.databrowser;
+    const isDateSelected = !!minDate;
+    const title = isDateSelected ?
+      (
+        <span>
+          Time Range: &nbsp;
+          <span className="fw-bold">
+            {dateSelector}: {minDate} to {maxDate}
+          </span>
+        </span>
+      ) :
+      (
+        <span>
+          Time Range
+        </span>
+      );
+    return (
+      <OwnPanel
+        header={title} eventKey={key} key={key} removeFacet={isDateSelected ? (() => dispatch(clearTimeRange())) : null}
+        collapse={() => dispatch(setActiveFacet(key))}
+      >
+        <TimeRangeSelector />
+      </OwnPanel>
+    );
+  }
+
   renderFilesPanel () {
     //TODO: This should be a separate component
     const { activeFacet, files, numFiles, } = this.props.databrowser;
@@ -89,7 +138,7 @@ class Databrowser extends React.Component {
           <div style={{ maxHeight:500,overflow:"auto" }}>
             <ul className="jqueryFileTree">
               {
-                _.map(files, (fn) => {
+                files.map((fn) => {
                   return (
                     <li className="ext_nc" key={fn} style={{ whiteSpace: "normal" }}>
                       <OverlayTrigger overlay={<Tooltip>Click here to inspect metadata</Tooltip>}>
@@ -136,6 +185,16 @@ class Databrowser extends React.Component {
 
     const facetPanels = this.renderFacetPanels();
 
+    let dateSelectorToCli;
+    const dateSelector = this.props.databrowser.dateSelector;
+    if (dateSelector === TIME_RANGE_FLEXIBLE) {
+      dateSelectorToCli = "flexible";
+    } else if (dateSelector === TIME_RANGE_STRICT) {
+      dateSelectorToCli = "strict";
+    } else if (dateSelector === TIME_RANGE_FILE) {
+      dateSelectorToCli = "file";
+    }
+
     return (
       <Container>
         <Row>
@@ -164,12 +223,31 @@ class Databrowser extends React.Component {
           <Col md={12}>
             <Accordion activeKey={activeFacet}>
               {facetPanels}
+              {this.renderTimeSelectionPanel()}
             </Accordion>
 
             <Card className="mt-2 p-3 d-block shadow-sm">
               freva databrowser
               {
-                _.map(selectedFacets, (value, key) => {
+                this.props.databrowser.minDate && <React.Fragment>
+                  &nbsp;time=
+                  <span className="fw-bold">
+                    {`${this.props.databrowser.minDate}to${this.props.databrowser.maxDate}`}
+                  </span>
+                </React.Fragment>
+              }
+              {
+                dateSelectorToCli && <React.Fragment>
+                  &nbsp;time-select
+                  <span className="fw-bold">
+                    &nbsp;
+                    {`${dateSelectorToCli}`}
+                  </span>
+                </React.Fragment>
+              }
+              {
+                Object.keys(selectedFacets).map((key) => {
+                  const value = selectedFacets[key];
                   return <React.Fragment key={`command-${key}`}> {key}=<strong>{value}</strong></React.Fragment>;
                 })
               }
@@ -209,6 +287,9 @@ Databrowser.propTypes = {
     ncdumpOutput: PropTypes.string,
     ncdumpError: PropTypes.string,
     metadata: PropTypes.object,
+    dateSelector : PropTypes.string,
+    minDate: PropTypes.string,
+    maxDate: PropTypes.string,
   }),
   error: PropTypes.string,
   dispatch: PropTypes.func.isRequired

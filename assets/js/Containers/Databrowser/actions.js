@@ -1,5 +1,4 @@
 import fetch from "isomorphic-fetch";
-import _ from "lodash";
 
 import { getCookie } from "../../utils";
 
@@ -34,6 +33,23 @@ export const resetNcdump = () => ({
   type: constants.RESET_NCDUMP
 });
 
+export const setTimeRange = (timeRange) => dispatch => {
+  dispatch({
+    type: constants.SET_TIME_RANGE,
+    timeRange
+  });
+  dispatch(loadFacets());
+  dispatch(loadFiles());
+};
+
+export const clearTimeRange = () => dispatch => {
+  dispatch({
+    type: constants.CLEAR_TIME_RANGE
+  });
+  dispatch(loadFacets());
+  dispatch(loadFiles());
+};
+
 export const setMetadata = (metadata) => ({
   type: constants.SET_METADATA,
   metadata
@@ -54,44 +70,35 @@ export const setActiveFacet = (facet) => ({
 });
 
 export const loadFacets = () => (dispatch, getState) => {
-
-  const { selectedFacets } = getState().databrowserReducer;
-  let params = "";
-  _.map(selectedFacets, (value, key) => {
-    params += `&${key}=${value}`;
-  });
-  const url = `/solr/solr-search/?facet=*${params}`;
-
-  return fetch(url, {
-    credentials: "same-origin",
-    headers: {
-      "X-CSRFToken": getCookie("csrftoken"),
-      "Accept": "application/json",
-      "Content-Type": "application/json"
-    }
-  }).then(response => response.json())
-    .then(json => {
-      return dispatch({
-        type: constants.LOAD_FACETS,
-        payload: json
-      });
-    })
-    .catch(() => {
-      return dispatch({
-        type: globalStateConstants.SET_ERROR,
-        payload: "Internal Error: Could not load results"
-      });
-    });
+  return fetchResults(dispatch, getState, "facet=*", constants.LOAD_FACETS);
 };
 
 export const loadFiles = () => (dispatch, getState) => {
+  return fetchResults(dispatch, getState, "start=0&rows=100", constants.LOAD_FILES);
+};
 
-  const { selectedFacets } = getState().databrowserReducer;
+function fetchResults (dispatch, getState, additionalParams, actionType) {
+  const { selectedFacets, dateSelector, minDate, maxDate } = getState().databrowserReducer;
   let params = "";
-  _.map(selectedFacets, (value, key) => {
+  Object.keys(selectedFacets).forEach(key => {
+    const value = selectedFacets[key];
     params += `&${key}=${value}`;
   });
-  const url = `/solr/solr-search/?start=0&rows=100${params}`;
+
+  const isDateSelected = !!minDate;
+  if (isDateSelected) {
+    let operator;
+    if (dateSelector === constants.TIME_RANGE_FLEXIBLE) {
+      operator = "Intersects";
+    } else if (dateSelector === constants.TIME_RANGE_STRICT) {
+      operator = "Within";
+    } else {
+      operator = "Contains";
+    }
+    params += `&time_select=${operator}&time=${minDate} TO ${maxDate}`;
+  }
+
+  const url = `/solr/solr-search/?${additionalParams}${params}`;
 
   return fetch(url, {
     credentials: "same-origin",
@@ -103,7 +110,7 @@ export const loadFiles = () => (dispatch, getState) => {
   }).then(response => response.json())
     .then(json => {
       return dispatch({
-        type: constants.LOAD_FILES,
+        type: actionType,
         payload: json
       });
     })
@@ -113,7 +120,7 @@ export const loadFiles = () => (dispatch, getState) => {
         payload: "Internal Error: Could not load results"
       });
     });
-};
+}
 
 export const loadNcdump = (fn, pw) => dispatch => {
   const url = "/api/solr/ncdump/";

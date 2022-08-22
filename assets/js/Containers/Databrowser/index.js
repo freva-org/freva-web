@@ -5,7 +5,6 @@ import {
   Container,
   Row,
   Col,
-  Accordion,
   Card,
   Tooltip,
   OverlayTrigger,
@@ -25,7 +24,6 @@ import {
   selectFacet,
   clearFacet,
   clearAllFacets,
-  setActiveFacet,
   setMetadata,
   loadFiles,
   loadNcdump,
@@ -66,7 +64,7 @@ class Databrowser extends React.Component {
      * Loop all facets and render the panels
      */
   renderFacetPanels () {
-    const { facets, selectedFacets, activeFacet, metadata } = this.props.databrowser;
+    const { facets, selectedFacets, metadata } = this.props.databrowser;
     const { dispatch } = this.props;
 
     return Object.keys(facets).map((key) => {
@@ -83,12 +81,15 @@ class Databrowser extends React.Component {
       }
       return (
         <OwnPanel
-          header={panelHeader} eventKey={key} key={key} removeFacet={isFacetSelected ? (() => dispatch(clearFacet(key))) : null}
-          collapse={() => dispatch(setActiveFacet(key))}
+          header={panelHeader}
+          key={key}
+          removeFacet={isFacetSelected ? (() => dispatch(clearFacet(key))) : null}
         >
           <AccordionItemBody
-            eventKey={key} value={value} facetClick={(key, item) => dispatch(selectFacet(key, item))}
-            metadata={metadata[key] ? metadata[key] : null} visible={key === activeFacet}
+            eventKey={key}
+            value={value}
+            facetClick={(key, item) => dispatch(selectFacet(key, item))}
+            metadata={metadata[key] ? metadata[key] : null}
           />
         </OwnPanel>
       );
@@ -116,8 +117,9 @@ class Databrowser extends React.Component {
       );
     return (
       <OwnPanel
-        header={title} eventKey={key} key={key} removeFacet={isDateSelected ? (() => dispatch(clearTimeRange())) : null}
-        collapse={() => dispatch(setActiveFacet(key))}
+        header={title}
+        key={key}
+        removeFacet={isDateSelected ? (() => dispatch(clearTimeRange())) : null}
       >
         <TimeRangeSelector />
       </OwnPanel>
@@ -126,46 +128,44 @@ class Databrowser extends React.Component {
 
   renderFilesPanel () {
     //TODO: This should be a separate component
-    const { activeFacet, files, numFiles, } = this.props.databrowser;
-    const { dispatch } = this.props;
+    const { files, numFiles, } = this.props.databrowser;
     return (
-      <Accordion activeKey={activeFacet}>
-        <OwnPanel
-          header={<span> Files [{numFiles}]</span>}
-          eventKey="files"
-          collapse={() => dispatch(setActiveFacet("files"))}
-        >
-          <div style={{ maxHeight:500,overflow:"auto" }}>
-            <ul className="jqueryFileTree">
-              {
-                files.map((fn) => {
-                  return (
-                    <li className="ext_nc" key={fn} style={{ whiteSpace: "normal" }}>
-                      <OverlayTrigger overlay={<Tooltip>Click here to inspect metadata</Tooltip>}>
-                        <Button
-                          variant="link" className="p-0" onClick={
-                            () => {
-                              this.setState({ showDialog: true, fn });
-                            }
+      <OwnPanel
+        header={<span> Files [{numFiles}]</span>}
+        isOpen
+      >
+        <div style={{ maxHeight:500,overflow:"auto" }}>
+          <ul className="jqueryFileTree">
+            {
+              files.map((fn) => {
+                return (
+                  <li className="ext_nc" key={fn} style={{ whiteSpace: "normal" }}>
+                    <OverlayTrigger overlay={<Tooltip>Click here to inspect metadata</Tooltip>}>
+                      <Button
+                        variant="link"
+                        className="p-0"
+                        onClick={
+                          () => {
+                            this.setState({ showDialog: true, fn });
                           }
-                        >
-                          <FaInfoCircle className="ncdump" />
-                        </Button>
-                      </OverlayTrigger>
-                      {" "}{fn}
-                    </li>
-                  );
-                })
-              }
-            </ul>
-          </div>
-        </OwnPanel>
-      </Accordion>
+                        }
+                      >
+                        <FaInfoCircle className="ncdump" />
+                      </Button>
+                    </OverlayTrigger>
+                    {" "}{fn}
+                  </li>
+                );
+              })
+            }
+          </ul>
+        </div>
+      </OwnPanel>
     );
   }
 
   render () {
-    const { facets, selectedFacets, activeFacet, ncdumpStatus, ncdumpOutput, ncdumpError } = this.props.databrowser;
+    const { facets, selectedFacets, ncdumpStatus, ncdumpOutput, ncdumpError } = this.props.databrowser;
     const { dispatch } = this.props;
     if (this.props.error) {
       return (
@@ -209,7 +209,8 @@ class Databrowser extends React.Component {
                 <Card className="shadow-sm">
                   <a
                     className="m-3"
-                    href="#" onClick={
+                    href="#"
+                    onClick={
                       (e) => {
                         e.preventDefault(); dispatch(clearAllFacets());
                       }
@@ -221,10 +222,8 @@ class Databrowser extends React.Component {
         </Row>
         <Row>
           <Col md={12}>
-            <Accordion activeKey={activeFacet}>
-              {facetPanels}
-              {this.renderTimeSelectionPanel()}
-            </Accordion>
+            {facetPanels}
+            {this.renderTimeSelectionPanel()}
 
             <Card className="mt-2 p-3 d-block shadow-sm">
               freva databrowser
@@ -282,7 +281,6 @@ Databrowser.propTypes = {
     files: PropTypes.array,
     numFiles: PropTypes.number,
     selectedFacets: PropTypes.object,
-    activeFacet: PropTypes.string,
     ncdumpStatus: PropTypes.string,
     ncdumpOutput: PropTypes.string,
     ncdumpError: PropTypes.string,

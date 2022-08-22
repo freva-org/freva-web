@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import PropTypes from "prop-types";
 
 import { connect } from "react-redux";
-import { Container, Row, Col, Accordion, Card, Form, Pagination, Table, Alert } from "react-bootstrap";
+import { Container, Row, Col, Card, Form, Pagination, Table, Alert } from "react-bootstrap";
 
 import _ from "lodash";
 
@@ -16,8 +16,10 @@ import Spinner from "../../Components/Spinner";
 import { dateformatter, getCookie } from "../../utils";
 
 import {
-  loadResultFacets, selectResultFacet, clearResultFacet,
-  clearAllResultFacets, setActiveResultFacet
+  loadResultFacets,
+  selectResultFacet,
+  clearResultFacet,
+  clearAllResultFacets
 } from "./actions";
 
 
@@ -235,7 +237,7 @@ LinkCell.propTypes = {
   }).isRequired
 };
 
-function TableContainer ({ activeFacet, selectedFacets, closeAccordion }) {
+function TableContainer ({ selectedFacets }) {
   const columns = React.useMemo(
     () => [
       {
@@ -322,30 +324,25 @@ function TableContainer ({ activeFacet, selectedFacets, closeAccordion }) {
 
 
   return (
-    <Accordion activeKey={activeFacet}>
-      <OwnPanel
-        header={<span>Results [{resultCount}]</span>}
-        eventKey="results"
-        id="result-browser"
-        collapse={closeAccordion}
-      >
-        <ResultTable
-          columns={columns}
-          data={data}
-          fetchData={fetchData}
-          loading={loading}
-          pageCount={pageCount}
-          selectedFacets={selectedFacets}
-        />
-      </OwnPanel>
-    </Accordion>
+    <OwnPanel
+      header={<span>Results [{resultCount}]</span>}
+      id="result-browser"
+      isOpen
+    >
+      <ResultTable
+        columns={columns}
+        data={data}
+        fetchData={fetchData}
+        loading={loading}
+        pageCount={pageCount}
+        selectedFacets={selectedFacets}
+      />
+    </OwnPanel>
   );
 }
 
 TableContainer.propTypes = {
-  activeFacet: PropTypes.string,
   selectedFacets: PropTypes.object,
-  closeAccordion: PropTypes.func.isRequired
 };
 
 class Resultbrowser extends React.Component {
@@ -366,7 +363,7 @@ class Resultbrowser extends React.Component {
      * Loop all facets and render the panels
      */
   renderFacetPanels () {
-    const { facets, selectedFacets, activeFacet, metadata } = this.props.resultbrowser;
+    const { facets, selectedFacets, metadata } = this.props.resultbrowser;
     const { dispatch } = this.props;
     return _.map(facets, (value, key) => {
       let panelHeader;
@@ -381,13 +378,15 @@ class Resultbrowser extends React.Component {
       }
       return (
         <OwnPanel
-          header={panelHeader} eventKey={key} key={key} removeFacet={isFacetSelected ? (() => dispatch(clearResultFacet(key))) : null}
-          collapse={() => dispatch(setActiveResultFacet(key))}
+          header={panelHeader}
+          key={key}
+          removeFacet={isFacetSelected ? (() => dispatch(clearResultFacet(key))) : null}
         >
           <AccordionItemBody
-            eventKey={key} value={value}
+            eventKey={key}
+            value={value}
             facetClick={(key, item) => dispatch(selectResultFacet(key, item))}
-            metadata={metadata[key] ? metadata[key] : null} visible={key === activeFacet}
+            metadata={metadata[key] ? metadata[key] : null}
           />
         </OwnPanel>
       );
@@ -397,19 +396,16 @@ class Resultbrowser extends React.Component {
 
   renderFilesPanel () {
     //TODO: This should be a separate component
-    const { activeFacet, selectedFacets } = this.props.resultbrowser;
-    const { dispatch } = this.props;
+    const { selectedFacets } = this.props.resultbrowser;
     return (
       <TableContainer
         selectedFacets={selectedFacets}
-        closeAccordion={() => dispatch(setActiveResultFacet("results"))}
-        activeFacet={activeFacet}
       />
     );
   }
 
   render () {
-    const { facets, selectedFacets, activeFacet } = this.props.resultbrowser;
+    const { facets, selectedFacets } = this.props.resultbrowser;
     const { dispatch } = this.props;
 
     if (this.props.error) {
@@ -446,9 +442,12 @@ class Resultbrowser extends React.Component {
               <Col md={12}>
                 <Card className="shadow-sm">
                   <a
-                    className="m-3" href="#" onClick={
+                    className="m-3"
+                    href="#"
+                    onClick={
                       (e) => {
-                        e.preventDefault(); dispatch(clearAllResultFacets());
+                        e.preventDefault();
+                        dispatch(clearAllResultFacets());
                       }
                     }
                   >Clear all</a>
@@ -458,9 +457,7 @@ class Resultbrowser extends React.Component {
         </Row>
         <Row>
           <Col md={12}>
-            <Accordion activeKey={activeFacet}>
-              {facetPanels}
-            </Accordion>
+            {facetPanels}
             {this.renderFilesPanel()}
           </Col>
         </Row>
@@ -473,7 +470,6 @@ Resultbrowser.propTypes = {
   resultbrowser: PropTypes.shape({
     facets: PropTypes.object,
     selectedFacets: PropTypes.object,
-    activeFacet: PropTypes.string,
     metadata: PropTypes.object,
     loadingFacets: PropTypes.bool
   }),

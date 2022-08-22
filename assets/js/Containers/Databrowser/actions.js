@@ -13,7 +13,6 @@ export const selectFacet = (facet, value) => dispatch => {
       facet,
       value
     });
-    dispatch(setActiveFacet(facet));
     dispatch(loadFacets());
     dispatch(loadFiles());
   },50);
@@ -63,11 +62,6 @@ export const clearAllFacets = (facet) => dispatch => {
   dispatch(loadFacets());
   dispatch(loadFiles());
 };
-
-export const setActiveFacet = (facet) => ({
-  type: constants.SET_ACTIVE_FACET,
-  facet
-});
 
 export const loadFacets = () => (dispatch, getState) => {
   return fetchResults(dispatch, getState, "facet=*", constants.LOAD_FACETS);

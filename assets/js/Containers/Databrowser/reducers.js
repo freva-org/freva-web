@@ -7,7 +7,6 @@ const databrowserInitialState = {
   files: [],
   numFiles: 0,
   selectedFacets: {},
-  activeFacet: "files",
   minDate: "",
   maxDate: "",
   dateSelector: "Select operator",
@@ -33,11 +32,6 @@ export const databrowserReducer = (state = databrowserInitialState, action) => {
     }
     case constants.CLEAR_ALL_FACETS:
       return { ...state, selectedFacets: {} };
-    case constants.SET_ACTIVE_FACET:
-      if (state.activeFacet === action.facet) {
-        return { ...state, activeFacet: databrowserInitialState.activeFacet };
-      }
-      return { ...state, activeFacet: action.facet };
     case constants.SET_METADATA:
       return { ...state, metadata: action.metadata };
     case constants.LOAD_FILES:

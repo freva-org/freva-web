@@ -9,8 +9,6 @@ export const CLEAR_FACET = "CLEAR_FACET";
 
 export const CLEAR_ALL_FACETS = "CLEAR_ALL_FACETS";
 
-export const SET_ACTIVE_FACET = "SET_ACTIVE_FACET";
-
 export const SET_METADATA = "SET_METADATA";
 
 export const SET_TIME_RANGE = "SET_TIME_RANGE";

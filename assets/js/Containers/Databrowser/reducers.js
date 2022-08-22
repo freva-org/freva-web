@@ -31,7 +31,13 @@ export const databrowserReducer = (state = databrowserInitialState, action) => {
       return { ...state, selectedFacets: newFacets };
     }
     case constants.CLEAR_ALL_FACETS:
-      return { ...state, selectedFacets: {} };
+      return {
+        ...state,
+        selectedFacets: {},
+        dateSelector: databrowserInitialState.dateSelector,
+        minDate: databrowserInitialState.minDate,
+        maxDate: databrowserInitialState.maxDate
+      };
     case constants.SET_METADATA:
       return { ...state, metadata: action.metadata };
     case constants.LOAD_FILES:

@@ -1143,6 +1143,6 @@ a.dropdown-item:hover {
    text-decoration: none;
 }
 
-.selector-button button {
-  width: 100%;
+#time-operator-dropdown {
+  flex: 1 1 auto;
 }

@@ -9,7 +9,7 @@ const databrowserInitialState = {
   selectedFacets: {},
   minDate: "",
   maxDate: "",
-  dateSelector: "Select operator",
+  dateSelector: constants.TIME_RANGE_FLEXIBLE,
   metadata: {},
   ncdumpStatus: "pw",
   ncdumpOutput: null,

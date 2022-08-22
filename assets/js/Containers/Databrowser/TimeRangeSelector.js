@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import {
@@ -25,14 +25,11 @@ import { setTimeRange } from "./actions";
 import { TIME_RANGE_FILE, TIME_RANGE_FLEXIBLE, TIME_RANGE_STRICT } from "./constants";
 
 const dateRegex = /^[-]?\d{4}(-[01]\d(-[0-3]\d(T[0-2]\d(:[0-5]\d)?Z?)?)?)?$/;
-const selectorDefaultText = "Select operator";
 
 function TimeRangeSelector ({ databrowser, dispatch }) {
-  const [selector, setSelector] = useState(selectorDefaultText);
+  const [selector, setSelector] = useState(TIME_RANGE_FLEXIBLE);
   const [minDate, setMinDate] = useState("");
   const [maxDate, setMaxDate] = useState("");
-
-  const inputRef = useRef(null);
 
   useEffect(() => {
     setMinDate(databrowser.minDate);
@@ -65,9 +62,7 @@ function TimeRangeSelector ({ databrowser, dispatch }) {
   }
 
   let tooltipText = "";
-  if (selector === selectorDefaultText) {
-    tooltipText = "Please choose a select operator";
-  } else if (maxDate.length < 4 || minDate.length < 4) {
+  if (maxDate.length < 4 || minDate.length < 4) {
     tooltipText = "Both date must consist of at least a year information with four digits";
   } else if (minDateErrorMessage) {
     tooltipText = minDateErrorMessage;
@@ -98,35 +93,38 @@ function TimeRangeSelector ({ databrowser, dispatch }) {
 
   return (
     <div>
-      <DropdownButton
-        className="mb-4 selector-button"
-        variant="secondary"
-        title={selector}
-        id="input-group-dropdown-1"
-      >
-        <Dropdown.Item onClick={setSelector.bind(this, TIME_RANGE_FLEXIBLE)} href="#">
-          <BsCircleSquare />&nbsp;
-          {TIME_RANGE_FLEXIBLE}
-        </Dropdown.Item>
-        <Dropdown.Item onClick={setSelector.bind(this, TIME_RANGE_STRICT)} href="#">
-          <BsRecordCircleFill />&nbsp;
-          {TIME_RANGE_STRICT}
-        </Dropdown.Item>
-        <Dropdown.Item onClick={setSelector.bind(this, TIME_RANGE_STRICT)} href="#">
-          <BsRecordCircle />&nbsp;
-          {TIME_RANGE_FILE}
-        </Dropdown.Item>
-      </DropdownButton>
+      <InputGroup className="mb-4">
+        <InputGroup.Text id="min-date-text">Operator</InputGroup.Text>
+        <DropdownButton
+          className="selector-button"
+          variant="outline-secondary"
+          title={selector}
+          id="time-operator-dropdown"
+        >
+          <Dropdown.Item onClick={setSelector.bind(this, TIME_RANGE_FLEXIBLE)} href="#">
+            <BsCircleSquare />&nbsp;
+            {TIME_RANGE_FLEXIBLE}
+          </Dropdown.Item>
+          <Dropdown.Item onClick={setSelector.bind(this, TIME_RANGE_STRICT)} href="#">
+            <BsRecordCircleFill />&nbsp;
+            {TIME_RANGE_STRICT}
+          </Dropdown.Item>
+          <Dropdown.Item onClick={setSelector.bind(this, TIME_RANGE_FILE)} href="#">
+            <BsRecordCircle />&nbsp;
+            {TIME_RANGE_FILE}
+          </Dropdown.Item>
+        </DropdownButton>
+      </InputGroup>
+
       <InputGroup>
         <InputGroup.Text id="min-date-text">Min date</InputGroup.Text>
         <Form.Control
-          ref={inputRef}
           aria-label="Min date"
           value={minDate}
           placeholder="e.g. 1970-12-31T23:59 (at least a year with 4 digits)"
           onChange={
             (e) => {
-              (setMinDate(e.target.value));
+              setMinDate(e.target.value);
             }
           }
         />

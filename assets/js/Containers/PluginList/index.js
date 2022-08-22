@@ -177,7 +177,8 @@ class PluginList extends React.Component {
             {
               !currentUser.isGuest && (currentUser.home || currentUser.scratch) ?
                 <Button
-                  variant="info" className="float-end"
+                  variant="info"
+                  className="float-end"
                   onClick={() => (exported ? this.props.dispatch(exportPlugin()) : this.setState({ showModal: true }))}
                 >
                   {exported ? "Remove imported Plugin" : "Plug-my-Plugin"}
@@ -198,7 +199,8 @@ class PluginList extends React.Component {
           <Col md={4}>
             <InputGroup className="mt-3">
               <FormControl
-                type="text" value={searchFilter}
+                type="text"
+                value={searchFilter}
                 onChange={this.handleSearchFilter}
                 placeholder="Search for plugins"
               />
@@ -221,7 +223,8 @@ class PluginList extends React.Component {
                   tags.map(tag => {
                     return (
                       <Button
-                        className="badge mb-2 me-2" variant={_.includes(tagsFilter, tag) ? "success" : "secondary"}
+                        className="badge mb-2 me-2"
+                        variant={_.includes(tagsFilter, tag) ? "success" : "secondary"}
                         key={tag}
                         onClick={() => dispatch(updateTagFilter(tag))}
                       >
@@ -249,7 +252,8 @@ class PluginList extends React.Component {
               {
                 currentUser.home &&
                 <Button
-                  variant="primary" active={root.id === "home"}
+                  variant="primary"
+                  active={root.id === "home"}
                   onClick={() => this.props.dispatch(changeRoot({ id: "home", path: currentUser.home }, "py"))}
                 >
                   Home
@@ -258,7 +262,8 @@ class PluginList extends React.Component {
               {
                 currentUser.scratch &&
                 <Button
-                  variant="primary" active={root.id === "scratch"}
+                  variant="primary"
+                  active={root.id === "scratch"}
                   onClick={() => this.props.dispatch(changeRoot({ id: "scratch", path: currentUser.scratch }, "py"))}
                 >
                   Workspace
@@ -269,7 +274,8 @@ class PluginList extends React.Component {
             <FormGroup style={{ marginTop: 10 }}>
               <FormLabel>File to plugin</FormLabel>
               <FormControl
-                type="text" value={this.state.value}
+                type="text"
+                value={this.state.value}
                 onChange={this.handlePluginValue}
               />
             </FormGroup>

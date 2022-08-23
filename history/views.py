@@ -79,13 +79,6 @@ class HistoryDatatable(Datatable):
         css_class = f"class='btn btn-primary btn-sm ttbtn'"
         button_text = "Info"
 
-        # change things for manually started jobs slightly
-        if instance.slurm_output == "0":
-            information = "Restricted information to manually started job:"
-            css_class = f"class='btn btn-info btn-sm ttbtn'"
-            button_text = "Info"
-        is_plugin_available = True
-
         try:
             url = reverse("history:jobinfo", args=[instance.id])
             href = "href='%s'" % url

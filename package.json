@@ -44,6 +44,7 @@
    "dependencies": {
       "assert": "^2.0.0",
       "buffer": "^6.0.3",
+      "date-fns": "2.29",
       "htmlparser2": "^7.2.0",
       "isomorphic-fetch": "^3.0.0",
       "linkify-react": "3.0.4",

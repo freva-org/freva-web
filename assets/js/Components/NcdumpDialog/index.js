@@ -33,7 +33,9 @@ class NcdumpDialog extends React.Component {
     const { show, onClose, status, output, file, error } = this.props;
     return (
       <Modal
-        show={show} size="lg" dialogClassName="ncdump-modal"
+        show={show}
+        size="lg"
+        dialogClassName="ncdump-modal"
         onHide={() => onClose()}
       >
         <Modal.Header closeButton>
@@ -48,8 +50,11 @@ class NcdumpDialog extends React.Component {
               <p>To inspect metadata you have to re-enter your password</p>
               <form onSubmit={this.submitNcdump} id="passForm" name="passForm">
                 <FormControl
-                  id="search" type="password" name="password"
-                  onChange={this.handleChange} value={this.state.pw}
+                  id="search"
+                  type="password"
+                  name="password"
+                  onChange={this.handleChange}
+                  value={this.state.pw}
                 />
               </form>
             </span>

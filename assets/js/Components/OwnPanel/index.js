@@ -1,23 +1,32 @@
-import React from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
-import { Accordion, Button, Card, useAccordionButton } from "react-bootstrap";
+import { Collapse, Button, Card } from "react-bootstrap";
 import { FaTimes } from "react-icons/fa";
 
 function OwnPanel (props) {
-  const decoratedOnClick = useAccordionButton(props.eventKey, () => {
-    props.collapse();
-  });
+  const [open, setOpen] = useState(props.isOpen);
 
-  const dropFacetAndCollapse = useAccordionButton(props.eventKey, () => {
+  function dropFacetAndCollapse (e) {
+    e.stopPropagation();
     props.removeFacet();
-    props.collapse();
+  }
+
+  function togglePanel () {
+    setOpen(!open);
+  }
+
+  const childrenWithProps = React.Children.map(props.children, child => {
+    if (React.isValidElement(child) && child.type !== "div") {
+      return React.cloneElement(child, { togglePanel });
+    }
+    return child;
   });
 
   return (
     <Card className="my-3 shadow-sm">
       <div
         className="btn btn-outline-secondary border-0 p-3 rounded-top text-start card-header shadow-sm button-div"
-        onClick={decoratedOnClick}
+        onClick={() => setOpen(!open)}
       >
         {props.header}
         {
@@ -32,20 +41,21 @@ function OwnPanel (props) {
             null
         }
       </div>
-      <Accordion.Collapse className="p-3" eventKey={props.eventKey}>
-        {props.children}
-      </Accordion.Collapse>
+      <Collapse in={open} className="p-3">
+        <div>
+          {childrenWithProps}
+        </div>
+      </Collapse>
     </Card>
   );
 }
 
 OwnPanel.propTypes = {
-  collapse: PropTypes.func.isRequired,
   header: PropTypes.node.isRequired,
-  eventKey: PropTypes.string.isRequired,
   isFacetSelected: PropTypes.bool,
   removeFacet: PropTypes.func,
-  children: PropTypes.node
+  children: PropTypes.node,
+  isOpen: PropTypes.bool
 };
 
 export default OwnPanel;

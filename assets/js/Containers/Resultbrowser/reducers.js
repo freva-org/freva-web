@@ -6,7 +6,6 @@ const resultbrowserInitialState = {
   facets: null,
   files: [],
   selectedFacets: {},
-  activeFacet: "results",
   metadata: {},
   loadingFacets: false
 };
@@ -31,11 +30,6 @@ export const resultbrowserReducer = (state = resultbrowserInitialState, action) 
     }
     case constants.CLEAR_ALL_RESULT_FACETS:
       return { ...state, selectedFacets: {} };
-    case constants.SET_ACTIVE_RESULT_FACET:
-      if (state.activeFacet === action.facet) {
-        return { ...state, activeFacet: resultbrowserInitialState.activeFacet };
-      }
-      return { ...state, activeFacet: action.facet };
     case constants.SET_METADATA:
       return { ...state, metadata: action.metadata };
     default:

@@ -14,7 +14,6 @@ export const selectResultFacet = (facet, value) => dispatch => {
       facet,
       value
     });
-    dispatch(setActiveResultFacet(facet));
     dispatch(loadResultFacets());
   },50);
 
@@ -41,11 +40,6 @@ export const clearAllResultFacets = (facet) => dispatch => {
   });
   dispatch(loadResultFacets());
 };
-
-export const setActiveResultFacet = (facet) => ({
-  type: constants.SET_ACTIVE_RESULT_FACET,
-  facet
-});
 
 export const loadResultFacets = () => (dispatch, getState) => {
 

@@ -107,6 +107,13 @@
       2
     ],
     "react/jsx-boolean-value": "error",
+    "react/jsx-max-props-per-line": [
+      "warn",
+      {
+        "maximum": 1,
+        "when": "multiline"
+      }
+    ],
     "react/jsx-curly-newline": [
       "warn",
       {

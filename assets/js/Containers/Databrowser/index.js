@@ -237,7 +237,7 @@ class Databrowser extends React.Component {
               }
               {
                 dateSelectorToCli && this.props.databrowser.minDate && <React.Fragment>
-                  &nbsp;time-select
+                  &nbsp;--time-select
                   <span className="fw-bold">
                     &nbsp;
                     {`${dateSelectorToCli}`}

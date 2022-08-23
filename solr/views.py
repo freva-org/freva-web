@@ -11,7 +11,6 @@ from django.http import HttpResponse
 
 from evaluation_system.model.solr import SolrFindFiles
 from django.conf import settings
-
 import json
 import logging
 
@@ -55,8 +54,6 @@ def solr_search(request):
 
     if "start" in args:
         args["start"] = int(request.GET["start"])
-    if "rows" in args:
-        args["rows"] = int(request.GET["rows"])
     if "time_select" in args:
         args["time_select"] = request.GET["time_select"]
     if "time" in args:
@@ -115,7 +112,6 @@ def solr_search(request):
         if facets == "*":
             # means select all,
             facets = None
-
         if facets == "experiment_prefix":
             args["experiment"] = args.pop("experiment_prefix")
             results = SolrFindFiles.facets(facets="experiment", **args)
@@ -125,12 +121,28 @@ def solr_search(request):
                 args["experiment"] = args.pop("experiment_prefix")[0] + "*"
             results = SolrFindFiles.facets(facets=facets, **args)
             results = reorder_results(results)
-    else:
-        results = SolrFindFiles.search(_retrieve_metadata=True, **args)
-        metadata = next(results)
-        results = list(results)
 
-    return HttpResponse(
-        json.dumps(dict(data=results, metadata=metadata)),
-        content_type="application/json",
-    )
+        return HttpResponse(
+            json.dumps(dict(data=results)),
+            content_type="application/json",
+        )
+    else:
+        rows = 0
+        if "rows" in args:
+            rows = int(request.GET["rows"])
+            args.pop("rows")
+        metadata = SolrFindFiles.get_metadata(**args)
+        if rows:
+            args["rows"] = rows
+        results = SolrFindFiles.search(**args)
+        results = list(results)
+        metadata_dict = {
+            "numFound": metadata.num_objects,
+            "docs": metadata.docs,
+            "numFoundExact": metadata.exact,
+            "start": metadata.start,
+        }
+        return HttpResponse(
+            json.dumps(dict(data=results, metadata=metadata_dict)),
+            content_type="application/json",
+        )

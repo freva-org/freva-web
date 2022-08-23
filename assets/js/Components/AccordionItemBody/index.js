@@ -18,7 +18,7 @@ function AccordionItemBody (props) {
       }
       if (metadata && metadata[item]) {
         return (
-          <div className="col-sm-6 col-md-3" key={item}>
+          <div className="col-md-12 col-sm-6" key={item}>
             <OverlayTrigger overlay={<Tooltip>{metadata[item]}</Tooltip>}>
               <a
                 href="#"
@@ -36,7 +36,7 @@ function AccordionItemBody (props) {
         );
       }
       return (
-        <div className="col-sm-6 col-md-3" key={item}>
+        <div className="col-md-12 col-sm-6" key={item}>
           <a
             href="#"
             onClick={
@@ -78,7 +78,7 @@ function AccordionItemBody (props) {
         placeholder={`Search ${eventKey} name`}
         onChange={handleChange}
       />
-      <div className="row">
+      <div className="row" style={{ "maxHeight":"300px", "overflow": "auto" }}>
         {filteredItems}
       </div>
     </div>

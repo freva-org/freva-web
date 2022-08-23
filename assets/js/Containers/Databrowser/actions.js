@@ -7,16 +7,13 @@ import * as globalStateConstants from "../App/constants";
 import * as constants from "./constants";
 
 export const selectFacet = (facet, value) => dispatch => {
-  setTimeout(function () {
-    dispatch({
-      type: constants.SELECT_FACET,
-      facet,
-      value
-    });
-    dispatch(loadFacets());
-    dispatch(loadFiles());
-  },50);
-
+  dispatch({
+    type: constants.SELECT_FACET,
+    facet,
+    value
+  });
+  dispatch(loadFacets());
+  dispatch(loadFiles());
 };
 
 export const clearFacet = (facet) => dispatch => {
@@ -64,10 +61,12 @@ export const clearAllFacets = (facet) => dispatch => {
 };
 
 export const loadFacets = () => (dispatch, getState) => {
+  dispatch({ type: constants.SET_FACET_LOADING });
   return fetchResults(dispatch, getState, "facet=*", constants.LOAD_FACETS);
 };
 
 export const loadFiles = () => (dispatch, getState) => {
+  dispatch({ type: constants.SET_FILE_LOADING });
   return fetchResults(dispatch, getState, "start=0&rows=100", constants.LOAD_FILES);
 };
 

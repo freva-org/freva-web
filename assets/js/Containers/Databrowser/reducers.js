@@ -14,12 +14,18 @@ const databrowserInitialState = {
   ncdumpStatus: "pw",
   ncdumpOutput: null,
   ncdumpError: null,
+  facetLoading: false,
+  fileLoading: false
 };
 
 export const databrowserReducer = (state = databrowserInitialState, action) => {
   switch (action.type) {
+    case constants.SET_FACET_LOADING:
+      return { ...state, facetLoading: true };
+    case constants.SET_FILE_LOADING:
+      return { ...state, fileLoading: true };
     case constants.LOAD_FACETS:
-      return { ...state, error: "", facets: action.payload.data };
+      return { ...state, error: "", facets: action.payload.data, facetLoading: false };
     case constants.SELECT_FACET: {
       const selectedFacets = { ...state.selectedFacets };
       selectedFacets[action.facet] = action.value;
@@ -41,7 +47,7 @@ export const databrowserReducer = (state = databrowserInitialState, action) => {
     case constants.SET_METADATA:
       return { ...state, metadata: action.metadata };
     case constants.LOAD_FILES:
-      return { ...state, files: action.payload.data, numFiles: action.payload.metadata.numFound };
+      return { ...state, files: action.payload.data, numFiles: action.payload.metadata.numFound, fileLoading: false };
     case constants.LOAD_NCDUMP_ERROR:
       return { ...state, ncdumpStatus: "error", ncdumpError:  action.message };
     case constants.LOAD_NCDUMP:

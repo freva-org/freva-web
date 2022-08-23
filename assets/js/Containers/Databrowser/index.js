@@ -64,7 +64,7 @@ class Databrowser extends React.Component {
      * Loop all facets and render the panels
      */
   renderFacetPanels () {
-    const { facets, selectedFacets, metadata } = this.props.databrowser;
+    const { facets, selectedFacets, metadata, facetLoading } = this.props.databrowser;
     const { dispatch } = this.props;
 
     return Object.keys(facets).map((key) => {
@@ -83,6 +83,7 @@ class Databrowser extends React.Component {
         <OwnPanel
           header={panelHeader}
           key={key}
+          loading={facetLoading}
           removeFacet={isFacetSelected ? (() => dispatch(clearFacet(key))) : null}
         >
           <AccordionItemBody
@@ -128,15 +129,13 @@ class Databrowser extends React.Component {
 
   renderFilesPanel () {
     //TODO: This should be a separate component
-    const { files, numFiles, } = this.props.databrowser;
+    const { files, numFiles, fileLoading } = this.props.databrowser;
     return (
-      <OwnPanel
-        header={<span> Files [{numFiles}]</span>}
-        isOpen
-      >
-        <div style={{ maxHeight:500,overflow:"auto" }}>
-          <ul className="jqueryFileTree">
-            {
+      <div className="py-3">
+        <h3> Files [{numFiles}]</h3>
+        <ul className="jqueryFileTree border shadow-sm py-3 rounded" style={{ "maxHeight":"1000px", "overflow": "auto" }}>
+          {
+            fileLoading ? <Spinner /> :
               files.map((fn) => {
                 return (
                   <li className="ext_nc" key={fn} style={{ whiteSpace: "normal" }}>
@@ -157,10 +156,9 @@ class Databrowser extends React.Component {
                   </li>
                 );
               })
-            }
-          </ul>
-        </div>
-      </OwnPanel>
+          }
+        </ul>
+      </div>
     );
   }
 
@@ -198,34 +196,29 @@ class Databrowser extends React.Component {
     return (
       <Container>
         <Row>
-          <Col md={12}>
-            <h2>Data-Browser</h2>
-          </Col>
-        </Row>
-        <Row>
-          {
-            Object.keys(selectedFacets).length !== 0 ?
-              <Col md={12}>
-                <Card className="shadow-sm">
-                  <a
-                    className="m-3"
-                    href="#"
-                    onClick={
-                      (e) => {
-                        e.preventDefault(); dispatch(clearAllFacets());
+          <h2>Data-Browser</h2>
+          <Col md={4}>
+            {
+              Object.keys(selectedFacets).length !== 0 ?
+                <Col md={12}>
+                  <Card className="shadow-sm mb-3">
+                    <a
+                      className="m-3"
+                      href="#"
+                      onClick={
+                        (e) => {
+                          e.preventDefault(); dispatch(clearAllFacets());
+                        }
                       }
-                    }
-                  >Clear all</a>
-                </Card>
-              </Col> : null
-          }
-        </Row>
-        <Row>
-          <Col md={12}>
+                    >Clear all</a>
+                  </Card>
+                </Col> : null
+            }
             {facetPanels}
             {this.renderTimeSelectionPanel()}
-
-            <Card className="mt-2 p-3 d-block shadow-sm">
+          </Col>
+          <Col md={8}>
+            <Card className="p-3 d-block shadow-sm">
               freva databrowser
               {
                 this.props.databrowser.minDate && <React.Fragment>
@@ -279,6 +272,8 @@ Databrowser.propTypes = {
   databrowser: PropTypes.shape({
     facets: PropTypes.object,
     files: PropTypes.array,
+    fileLoading: PropTypes.bool,
+    facetLoading: PropTypes.bool,
     numFiles: PropTypes.number,
     selectedFacets: PropTypes.object,
     ncdumpStatus: PropTypes.string,

@@ -271,6 +271,7 @@ class ResultFiles(APIView, FilterAbstract):
                     | Q(caption__icontains=searchText)
                     | Q(uid__username__icontains=searchText)
                     | Q(tool__icontains=searchText)
+                    | Q(id__contains=searchText)
                 )
 
             mod_request = prepare_facet_filter(selected_facets)

@@ -1152,5 +1152,5 @@ a.dropdown-item:hover {
 }
 
 .no-break {
-   white-space: no-break;
+   white-space: nowrap;
 }

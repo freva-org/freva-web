@@ -13,6 +13,9 @@ export const SET_METADATA = "SET_METADATA";
 
 export const SET_TIME_RANGE = "SET_TIME_RANGE";
 
+export const SET_FACET_LOADING = "SET_FACET_LOADING";
+export const SET_FILE_LOADING = "SET_FILE_LOADING";
+
 export const CLEAR_TIME_RANGE = "CLEAR_TIME_RANGE";
 
 export const LOAD_NCDUMP = "LOAD_NCDUMP";

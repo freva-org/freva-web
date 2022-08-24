@@ -1146,3 +1146,11 @@ a.dropdown-item:hover {
 #time-operator-dropdown {
   flex: 1 1 auto;
 }
+
+.forced-textwrap {
+   word-wrap: anywhere;
+}
+
+.no-break {
+   white-space: nowrap;
+}

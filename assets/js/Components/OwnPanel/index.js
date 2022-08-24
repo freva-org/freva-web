@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
-import { Collapse, Button, Card } from "react-bootstrap";
+import { Collapse, Button, Card, Spinner } from "react-bootstrap";
 import { FaTimes } from "react-icons/fa";
 
 function OwnPanel (props) {
@@ -23,12 +23,13 @@ function OwnPanel (props) {
   });
 
   return (
-    <Card className="my-3 shadow-sm">
+    <Card className="mb-3 shadow-sm">
       <div
         className="btn btn-outline-secondary border-0 p-3 rounded-top text-start card-header shadow-sm button-div"
         onClick={() => setOpen(!open)}
       >
         {props.header}
+        {props.loading && <Spinner animation="border" className="mx-2" size="sm" />}
         {
           props.removeFacet ?
             <Button
@@ -55,7 +56,8 @@ OwnPanel.propTypes = {
   isFacetSelected: PropTypes.bool,
   removeFacet: PropTypes.func,
   children: PropTypes.node,
-  isOpen: PropTypes.bool
+  isOpen: PropTypes.bool,
+  loading: PropTypes.bool
 };
 
 export default OwnPanel;

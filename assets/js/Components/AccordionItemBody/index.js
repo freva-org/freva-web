@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { FormControl, Tooltip, OverlayTrigger } from "react-bootstrap";
-
+import { VariableSizeList as List } from "react-window";
 
 function AccordionItemBody (props) {
   const [filter, setFilter] = useState("");
@@ -12,43 +12,42 @@ function AccordionItemBody (props) {
 
   function renderFilteredItems (filteredValues) {
     const { metadata, facetClick, eventKey } = props;
-    return filteredValues.map((item, i) => {
-      if (i % 2 === 1) {
-        return null;
-      }
-      if (metadata && metadata[item]) {
+    return filteredValues.map((item) => {
+      const value = item.value;
+      const count = item.count;
+      if (metadata && metadata[value]) {
         return (
-          <div className="col-md-12 col-sm-6" key={item}>
-            <OverlayTrigger overlay={<Tooltip>{metadata[item]}</Tooltip>}>
+          <div className="col-md-12 col-sm-6" key={value}>
+            <OverlayTrigger overlay={<Tooltip>{metadata[value]}</Tooltip>}>
               <a
                 href="#"
                 onClick={
                   (e) => {
                     e.preventDefault();
-                    facetClick(eventKey, item);
+                    facetClick(eventKey, value);
                     props.togglePanel();
                   }
                 }
-              >{item}</a>
+              >{value}</a>
             </OverlayTrigger>
-            {" "}[{filteredValues[i + 1]}]
+            {" "}[{count}]
           </div>
         );
       }
       return (
-        <div className="col-md-12 col-sm-6" key={item}>
+        <div className="col-md-12 col-sm-6" key={value}>
           <a
             href="#"
             onClick={
               (e) => {
                 e.preventDefault();
-                facetClick(eventKey, item);
+                facetClick(eventKey, value);
                 if (props.togglePanel) {
                   props.togglePanel();
                 }
               }
             }
-          >{item}</a> [{filteredValues[i + 1]}]
+          >{value}</a> [{item.count}]
         </div>
       );
     });
@@ -62,13 +61,12 @@ function AccordionItemBody (props) {
     const val = value[i];
     if (val.toLowerCase().indexOf(filterLower) !== -1 ||
         (metadata && metadata[val] && metadata[val].toLowerCase().indexOf(filterLower) !== -1)) {
-      filteredValues.push(val);
-      filteredValues.push(value[i + 1]);
+      filteredValues.push({ "value":val, "count": value[i + 1] });
     }
   }
 
   const filteredItems = renderFilteredItems(filteredValues);
-
+  const eventKeyId = eventKey.replaceAll(/\s/g, "_") + "_hiddenID";
   return (
     <div>
       <FormControl
@@ -78,12 +76,48 @@ function AccordionItemBody (props) {
         placeholder={`Search ${eventKey} name`}
         onChange={handleChange}
       />
-      <div className="row" style={{ "maxHeight":"300px", "overflow": "auto" }}>
-        {filteredItems}
-      </div>
+      <div id={eventKeyId} style={{ visibility: "visible", whiteSpace: "normal" }} />
+      {
+        filteredItems.length <= 12 ? (
+          filteredItems
+        ) : (
+          <List
+            className="infinite-body"
+            height={338}
+            itemData={filteredItems}
+            itemCount={filteredItems.length}
+            itemSize={(i) => onGetItemSize(filteredValues[i], eventKeyId)}
+          >
+            {ItemRenderer}
+          </List>
+        )
+      }
     </div>
   );
 
+}
+
+function onGetItemSize (row, hiddenFieldName) {
+  const text = `${row.value} [${row.count}]`;
+  const rowHeight = 28;
+  // if no text, or text is short, don't bother measuring.
+  if (!text || text.length < 20) {
+    return rowHeight;
+  }
+
+  // // attempt to measure height by writting text to a, kind of hidden element.
+  const hiddenElement = document.getElementById(hiddenFieldName);
+  if (hiddenElement) {
+    hiddenElement.textContent = text;
+    const ret = hiddenElement.offsetHeight;
+    hiddenElement.textContent = "";
+
+    if (ret > 0) {
+      return Math.max(ret, rowHeight);
+    }
+  }
+
+  return rowHeight;
 }
 
 AccordionItemBody.propTypes = {
@@ -94,5 +128,19 @@ AccordionItemBody.propTypes = {
   facetClick: PropTypes.any,
   togglePanel: PropTypes.func
 };
+
+class ItemRenderer extends React.PureComponent {
+  static propTypes = {
+    data: PropTypes.array.isRequired,
+    index: PropTypes.number.isRequired,
+    style: PropTypes.any
+  }
+
+  render () {
+    // Access the items array using the "data" prop:
+    const item = this.props.data[this.props.index];
+    return <div style={this.props.style}>{item}</div>;
+  }
+}
 
 export default AccordionItemBody;

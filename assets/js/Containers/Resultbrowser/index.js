@@ -1,19 +1,18 @@
-import React, { useRef } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 
 import { connect } from "react-redux";
-import { Container, Row, Col, Card, Form, Pagination, Table, Alert } from "react-bootstrap";
+import { Container, Row, Col, Card, Alert } from "react-bootstrap";
 
 import _ from "lodash";
 
-import { useTable, useSortBy, usePagination, useGlobalFilter } from "react-table";
-
-import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
 
 import AccordionItemBody from "../../Components/AccordionItemBody";
 import OwnPanel from "../../Components/OwnPanel";
 import Spinner from "../../Components/Spinner";
 import { dateformatter, getCookie } from "../../utils";
+
+import ResultTable from "./ResultTable";
 
 import {
   loadResultFacets,
@@ -22,210 +21,6 @@ import {
   clearAllResultFacets
 } from "./actions";
 
-
-function GlobalFilter ({
-  globalFilter,
-  setGlobalFilter,
-}) {
-  const debouncedSetGlobalFilter = useRef(_.debounce(setGlobalFilter, 300));
-  const [value, setValue] = React.useState(globalFilter);
-
-  const onChange = (value) => {
-    if (value.length > 2 || value.length === 0) {
-      debouncedSetGlobalFilter.current(value);
-    }
-  };
-
-
-  // const dobouncedOnChange = _.debounce(onChange, 500);
-  return (
-    <input
-      value={value || ""}
-      className="float-end form-control w-25"
-      onChange={
-        e => {
-          setValue(e.target.value);
-          // dobouncedOnChange(e.target.value);
-          onChange(e.target.value);
-        }
-      }
-      placeholder="Search"
-    />
-  );
-}
-
-GlobalFilter.propTypes = {
-  globalFilter: PropTypes.string,
-  setGlobalFilter: PropTypes.func.isRequired
-};
-
-function ResultTable ({ columns, data, fetchData, loading, selectedFacets, pageCount: controlledPageCount }) {
-  const skipPageResetRef = React.useRef();
-
-  const {
-    getTableProps,
-    headerGroups,
-    prepareRow,
-    page,
-    canPreviousPage,
-    canNextPage,
-    pageOptions,
-    pageCount,
-    gotoPage,
-    nextPage,
-    previousPage,
-    setPageSize,
-    state: { pageIndex, pageSize, sortBy, globalFilter },
-    setGlobalFilter,
-  } = useTable({
-    columns,
-    data,
-    selectedFacets,
-    initialState: { pageIndex: 0, pageSize: 25, sortBy: [], globalFilter: "" },
-    manualPagination: true,
-    manualSortBy: true,
-    manualGlobalFilter: true,
-    autoResetPage: true,
-    autoResetSortBy: true,
-    autoResetGlobalFilter: true,
-    pageCount: controlledPageCount,
-  }, useGlobalFilter, useSortBy, usePagination);
-
-  React.useEffect(() => {
-    gotoPage(0);
-  }, [selectedFacets]);
-
-  const debouncedFetchData = useRef(_.debounce(fetchData, 250));
-  React.useEffect(() => {
-    skipPageResetRef.current = true;
-    debouncedFetchData.current({ pageIndex, pageSize, sortBy, globalFilter, selectedFacets });
-  }, [fetchData, pageIndex, pageSize, sortBy, globalFilter, selectedFacets]);
-
-  React.useEffect(() => {
-    // After the table has updated, always remove the flag
-    skipPageResetRef.current = false;
-  });
-
-  return (
-    <div className="p-2">
-      <Table striped hover responsive {...getTableProps()}>
-        <thead>
-          <tr>
-            <th
-              colSpan={columns.length}
-            >
-              <GlobalFilter
-                globalFilter={globalFilter}
-                setGlobalFilter={setGlobalFilter}
-              />
-            </th>
-          </tr>
-          {
-            headerGroups.map(headerGroup => {
-              const { key, ...restHeaderGroupProps } = headerGroup.getHeaderGroupProps();
-              return (<tr key={key} {...restHeaderGroupProps}>
-                {
-                  headerGroup.headers.map(column => {
-                    const { key, ...restHeaderProps } = column.getHeaderProps((column.canSort ? column.getSortByToggleProps() : undefined));
-                    return (
-                      <th key={key} {...restHeaderProps}>
-                        {column.render("Header")}
-                        <span>
-                          {
-                            column.canSort
-                              ? column.isSorted
-                                ? column.isSortedDesc
-                                  ? <FaSortDown />
-                                  : <FaSortUp />
-                                : <FaSort className="text-muted" />
-                              : ""
-                          }
-                        </span>
-                      </th>
-                    );
-                  })
-                }
-              </tr>
-              );
-            })
-          }
-        </thead>
-        <tbody>
-          {
-            loading ?
-              <tr><td className="text-center" colSpan={columns.length}><Spinner /></td></tr>
-              :
-              page.length === 0 ?
-                <tr><td className="fw-bold text-center" colSpan={columns.length}>No elements found</td></tr>
-                :
-                page.map((row) => {
-                  prepareRow(row);
-                  const { key, ...restRowProps } = row.getRowProps();
-                  return (
-                    <tr key={key} {...restRowProps}>
-                      {
-                        row.cells.map(cell => {
-                          const { key, ...restCellProps } = cell.getCellProps();
-                          return (
-                            <td key={key} {...restCellProps}>
-                              {cell.render("Cell")}
-                            </td>
-                          );
-                        })
-                      }
-                    </tr>
-                  );
-                })
-          }
-        </tbody>
-      </Table>
-      <div className="d-flex justify-content-between px-0">
-        <Form.Select
-          className="w-25"
-          size="sm"
-          value={pageSize}
-          onChange={
-            e => {
-              setPageSize(Number(e.target.value));
-            }
-          }
-        >
-          {
-            [10, 25, 50].map(pageSize => (
-              <option key={pageSize} value={pageSize}>
-                Show {pageSize}
-              </option>
-            ))
-          }
-        </Form.Select>
-
-        <span>
-          Page{" "}
-          <strong>
-            {pageIndex + 1} of {pageOptions.length}
-          </strong>{" "}
-        </span>
-
-        <Pagination className="m-0">
-          <Pagination.First disabled={!canPreviousPage} onClick={() => gotoPage(0)} />
-          <Pagination.Prev onClick={() => previousPage()} disabled={!canPreviousPage} />
-          <Pagination.Next onClick={() => nextPage()} disabled={!canNextPage} />
-          <Pagination.Last onClick={() => gotoPage(pageCount - 1)} disabled={!canNextPage} />
-        </Pagination>
-      </div>
-    </div>
-  );
-}
-
-
-ResultTable.propTypes = {
-  columns: PropTypes.array,
-  data: PropTypes.array,
-  fetchData: PropTypes.func.isRequired,
-  loading: PropTypes.bool,
-  selectedFacets: PropTypes.object,
-  pageCount: PropTypes.number
-};
 
 const LinkCell = (props) => {
   return <a href={props.cell.value}>Show</a>;
@@ -258,6 +53,9 @@ function TableContainer ({ selectedFacets }) {
       {
         Header: "Caption",
         accessor: "caption",
+        Cell: (prop) => {
+          return <div className="forced-textwrap"> {prop.cell.value}</div>;
+        }
       },
       {
         Header: "User",
@@ -324,12 +122,9 @@ function TableContainer ({ selectedFacets }) {
 
 
   return (
-    <OwnPanel
-      header={<span>Results [{resultCount}]</span>}
-      id="result-browser"
-      isOpen
-    >
+    <div>
       <ResultTable
+        resultCount={resultCount}
         columns={columns}
         data={data}
         fetchData={fetchData}
@@ -337,7 +132,7 @@ function TableContainer ({ selectedFacets }) {
         pageCount={pageCount}
         selectedFacets={selectedFacets}
       />
-    </OwnPanel>
+    </div>
   );
 }
 
@@ -430,34 +225,30 @@ class Resultbrowser extends React.Component {
     return (
       <Container>
         <Row>
-          <Col md={12}>
-            <h2>
-              Resultbrowser {this.props.resultbrowser.loadingFacets && <Spinner outerClassName="d-inline fs-6 align-bottom" />}
-            </h2>
-          </Col>
-        </Row>
-        <Row>
-          {
-            Object.keys(selectedFacets).length !== 0 ?
-              <Col md={12}>
-                <Card className="shadow-sm">
-                  <a
-                    className="m-3"
-                    href="#"
-                    onClick={
-                      (e) => {
-                        e.preventDefault();
-                        dispatch(clearAllResultFacets());
+          <h2>
+            Resultbrowser {this.props.resultbrowser.loadingFacets && <Spinner outerClassName="d-inline fs-6 align-bottom" />}
+          </h2>
+          <Col md={4}>
+            {
+              Object.keys(selectedFacets).length !== 0 ?
+                <Col md={12}>
+                  <Card className="shadow-sm mb-3">
+                    <a
+                      className="m-3"
+                      href="#"
+                      onClick={
+                        (e) => {
+                          e.preventDefault();
+                          dispatch(clearAllResultFacets());
+                        }
                       }
-                    }
-                  >Clear all</a>
-                </Card>
-              </Col> : null
-          }
-        </Row>
-        <Row>
-          <Col md={12}>
+                    >Clear all</a>
+                  </Card>
+                </Col> : null
+            }
             {facetPanels}
+          </Col>
+          <Col md={8}>
             {this.renderFilesPanel()}
           </Col>
         </Row>

@@ -64,7 +64,7 @@ class Databrowser extends React.Component {
      * Loop all facets and render the panels
      */
   renderFacetPanels () {
-    const { facets, selectedFacets, metadata, facetLoading } = this.props.databrowser;
+    const { facets, selectedFacets, metadata } = this.props.databrowser;
     const { dispatch } = this.props;
 
     return Object.keys(facets).map((key) => {
@@ -83,7 +83,6 @@ class Databrowser extends React.Component {
         <OwnPanel
           header={panelHeader}
           key={key}
-          loading={facetLoading}
           removeFacet={isFacetSelected ? (() => dispatch(clearFacet(key))) : null}
         >
           <AccordionItemBody
@@ -196,7 +195,11 @@ class Databrowser extends React.Component {
     return (
       <Container>
         <Row>
-          <h2>Data-Browser</h2>
+          <h2>
+            Data-Browser&nbsp;
+            {this.props.databrowser.facetLoading && <Spinner outerClassName="d-inline fs-6 align-bottom" />}
+          </h2>
+
           <Col md={4}>
             {
               Object.keys(selectedFacets).length !== 0 ?
@@ -207,7 +210,8 @@ class Databrowser extends React.Component {
                       href="#"
                       onClick={
                         (e) => {
-                          e.preventDefault(); dispatch(clearAllFacets());
+                          e.preventDefault();
+                          dispatch(clearAllFacets());
                         }
                       }
                     >Clear all</a>

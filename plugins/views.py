@@ -229,7 +229,7 @@ def setup(request, plugin_name, row_id=None):
             f = PluginForm(tool=plugin, uid=user.getName())
             config_dict[f.caption_field_name] = h.caption
         else:
-            config_dict = plugin.setupConfiguration(check_cfg=False, substitute=True)
+            config_dict = plugin.setup_configuration(check_cfg=False, substitute=True)
 
         form = PluginForm(initial=config_dict, tool=plugin, uid=user.getName())
 

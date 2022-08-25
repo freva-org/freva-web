@@ -97,7 +97,7 @@ class PluginRangeFieldWidget(Input):
             value = PrintableList(value)
         return loader.render_to_string(
             "plugins/rangefield.html",
-            {"name": name, "value": value, "id": attrs["id"], attrs: attrs},
+            {"name": name, "value": value, "id": attrs["id"], "attrs": attrs},
         )
 
 

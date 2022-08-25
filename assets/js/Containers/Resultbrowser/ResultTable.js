@@ -101,22 +101,16 @@ function ResultTable ({
 
   return (
     <div>
+      <GlobalFilter
+        globalFilter={globalFilter}
+        setGlobalFilter={setGlobalFilter}
+      />
+      <div className="float-end text-muted fw-normal">
+        Results found: {resultCount}
+      </div>
+      <div className="clearfix border-bottom pb-1 mb-1" />
       <Table striped hover responsive {...getTableProps()}>
         <thead>
-          <tr>
-            <th
-              className="p-0 pb-3"
-              colSpan={columns.length}
-            >
-              <GlobalFilter
-                globalFilter={globalFilter}
-                setGlobalFilter={setGlobalFilter}
-              />
-              <div className="float-end text-muted fw-normal">
-                Results found: {resultCount}
-              </div>
-            </th>
-          </tr>
           {
             headerGroups.map(headerGroup => {
               const { key, ...restHeaderGroupProps } = headerGroup.getHeaderGroupProps();

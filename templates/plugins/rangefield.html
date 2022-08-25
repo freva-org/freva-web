@@ -10,7 +10,7 @@
 </style>
 
 <div class="input-group">
-    <span class="input-group-addon" style="cursor:help;" id="tooltip_{{ id }}" data-placement="top" data-toggle="tooltip"
+    <span class="input-group-text" style="cursor:help;" id="tooltip_{{ id }}" data-placement="top" data-toggle="tooltip"
         title="<p>This is a 'Range-Field'<br>You have various input options:</p>
         <ul>
             <li>a range: 1960:5:2000</li>
@@ -22,7 +22,7 @@
 
         <strong>?</strong>
     </span>
-    <input type="text" class="form-control {{attrs.class}" value="{% if value %}{{ value }}{%endif%}" id="{{ id }}" placeholder="{{name}}" name="{{name}}">
+    <input type="text" class="form-control {{attrs.class}}" value="{% if value %}{{ value }}{% endif %}" id="{{ id }}" placeholder="{{name}}" name="{{name}}">
 
 </div>
 

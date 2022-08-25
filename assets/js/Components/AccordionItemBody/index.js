@@ -97,6 +97,18 @@ function AccordionItemBody (props) {
 
 }
 
+/**
+ * The row-virtualization implemented above by the
+ * <List>-Tags needs to know the exact size of each
+ * single element in it.
+ *
+ * This function measures the height of a single element
+ * inside the facet-dropdown by putting the text of this
+ * element into a more or less hidden element and then
+ * measure the height of this element. This is necessary
+ * as not every element has the same height due to possible
+ * line breaks if a facet has a longer name.
+ */
 function onGetItemSize (row, hiddenFieldName) {
   const text = `${row.value} [${row.count}]`;
   const rowHeight = 28;
@@ -105,7 +117,7 @@ function onGetItemSize (row, hiddenFieldName) {
     return rowHeight;
   }
 
-  // // attempt to measure height by writting text to a, kind of hidden element.
+  // attempt to measure height by writing text to a kind of hidden element.
   const hiddenElement = document.getElementById(hiddenFieldName);
   if (hiddenElement) {
     hiddenElement.textContent = text;

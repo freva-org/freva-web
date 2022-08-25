@@ -169,7 +169,7 @@ def setup(request, plugin_name, row_id=None):
 
             if "EVALUATION_SYSTEM_PLUGINS_%s" % request.user in os.environ:
                 plugin_str = os.environ["EVALUATION_SYSTEM_PLUGINS_%s" % request.user]
-                export_user_plugin = "export EVALUATION_SYSTEM_PLUGINS=%s;" % plugin_str
+                export_user_plugin = "EVALUATION_SYSTEM_PLUGINS=%s" % plugin_str
             else:
                 export_user_plugin = ""
 
@@ -181,7 +181,7 @@ def setup(request, plugin_name, row_id=None):
                     unique_output=unique_output,
                 )
             )
-            ssh_cmd = f'bash -c "{eval_str} {exe_path} freva-plugin {command}"'
+            ssh_cmd = f'bash -c "{eval_str} {exe_path} {export_user_plugin} freva-plugin {command}"'
             logging.error(ssh_cmd)
             # finally send the ssh call
             _, stdout, stderr = ssh_call(

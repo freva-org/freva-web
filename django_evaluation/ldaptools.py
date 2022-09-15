@@ -121,7 +121,7 @@ class FUUserInformation(LdapUserInformation):
 
         self.miklip_user = []
         user_info = []
-        user_uids = res[0][1]["memberUid"]
+        user_uids = res[0][1].get("memberUid", [])
         # fill the users list
         for user in user_uids:
             uid = user.decode()
@@ -221,7 +221,7 @@ class MiklipUserInformation(LdapUserInformation):
         self.miklip_user = []
         user_info = []
         # test print of the first search
-        user_list = res[0][1]["member"]
+        user_list = res[0][1].get("member", [])
 
         # fill the users list
         for user in user_list:

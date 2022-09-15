@@ -4,7 +4,10 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
-from django.views.decorators.debug import sensitive_variables, sensitive_post_parameters
+from django.views.decorators.debug import (
+    sensitive_variables,
+    sensitive_post_parameters,
+)
 from pathlib import Path
 
 import evaluation_system.api.plugin_manager as pm
@@ -66,7 +69,9 @@ def search_similar_results(request, plugin_name=None, history_id=None):
     data = {}
 
     if request.user.isGuest():
-        hist_objects = History.objects.filter(uid=request.user).filter(tool=plugin_name)
+        hist_objects = History.objects.filter(uid=request.user).filter(
+            tool=plugin_name
+        )
     else:
         try:
             user = LdapUser(request.user.username)
@@ -143,13 +148,11 @@ def setup(request, plugin_name, row_id=None):
                     tmp_dict[str(k)] = "'%s'" % str(v[0])
 
             config_dict = tmp_dict
-
-            del config_dict["password_hidden"], config_dict["csrfmiddlewaretoken"]
-            try:
-                del config_dict[form.caption_field_name]
-            except:
-                pass
-
+            del (
+                config_dict["password_hidden"],
+                config_dict["csrfmiddlewaretoken"],
+            )
+            _ = config_dict.pop(form.caption_field_name, "")
             logging.debug(config_dict)
 
             # start the scheduler via sbatch
@@ -168,19 +171,27 @@ def setup(request, plugin_name, row_id=None):
             exe_path = f"PATH={settings.FREVA_BIN}:$PATH"
 
             if "EVALUATION_SYSTEM_PLUGINS_%s" % request.user in os.environ:
-                plugin_str = os.environ["EVALUATION_SYSTEM_PLUGINS_%s" % request.user]
-                export_user_plugin = "EVALUATION_SYSTEM_PLUGINS=%s" % plugin_str
+                plugin_str = os.environ[
+                    "EVALUATION_SYSTEM_PLUGINS_%s" % request.user
+                ]
+                export_user_plugin = (
+                    "EVALUATION_SYSTEM_PLUGINS=%s" % plugin_str
+                )
             else:
                 export_user_plugin = ""
-
-            command = " ".join(
-                plugin.compose_command(
-                    config_dict,
-                    batchmode="web" if slurm_options else False,
-                    caption=caption,
-                    unique_output=unique_output,
+            exclude = config.exclude.copy()
+            try:
+                config.exclude = []
+                command = " ".join(
+                    plugin.compose_command(
+                        config_dict,
+                        batchmode="web" if slurm_options else False,
+                        caption=caption,
+                        unique_output=unique_output,
+                    )
                 )
-            )
+            finally:
+                config.exclude = exclude
             ssh_cmd = f'bash -c "{eval_str} {exe_path} {export_user_plugin} freva-plugin {command}"'
             logging.error(ssh_cmd)
             # finally send the ssh call
@@ -202,7 +213,9 @@ def setup(request, plugin_name, row_id=None):
             logging.debug("errors of analyze:" + str(err))
             if stdout.channel.recv_exit_status() != 0:
                 err_msg = "\n".join(err)
-                raise RuntimeError(f"Command failed: {ssh_cmd}\nstderr: {err_msg}")
+                raise RuntimeError(
+                    f"Command failed: {ssh_cmd}\nstderr: {err_msg}"
+                )
             # THIS IS HOW WE DETERMINE THE ID USING A SCHEDULER
             substr = "Scheduled job with history"
             # find first line containing the substr
@@ -226,11 +239,15 @@ def setup(request, plugin_name, row_id=None):
             f = PluginForm(tool=plugin, uid=user.getName())
             config_dict[f.caption_field_name] = h.caption
         else:
-            config_dict = plugin.setup_configuration(check_cfg=False, substitute=True)
+            config_dict = plugin.setup_configuration(
+                check_cfg=False, substitute=True
+            )
 
         form = PluginForm(initial=config_dict, tool=plugin, uid=user.getName())
 
-    plugin_dict = pm.get_plugin_metadata(plugin_name, user_name=request.user.username)
+    plugin_dict = pm.get_plugin_metadata(
+        plugin_name, user_name=request.user.username
+    )
 
     home_dir = user.getUserHome() if HOME_DIRS_AVAILABLE else None
     try:
@@ -270,10 +287,12 @@ def dirlist(request):
             '<div class="alert alert-danger">You are not allowed to see the folder listing</div>'
         )
 
-    base_directory = Path(urllib.parse.unquote(request.POST.get("dir"))).resolve()
-    if not is_path_relative_to(base_directory, home_dir) and not is_path_relative_to(
-        base_directory, scratch_dir
-    ):
+    base_directory = Path(
+        urllib.parse.unquote(request.POST.get("dir"))
+    ).resolve()
+    if not is_path_relative_to(
+        base_directory, home_dir
+    ) and not is_path_relative_to(base_directory, scratch_dir):
         # user is trying to get a listing of a folder he is not allowed to see
         return HttpResponse(
             '<div class="alert alert-danger">Invalid base folder requested</div>'
@@ -329,13 +348,17 @@ def list_dir(request):
         )
 
     # we can specify an ending in GET request
-    base_directory = Path(urllib.parse.unquote(request.GET.get("dir"))).resolve()
-    if not is_path_relative_to(base_directory, home_dir) and not is_path_relative_to(
-        base_directory, scratch_dir
-    ):
+    base_directory = Path(
+        urllib.parse.unquote(request.GET.get("dir"))
+    ).resolve()
+    if not is_path_relative_to(
+        base_directory, home_dir
+    ) and not is_path_relative_to(base_directory, scratch_dir):
         # user is trying to get a listing of a folder he is not allowed to see
         return HttpResponse(
-            json.dumps({"status": "Invalid base folder requested", "folders": []})
+            json.dumps(
+                {"status": "Invalid base folder requested", "folders": []}
+            )
         )
     elif not base_directory.exists():
         return HttpResponse(
@@ -365,7 +388,10 @@ def list_dir(request):
     except Exception as e:
         return HttpResponse(
             json.dumps(
-                {"status": "Could not load directory: %s" % str(e), "folders": []}
+                {
+                    "status": "Could not load directory: %s" % str(e),
+                    "folders": [],
+                }
             )
         )
     return HttpResponse(json.dumps({"status": "success", "folders": folders}))

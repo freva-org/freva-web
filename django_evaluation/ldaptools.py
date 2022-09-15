@@ -1,10 +1,12 @@
-import ldap
+from __future__ import annotations
+from abc import ABCMeta, abstractmethod
+import importlib
+from typing import Iterator
 
 from django_evaluation import settings
 from django.core.cache import cache, caches
 from django.core.exceptions import ImproperlyConfigured
-import importlib
-from abc import ABCMeta, abstractmethod
+import ldap
 import grp
 import pwd
 
@@ -62,6 +64,32 @@ class LdapUserInformation(object):
             con.simple_bind_s()
         self._con = con
         return self._con
+
+    @staticmethod
+    def merge_member(
+        search_results: list[tuple[str, dict[str, list[bytes | str]]]],
+        key: str,
+    ) -> Iterator[str]:
+        """Merge the group member from a ldap search result into a list.
+
+        Parameters
+        ----------
+        search_results: list[tuple[str, dict[str, list[bytes]]]]
+            The ldap query results
+        key:
+            The search key representing the member in the ldap search query.
+
+        Yields
+        -------
+        str: of search results representing the members
+        """
+
+        for result in search_results:
+            for member in result[1].get(key, []):
+                if isinstance(member, str):
+                    yield member
+                else:
+                    yield member.decode()
 
     def _cache_ldap_users(self):
         if not self.user_info:
@@ -121,11 +149,8 @@ class FUUserInformation(LdapUserInformation):
 
         self.miklip_user = []
         user_info = []
-        user_uids = res[0][1].get("memberUid", [])
         # fill the users list
-        for user in user_uids:
-            uid = user.decode()
-
+        for uid in self.merge_member(res, "memberUid"):
             res = con.search_s(
                 settings.LDAP_USER_BASE,
                 ldap.SCOPE_SUBTREE,
@@ -220,17 +245,11 @@ class MiklipUserInformation(LdapUserInformation):
         )
         self.miklip_user = []
         user_info = []
-        # test print of the first search
-        user_list = res[0][1].get("member", [])
-
         # fill the users list
-        for user in user_list:
+        for user in self.merge_member(res, "member"):
             # look up the user entries in the LDAP System
             # print to see the structure of the user
-            try:
-                uid = user.decode().split(",")[0]
-            except AttributeError:
-                uid = user.split(",")[0]
+            uid = user.split(",")[0]
             res = con.search_s(
                 settings.LDAP_USER_BASE,
                 ldap.SCOPE_SUBTREE,

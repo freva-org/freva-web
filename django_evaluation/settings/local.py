@@ -89,9 +89,7 @@ STATIC_URL = "/static/"
 if not DEV:
     STATIC_ROOT = str(Path(PROJECT_ROOT) / "static")
 
-INSTITUTION_LOGO = _get_logo(
-    web_config.get("INSTITUTION_LOGO", ""), PROJECT_ROOT
-)
+INSTITUTION_LOGO = _get_logo(web_config.get("INSTITUTION_LOGO", ""), PROJECT_ROOT)
 FREVA_LOGO = f"{STATIC_URL}img/by_freva_transparent.png"
 MAIN_COLOR = _get_conf_key(web_config, "MAIN_COLOR", "Tomato", False)
 _set_favicon(MAIN_COLOR, Path(PROJECT_ROOT))
@@ -139,9 +137,7 @@ INSTITUTION_NAME = web_config.get("INSTITUTION_NAME", "Freva")
 ##################################################
 ##################################################
 # The server for LDAP configuration
-AUTH_LDAP_SERVER_URI = web_config.get(
-    "AUTH_LDAP_SERVER_URI", "ldap://idm-dmz.dkrz.de"
-)
+AUTH_LDAP_SERVER_URI = web_config.get("AUTH_LDAP_SERVER_URI", "ldap://idm-dmz.dkrz.de")
 AUTH_LDAP_START_TLS = web_config.get("AUTH_LDAP_START_TLS", False)
 # The directory with SSL certificates
 CA_CERT_DIR = str(web_config_path.parent)
@@ -154,16 +150,12 @@ AUTH_LDAP_GLOBAL_OPTIONS = {
 }
 # this is not used by django directly, but we use it for
 # python-ldap access, as well.
-LDAP_USER_BASE = web_config.get(
-    "LDAP_USER_BASE", "cn=users,cn=accounts,dc=dkrz,dc=de"
-)
+LDAP_USER_BASE = web_config.get("LDAP_USER_BASE", "cn=users,cn=accounts,dc=dkrz,dc=de")
 LDAP_GROUP_BASE = web_config.get(
     "LDAP_GROUP_BASE", "cn=groups,cn=accounts,dc=dkrz,dc=de"
 )
 
-AUTH_LDAP_USER_SEARCH = LDAPSearch(
-    LDAP_USER_BASE, ldap.SCOPE_SUBTREE, "(uid=%(user)s)"
-)
+AUTH_LDAP_USER_SEARCH = LDAPSearch(LDAP_USER_BASE, ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
 # keep the authenticated user for group search
 AUTH_LDAP_BIND_AS_AUTHENTICATING_USER = True
 if ALLOWED_GROUP != "*":
@@ -173,9 +165,7 @@ if ALLOWED_GROUP != "*":
 LDAP_FIRSTNAME_FIELD = web_config.get("LDAP_FIRSTNAME_FIELD", "givenname")
 LDAP_LASTNAME_FIELD = web_config.get("LDAP_LASTNAME_FIELD", "sn")
 LDAP_EMAIL_FIELD = web_config.get("LDAP_EMAIL_FIELD", "mail")
-LDAP_GROUP_CLASS = (
-    f'(objectClass={web_config.get("LDAP_GROUP_CLASS", "groupOfNames")})'
-)
+LDAP_GROUP_CLASS = f'(objectClass={web_config.get("LDAP_GROUP_CLASS", "groupOfNames")})'
 LDAP_GROUP_TYPE = web_config.get(
     "LDAP_GROUP_TYPE", "nested"
 )  # accepted values: nested, posix
@@ -288,9 +278,7 @@ if isinstance(ALLOWED_HOSTS, str):
     ALLOWED_HOSTS = [ALLOWED_HOSTS]
 
 # Provide a full list of all valid hosts (including the http(s):// prefix) which are expected
-CSRF_TRUSTED_ORIGINS = web_config.get(
-    "CSRF_TRUSTED_ORIGINS", ["http://localhost"]
-)
+CSRF_TRUSTED_ORIGINS = web_config.get("CSRF_TRUSTED_ORIGINS", ["http://localhost"])
 
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
@@ -330,6 +318,4 @@ _MENU_ENTRIES = [
 ]
 
 for title, url, html_id in web_config.get("MENU_ENTRIES", _MENU_ENTRIES):
-    MENU_ENTRIES.append(
-        {"name": title, "url": reverse_lazy(url), "html_id": html_id}
-    )
+    MENU_ENTRIES.append({"name": title, "url": reverse_lazy(url), "html_id": html_id})

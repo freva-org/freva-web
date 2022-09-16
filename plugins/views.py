@@ -205,10 +205,6 @@ def setup(request, plugin_name, row_id=None):
             logging.debug("command:" + str(ssh_cmd))
             logging.debug("output of analyze:" + str(out))
             logging.debug("errors of analyze:" + str(err))
-            if stdout.channel.recv_exit_status() != 0:
-                err_msg = "\n".join(err)
-                logging.error("Command failed: %s ", err_msg)
-                return redirect("history:history")
             # THIS IS HOW WE DETERMINE THE ID USING A SCHEDULER
             substr = "Scheduled job with history"
             # find first line containing the substr

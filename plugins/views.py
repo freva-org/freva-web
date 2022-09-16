@@ -175,8 +175,9 @@ def setup(request, plugin_name, row_id=None):
                 export_user_plugin = ""
             scheduler_options = ",".join(
                 [
-                    s.strip()
+                    s
                     for s in config_dict.get("extra_scheduler_options", "").split(",")
+                    if s.strip()
                 ]
             )
             sched_opts_str = f"extra_scheduler_options='{scheduler_options}'"
@@ -187,7 +188,7 @@ def setup(request, plugin_name, row_id=None):
                 unique_output=unique_output,
             )
             if scheduler_options:
-                cmd.insert(1, sched_opts_str)
+                cmd.append(sched_opts_str)
             command = " ".join(cmd)
             ssh_cmd = f'bash -c "{eval_str} {exe_path} {export_user_plugin} freva-plugin {command}"'
             logging.info(ssh_cmd)

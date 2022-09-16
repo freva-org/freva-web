@@ -212,8 +212,9 @@ def setup(request, plugin_name, row_id=None):
                 (s.strip("\n") for s in err if substr in s), ""
             )  # returns 'abc123'
             try:
-                row_id = int(scheduler_output.split(":")[-1])
-            except Exception:
+                row_id = int(scheduler_output.split(":")[-1].strip())
+            except Exception as error:
+                logging.error(error)
                 # We couldn't find out the row id due to issues with the log file.
                 # Redirect to user's history
                 return redirect("history:history")

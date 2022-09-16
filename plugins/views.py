@@ -209,7 +209,7 @@ def setup(request, plugin_name, row_id=None):
             substr = "Scheduled job with history"
             # find first line containing the substr
             scheduler_output = next(
-                (s.strip("\n") for s in err if substr in s), ""
+                (s.strip("\n") for s in out if substr in s), ""
             )  # returns 'abc123'
             try:
                 row_id = int(scheduler_output.split(":")[-1].strip())

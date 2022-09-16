@@ -173,19 +173,22 @@ def setup(request, plugin_name, row_id=None):
                 export_user_plugin = "EVALUATION_SYSTEM_PLUGINS=%s" % plugin_str
             else:
                 export_user_plugin = ""
-            exclude = config.exclude.copy()
-            try:
-                config.exclude = []
-                command = " ".join(
-                    plugin.compose_command(
-                        config_dict,
-                        batchmode="web" if slurm_options else False,
-                        caption=caption,
-                        unique_output=unique_output,
-                    )
-                )
-            finally:
-                config.exclude = exclude
+            scheduler_options = ",".join(
+                [
+                    s.strip()
+                    for s in config_dict.get("extra_scheduler_options", "").split(",")
+                ]
+            )
+            sched_opts_str = "extra_scheduler_options='{scheduler_options}'"
+            cmd = plugin.compose_command(
+                config_dict,
+                batchmode="web" if slurm_options else False,
+                caption=caption,
+                unique_output=unique_output,
+            )
+            if scheduler_options:
+                cmd.insert(1, sched_opts_str)
+            command = " ".join(cmd)
             ssh_cmd = f'bash -c "{eval_str} {exe_path} {export_user_plugin} freva-plugin {command}"'
             logging.info(ssh_cmd)
             # finally send the ssh call

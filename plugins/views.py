@@ -158,7 +158,7 @@ def setup(request, plugin_name, row_id=None):
             password = request.POST["password_hidden"]
             hostnames = list(get_scheduler_hosts(request.user))
 
-            logging.error(hostnames)
+            logging.info(hostnames)
             # compose the plugin command
 
             slurm_options = config.get_section("scheduler_options")
@@ -187,7 +187,7 @@ def setup(request, plugin_name, row_id=None):
             finally:
                 config.exclude = exclude
             ssh_cmd = f'bash -c "{eval_str} {exe_path} {export_user_plugin} freva-plugin {command}"'
-            logging.error(ssh_cmd)
+            logging.info(ssh_cmd)
             # finally send the ssh call
             _, stdout, stderr = ssh_call(
                 username=username,
@@ -207,7 +207,8 @@ def setup(request, plugin_name, row_id=None):
             logging.debug("errors of analyze:" + str(err))
             if stdout.channel.recv_exit_status() != 0:
                 err_msg = "\n".join(err)
-                raise RuntimeError(f"Command failed: {ssh_cmd}\nstderr: {err_msg}")
+                logging.error("Command failed: %s ", err_msg)
+                return redirect("history:history")
             # THIS IS HOW WE DETERMINE THE ID USING A SCHEDULER
             substr = "Scheduled job with history"
             # find first line containing the substr

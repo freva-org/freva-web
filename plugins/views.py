@@ -179,7 +179,7 @@ def setup(request, plugin_name, row_id=None):
                     for s in config_dict.get("extra_scheduler_options", "").split(",")
                 ]
             )
-            sched_opts_str = "extra_scheduler_options='{scheduler_options}'"
+            sched_opts_str = f"extra_scheduler_options='{scheduler_options}'"
             cmd = plugin.compose_command(
                 config_dict,
                 batchmode="web" if slurm_options else False,

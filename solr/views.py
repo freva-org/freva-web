@@ -39,19 +39,6 @@ def solr_search(request):
     args.pop("page_limit", None)
     args.pop("_", None)
 
-    if not request.user.has_perm("history.browse_full_data"):
-        restrictions = settings.SOLR_RESTRICTIONS
-        arg_keys = list(args.keys())
-        for k in arg_keys:
-            if k in restrictions:
-                args[k] = list(set(args[k]).intersection(set(restrictions[k])))
-                if not args[k]:
-                    args.pop(k)
-
-        tmp = restrictions.copy()
-        tmp.update(args)
-        args = tmp
-
     if "start" in args:
         args["start"] = int(request.GET["start"])
     if "time_select" in args:

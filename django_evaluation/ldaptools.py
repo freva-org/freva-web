@@ -1,9 +1,11 @@
 from __future__ import annotations
 from abc import ABCMeta, abstractmethod
 import importlib
+import time
 from typing import Iterator
 
 from django_evaluation import settings
+from django_evaluation.utils import background
 from django.core.cache import cache, caches
 from django.core.exceptions import ImproperlyConfigured
 import ldap
@@ -30,9 +32,7 @@ class LdapUserInformation(object):
     def _establish_ldap_connection():
         for SERVER in settings.AUTH_LDAP_SERVER_URI.split(","):
             if not settings.AUTH_LDAP_START_TLS:
-                ldap.set_option(
-                    ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER
-                )
+                ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
             try:
                 con = ldap.initialize(SERVER)
             except ldap.LDAPError as e:
@@ -95,6 +95,19 @@ class LdapUserInformation(object):
                 if key not in results:
                     results.append(key)
                     yield key
+
+    @background
+    def run_ldap_cacheing_daemon(self, refresh_interval: int = 3600) -> None:
+        """Reload the ldap information every `refresh_interval` seconds.
+
+        Parameters
+        ----------
+        refresh_interval: int
+            Number of seconds to wait before the ldap information is refreshed.
+        """
+        while True:
+            self._cache_ldap_users()
+            time.sleep(refresh_interval)
 
     def _cache_ldap_users(self):
         if not self.user_info:
@@ -186,9 +199,7 @@ class FUUserInformation(LdapUserInformation):
                 for val in tmp:
                     if "@" in val:
                         email = val
-                        user_info.append(
-                            (uid, prename, lastname, email, home_dir)
-                        )
+                        user_info.append((uid, prename, lastname, email, home_dir))
                         break
 
         self.user_info = sorted(user_info, key=lambda tup: tup[1])
@@ -266,8 +277,7 @@ class MiklipUserInformation(LdapUserInformation):
             if res:
                 try:
                     res_str = {
-                        k: list(map(bytes.decode, v))
-                        for (k, v) in res[0][1].items()
+                        k: list(map(bytes.decode, v)) for (k, v) in res[0][1].items()
                     }
                 except TypeError:
                     res_str = {k: v for (k, v) in res[0][1].items()}

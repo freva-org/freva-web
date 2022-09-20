@@ -33,9 +33,7 @@ class LdapUserInformation(object):
     def _establish_ldap_connection():
         for SERVER in settings.AUTH_LDAP_SERVER_URI.split(","):
             if not settings.AUTH_LDAP_START_TLS:
-                ldap.set_option(
-                    ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER
-                )
+                ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
             try:
                 con = ldap.initialize(SERVER)
             except ldap.LDAPError as e:
@@ -114,7 +112,7 @@ class LdapUserInformation(object):
     def _cache_ldap_users(self):
         if not self.user_info:
             caches["default"]
-            self.user_info = cache.get("LDAP_user_info")
+            self.user_info = cache.get("LDAP_user_info", [])
             if not self.user_info:
                 self.load_from_ldap()
                 cache.set("LDAP_user_info", self.user_info, 3600)
@@ -132,9 +130,8 @@ class LdapUserInformation(object):
         if uid:
             if not self.user_info_dict:
                 caches["default"]
-                self.user_info_dict = cache.get("LDAP_user_info_dict")
+                self.user_info_dict = cache.get("LDAP_user_info_dict", {})
                 if not self.user_info_dict:
-                    self.user_info_dict = {}
                     for user in self.user_info:
                         self.user_info_dict[user[0]] = user
                     cache.set("LDAP_user_info_dict", self.user_info_dict, 3600)
@@ -201,14 +198,10 @@ class FUUserInformation(LdapUserInformation):
                 for val in tmp:
                     if "@" in val:
                         email = val
-                        user_info.append(
-                            (uid, prename, lastname, email, home_dir)
-                        )
+                        user_info.append((uid, prename, lastname, email, home_dir))
                         break
 
-        self.user_info = sorted(
-            self.user_info + user_info, key=lambda tup: tup[1]
-        )
+        self.user_info = sorted(self.user_info + user_info, key=lambda tup: tup[1])
         return self.user_info
 
 
@@ -283,8 +276,7 @@ class MiklipUserInformation(LdapUserInformation):
             if res:
                 try:
                     res_str = {
-                        k: list(map(bytes.decode, v))
-                        for (k, v) in res[0][1].items()
+                        k: list(map(bytes.decode, v)) for (k, v) in res[0][1].items()
                     }
                 except TypeError:
                     res_str = {k: v for (k, v) in res[0][1].items()}
@@ -312,9 +304,7 @@ class MiklipUserInformation(LdapUserInformation):
                             " ".join(res_str.get("homeDirectory", "")),
                         )
                     )
-        self.user_info = sorted(
-            self.user_info + user_info, key=lambda tup: tup[1]
-        )
+        self.user_info = sorted(self.user_info + user_info, key=lambda tup: tup[1])
         return self.user_info
 
 

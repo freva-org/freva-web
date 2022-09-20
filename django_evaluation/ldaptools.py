@@ -33,7 +33,9 @@ class LdapUserInformation(object):
     def _establish_ldap_connection():
         for SERVER in settings.AUTH_LDAP_SERVER_URI.split(","):
             if not settings.AUTH_LDAP_START_TLS:
-                ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
+                ldap.set_option(
+                    ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER
+                )
             try:
                 con = ldap.initialize(SERVER)
             except ldap.LDAPError as e:
@@ -68,8 +70,8 @@ class LdapUserInformation(object):
         self._con = con
         return self._con
 
+    @staticmethod
     def merge_member(
-        self,
         search_results: list[tuple[str, dict[str, list[bytes | str]]]],
         key: str,
     ) -> Iterator[str]:
@@ -86,14 +88,15 @@ class LdapUserInformation(object):
         -------
         str: of search results representing the members
         """
+        _user_ids = set()
         for result in search_results:
             for member in result[1].get(key, []):
                 if isinstance(member, str):
                     uid = member
                 else:
                     uid = member.decode()
-                if uid not in self._user_ids:
-                    self._user_ids.add(uid)
+                if uid not in _user_ids:
+                    _user_ids.add(uid)
                     yield uid
 
     @background
@@ -198,10 +201,14 @@ class FUUserInformation(LdapUserInformation):
                 for val in tmp:
                     if "@" in val:
                         email = val
-                        user_info.append((uid, prename, lastname, email, home_dir))
+                        user_info.append(
+                            (uid, prename, lastname, email, home_dir)
+                        )
                         break
 
-        self.user_info = sorted(self.user_info + user_info, key=lambda tup: tup[1])
+        self.user_info = sorted(
+            self.user_info + user_info, key=lambda tup: tup[1]
+        )
         return self.user_info
 
 
@@ -253,58 +260,67 @@ class MiklipUserInformation(LdapUserInformation):
         """
         Loads the miklip user ids and the info belonging to the user
         """
-        con = self.connection
-        res = con.search_s(
+        users = (
+            self.connection.search_s(
+                settings.LDAP_GROUP_BASE,
+                ldap.SCOPE_SUBTREE,
+                attrlist=self.ldap_keys,
+            )
+            or []
+        )
+        self.miklip_user = []
+        user_info_dict = {}
+        all_users = set()
+        user_info = set()
+        # fill the users list
+        for res in users:
+            try:
+                res_str = {
+                    k: list(map(bytes.decode, v)) for (k, v) in res[1].items()
+                }
+            except TypeError:
+                res_str = dict(res[1].items())
+            if res_str:
+                mail = res_str.get("mail", None)
+                forward = res_str.get("mailForwardingAddress", None)
+                user_id = res_str.get("uid")[0]
+                # user info needs elements user_id, first_name, last_name, email
+                ldap_entry = ()
+                if forward:
+                    ldap_entry = (
+                        user_id,
+                        " ".join(res_str.get("sn", "")),
+                        " ".join(res_str.get("givenName", "")),
+                        forward[-1],
+                        " ".join(res_str.get("homeDirectory", "")),
+                    )
+                elif mail:
+                    ldap_entry = (
+                        user_id,
+                        " ".join(res_str.get("sn", "")),
+                        " ".join(res_str.get("givenName", "")),
+                        mail[-1],
+                        " ".join(res_str.get("homeDirectory", "")),
+                    )
+                if ldap_entry:
+                    user_info_dict[ldap_entry[0]] = ldap_entry
+                    all_users.add(ldap_entry)
+        groups = self.connection.search_s(
             settings.LDAP_GROUP_BASE,
             ldap.SCOPE_SUBTREE,
             attrlist=["member"],
             filterstr=settings.LDAP_GROUP_FILTER,
         )
-        self.miklip_user = []
-        user_info = []
         # fill the users list
-        for user in self.merge_member(res, "member"):
+        user_info = []
+        for user in self.merge_member(groups, "member"):
             # look up the user entries in the LDAP System
             # print to see the structure of the user
-            uid = user.split(",")[0]
-            res = con.search_s(
-                settings.LDAP_USER_BASE,
-                ldap.SCOPE_SUBTREE,
-                attrlist=self.ldap_keys,
-                filterstr=f"{uid}",
-            )
-            if res:
-                try:
-                    res_str = {
-                        k: list(map(bytes.decode, v)) for (k, v) in res[0][1].items()
-                    }
-                except TypeError:
-                    res_str = {k: v for (k, v) in res[0][1].items()}
-                mail = res_str.get("mail", None)
-                forward = res_str.get("mailForwardingAddress", None)
-                user_id = uid.split("=")[-1]
-                # user info needs elements user_id, first_name, last_name, email
-                if forward:
-                    user_info.append(
-                        (
-                            user_id,
-                            " ".join(res_str.get("sn", "")),
-                            " ".join(res_str.get("givenName", "")),
-                            forward[-1],
-                            " ".join(res_str.get("homeDirectory", "")),
-                        )
-                    )
-                elif mail:
-                    user_info.append(
-                        (
-                            user_id,
-                            " ".join(res_str.get("sn", "")),
-                            " ".join(res_str.get("givenName", "")),
-                            mail[-1],
-                            " ".join(res_str.get("homeDirectory", "")),
-                        )
-                    )
-        self.user_info = sorted(self.user_info + user_info, key=lambda tup: tup[1])
+
+            uid = user.partition(",")[0].strip("uid=")
+            if uid in user_info_dict:
+                user_info.append(user_info_dict[uid])
+        self.user_info = sorted(user_info, key=lambda tup: tup[1])
         return self.user_info
 
 

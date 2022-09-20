@@ -158,56 +158,53 @@ class FUUserInformation(LdapUserInformation):
     ldap_keys = ["uid", "mail", "cn", "homeDirectory", "gecos"]
 
     def load_from_ldap(self):
-        # search all users belonging
-        con = self.connection
-        res = con.search_s(
+        users = (
+            self.connection.search_s(
+                settings.LDAP_USER_BASE,
+                ldap.SCOPE_SUBTREE,
+                attrlist=self.ldap_keys,
+            )
+            or []
+        )
+        user_info_dict = {}
+        user_info = set()
+        # fill the users list
+        for res in users:
+            try:
+                res_str = {
+                    k: list(map(bytes.decode, v)) for (k, v) in res[1].items()
+                }
+            except TypeError:
+                res_str = dict(res[1].items())
+            uid = res_str.get("uid", [None])[0]
+            prename, _, lastname = res_str.get("cn", [""]).partition(" ")
+            mail = res_str.get("mail", [None])[0]
+            gecos = res_str.get("gecos", [None])[0]
+            home_dir = res_str.get("homeDirectory", [None])[0]
+            ldap_key = ()
+            if mail:
+                ldap_key = (uid, prename, lastname, mail, home_dir)
+            elif gecos:
+                for val in gecos.split(","):
+                    if "@" in val:
+                        ldap_key = (uid, prename, lastname, val, home_dir)
+                        break
+            if ldap_key:
+                user_info_dict[uid] = ldap_key
+        groups = self.connection.search_s(
             settings.LDAP_GROUP_BASE,
             ldap.SCOPE_SUBTREE,
             attrlist=["memberUid"],
             filterstr=settings.LDAP_GROUP_FILTER,
         )
-
-        user_info = []
         # fill the users list
-        for uid in self.merge_member(res, "memberUid"):
-            res = con.search_s(
-                settings.LDAP_USER_BASE,
-                ldap.SCOPE_SUBTREE,
-                attrlist=self.ldap_keys,
-                filterstr=f"uid={uid}",
-            )
-            res_str = {k: v[0].decode() for (k, v) in res[0][1].items()}
+        for user in self.merge_member(groups, "memberUid"):
+            # look up the user entries in the LDAP System
+            # print to see the structure of the user
 
-            uid = res_str["uid"]
-            name = res_str["cn"].split(" ")
-            try:
-                prename = name[1]
-            except:
-                prename = ""
-            try:
-                lastname = name[0]
-            except:
-                lastname = ""
-            mail = res_str.get("mail")
-            gecos = res_str.get("gecos")
-            home_dir = res_str.get("homeDirectory")
-
-            if mail:
-                email = mail
-                user_info.append((uid, prename, lastname, email, home_dir))
-            elif gecos:
-                tmp = gecos.split(",")
-                for val in tmp:
-                    if "@" in val:
-                        email = val
-                        user_info.append(
-                            (uid, prename, lastname, email, home_dir)
-                        )
-                        break
-
-        self.user_info = sorted(
-            self.user_info + user_info, key=lambda tup: tup[1]
-        )
+            if user in user_info_dict:
+                user_info.add(user_info_dict[uid])
+        self.user_info = sorted(user_info, key=lambda tup: tup[1])
         return self.user_info
 
 

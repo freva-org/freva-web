@@ -167,7 +167,6 @@ class FUUserInformation(LdapUserInformation):
             filterstr=settings.LDAP_GROUP_FILTER,
         )
 
-        self.miklip_user = []
         user_info = []
         # fill the users list
         for uid in self.merge_member(res, "memberUid"):
@@ -223,7 +222,6 @@ class DWDUserInformation(LdapUserInformation):
         res = con.search_s(
             settings.LDAP_GROUP_BASE, ldap.SCOPE_SUBTREE, "objectClass=Person"
         )
-        self.miklip_user = []
         user_info = []
         user_list = res
 
@@ -268,9 +266,7 @@ class MiklipUserInformation(LdapUserInformation):
             )
             or []
         )
-        self.miklip_user = []
         user_info_dict = {}
-        all_users = set()
         user_info = set()
         # fill the users list
         for res in users:
@@ -303,8 +299,7 @@ class MiklipUserInformation(LdapUserInformation):
                         " ".join(res_str.get("homeDirectory", "")),
                     )
                 if ldap_entry:
-                    user_info_dict[ldap_entry[0]] = ldap_entry
-                    all_users.add(ldap_entry)
+                    user_info_dict[user_id] = ldap_entry
         groups = self.connection.search_s(
             settings.LDAP_GROUP_BASE,
             ldap.SCOPE_SUBTREE,
@@ -319,7 +314,7 @@ class MiklipUserInformation(LdapUserInformation):
 
             uid = user.partition(",")[0].strip("uid=")
             if uid in user_info_dict:
-                user_info.append(user_info_dict[uid])
+                user_info.add(user_info_dict[uid])
         self.user_info = sorted(user_info, key=lambda tup: tup[1])
         return self.user_info
 

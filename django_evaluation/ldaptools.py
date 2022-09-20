@@ -260,7 +260,7 @@ class MiklipUserInformation(LdapUserInformation):
         """
         users = (
             self.connection.search_s(
-                settings.LDAP_GROUP_BASE,
+                settings.LDAP_USER_BASE,
                 ldap.SCOPE_SUBTREE,
                 attrlist=self.ldap_keys,
             )
@@ -307,7 +307,6 @@ class MiklipUserInformation(LdapUserInformation):
             filterstr=settings.LDAP_GROUP_FILTER,
         )
         # fill the users list
-        user_info = []
         for user in self.merge_member(groups, "member"):
             # look up the user entries in the LDAP System
             # print to see the structure of the user

@@ -33,9 +33,7 @@ class LdapUserInformation(object):
     def _establish_ldap_connection():
         for SERVER in settings.AUTH_LDAP_SERVER_URI.split(","):
             if not settings.AUTH_LDAP_START_TLS:
-                ldap.set_option(
-                    ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER
-                )
+                ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, ldap.OPT_X_TLS_NEVER)
             try:
                 con = ldap.initialize(SERVER)
             except ldap.LDAPError as e:
@@ -171,9 +169,7 @@ class FUUserInformation(LdapUserInformation):
         # fill the users list
         for res in users:
             try:
-                res_str = {
-                    k: list(map(bytes.decode, v)) for (k, v) in res[1].items()
-                }
+                res_str = {k: list(map(bytes.decode, v)) for (k, v) in res[1].items()}
             except TypeError:
                 res_str = dict(res[1].items())
             uid = res_str.get("uid", [None])[0]
@@ -268,9 +264,7 @@ class MiklipUserInformation(LdapUserInformation):
         # fill the users list
         for res in users:
             try:
-                res_str = {
-                    k: list(map(bytes.decode, v)) for (k, v) in res[1].items()
-                }
+                res_str = {k: list(map(bytes.decode, v)) for (k, v) in res[1].items()}
             except TypeError:
                 res_str = dict(res[1].items())
             if res_str:

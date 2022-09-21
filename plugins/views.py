@@ -4,7 +4,10 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
-from django.views.decorators.debug import sensitive_variables, sensitive_post_parameters
+from django.views.decorators.debug import (
+    sensitive_variables,
+    sensitive_post_parameters,
+)
 from pathlib import Path
 
 import evaluation_system.api.plugin_manager as pm
@@ -143,13 +146,11 @@ def setup(request, plugin_name, row_id=None):
                     tmp_dict[str(k)] = "'%s'" % str(v[0])
 
             config_dict = tmp_dict
-
-            del config_dict["password_hidden"], config_dict["csrfmiddlewaretoken"]
-            try:
-                del config_dict[form.caption_field_name]
-            except:
-                pass
-
+            del (
+                config_dict["password_hidden"],
+                config_dict["csrfmiddlewaretoken"],
+            )
+            _ = config_dict.pop(form.caption_field_name, "")
             logging.debug(config_dict)
 
             # start the scheduler via sbatch
@@ -157,7 +158,7 @@ def setup(request, plugin_name, row_id=None):
             password = request.POST["password_hidden"]
             hostnames = list(get_scheduler_hosts(request.user))
 
-            logging.error(hostnames)
+            logging.info(hostnames)
             # compose the plugin command
 
             slurm_options = config.get_section("scheduler_options")
@@ -172,17 +173,25 @@ def setup(request, plugin_name, row_id=None):
                 export_user_plugin = "EVALUATION_SYSTEM_PLUGINS=%s" % plugin_str
             else:
                 export_user_plugin = ""
-
-            command = " ".join(
-                plugin.compose_command(
-                    config_dict,
-                    batchmode="web" if slurm_options else False,
-                    caption=caption,
-                    unique_output=unique_output,
-                )
+            scheduler_options = ",".join(
+                [
+                    s
+                    for s in config_dict.get("extra_scheduler_options", "").split(",")
+                    if s.strip()
+                ]
             )
+            sched_opts_str = f"extra_scheduler_options={scheduler_options}"
+            cmd = plugin.compose_command(
+                config_dict,
+                batchmode="web" if slurm_options else False,
+                caption=caption,
+                unique_output=unique_output,
+            )
+            if scheduler_options:
+                cmd.append(sched_opts_str)
+            command = " ".join(cmd)
             ssh_cmd = f'bash -c "{eval_str} {exe_path} {export_user_plugin} freva-plugin {command}"'
-            logging.error(ssh_cmd)
+            logging.info(ssh_cmd)
             # finally send the ssh call
             _, stdout, stderr = ssh_call(
                 username=username,
@@ -200,18 +209,16 @@ def setup(request, plugin_name, row_id=None):
             logging.debug("command:" + str(ssh_cmd))
             logging.debug("output of analyze:" + str(out))
             logging.debug("errors of analyze:" + str(err))
-            if stdout.channel.recv_exit_status() != 0:
-                err_msg = "\n".join(err)
-                raise RuntimeError(f"Command failed: {ssh_cmd}\nstderr: {err_msg}")
             # THIS IS HOW WE DETERMINE THE ID USING A SCHEDULER
             substr = "Scheduled job with history"
             # find first line containing the substr
             scheduler_output = next(
-                (s.strip("\n") for s in err if substr in s), ""
+                (s.strip("\n") for s in out if substr in s), ""
             )  # returns 'abc123'
             try:
-                row_id = int(scheduler_output.split(":")[-1])
-            except Exception:
+                row_id = int(scheduler_output.split(":")[-1].strip())
+            except Exception as error:
+                logging.error(error)
                 # We couldn't find out the row id due to issues with the log file.
                 # Redirect to user's history
                 return redirect("history:history")
@@ -365,7 +372,10 @@ def list_dir(request):
     except Exception as e:
         return HttpResponse(
             json.dumps(
-                {"status": "Could not load directory: %s" % str(e), "folders": []}
+                {
+                    "status": "Could not load directory: %s" % str(e),
+                    "folders": [],
+                }
             )
         )
     return HttpResponse(json.dumps({"status": "success", "folders": folders}))

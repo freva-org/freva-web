@@ -355,10 +355,7 @@ def results(request, id, show_output_only=False):
             return redirect_to_login(path)
 
         elif not history_object.uid == request.user:
-            if request.user.isGuest():
-                if flag != History.Flag.guest:
-                    raise PermissionDenied
-            elif not (
+            if not (
                 request.user.has_perm("history.results_view_others")
                 and flag
                 in [History.Flag.public, History.Flag.shared, History.Flag.guest]

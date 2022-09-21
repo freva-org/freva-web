@@ -34,13 +34,7 @@ def mailfield(is_guest):
     info = []
     user_info = get_ldap_object()
 
-    if is_guest:
-        for uid in settings.EMAIL_RESTRICTIONS:
-            ldap_info = user_info.get_user_info(uid)
-
-            if ldap_info:
-                info.append(ldap_info)
-    else:
+    if not is_guest:
         info = user_info.get_all_users()
 
     data = []

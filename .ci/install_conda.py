@@ -91,9 +91,9 @@ class CondaInstaller:
         reporthook = None
         if self.silent is False:
             reporthook = progress_bar
-        urllib.request.urlretrieve(self.conda_url,
-                                   reporthook=reporthook,
-                                   filename=str(conda_script))
+        urllib.request.urlretrieve(
+            self.conda_url, reporthook=reporthook, filename=str(conda_script)
+        )
         conda_script.touch(0o755)
         cmd = f"bash {conda_script} -p {tmp_env} -b -f"
         logger.info(f"Installing minconda:\n{cmd}")

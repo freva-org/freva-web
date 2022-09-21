@@ -2,7 +2,6 @@ name: freva-web
 channels:
   - conda-forge
 dependencies:
-  - black
   - bleach
   - conda
   - configparser
@@ -29,6 +28,7 @@ dependencies:
   - pep8
   - pip
   - pip:
+    - black
     - requests_mock
     - django-auth-ldap
     - django-datatable-view

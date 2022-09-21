@@ -8,7 +8,7 @@ dummy-data:
 	python3 docker/solr/ingest_dummy_data.py
 
 lint:
-	black -t py39 --check .
+	black -t py310 --check .
 
 tests:
 	pytest -vv $(PWD) tests/

@@ -3,7 +3,11 @@ import os
 import sys
 import pymysql
 import ldap
-from django_auth_ldap.config import LDAPSearch, NestedGroupOfNamesType, PosixGroupType
+from django_auth_ldap.config import (
+    LDAPSearch,
+    NestedGroupOfNamesType,
+    PosixGroupType,
+)
 import shutil
 import toml
 import requests
@@ -138,7 +142,7 @@ AUTH_LDAP_START_TLS = web_config.get("AUTH_LDAP_START_TLS", False)
 # The directory with SSL certificates
 CA_CERT_DIR = str(web_config_path.parent)
 # the only allowd group
-ALLOWED_GROUP = web_config.get("ALLOWED_GROUP", "freva")
+ALLOWED_GROUP = web_config.get("ALLOWED_GROUP", "") or "*"
 # Require a ca certificate
 AUTH_LDAP_GLOBAL_OPTIONS = {
     ldap.OPT_X_TLS_REQUIRE_CERT: ldap.OPT_X_TLS_DEMAND,  # TPYE OF CERTIFICATION
@@ -154,8 +158,9 @@ LDAP_GROUP_BASE = web_config.get(
 AUTH_LDAP_USER_SEARCH = LDAPSearch(LDAP_USER_BASE, ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
 # keep the authenticated user for group search
 AUTH_LDAP_BIND_AS_AUTHENTICATING_USER = True
-# ALLOWED_GROUP_MEMBER user only
-AUTH_LDAP_REQUIRE_GROUP = f"cn={ALLOWED_GROUP},{LDAP_GROUP_BASE}"
+if ALLOWED_GROUP != "*":
+    # ALLOWED_GROUP_MEMBER user only
+    AUTH_LDAP_REQUIRE_GROUP = f"cn={ALLOWED_GROUP},{LDAP_GROUP_BASE}"
 
 LDAP_FIRSTNAME_FIELD = web_config.get("LDAP_FIRSTNAME_FIELD", "givenname")
 LDAP_LASTNAME_FIELD = web_config.get("LDAP_LASTNAME_FIELD", "sn")

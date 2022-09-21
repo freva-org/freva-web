@@ -7,6 +7,7 @@
         $("#mail_to_field").select2({
             data: {{user_data|mask_safe_uid:is_guest}},
             placeholder: "Select recipients",
+            minimumInputLength: 2,
             allowClear: true,
             multiple:true,
             maximumSelectionSize: 5,

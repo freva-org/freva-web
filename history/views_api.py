@@ -234,7 +234,10 @@ class ResultFiles(APIView, FilterAbstract):
         - apply offset, sortName, sortOrder and searchText on cache results
         """
         full_path = request.get_full_path()
-        max_entry = History.objects.filter(flag__lt=3, status__lt=2).latest("id")
+        history_objects = History.objects.filter(flag__lt=3, status__lt=2)
+        if not history_objects:
+            return Response({"data": [], "metadata": {"start": 0, "numFound": 0}})
+        max_entry = history_objects.latest("id")
         max_id = max_entry.id if max_entry else 0
 
         cache_max_id = cache.get(f"{full_path}_{max_id}", 0)

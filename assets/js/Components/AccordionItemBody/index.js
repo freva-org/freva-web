@@ -1,9 +1,83 @@
-import React, { useState } from "react";
+import React, { useCallback, useLayoutEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { FormControl, Tooltip, OverlayTrigger } from "react-bootstrap";
 import { VariableSizeList as List } from "react-window";
 
+/**
+ * The row-virtualization implemented above by the
+ * <List>-Tags needs to know the exact size of each
+ * single element in it.
+ *
+ * This component measures the height of a single element
+ * inside the facet-dropdown by putting the text of this
+ * element into a more or less hidden element
+ * (elemRef, which is created in OwnPanel) and then
+ * measure the height of this element. This is necessary
+ * as not every element has the same height due to possible
+ * line breaks if a facet has a longer name.
+ */
+const Row = ({ data, index, setSize, windowWidth, rowData, elemRef }) => {
+  React.useEffect(() => {
+    const text = `${rowData.value} [${rowData.count}]`;
+    let rowHeight = 28;
+    // if no text, or text is short, don't bother measuring.
+    if (text && text.length > 20) {
+      // attempt to measure height by writing text to a kind of hidden element.
+      if (elemRef) {
+        elemRef.current.textContent = text;
+        const ret = elemRef.current.offsetHeight;
+        elemRef.current.textContent = "";
+
+        if (ret > 0) {
+          rowHeight = Math.max(ret, rowHeight);
+        }
+      }
+    }
+
+    setSize(index, rowHeight);
+  }, [setSize, index, windowWidth]);
+
+  return (
+    <React.Fragment>
+      {data[index]}
+    </React.Fragment>
+  );
+};
+
+Row.propTypes = {
+  data: PropTypes.array,
+  rowData: PropTypes.shape({ value: PropTypes.string, count: PropTypes.number }),
+  elemRef: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.shape({ current: PropTypes.instanceOf(Element) })
+  ]),
+  index: PropTypes.number,
+  setSize: PropTypes.func,
+  windowWidth: PropTypes.number,
+};
+
+export const useWindowSize = () => {
+  const [size, setSize] = useState([0, 0]);
+  useLayoutEffect(() => {
+    function updateSize () {
+      setSize([window.innerWidth, window.innerHeight]);
+    }
+    window.addEventListener("resize", updateSize);
+    updateSize();
+    return () => window.removeEventListener("resize", updateSize);
+  }, []);
+  return size;
+};
+
+
+
 function AccordionItemBody (props) {
+  const listRef = useRef();
+  const sizeMap = useRef({});
+  const setSize = useCallback((index, size) => {
+    sizeMap.current = { ...sizeMap.current, [index]: size };
+    listRef.current.resetAfterIndex(index);
+  }, []);
   const [filter, setFilter] = useState("");
 
   function handleChange (e) {
@@ -18,7 +92,7 @@ function AccordionItemBody (props) {
       if (metadata && metadata[value]) {
         return (
           <div className="col-md-12 col-sm-6" key={value}>
-            <OverlayTrigger overlay={<Tooltip>{metadata[value]}</Tooltip>}>
+            <OverlayTrigger overlay={<Tooltip><div dangerouslySetInnerHTML={{ __html: metadata[value] }} /></Tooltip>}>
               <a
                 href="#"
                 onClick={
@@ -66,7 +140,9 @@ function AccordionItemBody (props) {
   }
 
   const filteredItems = renderFilteredItems(filteredValues);
-  const eventKeyId = eventKey.replaceAll(/\s/g, "_") + "_hiddenID";
+  const [ windowWidth ] = useWindowSize();
+  const getSize = index => sizeMap.current[index] || 24;
+
   return (
     <div>
       <FormControl
@@ -76,19 +152,34 @@ function AccordionItemBody (props) {
         placeholder={`Search ${eventKey} name`}
         onChange={handleChange}
       />
-      <div id={eventKeyId} style={{ visibility: "visible", whiteSpace: "normal" }} />
       {
         filteredItems.length <= 12 ? (
           filteredItems
         ) : (
           <List
+            ref={listRef}
             className="infinite-body"
             height={338}
             itemData={filteredItems}
             itemCount={filteredItems.length}
-            itemSize={(i) => onGetItemSize(filteredValues[i], eventKeyId)}
+            itemSize={getSize}
+            width="100%"
           >
-            {ItemRenderer}
+            {
+              ({ data, index, style }) => (
+                <div style={style}>
+                  <Row
+                    data={data}
+                    index={index}
+                    setSize={setSize}
+                    windowWidth={windowWidth}
+                    rowData={filteredValues[index]}
+                    elemRef={props.elemRef}
+                  />
+                </div>
+              )
+            }
+
           </List>
         )
       }
@@ -97,62 +188,17 @@ function AccordionItemBody (props) {
 
 }
 
-/**
- * The row-virtualization implemented above by the
- * <List>-Tags needs to know the exact size of each
- * single element in it.
- *
- * This function measures the height of a single element
- * inside the facet-dropdown by putting the text of this
- * element into a more or less hidden element and then
- * measure the height of this element. This is necessary
- * as not every element has the same height due to possible
- * line breaks if a facet has a longer name.
- */
-function onGetItemSize (row, hiddenFieldName) {
-  const text = `${row.value} [${row.count}]`;
-  const rowHeight = 28;
-  // if no text, or text is short, don't bother measuring.
-  if (!text || text.length < 20) {
-    return rowHeight;
-  }
-
-  // attempt to measure height by writing text to a kind of hidden element.
-  const hiddenElement = document.getElementById(hiddenFieldName);
-  if (hiddenElement) {
-    hiddenElement.textContent = text;
-    const ret = hiddenElement.offsetHeight;
-    hiddenElement.textContent = "";
-
-    if (ret > 0) {
-      return Math.max(ret, rowHeight);
-    }
-  }
-
-  return rowHeight;
-}
 
 AccordionItemBody.propTypes = {
-  eventKey: PropTypes.any,
-  value: PropTypes.any,
-  metadata: PropTypes.any,
-  visible: PropTypes.any,
-  facetClick: PropTypes.any,
+  eventKey: PropTypes.string,
+  value: PropTypes.array,
+  metadata: PropTypes.object,
+  elemRef: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.shape({ current: PropTypes.instanceOf(Element) })
+  ]),
+  facetClick: PropTypes.func,
   togglePanel: PropTypes.func
 };
-
-class ItemRenderer extends React.PureComponent {
-  static propTypes = {
-    data: PropTypes.array.isRequired,
-    index: PropTypes.number.isRequired,
-    style: PropTypes.any
-  }
-
-  render () {
-    // Access the items array using the "data" prop:
-    const item = this.props.data[this.props.index];
-    return <div style={this.props.style}>{item}</div>;
-  }
-}
 
 export default AccordionItemBody;

@@ -32,7 +32,7 @@ test_latest:
   tags:
     - docker, specific
   before_script:
-    - /usr/bin/python3 .ci/install_conda.py /tmp/anaconda3 conda-env.yml -s
+    - python .ci/install_conda.py /tmp/anaconda3 conda-env.yml -s
   script:
     - /tmp/anaconda3/bin/conda run make lint
     - /tmp/anaconda3/bin/conda run make tests

@@ -1,0 +1,17 @@
+name: Linter
+run-name: ${{ github.actor }} is linting the code
+
+on: [push, pull_request]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: freva-web 
+          environment-file: conda-env.yml
+          python-version: 3.10
+          auto-activate-base: false
+      - name: Lint python
+        run: make lint

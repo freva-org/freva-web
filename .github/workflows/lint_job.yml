@@ -5,13 +5,20 @@ on: [push, pull_request]
 jobs:
   lint:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
     steps:
       - uses: actions/checkout@v3
       - uses: conda-incubator/setup-miniconda@v2
         with:
-          activate-environment: freva-web 
+          activate-environment: freva-web
           environment-file: conda-env.yml
-          python-version: 3.10
+          python-version: "3.10"
           auto-activate-base: false
       - name: Lint python
         run: make lint
+      - name: Prepare node
+        run: npm install
+      - name: Lint javascript
+        run: npm run lint

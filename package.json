@@ -9,6 +9,7 @@
    },
    "scripts": {
       "test": "echo \"Error: no test specified\" && exit 1",
+      "lint": "eslint assets",
       "dev": "webpack serve --config webpack.config.js",
       "build": "webpack --config webpack.config.js --progress --color --mode=development",
       "build-production": "webpack --config webpack.config.js --progress --color --mode=production"

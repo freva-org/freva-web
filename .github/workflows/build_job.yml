@@ -24,7 +24,13 @@ jobs:
         name: Get tag
         id: repository
         # run: echo  "::set-output name=tag::$(git describe --tags HEAD)"
-        run: echo  "::set-output name=tag::2022.11.01"
+        run: |
+          echo "tag=2022.11.01" >> $GITHUB_OUTPUT
+          echo "repo=$(echo ${{ github.repository }}|tr 'A-Z' 'a-z')" >> $GITHUB_OUTPUT
+
+      -
+        name: Get repo name in lower case
+        id:
 
       -
         name: Set up QEMU
@@ -49,4 +55,4 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ghcr.io/${{ github.repository }}:${{ steps.repository.outputs.tag }}
+          tags: ghcr.io/${{ steps.repository.outputs.repo }}:${{ steps.repository.outputs.tag }}

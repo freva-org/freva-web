@@ -26,7 +26,6 @@ jobs:
         run: |
           echo "tag=2022.11.01" >> $GITHUB_OUTPUT
           echo "repo=$(echo ${{ github.repository }}|tr 'A-Z' 'a-z')" >> $GITHUB_OUTPUT
-        # run: echo  "::set-output name=tag::$(git describe --tags HEAD)"
 
       -
         name: Get repo name in lower case

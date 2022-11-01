@@ -12,8 +12,8 @@ evaluation_system.conf
 .*
 !.ci
 !.gitignore
+!.github
 !.envrc
-!.gitlab-ci.yml
 
 static/preview/*
 tail/*

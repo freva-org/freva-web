@@ -11,7 +11,8 @@ ARG FREVA_WEB_DIR
 WORKDIR ${FREVA_WEB_DIR}
 COPY . .
 
-ENV PATH=$CONDA_ENV_DIR/bin:$PATH:
+ENV PATH=$CONDA_ENV_DIR/bin:$PATH\
+    DJANGO_SUPERUSER_EMAIL=freva@dkrz.de
 
 RUN set -e \
   && mamba env create -p ${CONDA_ENV_DIR} -f conda-env.yml \
@@ -22,4 +23,4 @@ RUN set -e \
 
 EXPOSE 8000
 
-CMD ["gunicorn", "-b", "[::]:8000", "-w", "1", "django_evaluation.wsgi"]
+CMD ./init_django.sh

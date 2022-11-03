@@ -6,7 +6,7 @@ name: Build and publish the container image
     tags:
       - '*'
     branches:
-      - '*'
+      - 'main'
 
 jobs:
   build-and-push-image:
@@ -25,8 +25,7 @@ jobs:
         name: Get tag
         id: repository
         run: |
-          #echo "tag=$(git describe --tags HEAD)" >> $GITHUB_OUTPUT
-          echo "tag=2022.11.01" >> $GITHUB_OUTPUT
+          echo "tag=$(git describe --tags HEAD)" >> $GITHUB_OUTPUT
           echo "repo=$(echo ${{ github.repository }}|tr 'A-Z' 'a-z')" >> $GITHUB_OUTPUT
 
       -

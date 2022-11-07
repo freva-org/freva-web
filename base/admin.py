@@ -4,6 +4,9 @@ from django.contrib.auth.models import User
 
 from django.contrib.auth.models import Permission
 
+from .models import UIMessages
+
+admin.site.register(UIMessages)
 admin.site.unregister(User)
 
 

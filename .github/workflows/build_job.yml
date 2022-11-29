@@ -1,6 +1,7 @@
 name: Build and publish the container image
 
 "on":
+  workflow_dispatch:
   push:
     tags:
       - '*'
@@ -23,8 +24,9 @@ jobs:
       -
         name: Get tag
         id: repository
-        # run: echo  "::set-output name=tag::$(git describe --tags HEAD)"
-        run: echo  "::set-output name=tag::2022.11.01"
+        run: |
+          echo "tag=$(git describe --tags HEAD)" >> $GITHUB_OUTPUT
+          echo "repo=$(echo ${{ github.repository }}|tr 'A-Z' 'a-z')" >> $GITHUB_OUTPUT
 
       -
         name: Set up QEMU
@@ -47,6 +49,8 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           push: true
-          tags: ghcr.io/${{ github.repository }}:${{ steps.repository.outputs.tag }}
+          tags: |
+            ghcr.io/${{ steps.repository.outputs.repo }}:${{ steps.repository.outputs.tag }}
+            ghcr.io/${{ steps.repository.outputs.repo }}:latest

@@ -43,31 +43,31 @@
             <div class="row mb-3">
                 <div class="col-md-12">
                     {% if is_plugin_available %}
-                        <a class="btn btn-primary" href="{% url 'plugins:setup' history_object.tool history_object.id%}" id="config_button">Edit configuration</a>
+                        <a class="btn btn-primary mb-2" href="{% url 'plugins:setup' history_object.tool history_object.id%}" id="config_button">Edit configuration</a>
                     {% else %}
                         <div class="alert alert-warning">
                             This result has been produced with an user-imported plugin. Configuration changes are not possible.
                         </div>
                     {% endif %}
                     {% if documentation %}
-                        <a class="btn btn-success" href="{{documentation.url}}">Documentation</a>
+                        <a class="btn btn-success mb-2" href="{{documentation.url}}">Documentation</a>
                     {%endif%}
                     {% if history_object.status > 2 and history_object.slurm_output != '0' and history_object.uid == request.user %}
 
-                        <button class="btn btn-danger mybtn-cancel" id="cancelButton" onClick="cancelDialog.show({{history_object.id}})">Cancel job</button>
+                        <button class="btn btn-danger mb-2 mybtn-cancel" id="cancelButton" onClick="cancelDialog.show({{history_object.id}})">Cancel job</button>
                         {# Render a Bootstrap password/cancel dialog #}
                         {% cancel_dialog %}
                     {%endif%}
 
                     {% if request.user == history_object.uid %}
-                        <button class="btn btn-secondary mybtn-sendmail" id="sendButton" onClick="$('#sendmail_modal').modal('show')">Share Results</button>
+                        <button class="btn btn-secondary mb-2 mybtn-sendmail" id="sendButton" onClick="$('#sendmail_modal').modal('show')">Share Results</button>
 
-                        <button class="btn btn-secondary mybtn-caption" id="captionButton" onClick="$('#caption_modal').modal('show')">Set Caption</button>
+                        <button class="btn btn-secondary mb-2 mybtn-caption" id="captionButton" onClick="$('#caption_modal').modal('show')">Set Caption</button>
                     {%endif%}
                     {# Render a Bootstrap caption dialog #}
                     {% caption_dialog result_caption default_caption history_object request.user %}
 
-                    <button class="btn btn-warning" id="followButton"><span id='followText'>{{follow}}</span></button>
+                    <button class="btn btn-warning mb-2 " id="followButton"><span id='followText'>{{follow}}</span></button>
                     {%if developer %}
                         {% mail_to_developer history_object.tool request.user.username request.build_absolute_uri %}
                     {%endif%}
@@ -119,12 +119,23 @@
                                 </tr>
                             </table>
                         </div> <!-- col-md-12 -->
-                        <a class="btn btn-info" onClick="$('.additional').toggle()">Additional information</a>
-                        <a class="btn btn-info"
-                            onClick="window.prompt('Copy to clipboard: Ctrl+C, Enter', '{{analyze_command | mask_uid:request.user.isGuest | escapejs}}');"
+                        <button class="btn btn-info mb-2" onClick="$('.additional').toggle()">Additional information</button>
+                        <button class="btn btn-info mb-2"
+                            onClick="copyTextToClipboard('{{analyze_command | mask_uid:request.user.isGuest | escapejs}}');"
                             id="copy_button">
-                            Copy analyze command
-                        </a>
+                            Copy analyse command
+                        </button>
+
+                        <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+                          <div id="clipboard-toast" class="toast hide" style="background-color: #ddede5;" role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="d-flex">
+                              <div class="toast-body">
+                                <strong id="clipboard-toast-text">Copied command to clipboard</strong>
+                              </div>
+                              <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                          </div>
+                        </div>
 
                     </div><!-- panel-body -->
                 </div><!-- panel-collapse collapse-->
@@ -271,6 +282,44 @@
 
         function capitalizeFirst(string) {
             return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        function fallbackCopyTextToClipboard(text) {
+          var textArea = document.createElement("textarea");
+          textArea.value = text;
+
+          // Avoid scrolling to bottom
+          textArea.style.top = "0";
+          textArea.style.left = "0";
+          textArea.style.position = "fixed";
+
+          document.body.appendChild(textArea);
+          textArea.focus();
+          textArea.select();
+
+          try {
+            var successful = document.execCommand('copy');
+            var msg = successful ? 'successful' : 'unsuccessful';
+            $("#clipboard-toast").toast("show");
+          } catch (err) {
+            // Fallback for the fallback: Show window prompt to copy-paste the command
+            window.prompt('Copy to clipboard: Ctrl+C, Enter', '{{analyze_command | mask_uid:request.user.isGuest | escapejs}}')
+          }
+
+          document.body.removeChild(textArea);
+        }
+
+        function copyTextToClipboard(text) {
+          if (!navigator.clipboard) {
+            fallbackCopyTextToClipboard(text);
+            return;
+          }
+          navigator.clipboard.writeText(text).then(function() {
+            $("#clipboard-toast").toast("show");
+          }, function(err) {
+            // Fallback: Show window prompt to copy-paste the command
+            window.prompt('Copy to clipboard: Ctrl+C, Enter', '{{analyze_command | mask_uid:request.user.isGuest | escapejs}}')
+          });
         }
 
 

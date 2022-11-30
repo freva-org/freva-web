@@ -1,5 +1,7 @@
 import logging
 
+from base.models import UIMessages
+
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 import django.contrib.auth as auth
@@ -21,6 +23,7 @@ def home(request):
 
     next_page = request.GET.get("next", None)
     forward = request.POST.get("next", None)
+    messages = UIMessages.objects.order_by("-id").filter(resolved=False)
     if not request.user.is_authenticated:
         try:
             username = request.POST.get("user", "")
@@ -51,7 +54,12 @@ def home(request):
     return render(
         request,
         "base/home.html",
-        {"login_failed": login_failed, "guest_login": guest_login, "next": next_page},
+        {
+            "login_failed": login_failed,
+            "guest_login": guest_login,
+            "next": next_page,
+            "messages": messages,
+        },
     )
 
 

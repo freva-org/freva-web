@@ -13,6 +13,7 @@ dependencies:
   - django-webpack-loader
   - djangorestframework
   - fabric
+  - freva
   - git
   - gunicorn
   - markdown
@@ -38,7 +39,6 @@ dependencies:
     - django-discover-runner
     - django-bootstrap-v5
     - django-model-utils
-    - freva
     - pep257
     - types-requests
     - types-toml

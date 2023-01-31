@@ -14,8 +14,21 @@ const pluginListInitialState = {
   searchFilter: ""
 };
 
-function sortObject (o) {
-  return Object.keys(o).sort().reduce((r, k) => (r[k] = o[k], r), {});
+const OTHER_CATEGORY = "others";
+
+function compareCategories (a, b) {
+  const normalizedA = a.toLowerCase().trim();
+  const normalizedB = b.toLowerCase().trim();
+  if (normalizedA === OTHER_CATEGORY) {
+    return 1;
+  } else if (normalizedB === OTHER_CATEGORY) {
+    return -1;
+  }
+  return a.localeCompare(b);
+}
+
+function sortCategories (o) {
+  return Object.keys(o).sort(compareCategories).reduce((r, k) => (r[k] = o[k], r), {});
 }
 
 const createCategories = plugins => {
@@ -31,7 +44,7 @@ const createCategories = plugins => {
     }
     categories[newCat] = cat;
   });
-  return sortObject(categories);
+  return sortCategories(categories);
 };
 
 const createTags = plugins => {
@@ -95,8 +108,8 @@ export const pluginListReducer = (state = pluginListInitialState, action) => {
       });
       action.payload.forEach(p => {
         const plugin = p[1];
-        if (!constants.CATEGORY_TITLES[plugin.category]) {
-          plugin.category = "other";
+        if (!plugin.category) {
+          plugin.category = OTHER_CATEGORY;
         }
       });
       return {

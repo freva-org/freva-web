@@ -14,10 +14,19 @@ import { fetchDir, closeDir, changeRoot } from "../../Components/FileTree/action
 
 import Spinner from "../../Components/Spinner";
 
-import { CATEGORY_TITLES } from "./constants";
 import { exportPlugin, loadPlugins, updateCategoryFilter, updateTagFilter, updateSearchFilter } from "./actions";
 
-
+function initCap (str) {
+  if (!str) {
+    return str;
+  }
+  if (str.length === 1) {
+    return str.substring(0, 1).toUpperCase();
+  } else if (str.length >= 1) {
+    return str.substring(0, 1).toUpperCase() + str.substring(1);
+  }
+  return str;
+}
 
 class PluginList extends React.Component {
 
@@ -53,7 +62,7 @@ class PluginList extends React.Component {
 
   renderPluginBlock (filteredPlugins, category) {
     const plugins = filteredPlugins.filter(val => {
-      return val[1].category.toLowerCase() === category;
+      return val[1].category.toLowerCase().trim() === category.toLowerCase().trim();
     });
 
     if (plugins.length <= 0) {
@@ -62,7 +71,7 @@ class PluginList extends React.Component {
     return (
       <ListGroup className="mb-3 card" key={category + "plugins"}>
         <div className="card-header">
-          <h3 className="mb-0">{CATEGORY_TITLES[category]}</h3>
+          <h3 className="mb-0">{initCap(category)}</h3>
         </div>
         {
           plugins.map(val => {
@@ -108,7 +117,7 @@ class PluginList extends React.Component {
         <FormCheck.Label
           htmlFor={categoryName + "-cat"}
         >
-          {CATEGORY_TITLES[categoryName]} ({categories[categoryName].length})
+          {initCap(categoryName)} ({categories[categoryName].length})
         </FormCheck.Label>
       </FormCheck>
     );
@@ -190,7 +199,7 @@ class PluginList extends React.Component {
         <Row>
           <Col md={8} className="mt-3">
             {
-              Object.keys(CATEGORY_TITLES).map(key => {
+              Object.keys(categories).map(key => {
                 return this.renderPluginBlock(filteredPlugins, key);
               })
             }
@@ -210,7 +219,7 @@ class PluginList extends React.Component {
               <FormLabel>Categories:</FormLabel>
               <div>
                 {
-                  Object.keys(CATEGORY_TITLES).map(key => {
+                  Object.keys(categories).map(key => {
                     return this.renderCategoryCheckbox(categories, categoriesFilter, key);
                   })
                 }

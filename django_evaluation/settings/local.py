@@ -310,6 +310,10 @@ RESULT_BROWSER_FACETS = [
     "variable",
 ]
 MENU_ENTRIES = []
+
+# Sometimes it is desired to put a link into the navbar which does not correspond
+# to a template inside django. If something like this is needed, put a slash as a
+# prefix to your relative url (the second value in each of the lists), e.g. "/impressum"
 _MENU_ENTRIES = [
     ["Plugins", "plugins:home", "plugin_menu"],
     ["Data-Browser", "solr:data_browser", "browser_menu"],
@@ -318,4 +322,9 @@ _MENU_ENTRIES = [
 ]
 
 for title, url, html_id in web_config.get("MENU_ENTRIES", _MENU_ENTRIES):
-    MENU_ENTRIES.append({"name": title, "url": reverse_lazy(url), "html_id": html_id})
+    if url.startswith("/"):
+        MENU_ENTRIES.append({"name": title, "url": url, "html_id": html_id})
+    else:
+        MENU_ENTRIES.append(
+            {"name": title, "url": reverse_lazy(url), "html_id": html_id}
+        )

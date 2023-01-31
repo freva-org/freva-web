@@ -1154,3 +1154,29 @@ a.dropdown-item:hover {
 .no-break {
    white-space: nowrap;
 }
+
+
+@media (max-width: 768px) {
+  .services-item {
+    width: 100%;
+  }
+}
+
+@media (min-width: 769px) {
+  .services-item {
+    width: 100%;
+  }
+}
+
+@media (min-width: 992px) {
+  .services-item {
+    width: 49%;
+  }
+}
+
+.services-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}

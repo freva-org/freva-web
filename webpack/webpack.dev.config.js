@@ -6,10 +6,12 @@ const mode = "development";
 
 const isDevServer = !!(process.env.npm_lifecycle_event === "dev");
 
+const SERVER_HOST = "127.0.0.1";
+const SERVER_PORT = 8080;
+
 const entry = isDevServer ?
   [
-    "webpack-dev-server/client?http://localhost:8080",
-    "webpack/hot/dev-server",
+    `webpack-dev-server/client`,
     "./assets/js/index"
   ]
   :
@@ -20,14 +22,18 @@ let devServer;
 let plugins;
 if (isDevServer) {
   // override django's STATIC_URL for webpack bundles
-  output = { publicPath: "http://localhost:8080/assets/bundles/" };
+  output = { publicPath: `http://${SERVER_HOST}:${SERVER_PORT}/assets/bundles/` };
   devServer = {
-    port: 8080,
-    host: "localhost",
+    allowedHosts: "all",
+    hot: true,
     historyApiFallback: true,
     client: {
       logging: "verbose",
-    }
+      webSocketURL: `ws://${SERVER_HOST}:${SERVER_PORT}/ws`,
+    },
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+    },
   };
   // Add HotModuleReplacementPlugin and BundleTracker plugins
   plugins = [

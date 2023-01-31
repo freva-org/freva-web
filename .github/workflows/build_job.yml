@@ -26,7 +26,7 @@ jobs:
         name: Get tag
         id: repository
         run: |
-          echo "tag=$(git describe --tags HEAD)" >> $GITHUB_OUTPUT
+          echo "cat package.json|jq -r .version" >> $GITHUB_OUTPUT
           echo "repo=$(echo ${{ github.repository }}|tr 'A-Z' 'a-z')" >> $GITHUB_OUTPUT
 
       -

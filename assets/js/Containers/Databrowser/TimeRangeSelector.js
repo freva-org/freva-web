@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
+import { withRouter } from "react-router";
+import queryString from "query-string";
 import {
   BsRecordCircleFill,
   BsRecordCircle,
@@ -21,12 +23,12 @@ import {
   Tooltip
 } from "react-bootstrap";
 
-import { setTimeRange } from "./actions";
+// import { setTimeRange } from "./actions";
 import { TIME_RANGE_FILE, TIME_RANGE_FLEXIBLE, TIME_RANGE_STRICT } from "./constants";
 
 const dateRegex = /^[-]?\d{4}(-[01]\d(-[0-3]\d(T[0-2]\d(:[0-5]\d)?Z?)?)?)?$/;
 
-function TimeRangeSelector ({ databrowser, dispatch }) {
+function TimeRangeSelector ({ databrowser, router, location }) {
   const [selector, setSelector] = useState(TIME_RANGE_FLEXIBLE);
   const [minDate, setMinDate] = useState("");
   const [maxDate, setMaxDate] = useState("");
@@ -38,7 +40,18 @@ function TimeRangeSelector ({ databrowser, dispatch }) {
   }, [databrowser]);
 
   function applyChanges () {
-    dispatch(setTimeRange({ dateSelector: selector, minDate, maxDate }));
+    const currentLocation = location.pathname;
+
+    const { dateSelector: ignore1, minDate: ignore2, maxDate: ignore3, ...queryObject } = location.query;
+    const query = queryString.stringify({ ...queryObject, minDate, maxDate, dateSelector: selector });
+    router.push(currentLocation + "?" + query);
+  }
+
+  function onKeyPress (errorMessage, e) {
+    const enterKey = 13;
+    if (!errorMessage && e.charCode === enterKey) {
+      applyChanges();
+    }
   }
 
   let minDateErrorMessage = "";
@@ -61,38 +74,38 @@ function TimeRangeSelector ({ databrowser, dispatch }) {
     }
   }
 
-  let tooltipText = "";
+  let errorMessage = "";
   if (maxDate.length < 4 || minDate.length < 4) {
-    tooltipText = "Both date must consist of at least a year information with four digits";
+    errorMessage = "Both date must consist of at least a year information with four digits";
   } else if (minDateErrorMessage) {
-    tooltipText = minDateErrorMessage;
+    errorMessage = minDateErrorMessage;
   } else if (maxDateErrorMessage) {
-    tooltipText = maxDateErrorMessage;
+    errorMessage = maxDateErrorMessage;
   }
 
   let applyButton;
-  if (tooltipText) {
+  if (errorMessage) {
     const tooltip = (
-      <Tooltip id="boxWarning"> {tooltipText} </Tooltip>
+      <Tooltip id="boxWarning"> {errorMessage} </Tooltip>
     );
     applyButton = (
       <OverlayTrigger overlay={tooltip} placement="top">
         <span>
-          <Button variant="danger" onClick={applyChanges} disabled>
+          <Button variant="danger" disabled>
             Apply
           </Button>
         </span>
       </OverlayTrigger>);
   } else {
     applyButton = (
-      <Button variant="primary" onClick={applyChanges}>
+      <Button variant="primary" onClick={applyChanges.bind(this)}>
         Apply
       </Button>
     );
   }
 
   return (
-    <div>
+    <div onKeyPress={onKeyPress.bind(this, errorMessage)}>
       <InputGroup className="mb-4">
         <InputGroup.Text id="min-date-text">Operator</InputGroup.Text>
         <DropdownButton
@@ -153,6 +166,8 @@ function TimeRangeSelector ({ databrowser, dispatch }) {
 
 TimeRangeSelector.propTypes = {
   databrowser: PropTypes.object,
+  location: PropTypes.object.isRequired,
+  router: PropTypes.object.isRequired,
   dispatch: PropTypes.func.isRequired
 };
 
@@ -160,4 +175,4 @@ const mapStateToProps = state => ({
   databrowser: state.databrowserReducer
 });
 
-export default connect(mapStateToProps)(TimeRangeSelector);
+export default withRouter(connect(mapStateToProps)(TimeRangeSelector));

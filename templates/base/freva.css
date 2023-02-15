@@ -129,10 +129,6 @@ background:{{main_color}};
 color:{{main_color}};
 }
 
-.content ul li{
-background-image:url('/static/css/img/list-y.png');
-}
-
 .blog .meta i{
 color:{{main_color}};
 }

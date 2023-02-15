@@ -1,94 +1,64 @@
 import fetch from "isomorphic-fetch";
 
+import queryString from "query-string";
+
 import { getCookie } from "../../utils";
 
 import * as globalStateConstants from "../App/constants";
 
 import * as constants from "./constants";
 
-export const selectFacet = (facet, value) => dispatch => {
+export const updateFacetSelection = (queryObject) => dispatch => {
   dispatch({
-    type: constants.SELECT_FACET,
-    facet,
-    value
+    type: constants.UPDATE_FACET_SELECTION,
+    queryObject
   });
-  dispatch(loadFacets());
-  dispatch(loadFiles());
-};
-
-export const clearFacet = (facet) => dispatch => {
-  dispatch({
-    type: constants.CLEAR_FACET,
-    facet
-  });
-  dispatch(loadFacets());
-  dispatch(loadFiles());
 };
 
 export const resetNcdump = () => ({
   type: constants.RESET_NCDUMP
 });
 
-export const setTimeRange = (timeRange) => dispatch => {
-  dispatch({
-    type: constants.SET_TIME_RANGE,
-    timeRange
-  });
-  dispatch(loadFacets());
-  dispatch(loadFiles());
-};
-
-export const clearTimeRange = () => dispatch => {
-  dispatch({
-    type: constants.CLEAR_TIME_RANGE
-  });
-  dispatch(loadFacets());
-  dispatch(loadFiles());
-};
-
 export const setMetadata = (metadata) => ({
   type: constants.SET_METADATA,
   metadata
 });
 
-export const clearAllFacets = (facet) => dispatch => {
-  dispatch({
-    type: constants.CLEAR_ALL_FACETS,
-    facet
-  });
-  dispatch(loadFacets());
-  dispatch(loadFiles());
-};
-
-export const loadFacets = () => (dispatch, getState) => {
+export const loadFacets = (location) => (dispatch) => {
   dispatch({ type: constants.SET_FACET_LOADING });
-  return fetchResults(dispatch, getState, "facet=*", constants.LOAD_FACETS);
+  return fetchResults(dispatch, location, "facet=*", constants.LOAD_FACETS);
 };
 
-export const loadFiles = () => (dispatch, getState) => {
+export const loadFiles = (location) => (dispatch) => {
   dispatch({ type: constants.SET_FILE_LOADING });
-  return fetchResults(dispatch, getState, "start=0&rows=100", constants.LOAD_FILES);
+  return fetchResults(dispatch, location, "start=0&rows=100", constants.LOAD_FILES);
 };
 
-function fetchResults (dispatch, getState, additionalParams, actionType) {
-  const { selectedFacets, dateSelector, minDate, maxDate } = getState().databrowserReducer;
+function fetchResults (dispatch, location, additionalParams, actionType) {
+  // const { selectedFacets, dateSelector, minDate, maxDate } = getState().databrowserReducer;
   let params = "";
-  Object.keys(selectedFacets).forEach(key => {
-    const value = selectedFacets[key];
-    params += `&${key}=${value}`;
-  });
+  if (location) {
+    const queryObject = location.query;
+    const { dateSelector: ignore1, minDate: ignore2, maxDate: ignore3, ...facets } = location.query;
 
-  const isDateSelected = !!minDate;
-  if (isDateSelected) {
-    let operator;
-    if (dateSelector === constants.TIME_RANGE_FLEXIBLE) {
-      operator = "Intersects";
-    } else if (dateSelector === constants.TIME_RANGE_STRICT) {
-      operator = "Within";
-    } else {
-      operator = "Contains";
+    params = queryString.stringify(facets);
+
+    if (params) {
+      params = "&" + params;
     }
-    params += `&time_select=${operator}&time=${minDate} TO ${maxDate}`;
+
+    const isDateSelected = !!queryObject.minDate;
+    if (isDateSelected) {
+      let operator;
+      if (queryObject.dateSelector === constants.TIME_RANGE_FLEXIBLE) {
+        operator = "Intersects";
+      } else if (queryObject.dateSelector === constants.TIME_RANGE_STRICT) {
+        operator = "Within";
+      } else {
+        operator = "Contains";
+      }
+      params += `&time_select=${operator}&time=${queryObject.minDate} TO ${queryObject.maxDate}`;
+    }
   }
 
   const url = `/solr/solr-search/?${additionalParams}${params}`;

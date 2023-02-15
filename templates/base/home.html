@@ -8,15 +8,6 @@
 
     {% load settingstags %}
 
-    {% if next %}
-        <script>
-            $('document').ready(function() {
-                // assign next parameter
-                $("#next_page").val("{{next}}");
-            });
-        </script>
-    {% endif %}
-
     <!-- Show an error message after accessing a protected page -->
     {% if login_failed and not request.GET.login_required%}
         <div class="mb-1 alert alert-danger" style="margin-top: -0.5rem;">

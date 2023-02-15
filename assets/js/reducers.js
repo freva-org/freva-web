@@ -1,7 +1,5 @@
 import { combineReducers } from "redux";
 
-import { routerReducer } from "react-router-redux";
-
 import { appReducer } from "./Containers/App/reducers";
 import { pluginListReducer } from "./Containers/PluginList/reducers";
 import { fileTreeReducer } from "./Components/FileTree/reducers";
@@ -16,7 +14,6 @@ const rootReducer = combineReducers({
   pluginDetailReducer,
   databrowserReducer,
   resultbrowserReducer,
-  routing: routerReducer
 });
 
 export default rootReducer;

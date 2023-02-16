@@ -5,7 +5,6 @@ from django.utils.html import format_html
 
 
 class HistoryAmdin(admin.ModelAdmin):
-
     list_display = (
         "id",
         "timestamp",

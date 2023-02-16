@@ -7,7 +7,6 @@ from selenium.webdriver.support.select import Select
 
 
 class EvaluationSystemWeb(unittest.TestCase):
-
     id_to_test = "13056"
 
     def logout_user(self):
@@ -60,7 +59,6 @@ class EvaluationSystemWeb(unittest.TestCase):
             )
 
     def __init__(self, *args, **kwargs):
-
         super(EvaluationSystemWeb, self).__init__(*args, **kwargs)
         self.driver = webdriver.Firefox()
         self.driver.desired_capabilities["acceptSslCerts"] = True
@@ -257,7 +255,6 @@ class EvaluationSystemWeb(unittest.TestCase):
         self.driver.find_element_by_id("btn_delete_" + note_id).click()
 
     def test_history(self):
-
         self.driver.get("https://www-miklip.dkrz.de/history/")
         self.assertEqual(
             "History - Evaluation System", self.driver.title, "Cant open history"

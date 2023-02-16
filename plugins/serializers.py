@@ -3,7 +3,6 @@ from django.contrib.flatpages.models import FlatPage
 
 
 class PluginSerializer(serializers.Serializer):
-
     name = serializers.SerializerMethodField()
     short_description = serializers.SerializerMethodField()
     long_description = serializers.SerializerMethodField()

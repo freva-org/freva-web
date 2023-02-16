@@ -20,7 +20,6 @@ def home(request):
     """Default view for the root"""
     login_failed = False
     guest_login = None
-
     next_page = request.GET.get("next", None)
     forward = request.POST.get("next", None)
     messages = UIMessages.objects.order_by("-id").filter(resolved=False)

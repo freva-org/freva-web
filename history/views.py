@@ -566,7 +566,6 @@ def set_caption(request, id):
 @sensitive_post_parameters("password")
 @login_required()
 def cancel_slurmjob(request):
-
     from paramiko import AuthenticationException
 
     eval_config.reloadConfiguration()

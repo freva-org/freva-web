@@ -37,19 +37,18 @@ const Row = ({ data, index, setSize, windowWidth, rowData, elemRef }) => {
     setSize(index, rowHeight);
   }, [setSize, index, windowWidth]);
 
-  return (
-    <React.Fragment>
-      {data[index]}
-    </React.Fragment>
-  );
+  return <React.Fragment>{data[index]}</React.Fragment>;
 };
 
 Row.propTypes = {
   data: PropTypes.array,
-  rowData: PropTypes.shape({ value: PropTypes.string, count: PropTypes.number }),
+  rowData: PropTypes.shape({
+    value: PropTypes.string,
+    count: PropTypes.number,
+  }),
   elemRef: PropTypes.oneOfType([
     PropTypes.func,
-    PropTypes.shape({ current: PropTypes.instanceOf(Element) })
+    PropTypes.shape({ current: PropTypes.instanceOf(Element) }),
   ]),
   index: PropTypes.number,
   setSize: PropTypes.func,
@@ -59,7 +58,7 @@ Row.propTypes = {
 export const useWindowSize = () => {
   const [size, setSize] = useState([0, 0]);
   useLayoutEffect(() => {
-    function updateSize () {
+    function updateSize() {
       setSize([window.innerWidth, window.innerHeight]);
     }
     window.addEventListener("resize", updateSize);
@@ -69,9 +68,7 @@ export const useWindowSize = () => {
   return size;
 };
 
-
-
-function AccordionItemBody (props) {
+function AccordionItemBody(props) {
   const listRef = useRef();
   const sizeMap = useRef({});
   const setSize = useCallback((index, size) => {
@@ -80,11 +77,11 @@ function AccordionItemBody (props) {
   }, []);
   const [filter, setFilter] = useState("");
 
-  function handleChange (e) {
+  function handleChange(e) {
     setFilter(e.target.value);
   }
 
-  function renderFilteredItems (filteredValues) {
+  function renderFilteredItems(filteredValues) {
     const { metadata, facetClick, eventKey } = props;
     return filteredValues.map((item) => {
       const value = item.value;
@@ -92,19 +89,25 @@ function AccordionItemBody (props) {
       if (metadata && metadata[value]) {
         return (
           <div className="col-md-12 col-sm-6" key={value}>
-            <OverlayTrigger overlay={<Tooltip><div dangerouslySetInnerHTML={{ __html: metadata[value] }} /></Tooltip>}>
+            <OverlayTrigger
+              overlay={
+                <Tooltip>
+                  <div dangerouslySetInnerHTML={{ __html: metadata[value] }} />
+                </Tooltip>
+              }
+            >
               <a
                 href="#"
-                onClick={
-                  (e) => {
-                    e.preventDefault();
-                    facetClick(eventKey, value);
-                    props.togglePanel();
-                  }
-                }
-              >{value}</a>
-            </OverlayTrigger>
-            {" "}[{count}]
+                onClick={(e) => {
+                  e.preventDefault();
+                  facetClick(eventKey, value);
+                  props.togglePanel();
+                }}
+              >
+                {value}
+              </a>
+            </OverlayTrigger>{" "}
+            [{count}]
           </div>
         );
       }
@@ -112,36 +115,40 @@ function AccordionItemBody (props) {
         <div className="col-md-12 col-sm-6" key={value}>
           <a
             href="#"
-            onClick={
-              (e) => {
-                e.preventDefault();
-                facetClick(eventKey, value);
-                if (props.togglePanel) {
-                  props.togglePanel();
-                }
+            onClick={(e) => {
+              e.preventDefault();
+              facetClick(eventKey, value);
+              if (props.togglePanel) {
+                props.togglePanel();
               }
-            }
-          >{value}</a> [{item.count}]
+            }}
+          >
+            {value}
+          </a>{" "}
+          [{item.count}]
         </div>
       );
     });
   }
-
 
   const { eventKey, value, metadata } = props;
   const filterLower = filter.toLowerCase();
   const filteredValues = [];
   for (let i = 0; i < value.length; i = i + 2) {
     const val = value[i];
-    if (val.toLowerCase().indexOf(filterLower) !== -1 ||
-        (metadata && metadata[val] && metadata[val].toLowerCase().indexOf(filterLower) !== -1)) {
-      filteredValues.push({ "value":val, "count": value[i + 1] });
+    if (
+      val.toLowerCase().indexOf(filterLower) !== -1 ||
+      (metadata &&
+        metadata[val] &&
+        metadata[val].toLowerCase().indexOf(filterLower) !== -1)
+    ) {
+      filteredValues.push({ value: val, count: value[i + 1] });
     }
   }
 
   const filteredItems = renderFilteredItems(filteredValues);
-  const [ windowWidth ] = useWindowSize();
-  const getSize = index => sizeMap.current[index] || 24;
+  const [windowWidth] = useWindowSize();
+  const getSize = (index) => sizeMap.current[index] || 24;
 
   return (
     <div>
@@ -152,42 +159,35 @@ function AccordionItemBody (props) {
         placeholder={`Search ${eventKey} name`}
         onChange={handleChange}
       />
-      {
-        filteredItems.length <= 12 ? (
-          filteredItems
-        ) : (
-          <List
-            ref={listRef}
-            className="infinite-body"
-            height={338}
-            itemData={filteredItems}
-            itemCount={filteredItems.length}
-            itemSize={getSize}
-            width="100%"
-          >
-            {
-              ({ data, index, style }) => (
-                <div style={style}>
-                  <Row
-                    data={data}
-                    index={index}
-                    setSize={setSize}
-                    windowWidth={windowWidth}
-                    rowData={filteredValues[index]}
-                    elemRef={props.elemRef}
-                  />
-                </div>
-              )
-            }
-
-          </List>
-        )
-      }
+      {filteredItems.length <= 12 ? (
+        filteredItems
+      ) : (
+        <List
+          ref={listRef}
+          className="infinite-body"
+          height={338}
+          itemData={filteredItems}
+          itemCount={filteredItems.length}
+          itemSize={getSize}
+          width="100%"
+        >
+          {({ data, index, style }) => (
+            <div style={style}>
+              <Row
+                data={data}
+                index={index}
+                setSize={setSize}
+                windowWidth={windowWidth}
+                rowData={filteredValues[index]}
+                elemRef={props.elemRef}
+              />
+            </div>
+          )}
+        </List>
+      )}
     </div>
   );
-
 }
-
 
 AccordionItemBody.propTypes = {
   eventKey: PropTypes.string,
@@ -195,10 +195,10 @@ AccordionItemBody.propTypes = {
   metadata: PropTypes.object,
   elemRef: PropTypes.oneOfType([
     PropTypes.func,
-    PropTypes.shape({ current: PropTypes.instanceOf(Element) })
+    PropTypes.shape({ current: PropTypes.instanceOf(Element) }),
   ]),
   facetClick: PropTypes.func,
-  togglePanel: PropTypes.func
+  togglePanel: PropTypes.func,
 };
 
 export default AccordionItemBody;

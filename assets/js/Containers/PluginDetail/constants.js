@@ -1,4 +1,3 @@
-
 export const LOAD_PLUGIN = "LOAD_PLUGIN";
 
 export const RESET_PLUGIN = "RESET_PLUGIN";

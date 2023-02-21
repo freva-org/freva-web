@@ -32,7 +32,11 @@ export const fileTreeReducer = (state = fileTreeInitialState, action) => {
         return { ...state, nodes: newNodes };
       }
     case constants.FETCH_DIR_ERROR:
-      return { ...state, nodes: action.payload.folders, error: action.payload.status };
+      return {
+        ...state,
+        nodes: action.payload.folders,
+        error: action.payload.status,
+      };
     case constants.CHANGE_ROOT:
       return { ...state, nodes: [], root: action.root };
     case constants.CLOSE_DIR: {

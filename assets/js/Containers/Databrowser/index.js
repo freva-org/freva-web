@@ -28,40 +28,46 @@ import {
   loadFiles,
   loadNcdump,
   resetNcdump,
-  updateFacetSelection
+  updateFacetSelection,
 } from "./actions";
 
 import {
   TIME_RANGE_FILE,
   TIME_RANGE_STRICT,
-  TIME_RANGE_FLEXIBLE
+  TIME_RANGE_FLEXIBLE,
 } from "./constants";
 
 import TimeRangeSelector from "./TimeRangeSelector";
 
 class Databrowser extends React.Component {
-
-  constructor (props) {
+  constructor(props) {
     super(props);
     this.state = { showDialog: false, fn: null };
   }
 
   /**
-     * On mount we load all facets and files to display
-     * Also load the metadata.js script
-     */
-  componentDidMount () {
+   * On mount we load all facets and files to display
+   * Also load the metadata.js script
+   */
+  componentDidMount() {
     this.props.dispatch(loadFacets(this.props.location));
     this.props.dispatch(loadFiles(this.props.location));
     this.props.dispatch(updateFacetSelection(this.props.location.query));
     const script = document.createElement("script");
     script.src = "/static/js/metadata.js";
     script.async = true;
-    script.onload = () => this.props.dispatch(setMetadata({ variable: window.variable, model: window.model, institute: window.institute }));
+    script.onload = () =>
+      this.props.dispatch(
+        setMetadata({
+          variable: window.variable,
+          model: window.model,
+          institute: window.institute,
+        })
+      );
     document.body.appendChild(script);
   }
 
-  componentDidUpdate (prevProps) {
+  componentDidUpdate(prevProps) {
     if (prevProps.location.search !== this.props.location.search) {
       this.props.dispatch(loadFacets(this.props.location));
       this.props.dispatch(loadFiles(this.props.location));
@@ -69,9 +75,9 @@ class Databrowser extends React.Component {
     }
   }
   /**
-     * Loop all facets and render the panels
-     */
-  renderFacetPanels () {
+   * Loop all facets and render the panels
+   */
+  renderFacetPanels() {
     const { facets, selectedFacets, metadata } = this.props.databrowser;
     // const { dispatch } = this.props;
 
@@ -80,40 +86,56 @@ class Databrowser extends React.Component {
       let panelHeader;
       const isFacetSelected = !!selectedFacets[key];
       if (isFacetSelected) {
-        panelHeader = <span>{key}: <strong>{selectedFacets[key]}</strong></span>;
+        panelHeader = (
+          <span>
+            {key}: <strong>{selectedFacets[key]}</strong>
+          </span>
+        );
       } else if (value.length === 2) {
-        panelHeader = <span>{key}: <strong>{value[0]}</strong></span>;
+        panelHeader = (
+          <span>
+            {key}: <strong>{value[0]}</strong>
+          </span>
+        );
       } else {
         const numberOfValues = value.length / 2;
-        panelHeader = <span>{key} ({numberOfValues})</span>;
+        panelHeader = (
+          <span>
+            {key} ({numberOfValues})
+          </span>
+        );
       }
       return (
         <OwnPanel
           header={panelHeader}
           key={key}
           removeFacet={
-            isFacetSelected ? (() => {
-              const currentLocation = this.props.location.pathname;
-              const { [key]: toRemove, ...queryObject } = this.props.location.query;
-              const query = queryString.stringify(queryObject);
-              this.props.router.push(currentLocation + "?" + query);
-            }) : null
+            isFacetSelected
+              ? () => {
+                  const currentLocation = this.props.location.pathname;
+                  const { [key]: toRemove, ...queryObject } =
+                    this.props.location.query;
+                  const query = queryString.stringify(queryObject);
+                  this.props.router.push(currentLocation + "?" + query);
+                }
+              : null
           }
         >
           <AccordionItemBody
             eventKey={key}
             value={value}
-            facetClick={
-              (key, item) => {
-                const currentLocation = this.props.location.pathname;
-                const query = queryString.stringify({ ...this.props.location.query, [key]: item });
-                if (query) {
-                  this.props.router.push(currentLocation + "?" + query);
-                } else {
-                  this.props.router.push(currentLocation);
-                }
+            facetClick={(key, item) => {
+              const currentLocation = this.props.location.pathname;
+              const query = queryString.stringify({
+                ...this.props.location.query,
+                [key]: item,
+              });
+              if (query) {
+                this.props.router.push(currentLocation + "?" + query);
+              } else {
+                this.props.router.push(currentLocation);
               }
-            }
+            }}
             metadata={metadata[key] ? metadata[key] : null}
           />
         </OwnPanel>
@@ -121,39 +143,41 @@ class Databrowser extends React.Component {
     });
   }
 
-  renderTimeSelectionPanel () {
+  renderTimeSelectionPanel() {
     const key = "time_range";
-    const { dateSelector, minDate, maxDate, } = this.props.databrowser;
+    const { dateSelector, minDate, maxDate } = this.props.databrowser;
     const isDateSelected = !!minDate;
-    const title = isDateSelected ?
-      (
-        <span>
-          Time Range: &nbsp;
-          <span className="fw-bold">
-            {dateSelector}: {minDate} to {maxDate}
-          </span>
+    const title = isDateSelected ? (
+      <span>
+        Time Range: &nbsp;
+        <span className="fw-bold">
+          {dateSelector}: {minDate} to {maxDate}
         </span>
-      ) :
-      (
-        <span>
-          Time Range
-        </span>
-      );
+      </span>
+    ) : (
+      <span>Time Range</span>
+    );
     return (
       <OwnPanel
         header={title}
         key={key}
         removeFacet={
-          isDateSelected ? (() => {
-            const currentLocation = this.props.location.pathname;
-            const { dateSelector: ignore1, minDate: ignore2, maxDate: ignore3, ...queryObject } = this.props.location.query;
-            const query = queryString.stringify(queryObject);
-            if (query) {
-              this.props.router.push(currentLocation + "?" + query);
-            } else {
-              this.props.router.push(currentLocation);
-            }
-          })
+          isDateSelected
+            ? () => {
+                const currentLocation = this.props.location.pathname;
+                const {
+                  dateSelector: ignore1,
+                  minDate: ignore2,
+                  maxDate: ignore3,
+                  ...queryObject
+                } = this.props.location.query;
+                const query = queryString.stringify(queryObject);
+                if (query) {
+                  this.props.router.push(currentLocation + "?" + query);
+                } else {
+                  this.props.router.push(currentLocation);
+                }
+              }
             : null
         }
       >
@@ -162,43 +186,52 @@ class Databrowser extends React.Component {
     );
   }
 
-  renderFilesPanel () {
+  renderFilesPanel() {
     //TODO: This should be a separate component
     const { files, numFiles, fileLoading } = this.props.databrowser;
     return (
       <div className="py-3">
         <h3> Files [{numFiles}]</h3>
-        <ul className="jqueryFileTree border shadow-sm py-3 rounded" style={{ "maxHeight":"1000px", "overflow": "auto" }}>
-          {
-            fileLoading ? <Spinner /> :
-              files.map((fn) => {
-                return (
-                  <li className="ext_nc" key={fn} style={{ whiteSpace: "normal" }}>
-                    <OverlayTrigger overlay={<Tooltip>Click here to inspect metadata</Tooltip>}>
-                      <Button
-                        variant="link"
-                        className="p-0"
-                        onClick={
-                          () => {
-                            this.setState({ showDialog: true, fn });
-                          }
-                        }
-                      >
-                        <FaInfoCircle className="ncdump" />
-                      </Button>
-                    </OverlayTrigger>
-                    {" "}{fn}
-                  </li>
-                );
-              })
-          }
+        <ul
+          className="jqueryFileTree border shadow-sm py-3 rounded"
+          style={{ maxHeight: "1000px", overflow: "auto" }}
+        >
+          {fileLoading ? (
+            <Spinner />
+          ) : (
+            files.map((fn) => {
+              return (
+                <li
+                  className="ext_nc"
+                  key={fn}
+                  style={{ whiteSpace: "normal" }}
+                >
+                  <OverlayTrigger
+                    overlay={<Tooltip>Click here to inspect metadata</Tooltip>}
+                  >
+                    <Button
+                      variant="link"
+                      className="p-0"
+                      onClick={() => {
+                        this.setState({ showDialog: true, fn });
+                      }}
+                    >
+                      <FaInfoCircle className="ncdump" />
+                    </Button>
+                  </OverlayTrigger>{" "}
+                  {fn}
+                </li>
+              );
+            })
+          )}
         </ul>
       </div>
     );
   }
 
-  render () {
-    const { facets, selectedFacets, ncdumpStatus, ncdumpOutput, ncdumpError } = this.props.databrowser;
+  render() {
+    const { facets, selectedFacets, ncdumpStatus, ncdumpOutput, ncdumpError } =
+      this.props.databrowser;
     const { dispatch } = this.props;
     if (this.props.error) {
       return (
@@ -211,9 +244,7 @@ class Databrowser extends React.Component {
     }
     // Wait until facets are loaded
     if (!facets) {
-      return (
-        <Spinner />
-      );
+      return <Spinner />;
     }
 
     const facetPanels = this.renderFacetPanels();
@@ -233,56 +264,60 @@ class Databrowser extends React.Component {
         <Row>
           <h2>
             Data-Browser&nbsp;
-            {this.props.databrowser.facetLoading && <Spinner outerClassName="d-inline fs-6 align-bottom" />}
+            {this.props.databrowser.facetLoading && (
+              <Spinner outerClassName="d-inline fs-6 align-bottom" />
+            )}
           </h2>
 
           <Col md={4}>
-            {
-              Object.keys(selectedFacets).length !== 0 ?
-                <Col md={12}>
-                  <Card className="shadow-sm mb-3">
-                    <a
-                      className="m-3"
-                      href="#"
-                      onClick={
-                        (e) => {
-                          e.preventDefault();
-                          this.props.router.push(this.props.location.pathname);
-                        }
-                      }
-                    >Clear all</a>
-                  </Card>
-                </Col> : null
-            }
+            {Object.keys(selectedFacets).length !== 0 ? (
+              <Col md={12}>
+                <Card className="shadow-sm mb-3">
+                  <a
+                    className="m-3"
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      this.props.router.push(this.props.location.pathname);
+                    }}
+                  >
+                    Clear all
+                  </a>
+                </Card>
+              </Col>
+            ) : null}
             {facetPanels}
             {this.renderTimeSelectionPanel()}
           </Col>
           <Col md={8}>
             <Card className="p-3 d-block shadow-sm">
               freva databrowser
-              {
-                this.props.databrowser.minDate && <React.Fragment>
+              {this.props.databrowser.minDate && (
+                <React.Fragment>
                   &nbsp;time=
                   <span className="fw-bold">
                     {`${this.props.databrowser.minDate}to${this.props.databrowser.maxDate}`}
                   </span>
                 </React.Fragment>
-              }
-              {
-                Object.keys(selectedFacets).map((key) => {
-                  const value = selectedFacets[key];
-                  return <React.Fragment key={`command-${key}`}> {key}=<strong>{value}</strong></React.Fragment>;
-                })
-              }
-              {
-                dateSelectorToCli && this.props.databrowser.minDate && <React.Fragment>
+              )}
+              {Object.keys(selectedFacets).map((key) => {
+                const value = selectedFacets[key];
+                return (
+                  <React.Fragment key={`command-${key}`}>
+                    {" "}
+                    {key}=<strong>{value}</strong>
+                  </React.Fragment>
+                );
+              })}
+              {dateSelectorToCli && this.props.databrowser.minDate && (
+                <React.Fragment>
                   &nbsp;--time-select
                   <span className="fw-bold">
                     &nbsp;
                     {`${dateSelectorToCli}`}
                   </span>
                 </React.Fragment>
-              }
+              )}
             </Card>
 
             {this.renderFilesPanel()}
@@ -290,11 +325,10 @@ class Databrowser extends React.Component {
             <NcdumpDialog
               show={this.state.showDialog}
               file={this.state.fn}
-              onClose={
-                () => {
-                  this.setState({ showDialog: false }); dispatch(resetNcdump());
-                }
-              }
+              onClose={() => {
+                this.setState({ showDialog: false });
+                dispatch(resetNcdump());
+              }}
               submitNcdump={(fn, pw) => dispatch(loadNcdump(fn, pw))}
               status={ncdumpStatus}
               output={ncdumpOutput}
@@ -305,7 +339,6 @@ class Databrowser extends React.Component {
       </Container>
     );
   }
-
 }
 
 Databrowser.propTypes = {
@@ -320,19 +353,19 @@ Databrowser.propTypes = {
     ncdumpOutput: PropTypes.string,
     ncdumpError: PropTypes.string,
     metadata: PropTypes.object,
-    dateSelector : PropTypes.string,
+    dateSelector: PropTypes.string,
     minDate: PropTypes.string,
     maxDate: PropTypes.string,
   }),
   location: PropTypes.object.isRequired,
   router: PropTypes.object.isRequired,
   error: PropTypes.string,
-  dispatch: PropTypes.func.isRequired
+  dispatch: PropTypes.func.isRequired,
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   databrowser: state.databrowserReducer,
-  error: state.appReducer.error
+  error: state.appReducer.error,
 });
 
 export default withRouter(connect(mapStateToProps)(Databrowser));

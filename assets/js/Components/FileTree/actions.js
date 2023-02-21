@@ -4,13 +4,13 @@ import * as constants from "./constants";
 
 export const closeDir = (path) => ({
   type: constants.CLOSE_DIR,
-  path
+  path,
 });
 
 export const changeRoot = (dir, ext) => (dispatch) => {
   dispatch({
     type: constants.CHANGE_ROOT,
-    root: dir
+    root: dir,
   });
   return dispatch(fetchDir(dir.path, ext));
 };
@@ -20,23 +20,23 @@ export const fetchDir = (dir, ext) => (dispatch) => {
   return fetch(url, {
     credentials: "same-origin",
     headers: {
-      "Accept": "application/json",
-      "Content-Type": "application/json"
-    }
-  }).then(response => response.json())
-    .then(json => {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+  })
+    .then((response) => response.json())
+    .then((json) => {
       if (json.status === "success") {
         return dispatch({
           type: constants.FETCH_DIR_SUCCESS,
           payload: json,
-          path: dir
+          path: dir,
         });
       }
       return dispatch({
         type: constants.FETCH_DIR_ERROR,
         payload: json,
-        path: dir
+        path: dir,
       });
     });
 };
-

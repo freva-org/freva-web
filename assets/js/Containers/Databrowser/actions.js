@@ -8,20 +8,20 @@ import * as globalStateConstants from "../App/constants";
 
 import * as constants from "./constants";
 
-export const updateFacetSelection = (queryObject) => dispatch => {
+export const updateFacetSelection = (queryObject) => (dispatch) => {
   dispatch({
     type: constants.UPDATE_FACET_SELECTION,
-    queryObject
+    queryObject,
   });
 };
 
 export const resetNcdump = () => ({
-  type: constants.RESET_NCDUMP
+  type: constants.RESET_NCDUMP,
 });
 
 export const setMetadata = (metadata) => ({
   type: constants.SET_METADATA,
-  metadata
+  metadata,
 });
 
 export const loadFacets = (location) => (dispatch) => {
@@ -31,15 +31,25 @@ export const loadFacets = (location) => (dispatch) => {
 
 export const loadFiles = (location) => (dispatch) => {
   dispatch({ type: constants.SET_FILE_LOADING });
-  return fetchResults(dispatch, location, "start=0&rows=100", constants.LOAD_FILES);
+  return fetchResults(
+    dispatch,
+    location,
+    "start=0&rows=100",
+    constants.LOAD_FILES
+  );
 };
 
-function fetchResults (dispatch, location, additionalParams, actionType) {
+function fetchResults(dispatch, location, additionalParams, actionType) {
   // const { selectedFacets, dateSelector, minDate, maxDate } = getState().databrowserReducer;
   let params = "";
   if (location) {
     const queryObject = location.query;
-    const { dateSelector: ignore1, minDate: ignore2, maxDate: ignore3, ...facets } = location.query;
+    const {
+      dateSelector: ignore1,
+      minDate: ignore2,
+      maxDate: ignore3,
+      ...facets
+    } = location.query;
 
     params = queryString.stringify(facets);
 
@@ -67,25 +77,26 @@ function fetchResults (dispatch, location, additionalParams, actionType) {
     credentials: "same-origin",
     headers: {
       "X-CSRFToken": getCookie("csrftoken"),
-      "Accept": "application/json",
-      "Content-Type": "application/json"
-    }
-  }).then(response => response.json())
-    .then(json => {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+  })
+    .then((response) => response.json())
+    .then((json) => {
       return dispatch({
         type: actionType,
-        payload: json
+        payload: json,
       });
     })
     .catch(() => {
       return dispatch({
         type: globalStateConstants.SET_ERROR,
-        payload: "Internal Error: Could not load results"
+        payload: "Internal Error: Could not load results",
       });
     });
 }
 
-export const loadNcdump = (fn, pw) => dispatch => {
+export const loadNcdump = (fn, pw) => (dispatch) => {
   const url = "/api/solr/ncdump/";
   dispatch({ type: constants.LOAD_NCDUMP, fn });
   return fetch(url, {
@@ -93,30 +104,35 @@ export const loadNcdump = (fn, pw) => dispatch => {
     method: "POST",
     headers: {
       "X-CSRFToken": getCookie("csrftoken"),
-      "Accept": "application/json",
-      "Content-Type": "application/json"
+      Accept: "application/json",
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       file: fn,
-      pass: pw
+      pass: pw,
+    }),
+  })
+    .then((resp) => {
+      if (!resp.ok) {
+        /* eslint-disable */
+        return resp.json().then((json) => {
+          console.log(resp.statusText);
+          if (json.error_msg) {
+            throw new Error(json.error_msg);
+          } else {
+            throw new Error(resp.statusText);
+          }
+        });
+      }
+      return resp.json();
     })
-  }).then(resp => {
-    if (!resp.ok) {
-      /* eslint-disable */
-      return resp.json().then(json => {
-        console.log(resp.statusText)
-        if (json.error_msg) {
-          throw new Error(json.error_msg);
-        } else {
-          throw new Error(resp.statusText);
-        }
+    .then((json) => {
+      return dispatch({
+        type: constants.LOAD_NCDUMP_SUCCESS,
+        message: json.ncdump,
       });
-    }
-    return resp.json();
-  }).then(json => {
-    return dispatch({ type: constants.LOAD_NCDUMP_SUCCESS, message: json.ncdump });
-  }
-  ).catch((error) => {
-    dispatch({ type: constants.LOAD_NCDUMP_ERROR, message: error.message });
-  });
+    })
+    .catch((error) => {
+      dispatch({ type: constants.LOAD_NCDUMP_ERROR, message: error.message });
+    });
 };

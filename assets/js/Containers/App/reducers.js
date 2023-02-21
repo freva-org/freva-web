@@ -2,7 +2,7 @@ import * as constants from "./constants";
 
 const appReducerInitialState = {
   currentUser: null,
-  error: ""
+  error: "",
 };
 
 export const appReducer = (state = appReducerInitialState, action) => {

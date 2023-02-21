@@ -1,4 +1,3 @@
-
 export const LOAD_FACETS = "LOAD_FACETS";
 
 export const LOAD_FILES = "LOAD_FILES";

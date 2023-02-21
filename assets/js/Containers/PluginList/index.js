@@ -3,20 +3,41 @@ import PropTypes from "prop-types";
 import { browserHistory } from "react-router";
 import { connect } from "react-redux";
 import {
-  Row, Col, Button, ListGroup, ListGroupItem, Container, Modal, ButtonGroup, FormCheck,
-  FormGroup, FormLabel, FormControl, InputGroup
+  Row,
+  Col,
+  Button,
+  ListGroup,
+  ListGroupItem,
+  Container,
+  Modal,
+  ButtonGroup,
+  FormCheck,
+  FormGroup,
+  FormLabel,
+  FormControl,
+  InputGroup,
 } from "react-bootstrap";
 
 import _ from "lodash";
 
 import FileTree from "../../Components/FileTree";
-import { fetchDir, closeDir, changeRoot } from "../../Components/FileTree/actions";
+import {
+  fetchDir,
+  closeDir,
+  changeRoot,
+} from "../../Components/FileTree/actions";
 
 import Spinner from "../../Components/Spinner";
 
-import { exportPlugin, loadPlugins, updateCategoryFilter, updateTagFilter, updateSearchFilter } from "./actions";
+import {
+  exportPlugin,
+  loadPlugins,
+  updateCategoryFilter,
+  updateTagFilter,
+  updateSearchFilter,
+} from "./actions";
 
-function initCap (str) {
+function initCap(str) {
   if (!str) {
     return str;
   }
@@ -29,8 +50,7 @@ function initCap (str) {
 }
 
 class PluginList extends React.Component {
-
-  constructor (props) {
+  constructor(props) {
     super(props);
     this.handleExport = this.handleImport.bind(this);
     this.handleSearchFilter = this.handleSearchFilter.bind(this);
@@ -43,26 +63,28 @@ class PluginList extends React.Component {
     };
   }
 
-  componentDidMount () {
+  componentDidMount() {
     this.props.dispatch(loadPlugins());
   }
 
-  handleImport () {
+  handleImport() {
     this.props.dispatch(exportPlugin(this.state.value));
     this.setState({ showModal: false });
   }
 
-  handleSearchFilter (e) {
+  handleSearchFilter(e) {
     this.props.dispatch(updateSearchFilter(e.target.value));
   }
 
-  handlePluginValue (e) {
+  handlePluginValue(e) {
     this.setState({ value: e.target.value });
   }
 
-  renderPluginBlock (filteredPlugins, category) {
-    const plugins = filteredPlugins.filter(val => {
-      return val[1].category.toLowerCase().trim() === category.toLowerCase().trim();
+  renderPluginBlock(filteredPlugins, category) {
+    const plugins = filteredPlugins.filter((val) => {
+      return (
+        val[1].category.toLowerCase().trim() === category.toLowerCase().trim()
+      );
     });
 
     if (plugins.length <= 0) {
@@ -73,35 +95,34 @@ class PluginList extends React.Component {
         <div className="card-header">
           <h3 className="mb-0">{initCap(category)}</h3>
         </div>
-        {
-          plugins.map(val => {
-            return (
-              <ListGroupItem
-                className="shadow-sm card-body border-0 border-bottom"
-                action
-                onClick={
-                  (e) => {
-                    e.preventDefault(); browserHistory.push(`/plugins/${val[0]}/detail/`);
-                  }
-                }
-                href={`/plugins/${val[0]}/detail/`}
-                key={val[0]}
-              >
-                <div className="fs-5">{val[1].name}</div>
-                {
-                  val[1].user_exported ?
-                    <span className="text-danger">You have plugged in this tool.<br /></span> : null
-                }
-                {val[1].description}
-              </ListGroupItem>
-            );
-          })
-        }
+        {plugins.map((val) => {
+          return (
+            <ListGroupItem
+              className="shadow-sm card-body border-0 border-bottom"
+              action
+              onClick={(e) => {
+                e.preventDefault();
+                browserHistory.push(`/plugins/${val[0]}/detail/`);
+              }}
+              href={`/plugins/${val[0]}/detail/`}
+              key={val[0]}
+            >
+              <div className="fs-5">{val[1].name}</div>
+              {val[1].user_exported ? (
+                <span className="text-danger">
+                  You have plugged in this tool.
+                  <br />
+                </span>
+              ) : null}
+              {val[1].description}
+            </ListGroupItem>
+          );
+        })}
       </ListGroup>
     );
   }
 
-  renderCategoryCheckbox (categories, categoriesFilter, categoryName) {
+  renderCategoryCheckbox(categories, categoriesFilter, categoryName) {
     if (!categories[categoryName]) {
       return null;
     }
@@ -110,20 +131,20 @@ class PluginList extends React.Component {
       <FormCheck key={categoryName + "checkbox"}>
         <FormCheck.Input
           type="checkbox"
-          onChange={() => this.props.dispatch(updateCategoryFilter(categoryName))}
+          onChange={() =>
+            this.props.dispatch(updateCategoryFilter(categoryName))
+          }
           checked={_.includes(categoriesFilter, categoryName)}
           id={categoryName + "-cat"}
         />
-        <FormCheck.Label
-          htmlFor={categoryName + "-cat"}
-        >
+        <FormCheck.Label htmlFor={categoryName + "-cat"}>
           {initCap(categoryName)} ({categories[categoryName].length})
         </FormCheck.Label>
       </FormCheck>
     );
   }
 
-  render () {
+  render() {
     const {
       exported,
       tags,
@@ -132,77 +153,74 @@ class PluginList extends React.Component {
       tagsFilter,
       filteredPlugins,
       searchFilter,
-      pluginsLoaded
+      pluginsLoaded,
     } = this.props.pluginList;
 
     const { nodes, root, error } = this.props.fileTree;
     const { currentUser, dispatch } = this.props;
     let children;
     if (nodes && nodes.length > 0) {
-      children = nodes.map(n => {
+      children = nodes.map((n) => {
         return (
           <FileTree
             node={n}
             key={n.name}
             extension="py"
-            handleOpen={
-              (e, path) => {
-                e.preventDefault(); this.props.dispatch(fetchDir(path, "py"));
-              }
-            }
-            handleClose={
-              (e, path) => {
-                e.preventDefault(); this.props.dispatch(closeDir(path));
-              }
-            }
-            handleFileClick={
-              (e, path) => {
-                e.preventDefault(); this.setState({ value:path });
-              }
-            }
+            handleOpen={(e, path) => {
+              e.preventDefault();
+              this.props.dispatch(fetchDir(path, "py"));
+            }}
+            handleClose={(e, path) => {
+              e.preventDefault();
+              this.props.dispatch(closeDir(path));
+            }}
+            handleFileClick={(e, path) => {
+              e.preventDefault();
+              this.setState({ value: path });
+            }}
           />
         );
       });
     } else if (error) {
-      children = (
-        <div className="text-danger">
-          {error}
-        </div>
-      );
+      children = <div className="text-danger">{error}</div>;
     }
 
     if (!pluginsLoaded) {
-      return (
-        <Spinner />
-      );
+      return <Spinner />;
     }
-    const defaultSelection = currentUser.home ? { id: "home", path: currentUser.home } : { id: "scratch", path: currentUser.scratch };
+    const defaultSelection = currentUser.home
+      ? { id: "home", path: currentUser.home }
+      : { id: "scratch", path: currentUser.scratch };
 
     return (
       <Container>
         <Row>
-          <Col md={6}><h2>Plugins</h2></Col>
+          <Col md={6}>
+            <h2>Plugins</h2>
+          </Col>
           <Col md={6} className="pt-2">
-            {
-              !currentUser.isGuest && (currentUser.home || currentUser.scratch) ?
-                <Button
-                  variant="info"
-                  className="float-end"
-                  onClick={() => (exported ? this.props.dispatch(exportPlugin()) : this.setState({ showModal: true }))}
-                >
-                  {exported ? "Remove imported Plugin" : "Plug-my-Plugin"}
-                </Button> : null
-            }
+            {!currentUser.isGuest &&
+            (currentUser.home || currentUser.scratch) ? (
+              <Button
+                variant="info"
+                className="float-end"
+                onClick={() => {
+                  return exported
+                    ? this.props.dispatch(exportPlugin())
+                    : this.setState({ showModal: true });
+                }}
+              >
+                {exported ? "Remove imported Plugin" : "Plug-my-Plugin"}
+              </Button>
+            ) : null}
           </Col>
         </Row>
 
         <Row>
           <Col md={8} className="mt-3">
-            {
-              Object.keys(categories).map(key => {
-                return this.renderPluginBlock(filteredPlugins, key);
-              })
-            }
+            {Object.keys(categories).map((key) => {
+              return this.renderPluginBlock(filteredPlugins, key);
+            })}
           </Col>
 
           <Col md={4}>
@@ -218,30 +236,32 @@ class PluginList extends React.Component {
             <div className="mt-2">
               <FormLabel>Categories:</FormLabel>
               <div>
-                {
-                  Object.keys(categories).map(key => {
-                    return this.renderCategoryCheckbox(categories, categoriesFilter, key);
-                  })
-                }
+                {Object.keys(categories).map((key) => {
+                  return this.renderCategoryCheckbox(
+                    categories,
+                    categoriesFilter,
+                    key
+                  );
+                })}
               </div>
             </div>
             <div className="mt-2">
               <FormLabel>Tags:</FormLabel>
               <div className="d-flex flex-wrap justify-content-between">
-                {
-                  tags.map(tag => {
-                    return (
-                      <Button
-                        className="badge mb-2 me-2"
-                        variant={_.includes(tagsFilter, tag) ? "success" : "secondary"}
-                        key={tag}
-                        onClick={() => dispatch(updateTagFilter(tag))}
-                      >
-                        {tag}
-                      </Button>
-                    );
-                  })
-                }
+                {tags.map((tag) => {
+                  return (
+                    <Button
+                      className="badge mb-2 me-2"
+                      variant={
+                        _.includes(tagsFilter, tag) ? "success" : "secondary"
+                      }
+                      key={tag}
+                      onClick={() => dispatch(updateTagFilter(tag))}
+                    >
+                      {tag}
+                    </Button>
+                  );
+                })}
               </div>
             </div>
           </Col>
@@ -258,26 +278,35 @@ class PluginList extends React.Component {
           <Modal.Body>
             <p>Here you can plugin your own plugin</p>
             <ButtonGroup className="mb-2">
-              {
-                currentUser.home &&
+              {currentUser.home && (
                 <Button
                   variant="primary"
                   active={root.id === "home"}
-                  onClick={() => this.props.dispatch(changeRoot({ id: "home", path: currentUser.home }, "py"))}
+                  onClick={() =>
+                    this.props.dispatch(
+                      changeRoot({ id: "home", path: currentUser.home }, "py")
+                    )
+                  }
                 >
                   Home
                 </Button>
-              }
-              {
-                currentUser.scratch &&
+              )}
+              {currentUser.scratch && (
                 <Button
                   variant="primary"
                   active={root.id === "scratch"}
-                  onClick={() => this.props.dispatch(changeRoot({ id: "scratch", path: currentUser.scratch }, "py"))}
+                  onClick={() =>
+                    this.props.dispatch(
+                      changeRoot(
+                        { id: "scratch", path: currentUser.scratch },
+                        "py"
+                      )
+                    )
+                  }
                 >
                   Workspace
                 </Button>
-              }
+              )}
             </ButtonGroup>
             {children}
             <FormGroup style={{ marginTop: 10 }}>
@@ -291,7 +320,9 @@ class PluginList extends React.Component {
           </Modal.Body>
 
           <Modal.Footer>
-            <Button variant="primary" onClick={() => this.handleExport()}>Import Plugin</Button>
+            <Button variant="primary" onClick={() => this.handleExport()}>
+              Import Plugin
+            </Button>
           </Modal.Footer>
         </Modal>
       </Container>
@@ -308,14 +339,14 @@ PluginList.propTypes = {
     tagsFilter: PropTypes.array,
     filteredPlugins: PropTypes.array,
     searchFilter: PropTypes.string,
-    pluginsLoaded: PropTypes.bool
+    pluginsLoaded: PropTypes.bool,
   }),
   fileTree: PropTypes.shape({
     nodes: PropTypes.array,
     root: PropTypes.shape({
-      id: PropTypes.string
+      id: PropTypes.string,
     }),
-    error: PropTypes.string
+    error: PropTypes.string,
   }),
   currentUser: PropTypes.shape({
     id: PropTypes.number,
@@ -323,15 +354,15 @@ PluginList.propTypes = {
     email: PropTypes.string,
     isGuest: PropTypes.bool,
     home: PropTypes.string,
-    scratch: PropTypes.string
+    scratch: PropTypes.string,
   }),
-  dispatch: PropTypes.func.isRequired
+  dispatch: PropTypes.func.isRequired,
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   pluginList: state.pluginListReducer,
   fileTree: state.fileTreeReducer,
-  currentUser: state.appReducer.currentUser
+  currentUser: state.appReducer.currentUser,
 });
 
 export default connect(mapStateToProps)(PluginList);

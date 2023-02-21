@@ -7,10 +7,13 @@ const resultbrowserInitialState = {
   files: [],
   selectedFacets: {},
   metadata: {},
-  loadingFacets: false
+  loadingFacets: false,
 };
 
-export const resultbrowserReducer = (state = resultbrowserInitialState, action) => {
+export const resultbrowserReducer = (
+  state = resultbrowserInitialState,
+  action
+) => {
   switch (action.type) {
     case constants.START_LOADING_RESULT_FACETS:
       return { ...state, loadingFacets: true };
@@ -36,5 +39,3 @@ export const resultbrowserReducer = (state = resultbrowserInitialState, action) 
       return state;
   }
 };
-
-

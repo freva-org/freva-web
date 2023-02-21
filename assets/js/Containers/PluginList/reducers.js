@@ -11,12 +11,12 @@ const pluginListInitialState = {
   categories: {},
   categoriesFilter: [],
   tagsFilter: [],
-  searchFilter: ""
+  searchFilter: "",
 };
 
 const OTHER_CATEGORY = "others";
 
-function compareCategories (a, b) {
+function compareCategories(a, b) {
   const normalizedA = a.toLowerCase().trim();
   const normalizedB = b.toLowerCase().trim();
   if (normalizedA === OTHER_CATEGORY) {
@@ -27,13 +27,15 @@ function compareCategories (a, b) {
   return a.localeCompare(b);
 }
 
-function sortCategories (o) {
-  return Object.keys(o).sort(compareCategories).reduce((r, k) => (r[k] = o[k], r), {});
+function sortCategories(o) {
+  return Object.keys(o)
+    .sort(compareCategories)
+    .reduce((r, k) => ((r[k] = o[k]), r), {});
 }
 
-const createCategories = plugins => {
+const createCategories = (plugins) => {
   const categories = {};
-  plugins.forEach(p => {
+  plugins.forEach((p) => {
     const plugin = p[1];
     const newCat = plugin.category;
     let cat = categories[newCat];
@@ -47,9 +49,9 @@ const createCategories = plugins => {
   return sortCategories(categories);
 };
 
-const createTags = plugins => {
+const createTags = (plugins) => {
   let tags = [];
-  plugins.forEach(p => {
+  plugins.forEach((p) => {
     const plugin = p[1];
     if (plugin.tags) {
       tags = tags.concat(plugin.tags);
@@ -62,7 +64,7 @@ const filterPlugins = (plugins, categoriesFilter, tagsFilter, searchFilter) => {
   let filteredPlugins = plugins;
   // filter for categories
   if (categoriesFilter.length > 0) {
-    filteredPlugins = filteredPlugins.filter(p => {
+    filteredPlugins = filteredPlugins.filter((p) => {
       return _.includes(categoriesFilter, p[1].category);
     });
   }
@@ -70,7 +72,7 @@ const filterPlugins = (plugins, categoriesFilter, tagsFilter, searchFilter) => {
   // filter for tags
   // tool must have ALL tags
   if (tagsFilter.length > 0) {
-    filteredPlugins = filteredPlugins.filter(p => {
+    filteredPlugins = filteredPlugins.filter((p) => {
       for (let i = 0; i < tagsFilter.length; i++) {
         if (!_.includes(p[1].tags, tagsFilter[i])) {
           return false;
@@ -82,10 +84,13 @@ const filterPlugins = (plugins, categoriesFilter, tagsFilter, searchFilter) => {
 
   // filter for string
   const searchWord = searchFilter.toLowerCase();
-  filteredPlugins = filteredPlugins.filter(p => {
+  filteredPlugins = filteredPlugins.filter((p) => {
     const plugin = p[1];
     const title = _.includes(plugin.name.toLowerCase(), searchWord);
-    const description = _.includes(plugin.description.toLowerCase(), searchWord);
+    const description = _.includes(
+      plugin.description.toLowerCase(),
+      searchWord
+    );
     let tags = false;
     if (plugin.tags) {
       tags = _.includes(plugin.tags.join().toLowerCase(), searchWord);
@@ -95,18 +100,22 @@ const filterPlugins = (plugins, categoriesFilter, tagsFilter, searchFilter) => {
   return filteredPlugins;
 };
 
-
 export const pluginListReducer = (state = pluginListInitialState, action) => {
   switch (action.type) {
     case constants.FILTER_PLUGINS: {
-      const filteredPlugins = filterPlugins([...state.plugins], state.categoriesFilter, state.tagsFilter, state.searchFilter);
+      const filteredPlugins = filterPlugins(
+        [...state.plugins],
+        state.categoriesFilter,
+        state.tagsFilter,
+        state.searchFilter
+      );
       return { ...state, filteredPlugins, tags: createTags(filteredPlugins) };
     }
     case constants.LOAD_PLUGINS: {
-      const exported = action.payload.some(v => {
+      const exported = action.payload.some((v) => {
         return v[1].user_exported;
       });
-      action.payload.forEach(p => {
+      action.payload.forEach((p) => {
         const plugin = p[1];
         if (!plugin.category) {
           plugin.category = OTHER_CATEGORY;
@@ -118,8 +127,13 @@ export const pluginListReducer = (state = pluginListInitialState, action) => {
         exported,
         categories: createCategories(action.payload),
         tags: createTags(action.payload),
-        filteredPlugins: filterPlugins(action.payload, state.categoriesFilter, state.tagsFilter, state.searchFilter),
-        pluginsLoaded: true
+        filteredPlugins: filterPlugins(
+          action.payload,
+          state.categoriesFilter,
+          state.tagsFilter,
+          state.searchFilter
+        ),
+        pluginsLoaded: true,
       };
     }
     case constants.UPDATE_CATEGORY_FILTER: {

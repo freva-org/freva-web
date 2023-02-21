@@ -11,7 +11,7 @@ if (process.env.NODE_ENV !== "production") {
   middleware.push(createLogger());
 }
 
-export default function configureStore (initialState) {
+export default function configureStore(initialState) {
   const store = createStore(
     reducer,
     initialState,

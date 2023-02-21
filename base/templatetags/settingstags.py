@@ -14,7 +14,6 @@ def settings_val(value):
 
 @register.simple_tag
 def setting_to_list(value):
-
     setting_value = getattr(settings, value)
     result = ""
     for val in setting_value:

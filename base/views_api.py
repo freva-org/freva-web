@@ -10,7 +10,6 @@ class AuthenticatedUser(APIView):
     serializer_class = UserSerializer
 
     def get(self, request):
-
         if request.user.is_authenticated:
             try:
                 user = LdapUser(request.user.username)

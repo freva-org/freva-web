@@ -21,7 +21,6 @@ admin.site.register(User, CustomUserAdmin)
 
 
 class PermissionAdmin(admin.ModelAdmin):
-
     list_display = ("id", "name", "codename")
 
 

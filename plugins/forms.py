@@ -158,7 +158,6 @@ class PluginForm(forms.Form):
         self.get_caption_field(tool)
 
         for key in tool.__parameters__:
-
             param = tool.__parameters__.get_parameter(key)
             param_subtype = param.base_type
 

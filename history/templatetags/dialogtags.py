@@ -20,7 +20,6 @@ def sendmail_dialog(url, is_guest):
 
 @register.inclusion_tag("history/templatetags/caption_dialog.html")
 def caption_dialog(current, default, history_object, user):
-
     return {
         "current_caption": current,
         "default_caption": default,

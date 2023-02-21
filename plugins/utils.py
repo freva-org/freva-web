@@ -23,7 +23,6 @@ def get_scheduler_hosts(user):
 
 
 def get_plugin_or_404(plugin_name, user=None):
-
     try:
         return pm.get_plugin_instance(plugin_name, user)
     except SyntaxError:

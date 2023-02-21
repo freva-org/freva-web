@@ -14,6 +14,9 @@ import {
 
 import { FaInfoCircle } from "react-icons/fa";
 
+import queryString from "query-string";
+import { withRouter } from "react-router";
+
 import NcdumpDialog from "../../Components/NcdumpDialog";
 import AccordionItemBody from "../../Components/AccordionItemBody";
 import OwnPanel from "../../Components/OwnPanel";
@@ -21,14 +24,11 @@ import Spinner from "../../Components/Spinner";
 
 import {
   loadFacets,
-  selectFacet,
-  clearFacet,
-  clearAllFacets,
   setMetadata,
   loadFiles,
   loadNcdump,
   resetNcdump,
-  clearTimeRange
+  updateFacetSelection
 } from "./actions";
 
 import {
@@ -51,8 +51,9 @@ class Databrowser extends React.Component {
      * Also load the metadata.js script
      */
   componentDidMount () {
-    this.props.dispatch(loadFacets());
-    this.props.dispatch(loadFiles());
+    this.props.dispatch(loadFacets(this.props.location));
+    this.props.dispatch(loadFiles(this.props.location));
+    this.props.dispatch(updateFacetSelection(this.props.location.query));
     const script = document.createElement("script");
     script.src = "/static/js/metadata.js";
     script.async = true;
@@ -60,12 +61,19 @@ class Databrowser extends React.Component {
     document.body.appendChild(script);
   }
 
+  componentDidUpdate (prevProps) {
+    if (prevProps.location.search !== this.props.location.search) {
+      this.props.dispatch(loadFacets(this.props.location));
+      this.props.dispatch(loadFiles(this.props.location));
+      this.props.dispatch(updateFacetSelection(this.props.location.query));
+    }
+  }
   /**
      * Loop all facets and render the panels
      */
   renderFacetPanels () {
     const { facets, selectedFacets, metadata } = this.props.databrowser;
-    const { dispatch } = this.props;
+    // const { dispatch } = this.props;
 
     return Object.keys(facets).map((key) => {
       const value = facets[key];
@@ -83,12 +91,29 @@ class Databrowser extends React.Component {
         <OwnPanel
           header={panelHeader}
           key={key}
-          removeFacet={isFacetSelected ? (() => dispatch(clearFacet(key))) : null}
+          removeFacet={
+            isFacetSelected ? (() => {
+              const currentLocation = this.props.location.pathname;
+              const { [key]: toRemove, ...queryObject } = this.props.location.query;
+              const query = queryString.stringify(queryObject);
+              this.props.router.push(currentLocation + "?" + query);
+            }) : null
+          }
         >
           <AccordionItemBody
             eventKey={key}
             value={value}
-            facetClick={(key, item) => dispatch(selectFacet(key, item))}
+            facetClick={
+              (key, item) => {
+                const currentLocation = this.props.location.pathname;
+                const query = queryString.stringify({ ...this.props.location.query, [key]: item });
+                if (query) {
+                  this.props.router.push(currentLocation + "?" + query);
+                } else {
+                  this.props.router.push(currentLocation);
+                }
+              }
+            }
             metadata={metadata[key] ? metadata[key] : null}
           />
         </OwnPanel>
@@ -98,7 +123,6 @@ class Databrowser extends React.Component {
 
   renderTimeSelectionPanel () {
     const key = "time_range";
-    const { dispatch } = this.props;
     const { dateSelector, minDate, maxDate, } = this.props.databrowser;
     const isDateSelected = !!minDate;
     const title = isDateSelected ?
@@ -119,7 +143,19 @@ class Databrowser extends React.Component {
       <OwnPanel
         header={title}
         key={key}
-        removeFacet={isDateSelected ? (() => dispatch(clearTimeRange())) : null}
+        removeFacet={
+          isDateSelected ? (() => {
+            const currentLocation = this.props.location.pathname;
+            const { dateSelector: ignore1, minDate: ignore2, maxDate: ignore3, ...queryObject } = this.props.location.query;
+            const query = queryString.stringify(queryObject);
+            if (query) {
+              this.props.router.push(currentLocation + "?" + query);
+            } else {
+              this.props.router.push(currentLocation);
+            }
+          })
+            : null
+        }
       >
         <TimeRangeSelector />
       </OwnPanel>
@@ -211,7 +247,7 @@ class Databrowser extends React.Component {
                       onClick={
                         (e) => {
                           e.preventDefault();
-                          dispatch(clearAllFacets());
+                          this.props.router.push(this.props.location.pathname);
                         }
                       }
                     >Clear all</a>
@@ -233,6 +269,12 @@ class Databrowser extends React.Component {
                 </React.Fragment>
               }
               {
+                Object.keys(selectedFacets).map((key) => {
+                  const value = selectedFacets[key];
+                  return <React.Fragment key={`command-${key}`}> {key}=<strong>{value}</strong></React.Fragment>;
+                })
+              }
+              {
                 dateSelectorToCli && this.props.databrowser.minDate && <React.Fragment>
                   &nbsp;--time-select
                   <span className="fw-bold">
@@ -240,12 +282,6 @@ class Databrowser extends React.Component {
                     {`${dateSelectorToCli}`}
                   </span>
                 </React.Fragment>
-              }
-              {
-                Object.keys(selectedFacets).map((key) => {
-                  const value = selectedFacets[key];
-                  return <React.Fragment key={`command-${key}`}> {key}=<strong>{value}</strong></React.Fragment>;
-                })
               }
             </Card>
 
@@ -288,6 +324,8 @@ Databrowser.propTypes = {
     minDate: PropTypes.string,
     maxDate: PropTypes.string,
   }),
+  location: PropTypes.object.isRequired,
+  router: PropTypes.object.isRequired,
   error: PropTypes.string,
   dispatch: PropTypes.func.isRequired
 };
@@ -297,4 +335,4 @@ const mapStateToProps = state => ({
   error: state.appReducer.error
 });
 
-export default connect(mapStateToProps)(Databrowser);
+export default withRouter(connect(mapStateToProps)(Databrowser));

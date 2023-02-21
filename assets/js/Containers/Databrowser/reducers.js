@@ -1,5 +1,3 @@
-import _ from "lodash";
-
 import * as constants from "./constants";
 
 const databrowserInitialState = {
@@ -26,24 +24,33 @@ export const databrowserReducer = (state = databrowserInitialState, action) => {
       return { ...state, fileLoading: true };
     case constants.LOAD_FACETS:
       return { ...state, error: "", facets: action.payload.data, facetLoading: false };
-    case constants.SELECT_FACET: {
-      const selectedFacets = { ...state.selectedFacets };
-      selectedFacets[action.facet] = action.value;
-      return { ...state, selectedFacets };
-    }
-    case constants.CLEAR_FACET: {
-      let newFacets = { ...state.selectedFacets };
-      newFacets = _.omit(newFacets, action.facet);
-      return { ...state, selectedFacets: newFacets };
-    }
-    case constants.CLEAR_ALL_FACETS:
+    case constants.UPDATE_FACET_SELECTION: {
+      const { minDate, maxDate, dateSelector, ...queryObject } = action.queryObject;
+      // let newObject = {}
+      // if (state.facets) {
+      //   Object.keys(state.facets).forEach(key => {
+      //     if (key in queryObject) {
+      //       newObject = { ...newObject, [key]: queryObject[key] };
+      //     }
+      //   });
+      // }
+      // let dateInfo = {};
+      let myMinDate = minDate;
+      let myMaxDate = maxDate;
+      let myDateSelector = dateSelector;
+      if (!dateSelector || !minDate || !maxDate) {
+        myDateSelector = databrowserInitialState.dateSelector;
+        myMinDate = databrowserInitialState.minDate;
+        myMaxDate = databrowserInitialState.maxDate;
+      }
       return {
         ...state,
-        selectedFacets: {},
-        dateSelector: databrowserInitialState.dateSelector,
-        minDate: databrowserInitialState.minDate,
-        maxDate: databrowserInitialState.maxDate
+        selectedFacets: { ...queryObject },
+        dateSelector: myDateSelector,
+        minDate: myMinDate,
+        maxDate: myMaxDate
       };
+    }
     case constants.SET_METADATA:
       return { ...state, metadata: action.metadata };
     case constants.LOAD_FILES:
@@ -54,15 +61,6 @@ export const databrowserReducer = (state = databrowserInitialState, action) => {
       return { ...state, ncdumpStatus: "loading" };
     case constants.LOAD_NCDUMP_SUCCESS:
       return { ...state, ncdumpStatus: "ready", ncdumpOutput: action.message, ncdumpError: null };
-    case constants.SET_TIME_RANGE:
-      return { ...state, dateSelector: action.timeRange.dateSelector, minDate: action.timeRange.minDate, maxDate: action.timeRange.maxDate };
-    case constants.CLEAR_TIME_RANGE:
-      return {
-        ...state,
-        dateSelector: databrowserInitialState.dateSelector,
-        minDate: databrowserInitialState.minDate,
-        maxDate: databrowserInitialState.maxDate
-      };
     case constants.RESET_NCDUMP:
       return { ...state, ncdumpStatus: "pw", ncdumpOutput: null, ncdumpError: null };
     default:

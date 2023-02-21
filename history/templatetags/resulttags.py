@@ -185,7 +185,6 @@ user_mask = {}
 
 @register.inclusion_tag("history/templatetags/mail_to_developer.html")
 def mail_to_developer(tool_name, username, url):
-
     from evaluation_system.api import plugin_manager as pm
 
     try:

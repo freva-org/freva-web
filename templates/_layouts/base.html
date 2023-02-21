@@ -103,21 +103,14 @@
                 {% block footer %}{% endblock %}
             </div>
 
-            <!-- Asynchronous Google Analytics snippet. Change UA-XXXXX-X to be your site's ID.
-       mathiasbynens.be/notes/async-analytics-snippet -->
             <script>
-                var _gaq=[['_setAccount','UA-47972081-1'],['_trackPageview']];
-                (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
-                    g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
-                    s.parentNode.insertBefore(g,s)}(document,'script'));
-
                 $(document).ajaxSend(function(event, xhr, settings) {
                     function getCookie(name) {
                         var cookieValue = null;
                         if (document.cookie && document.cookie != '') {
                             var cookies = document.cookie.split(';');
                             for (var i = 0; i < cookies.length; i++) {
-                                var cookie = jQuery.trim(cookies[i]);
+                                var cookie = cookies[i].trim();
                                 // Does this cookie string begin with the name we want?
                                 if (cookie.substring(0, name.length + 1) == (name + '=')) {
                                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));

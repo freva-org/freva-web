@@ -14,7 +14,7 @@
     </style>
     <!-- Header starts -->
 
-    <header style="padding-top:0px;">
+    <header class="pt-0">
         <div class="container">
             <div class="row justify-content-between">
                 <div class="col-md-4 col-sm-6">
@@ -67,7 +67,7 @@
                                         </button>
                                         <input name="user" type="text" placeholder="Username" class="form-control" id='in_user'>
                                         <input name="password" type="password" placeholder="Password" class="form-control" id='in_pwd'>
-                                        <input name="next" type="hidden" id="next_page" value="{% firstof request.path '/' %}">
+                                        <input name="next" type="hidden" id="next_page" value="{% firstof next '/' %}">
                                         <button type="submit" class="btn text-white navbar-button">Sign in</button>
                                     </div><!-- /input-group -->
                                 </div>
@@ -77,9 +77,11 @@
                                 <li class="nav-item">
                                     <form action="{% url 'base:logout' %}" method="post" id="logout-link">
                                         {% csrf_token %}
-                                        <button type="submit" class="btn btn-link nav-link" name="something">logout ({{ request.user.username }})</button>
+                                        <button type="submit" class="btn btn-link nav-link" name="something">
+                                            Logout ({{ request.user.username }})
+                                        </button>
                                     </form>
-                                </ul>
+                            </ul>
                         {% endif %}
                     </div>
                 </div>

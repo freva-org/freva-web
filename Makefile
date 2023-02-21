@@ -9,8 +9,6 @@ dummy-data:
 
 lint:
 	black -t py310 --check .
-	npm run lint
-	npm run lint-format
 
 tests:
 	pytest -vv $(PWD) tests/

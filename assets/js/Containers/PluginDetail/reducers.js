@@ -1,7 +1,7 @@
 import * as constants from "./constants";
 
 const pluginInitialState = {
-  plugin: {}
+  plugin: {},
 };
 
 export const pluginDetailReducer = (state = pluginInitialState, action) => {

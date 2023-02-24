@@ -1,10 +1,6 @@
 {
   "parser": "@babel/eslint-parser",
-  "plugins": [
-    "react",
-    "promise",
-    "import",
-  ],
+  "plugins": ["react", "promise", "import"],
   "parserOptions": {
     "sourceType": "module",
     "requireConfigFile": false,
@@ -31,10 +27,6 @@
     "plugin:promise/recommended"
   ],
   "rules": {
-    "arrow-spacing": "warn",
-    "brace-style": "warn",
-    "curly": "warn",
-    "no-confusing-arrow": "warn",
     "no-prototype-builtins": "off",
     "no-path-concat": "warn",
     "no-self-compare": "warn",
@@ -59,13 +51,6 @@
       }
     ],
     "array-callback-return": "warn",
-    "object-curly-newline": [
-      "warn",
-      {
-        "consistent": true,
-        "multiline": true
-      }
-    ],
     "no-unused-vars": [
       "error",
       {
@@ -75,10 +60,7 @@
     "promise/no-promise-in-callback": "off",
     "no-duplicate-case": "error",
     "no-constant-condition": "error",
-    "dot-location": [
-      "error",
-      "property"
-    ],
+    "dot-location": ["error", "property"],
     "func-style": [
       "error",
       "declaration",
@@ -88,39 +70,7 @@
     ],
     "no-lonely-if": "error",
     "use-isnan": "error",
-    "semi": "warn",
-    "indent": [
-      "error",
-      2,
-      {
-        "SwitchCase": 1
-      }
-    ],
-    "no-multi-spaces": "warn",
-    //"key-spacing": ["warn", { "align": "value" }], // vielleicht ein ander mal
-    "react/jsx-indent": [
-      "error",
-      2
-    ],
-    "react/jsx-indent-props": [
-      "error",
-      2
-    ],
     "react/jsx-boolean-value": "error",
-    "react/jsx-max-props-per-line": [
-      "warn",
-      {
-        "maximum": 1,
-        "when": "multiline"
-      }
-    ],
-    "react/jsx-curly-newline": [
-      "warn",
-      {
-        "multiline": "require",
-        "singleline": "consistent"
-      }
-    ],
     "import/extensions": "error",
     "import/no-amd": "warn",
     "import/no-self-import": "warn",
@@ -154,73 +104,21 @@
           "render"
         ],
         "groups": {
-          "stat": [
-            "state",
-            "props"
-          ]
+          "stat": ["state", "props"]
         }
       }
     ],
-    "react/jsx-closing-bracket-location": "warn",
-    "react/jsx-tag-spacing": [
-      "warn",
-      {
-        "closingSlash": "never",
-        "beforeSelfClosing": "always",
-        "afterOpening": "never",
-        "beforeClosing": "never"
-      }
-    ],
-    "react/jsx-wrap-multilines": "warn",
-    "react/jsx-props-no-multi-spaces": "warn",
     "react/no-array-index-key": "warn",
     "react/no-did-mount-set-state": "off",
     "react/jsx-first-prop-new-line": "warn",
     "react/jsx-no-bind": "off",
     "react/no-deprecated": "warn",
-    "react/jsx-curly-brace-presence": [
-      "warn",
-      "never"
-    ],
-    "react/jsx-equals-spacing": [
-      "warn",
-      "never"
-    ],
-    "react/jsx-curly-spacing": [
-      "warn",
-      "never"
-    ],
     "react/display-name": "off",
-    "object-curly-spacing": [
-      "warn",
-      "always"
-    ],
     "eqeqeq": "warn",
-    "no-mixed-spaces-and-tabs": "warn",
-    "keyword-spacing": "warn",
-    "quotes": [
-      "error",
-      "double"
-    ],
-    "space-before-blocks": "warn",
-    "space-before-function-paren": "warn",
-    "space-in-parens": "warn",
-    "space-unary-ops": [
-      "warn",
-      {
-        "words": true,
-        "nonwords": false
-      }
-    ],
     "no-var": "warn",
     "prefer-const": "warn",
     "no-console": "warn",
-    "space-infix-ops": "error",
     "no-param-reassign": "warn",
-    "jsx-quotes": [
-      "error",
-      "prefer-double"
-    ],
     "no-throw-literal": "warn",
     "object-property-newline": [
       "warn",

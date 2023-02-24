@@ -5,24 +5,27 @@ export const getCurrentUser = () => (dispatch) => {
   return fetch(url, {
     credentials: "same-origin",
     headers: {
-      "Accept": "application/json",
-      "Content-Type": "application/json"
+      Accept: "application/json",
+      "Content-Type": "application/json",
     },
-  }).then(response => {
-    if (response.ok) {
-      return response.json();
-    } else {
-      throw Error(response.statusText);
-    }
   })
-    .then(json => dispatch({
-      type: constants.GET_CURRENT_USER_SUCCESS,
-      payload: json
-    }))
-    .catch(error => {
+    .then((response) => {
+      if (response.ok) {
+        return response.json();
+      } else {
+        throw Error(response.statusText);
+      }
+    })
+    .then((json) =>
+      dispatch({
+        type: constants.GET_CURRENT_USER_SUCCESS,
+        payload: json,
+      })
+    )
+    .catch((error) => {
       dispatch({
         type: constants.SET_ERROR,
-        payload: error
+        payload: error,
       });
     });
 };

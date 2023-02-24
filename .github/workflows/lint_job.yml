@@ -20,5 +20,7 @@ jobs:
         run: make lint
       - name: Prepare node
         run: npm install
+      - name: Lint js formatting
+        run: npm run lint-format
       - name: Lint javascript
         run: npm run lint

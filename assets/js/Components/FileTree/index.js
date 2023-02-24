@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-function FileTree (props) {
+function FileTree(props) {
   const { node } = props;
   let childNodes, cN, click;
   if (node.childNodes) {
@@ -21,7 +21,9 @@ function FileTree (props) {
   return (
     <ul className="jqueryFileTree">
       <li className={cN}>
-        <a onClick={(e) => click(e, node.path)} href="#">{node.name}</a>
+        <a onClick={(e) => click(e, node.path)} href="#">
+          {node.name}
+        </a>
         {childNodes}
       </li>
     </ul>
@@ -34,13 +36,11 @@ FileTree.propTypes = {
     path: PropTypes.string.isRequired,
     type: PropTypes.string.isRequired,
     ext: PropTypes.string,
-    childNodes: PropTypes.array
+    childNodes: PropTypes.array,
   }),
   handleClose: PropTypes.func.isRequired,
   handleOpen: PropTypes.func.isRequired,
   handleFileClick: PropTypes.func.isRequired,
 };
-
-
 
 export default FileTree;

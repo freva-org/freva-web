@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { Spinner } from "react-bootstrap";
 
-export default function CircularSpinner ({ outerClassName }) {
+export default function CircularSpinner({ outerClassName }) {
   const className = outerClassName ? outerClassName : "text-center";
   return (
     <div className={className}>
@@ -14,5 +14,5 @@ export default function CircularSpinner ({ outerClassName }) {
 }
 
 CircularSpinner.propTypes = {
-  outerClassName:PropTypes.string
+  outerClassName: PropTypes.string,
 };

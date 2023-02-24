@@ -7,25 +7,17 @@ import Spinner from "../../Components/Spinner";
 import { getCurrentUser } from "./actions";
 
 class App extends React.Component {
-
-  componentDidMount () {
+  componentDidMount() {
     this.props.dispatch(getCurrentUser());
   }
 
-  render () {
-
+  render() {
     // Wait until the current user is loaded
     if (!this.props.currentUser && this.props.error === "") {
-      return (
-        <Spinner />
-      );
+      return <Spinner />;
     }
 
-    return (
-      <React.Fragment>
-        {this.props.children}
-      </React.Fragment>
-    );
+    return <React.Fragment>{this.props.children}</React.Fragment>;
   }
 }
 
@@ -38,15 +30,15 @@ App.propTypes = {
     first_name: PropTypes.string,
     isGuest: PropTypes.bool,
     home: PropTypes.string,
-    scratch: PropTypes.string
+    scratch: PropTypes.string,
   }),
   error: PropTypes.string,
   dispatch: PropTypes.func.isRequired,
 };
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   currentUser: state.appReducer.currentUser,
-  error: state.appReducer.error
+  error: state.appReducer.error,
 });
 
 export default connect(mapStateToProps)(App);

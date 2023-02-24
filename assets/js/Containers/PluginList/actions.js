@@ -4,34 +4,33 @@ import { getCookie } from "../../utils";
 
 import * as constants from "./constants";
 
-export const updateCategoryFilter = (category) => dispatch => {
+export const updateCategoryFilter = (category) => (dispatch) => {
   dispatch({
     type: constants.UPDATE_CATEGORY_FILTER,
-    category
+    category,
   });
   return dispatch({
-    type: constants.FILTER_PLUGINS
+    type: constants.FILTER_PLUGINS,
   });
 };
 
-export const updateTagFilter = (tag) => dispatch => {
+export const updateTagFilter = (tag) => (dispatch) => {
   dispatch({
     type: constants.UPDATE_TAG_FILTER,
-    tag
+    tag,
   });
   return dispatch({
-    type: constants.FILTER_PLUGINS
+    type: constants.FILTER_PLUGINS,
   });
 };
 
-
-export const updateSearchFilter = (value) => dispatch => {
+export const updateSearchFilter = (value) => (dispatch) => {
   dispatch({
     type: constants.UPDATE_SEARCH_FILTER,
-    value
+    value,
   });
   return dispatch({
-    type: constants.FILTER_PLUGINS
+    type: constants.FILTER_PLUGINS,
   });
 };
 
@@ -41,18 +40,18 @@ export const exportPlugin = (path) => (dispatch) => {
     method: "POST",
     credentials: "same-origin",
     headers: {
-      "Accept": "application/json",
+      Accept: "application/json",
       "Content-Type": "application/json",
       "X-CSRFToken": getCookie("csrftoken"),
     },
     body: JSON.stringify({
-      export_file: path
-    })
+      export_file: path,
+    }),
   })
-    .then(response => response.json())
-    .then(json => {
+    .then((response) => response.json())
+    .then((json) => {
       dispatch({
-        type: constants.EXPORT_PLUGIN
+        type: constants.EXPORT_PLUGIN,
       });
       return json;
     })
@@ -60,18 +59,19 @@ export const exportPlugin = (path) => (dispatch) => {
 };
 
 export const loadPlugins = () => (dispatch) => {
-
   const url = "/api/plugins/list/";
   return fetch(url, {
     credentials: "same-origin",
     headers: {
-      "Accept": "application/json",
-      "Content-Type": "application/json"
-    }
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
   })
-    .then(response => response.json())
-    .then(json => dispatch({
-      type: constants.LOAD_PLUGINS,
-      payload: json
-    }));
+    .then((response) => response.json())
+    .then((json) =>
+      dispatch({
+        type: constants.LOAD_PLUGINS,
+        payload: json,
+      })
+    );
 };

@@ -7,42 +7,39 @@ import * as globalStateConstants from "../App/constants";
 
 import * as constants from "./constants";
 
-export const selectResultFacet = (facet, value) => dispatch => {
+export const selectResultFacet = (facet, value) => (dispatch) => {
   setTimeout(function () {
     dispatch({
       type: constants.SELECT_RESULT_FACET,
       facet,
-      value
+      value,
     });
     dispatch(loadResultFacets());
-  },50);
-
+  }, 50);
 };
 
-export const clearResultFacet = (facet) => dispatch => {
+export const clearResultFacet = (facet) => (dispatch) => {
   dispatch({
     type: constants.CLEAR_RESULT_FACET,
-    facet
+    facet,
   });
   dispatch(loadResultFacets());
 };
 
-
 export const setMetadata = (metadata) => ({
   type: constants.SET_METADATA,
-  metadata
+  metadata,
 });
 
-export const clearAllResultFacets = (facet) => dispatch => {
+export const clearAllResultFacets = (facet) => (dispatch) => {
   dispatch({
     type: constants.CLEAR_ALL_RESULT_FACETS,
-    facet
+    facet,
   });
   dispatch(loadResultFacets());
 };
 
 export const loadResultFacets = () => (dispatch, getState) => {
-
   const { selectedFacets } = getState().resultbrowserReducer;
   let params = "";
   _.map(selectedFacets, (value, key) => {
@@ -58,23 +55,23 @@ export const loadResultFacets = () => (dispatch, getState) => {
         credentials: "same-origin",
         headers: {
           "X-CSRFToken": getCookie("csrftoken"),
-          "Accept": "application/json",
-          "Content-Type": "application/json"
-        }
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
       });
-    }
-    ).then(response => response.json())
-    .then(json => {
+    })
+    .then((response) => response.json())
+    .then((json) => {
       return dispatch({
         type: constants.LOAD_RESULT_FACETS,
-        payload: json
+        payload: json,
       });
     })
     .catch(() => {
       dispatch({ type: constants.STOP_LOADING_RESULT_FACETS });
       return dispatch({
         type: globalStateConstants.SET_ERROR,
-        payload: "Internal Error: Could not load results"
+        payload: "Internal Error: Could not load results",
       });
     });
 };

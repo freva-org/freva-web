@@ -13,7 +13,7 @@ const databrowserInitialState = {
   ncdumpOutput: null,
   ncdumpError: null,
   facetLoading: false,
-  fileLoading: false
+  fileLoading: false,
 };
 
 export const databrowserReducer = (state = databrowserInitialState, action) => {
@@ -23,9 +23,15 @@ export const databrowserReducer = (state = databrowserInitialState, action) => {
     case constants.SET_FILE_LOADING:
       return { ...state, fileLoading: true };
     case constants.LOAD_FACETS:
-      return { ...state, error: "", facets: action.payload.data, facetLoading: false };
+      return {
+        ...state,
+        error: "",
+        facets: action.payload.data,
+        facetLoading: false,
+      };
     case constants.UPDATE_FACET_SELECTION: {
-      const { minDate, maxDate, dateSelector, ...queryObject } = action.queryObject;
+      const { minDate, maxDate, dateSelector, ...queryObject } =
+        action.queryObject;
       // let newObject = {}
       // if (state.facets) {
       //   Object.keys(state.facets).forEach(key => {
@@ -48,21 +54,36 @@ export const databrowserReducer = (state = databrowserInitialState, action) => {
         selectedFacets: { ...queryObject },
         dateSelector: myDateSelector,
         minDate: myMinDate,
-        maxDate: myMaxDate
+        maxDate: myMaxDate,
       };
     }
     case constants.SET_METADATA:
       return { ...state, metadata: action.metadata };
     case constants.LOAD_FILES:
-      return { ...state, files: action.payload.data, numFiles: action.payload.metadata.numFound, fileLoading: false };
+      return {
+        ...state,
+        files: action.payload.data,
+        numFiles: action.payload.metadata.numFound,
+        fileLoading: false,
+      };
     case constants.LOAD_NCDUMP_ERROR:
-      return { ...state, ncdumpStatus: "error", ncdumpError:  action.message };
+      return { ...state, ncdumpStatus: "error", ncdumpError: action.message };
     case constants.LOAD_NCDUMP:
       return { ...state, ncdumpStatus: "loading" };
     case constants.LOAD_NCDUMP_SUCCESS:
-      return { ...state, ncdumpStatus: "ready", ncdumpOutput: action.message, ncdumpError: null };
+      return {
+        ...state,
+        ncdumpStatus: "ready",
+        ncdumpOutput: action.message,
+        ncdumpError: null,
+      };
     case constants.RESET_NCDUMP:
-      return { ...state, ncdumpStatus: "pw", ncdumpOutput: null, ncdumpError: null };
+      return {
+        ...state,
+        ncdumpStatus: "pw",
+        ncdumpOutput: null,
+        ncdumpError: null,
+      };
     default:
       return state;
   }

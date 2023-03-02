@@ -134,6 +134,14 @@ INSTITUTION_NAME = web_config.get("INSTITUTION_NAME", "Freva")
 ##################################################
 # SETTING FOR LDAP
 # http://pythonhosted.org//django-auth-ldap/
+#
+# Freva is using LDAP on two different occasions:
+# - As an authentication service: For this we use the built-in
+#   Django-Functionalities. All LDAP-Properties below starting with
+#   `AUTH_LDAP`` belong to this.
+# - As a lookup for available users, e.g. for notify them about events
+#   or share results. This is implemented in ldaptools.py and all
+#   properties starting with `LDAP_` belong to this.
 ##################################################
 ##################################################
 # The server for LDAP configuration
@@ -193,6 +201,10 @@ LDAP_USER_DN = web_config.get(
     "LDAP_USER_DN", "uid=dkrzagent,cn=sysaccounts,cn=etc,dc=dkrz,dc=de"
 )
 LDAP_USER_PW = web_config.get("LDAP_USER_PW", "dkrzprox")
+
+AUTH_LDAP_BIND_DN = LDAP_USER_DN
+AUTH_LDAP_BIND_PASSWORD = LDAP_USER_PW
+
 LDAP_GROUP_FILTER = f"(cn={ALLOWED_GROUP})"
 LDAP_MODEL = f'django_evaluation.ldaptools.{web_config.get("LDAP_MODEL", "MiklipUserInformation")}'
 ##################################################

@@ -16,6 +16,7 @@ import {
   FormLabel,
   FormControl,
   InputGroup,
+  Alert,
 } from "react-bootstrap";
 
 import _ from "lodash";
@@ -185,8 +186,17 @@ class PluginList extends React.Component {
       children = <div className="text-danger">{error}</div>;
     }
 
-    if (!pluginsLoaded) {
+    if (!pluginsLoaded && !this.props.pluginList.errorMessage) {
       return <Spinner />;
+    }
+    if (this.props.pluginList.errorMessage) {
+      return (
+        <Container>
+          <Alert variant="danger">
+            <div className="fs-4">{this.props.pluginList.errorMessage}</div>
+          </Alert>
+        </Container>
+      );
     }
     const defaultSelection = currentUser.home
       ? { id: "home", path: currentUser.home }
@@ -340,6 +350,7 @@ PluginList.propTypes = {
     filteredPlugins: PropTypes.array,
     searchFilter: PropTypes.string,
     pluginsLoaded: PropTypes.bool,
+    errorMessage: PropTypes.string,
   }),
   fileTree: PropTypes.shape({
     nodes: PropTypes.array,

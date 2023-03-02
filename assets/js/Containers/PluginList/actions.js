@@ -67,11 +67,23 @@ export const loadPlugins = () => (dispatch) => {
       "Content-Type": "application/json",
     },
   })
-    .then((response) => response.json())
+    .then((response) => {
+      if (response.status >= 400) {
+        throw new Error(response.statusText);
+      }
+      return response.json();
+    })
     .then((json) =>
       dispatch({
         type: constants.LOAD_PLUGINS,
         payload: json,
       })
-    );
+    )
+    .catch((error) => {
+      dispatch({
+        type: constants.LOAD_PLUGINS_ERROR,
+        errorMessage:
+          "Error occured while loading plugin list: " + error.message,
+      });
+    });
 };

@@ -81,7 +81,12 @@ function fetchResults(dispatch, location, additionalParams, actionType) {
       "Content-Type": "application/json",
     },
   })
-    .then((response) => response.json())
+    .then((response) => {
+      if (response.status >= 400) {
+        throw new Error(response.statusText);
+      }
+      return response.json();
+    })
     .then((json) => {
       return dispatch({
         type: actionType,

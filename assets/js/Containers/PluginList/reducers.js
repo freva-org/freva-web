@@ -12,6 +12,7 @@ const pluginListInitialState = {
   categoriesFilter: [],
   tagsFilter: [],
   searchFilter: "",
+  errorMessage: "",
 };
 
 const OTHER_CATEGORY = "others";
@@ -153,6 +154,9 @@ export const pluginListReducer = (state = pluginListInitialState, action) => {
         tagsFilter.push(action.tag);
       }
       return { ...state, tagsFilter };
+    }
+    case constants.LOAD_PLUGINS_ERROR: {
+      return { ...state, errorMessage: action.errorMessage };
     }
     case constants.UPDATE_SEARCH_FILTER:
       return { ...state, searchFilter: action.value };

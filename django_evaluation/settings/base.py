@@ -226,8 +226,6 @@ LOG_LEVEL = logging.INFO
 HAS_SYSLOG = True
 SYSLOG_TAG = "http_app_django_evaluation"  # Make this unique to your project.
 
-SECRET_KEY = "hj1bkzobng0ck@0&%t509*1ki$#)i5y+i0)&=7zv@amu8pm5*t"
-
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 DEBUG = TEMPLATE_DEBUG = True
@@ -237,7 +235,7 @@ DEV = True
 # Hardcoded values can leak through source control. Consider loading
 # the secret key from an environment variable or a file instead.
 SECRET_KEY = os.environ.get(
-    SECRET_KEY, "hj1bkzobng0ck@0&%t509*1ki$#)i5y+i0)&=7zv@amu8pm5*t"
+    "SECRET_KEY", "hj1bkzobng0ck@0&%t509*1ki$#)i5y+i0)&=7zv@amu8pm5*t"
 )
 
 INTERNAL_IPS = "127.0.0.1"

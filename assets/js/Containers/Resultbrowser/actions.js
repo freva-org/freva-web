@@ -60,7 +60,12 @@ export const loadResultFacets = () => (dispatch, getState) => {
         },
       });
     })
-    .then((response) => response.json())
+    .then((response) => {
+      if (response.status >= 400) {
+        throw new Error(response.statusText);
+      }
+      return response.json();
+    })
     .then((json) => {
       return dispatch({
         type: constants.LOAD_RESULT_FACETS,

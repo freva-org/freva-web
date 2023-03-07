@@ -226,8 +226,6 @@ LOG_LEVEL = logging.INFO
 HAS_SYSLOG = True
 SYSLOG_TAG = "http_app_django_evaluation"  # Make this unique to your project.
 
-SECRET_KEY = "hj1bkzobng0ck@0&%t509*1ki$#)i5y+i0)&=7zv@amu8pm5*t"
-
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 DEBUG = TEMPLATE_DEBUG = True
@@ -236,59 +234,9 @@ DEV = True
 # SECURITY WARNING: keep the secret key used in production secret!
 # Hardcoded values can leak through source control. Consider loading
 # the secret key from an environment variable or a file instead.
-SECRET_KEY = "hj1bkzobng0ck@0&%t509*1ki$#)i5y+i0)&=7zv@amu8pm5*t"
-
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": True,
-    "formatters": {
-        "verbose": {
-            "format": "%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s"
-        },
-        "simple": {"format": "%(levelname)s %(message)s"},
-        "simple_mail": {"format": "Sent: %(levelname)s %(message)s"},
-    },
-    "filters": {
-        "require_debug_false": {
-            "()": "django.utils.log.RequireDebugFalse",
-        }
-    },
-    "handlers": {
-        "null": {
-            "level": "DEBUG",
-            "class": "logging.NullHandler",
-        },
-        "console": {
-            "level": "DEBUG",
-            "class": "logging.StreamHandler",
-            "formatter": "simple",
-        },
-        "console_mail": {
-            "level": "DEBUG",
-            "class": "logging.StreamHandler",
-            "formatter": "simple_mail",
-        },
-        "mail_admins": {
-            "level": "ERROR",
-            "class": "django.utils.log.AdminEmailHandler",
-            "formatter": "verbose",
-            "filters": ["require_debug_false"],
-        },
-    },
-    "loggers": {
-        "django": {
-            "handlers": ["mail_admins", "console_mail"],
-            "propagate": False,
-            "level": "ERROR",
-        },
-        "django.request": {
-            "handlers": ["mail_admins", "console_mail"],
-            "level": "ERROR",
-            "propagate": True,
-            "level": "INFO",
-        },
-    },
-}
+SECRET_KEY = os.environ.get(
+    "SECRET_KEY", "hj1bkzobng0ck@0&%t509*1ki$#)i5y+i0)&=7zv@amu8pm5*t"
+)
 
 INTERNAL_IPS = "127.0.0.1"
 

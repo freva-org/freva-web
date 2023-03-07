@@ -10,6 +10,7 @@ import {
   ButtonToolbar,
   Modal,
   FormControl,
+  Alert,
 } from "react-bootstrap";
 import nl2br from "react-nl2br";
 import Linkify from "linkify-react";
@@ -24,6 +25,7 @@ class PluginDetail extends React.Component {
     this.state = {
       showModal: false,
       text: "",
+      errorMessage: "",
     };
 
     this.handleChange = this.handleChange.bind(this);
@@ -52,8 +54,18 @@ class PluginDetail extends React.Component {
     const { plugin } = this.props;
 
     // Wait until plugin loaded
-    if (!plugin.name) {
+    if (!plugin.name && !this.props.errorMessage) {
       return <Spinner />;
+    }
+
+    if (this.props.errorMessage) {
+      return (
+        <Container>
+          <Alert variant="danger">
+            <div className="fs-4">{this.props.errorMessage}</div>
+          </Alert>
+        </Container>
+      );
     }
 
     return (
@@ -144,6 +156,7 @@ PluginDetail.propTypes = {
   params: PropTypes.shape({
     pluginName: PropTypes.string.isRequired,
   }),
+  errorMessage: PropTypes.string,
   plugin: PropTypes.shape({
     name: PropTypes.string,
     tool_developer: PropTypes.shape({
@@ -158,6 +171,7 @@ PluginDetail.propTypes = {
 
 const mapStateToProps = (state) => ({
   plugin: state.pluginDetailReducer.plugin,
+  errorMessage: state.pluginDetailReducer.errorMessage,
 });
 
 export default connect(mapStateToProps)(PluginDetail);

@@ -103,9 +103,7 @@ def solr_search(request):
         if facets == "experiment_prefix":
             args["experiment"] = args.pop("experiment_prefix")
             results = SolrFindFiles.facets(facets="experiment", **args)
-            results["experiment_prefix"] = remove_year(
-                results.pop("experiment")
-            )
+            results["experiment_prefix"] = remove_year(results.pop("experiment"))
         else:
             if "experiment_prefix" in args:
                 args["experiment"] = args.pop("experiment_prefix")[0] + "*"

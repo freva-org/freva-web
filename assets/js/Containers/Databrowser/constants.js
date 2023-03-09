@@ -16,4 +16,4 @@ export const RESET_NCDUMP = "RESET_NCDUMP";
 
 export const TIME_RANGE_FLEXIBLE = "flexible";
 export const TIME_RANGE_STRICT = "strict";
-export const TIME_RANGE_FILE = "contains";
+export const TIME_RANGE_FILE = "file";

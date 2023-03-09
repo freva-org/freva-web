@@ -59,15 +59,7 @@ function fetchResults(dispatch, location, additionalParams, actionType) {
 
     const isDateSelected = !!queryObject.minDate;
     if (isDateSelected) {
-      let operator;
-      if (queryObject.dateSelector === constants.TIME_RANGE_FLEXIBLE) {
-        operator = "Intersects";
-      } else if (queryObject.dateSelector === constants.TIME_RANGE_STRICT) {
-        operator = "Within";
-      } else {
-        operator = "Contains";
-      }
-      params += `&time_select=${operator}&time=${queryObject.minDate} TO ${queryObject.maxDate}`;
+      params += `&time_select=${queryObject.dateSelector}&time=${queryObject.minDate} TO ${queryObject.maxDate}`;
     }
   }
 

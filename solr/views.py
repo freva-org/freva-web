@@ -5,11 +5,12 @@ Created on 14.11.2013
 
 views for the solr application
 """
+from typing import Union
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 
-from evaluation_system.model.solr import SolrFindFiles
+
 import freva
 from django.conf import settings
 import json
@@ -68,7 +69,9 @@ def solr_search(request):
                 tmp.append(d[i + 1])
         return tmp
 
-    def reorder_results(res):
+    def reorder_results(
+        res: dict[str, dict[str, int]]
+    ) -> dict[str, list[Union[str, int]]]:
         import collections
 
         cmor = [
@@ -86,11 +89,11 @@ def solr_search(request):
         results = collections.OrderedDict()
         for cm in cmor:
             try:
-                results[cm] = res.pop(cm)
+                results[cm] = [f for sub in res.pop(cm).items() for f in sub]
             except KeyError:
                 pass
         for k, v in res.items():
-            results[k] = v
+            results[k] = [f for sub in v.items() for f in sub]
         return results
 
     if facets:
@@ -99,17 +102,23 @@ def solr_search(request):
         args.pop("facet")
         if facets == "*":
             # means select all,
-            facets = None
-        if facets == "experiment_prefix":
+            results = reorder_results(
+                freva.databrowser(count=True, all_facets=True, **args)
+            )
+        elif facets == "experiment_prefix":
             args["experiment"] = args.pop("experiment_prefix")
-            results = SolrFindFiles.facets(facets="experiment", **args)
-            results["experiment_prefix"] = remove_year(results.pop("experiment"))
+            results = reorder_results(
+                freva.databrowser(count=True, facet="experiment", **args)
+            )
+            results["experiment_prefix"] = remove_year(
+                results.pop("experiment")
+            )
         else:
             if "experiment_prefix" in args:
                 args["experiment"] = args.pop("experiment_prefix")[0] + "*"
-            results = SolrFindFiles.facets(facets=facets, **args)
-            results = reorder_results(results)
-
+            results = reorder_results(
+                freva.databrowser(count=True, facet=facets, **args)
+            )
         return HttpResponse(
             json.dumps(dict(data=results)),
             content_type="application/json",
@@ -119,17 +128,13 @@ def solr_search(request):
         if "rows" in args:
             rows = int(request.GET["rows"])
             args.pop("rows")
-        metadata = SolrFindFiles.get_metadata(**args)
+        n_files = freva.databrowser(count=True, **args)
         if rows:
             args["rows"] = rows
         results = freva.databrowser(uniq_key="uri", **args)
-        metadata_dict = {
-            "numFound": metadata.num_objects,
-            "docs": metadata.docs,
-            "numFoundExact": metadata.exact,
-            "start": metadata.start,
-        }
         return HttpResponse(
-            json.dumps(dict(data=sorted(results), metadata=metadata_dict)),
+            json.dumps(
+                dict(data=sorted(results), metadata={"numFound": n_files})
+            ),
             content_type="application/json",
         )

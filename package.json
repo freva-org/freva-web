@@ -1,6 +1,6 @@
 {
   "name": "evaluation_system_web",
-  "version": "2023.03.08",
+  "version": "2023.03.09",
   "description": "convert static/img/freva-favicon-black.png -fill '#A020F0' -opaque black -resize 64x64 static/img/freva-favicon.png",
   "main": "index.js",
   "directories": {
@@ -23,10 +23,10 @@
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.16.0",
+    "@babel/eslint-parser": "7.15.8",
     "@babel/preset-env": "^7.16.4",
     "@babel/preset-react": "^7.16.0",
     "babel-loader": "^8.2.3",
-    "@babel/eslint-parser": "7.15.8",
     "css-loader": "^6.5.1",
     "eslint": "7.32",
     "eslint-plugin-import": "2.25.2",
@@ -39,10 +39,10 @@
     "react-hot-loader": "^4.13.0",
     "style-loader": "^3.3.1",
     "webpack": "^5.69",
-    "webpack-merge": "5.8.0",
     "webpack-bundle-tracker": "^1.4.0",
     "webpack-cli": "^4.9.1",
-    "webpack-dev-server": "^4.7"
+    "webpack-dev-server": "^4.7",
+    "webpack-merge": "5.8.0"
   },
   "dependencies": {
     "date-fns": "2.29",
@@ -51,6 +51,7 @@
     "lodash": "^4.17.21",
     "prop-types": "^15.7.2",
     "query-string": "^7.1.3",
+    "react": "^16.14.0",
     "react-bootstrap": "^2.7.2",
     "react-dom": "^16.14.0",
     "react-html-parser": "^2.0.2",
@@ -60,9 +61,8 @@
     "react-router": "^3.2.6",
     "react-table": "^7.7.0",
     "react-window": "^1.8.8",
-    "react": "^16.14.0",
+    "redux": "^4.2.1",
     "redux-logger": "^3.0.6",
-    "redux-thunk": "^2.4.1",
-    "redux": "^4.2.1"
+    "redux-thunk": "^2.4.1"
   }
 }

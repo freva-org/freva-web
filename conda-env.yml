@@ -43,8 +43,6 @@ dependencies:
     - types-requests
     - types-toml
     - hurry.filesize
-    - git+https://gitlab.dkrz.de/freva/evaluation_system.git
-    - git+https://gitlab.dkrz.de/freva/metadata-inspektor.git
   - pygtail
   - pylint
   - pytest

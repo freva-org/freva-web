@@ -10,6 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 
 from evaluation_system.model.solr import SolrFindFiles
+import freva
 from django.conf import settings
 import json
 import logging
@@ -121,8 +122,7 @@ def solr_search(request):
         metadata = SolrFindFiles.get_metadata(**args)
         if rows:
             args["rows"] = rows
-        results = SolrFindFiles.search(**args)
-        results = list(results)
+        results = freva.databrowser(uniq_key="uri", **args)
         metadata_dict = {
             "numFound": metadata.num_objects,
             "docs": metadata.docs,
@@ -130,6 +130,6 @@ def solr_search(request):
             "start": metadata.start,
         }
         return HttpResponse(
-            json.dumps(dict(data=results, metadata=metadata_dict)),
+            json.dumps(dict(data=sorted(results), metadata=metadata_dict)),
             content_type="application/json",
         )

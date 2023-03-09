@@ -1,5 +1,6 @@
 #!/bin/bash
 
+python manage.py makemigrations base
 python manage.py migrate --fake-initial --noinput
 python manage.py migrate --fake contenttypes
 python manage.py collectstatic --noinput

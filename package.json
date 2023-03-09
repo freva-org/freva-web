@@ -1,6 +1,6 @@
 {
   "name": "evaluation_system_web",
-  "version": "2023.01.31",
+  "version": "2023.03.07",
   "description": "convert static/img/freva-favicon-black.png -fill '#A020F0' -opaque black -resize 64x64 static/img/freva-favicon.png",
   "main": "index.js",
   "directories": {

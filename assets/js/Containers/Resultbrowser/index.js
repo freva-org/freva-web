@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 
 import { connect } from "react-redux";
-import { Container, Row, Col, Card, Alert } from "react-bootstrap";
+import { Container, Row, Col, Card, Alert, Badge } from "react-bootstrap";
 
 import _ from "lodash";
 
@@ -176,8 +176,8 @@ class Resultbrowser extends React.Component {
       } else {
         const numberOfValues = value.length / 2;
         panelHeader = (
-          <span>
-            {key} ({numberOfValues})
+          <span className="d-flex justify-content-between">
+            <span>{key}</span> <Badge bg="secondary">{numberOfValues}</Badge>
           </span>
         );
       }

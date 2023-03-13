@@ -1,6 +1,6 @@
 import React, { useCallback, useLayoutEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
-import { FormControl, Tooltip, OverlayTrigger } from "react-bootstrap";
+import { FormControl, Tooltip, OverlayTrigger, Badge } from "react-bootstrap";
 import { VariableSizeList as List } from "react-window";
 
 /**
@@ -107,7 +107,7 @@ function AccordionItemBody(props) {
                 {value}
               </a>
             </OverlayTrigger>{" "}
-            [{count}]
+            <Badge bg="secondary">{count}</Badge>
           </div>
         );
       }
@@ -125,7 +125,7 @@ function AccordionItemBody(props) {
           >
             {value}
           </a>{" "}
-          [{item.count}]
+          <Badge bg="secondary">{item.count}</Badge>
         </div>
       );
     });

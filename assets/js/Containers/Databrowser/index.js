@@ -10,6 +10,7 @@ import {
   OverlayTrigger,
   Button,
   Alert,
+  Badge,
 } from "react-bootstrap";
 
 import { FaInfoCircle } from "react-icons/fa";
@@ -100,8 +101,9 @@ class Databrowser extends React.Component {
       } else {
         const numberOfValues = value.length / 2;
         panelHeader = (
-          <span>
-            {key} ({numberOfValues})
+          <span className="d-flex justify-content-between">
+            <span>{key}</span>
+            <Badge bg="secondary">{numberOfValues}</Badge>
           </span>
         );
       }
@@ -191,7 +193,10 @@ class Databrowser extends React.Component {
     const { files, numFiles, fileLoading } = this.props.databrowser;
     return (
       <div className="py-3">
-        <h3> Files [{numFiles}]</h3>
+        <h3 className="d-flex justify-content-between">
+          <span>Files</span>
+          <Badge bg="secondary">{numFiles.toLocaleString("en-US")}</Badge>
+        </h3>
         <ul
           className="jqueryFileTree border shadow-sm py-3 rounded"
           style={{ maxHeight: "1000px", overflow: "auto" }}
@@ -211,14 +216,14 @@ class Databrowser extends React.Component {
                   >
                     <Button
                       variant="link"
-                      className="p-0"
+                      className="p-0 me-1"
                       onClick={() => {
                         this.setState({ showDialog: true, fn });
                       }}
                     >
                       <FaInfoCircle className="ncdump" />
                     </Button>
-                  </OverlayTrigger>{" "}
+                  </OverlayTrigger>
                   {fn}
                 </li>
               );

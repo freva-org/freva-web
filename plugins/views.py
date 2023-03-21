@@ -209,14 +209,8 @@ def setup(request, plugin_name, row_id=None):
             logging.debug("command:" + str(ssh_cmd))
             logging.debug("output of analyze:" + str(out))
             logging.debug("errors of analyze:" + str(err))
-            # THIS IS HOW WE DETERMINE THE ID USING A SCHEDULER
-            substr = "Scheduled job with history"
-            # find first line containing the substr
-            scheduler_output = next(
-                (s.strip("\n") for s in out if substr in s), ""
-            )  # returns 'abc123'
             try:
-                row_id = int(scheduler_output.split(":")[-1].strip())
+                row_id = History.objects.filter(uid=request.user.username, tool=plugin_name).latest("timestamp").id
             except Exception as error:
                 logging.error(error)
                 # We couldn't find out the row id due to issues with the log file.

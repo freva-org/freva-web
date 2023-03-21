@@ -31,6 +31,8 @@ import {
 
 import Spinner from "../../Components/Spinner";
 
+import { initCap } from "../../utils";
+
 import {
   exportPlugin,
   loadPlugins,
@@ -38,18 +40,6 @@ import {
   updateTagFilter,
   updateSearchFilter,
 } from "./actions";
-
-function initCap(str) {
-  if (!str) {
-    return str;
-  }
-  if (str.length === 1) {
-    return str.substring(0, 1).toUpperCase();
-  } else if (str.length >= 1) {
-    return str.substring(0, 1).toUpperCase() + str.substring(1);
-  }
-  return str;
-}
 
 class PluginList extends React.Component {
   constructor(props) {

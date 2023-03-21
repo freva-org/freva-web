@@ -23,6 +23,8 @@ import AccordionItemBody from "../../Components/AccordionItemBody";
 import OwnPanel from "../../Components/OwnPanel";
 import Spinner from "../../Components/Spinner";
 
+import { initCap, underscoreToBlank } from "../../utils";
+
 import {
   loadFacets,
   setMetadata,
@@ -89,20 +91,21 @@ class Databrowser extends React.Component {
       if (isFacetSelected) {
         panelHeader = (
           <span>
-            {key}: <strong>{selectedFacets[key]}</strong>
+            {initCap(underscoreToBlank(key))}:{" "}
+            <strong>{selectedFacets[key]}</strong>
           </span>
         );
       } else if (value.length === 2) {
         panelHeader = (
           <span>
-            {key}: <strong>{value[0]}</strong>
+            {initCap(underscoreToBlank(key))}: <strong>{value[0]}</strong>
           </span>
         );
       } else {
         const numberOfValues = value.length / 2;
         panelHeader = (
           <span className="d-flex justify-content-between">
-            <span>{key}</span>
+            <span>{initCap(underscoreToBlank(key))}</span>
             <Badge bg="secondary">{numberOfValues}</Badge>
           </span>
         );

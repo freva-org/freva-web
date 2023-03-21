@@ -17,6 +17,7 @@ import {
   FormControl,
   InputGroup,
   Alert,
+  Badge,
 } from "react-bootstrap";
 
 import _ from "lodash";
@@ -129,18 +130,27 @@ class PluginList extends React.Component {
     }
 
     return (
-      <FormCheck key={categoryName + "checkbox"}>
-        <FormCheck.Input
-          type="checkbox"
-          onChange={() =>
-            this.props.dispatch(updateCategoryFilter(categoryName))
-          }
-          checked={_.includes(categoriesFilter, categoryName)}
-          id={categoryName + "-cat"}
-        />
-        <FormCheck.Label htmlFor={categoryName + "-cat"}>
-          {initCap(categoryName)} ({categories[categoryName].length})
-        </FormCheck.Label>
+      <FormCheck
+        className="d-flex justify-content-between"
+        key={categoryName + "checkbox"}
+      >
+        <span>
+          <FormCheck.Input
+            className="me-2"
+            type="checkbox"
+            onChange={() =>
+              this.props.dispatch(updateCategoryFilter(categoryName))
+            }
+            checked={_.includes(categoriesFilter, categoryName)}
+            id={categoryName + "-cat"}
+          />
+          <FormCheck.Label htmlFor={categoryName + "-cat"}>
+            {initCap(categoryName)}
+          </FormCheck.Label>
+        </span>
+        <div>
+          <Badge bg="secondary">{categories[categoryName].length}</Badge>
+        </div>
       </FormCheck>
     );
   }

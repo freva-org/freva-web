@@ -210,9 +210,13 @@ def setup(request, plugin_name, row_id=None):
             logging.debug("output of analyze:" + str(out))
             logging.debug("errors of analyze:" + str(err))
             try:
-                row_id = History.objects.filter(uid=request.user.username, tool=plugin_name).latest("timestamp").id
+                row_id = (
+                    History.objects.filter(uid=request.user.username, tool=plugin_name)
+                    .latest("timestamp")
+                    .id
+                )
             except Exception as error:
-                logging.error(error)
+                logging.exception(error)
                 # We couldn't find out the row id due to issues with the log file.
                 # Redirect to user's history
                 return redirect("history:history")

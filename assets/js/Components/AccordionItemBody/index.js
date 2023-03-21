@@ -92,26 +92,32 @@ function AccordionItemBody(props) {
             className="col-md-12 col-sm-6 flex-nowrap d-flex justify-content-between"
             key={value}
           >
-            <OverlayTrigger
-              overlay={
-                <Tooltip>
-                  <div dangerouslySetInnerHTML={{ __html: metadata[value] }} />
-                </Tooltip>
-              }
-            >
-              <a
-                href="#"
-                className="text-wrap"
-                onClick={(e) => {
-                  e.preventDefault();
-                  facetClick(eventKey, value);
-                  props.togglePanel();
-                }}
+            <div>
+              <OverlayTrigger
+                overlay={
+                  <Tooltip>
+                    <div
+                      dangerouslySetInnerHTML={{ __html: metadata[value] }}
+                    />
+                  </Tooltip>
+                }
               >
-                {value}
-              </a>
-            </OverlayTrigger>{" "}
-            <Badge bg="secondary">{count}</Badge>
+                <a
+                  href="#"
+                  className="text-wrap"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    facetClick(eventKey, value);
+                    props.togglePanel();
+                  }}
+                >
+                  {value}
+                </a>
+              </OverlayTrigger>{" "}
+            </div>
+            <div>
+              <Badge bg="secondary">{count}</Badge>
+            </div>
           </div>
         );
       }

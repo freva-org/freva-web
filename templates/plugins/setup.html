@@ -5,7 +5,7 @@
 {% block content %}
     {% load infotag %}
 
-    <script src="{{ STATIC_URL }}js/solr_search.js?{% now "U" %}"></script>
+    <script src="{{ STATIC_URL }}js/solr_search.js?{% now "U" %}"/>
 
     {% load bootstrap5 %}
     {% load static %}
@@ -185,24 +185,22 @@
                                 The actual submit is supressed with "return false" in $('#submit_analysis').on('click')
                             {% endcomment %}
                             <form name="passForm" id="passForm" action="/" method="post">
-                                <input id="username" type="text" name="username" style="display:none;">
+                                <input id="username" type="text" name="username" style="display:none;" />
                                 <input id="password_temp" class="form-control" type="password" name="password_temp"
-                                    style="width: 90%;">
+                                    style="width: 90%;" />
 
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12" id="similarResults">
-                                    <div class="spinner-border text-center" role="status">
-                                        <span class="visually-hidden">Loading...</span>
+                                <div class="row">
+                                    <div class="col-md-12" id="similarResults">
+                                        <div class="spinner-border text-center" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-default" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary" id="submit_analysis">Submit analysis</button>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-primary" id="submit_analysis">Submit analysis</button>
+                                </div>
                         </form>
                     </div>
                 </div><!-- /.modal-content -->
@@ -337,23 +335,31 @@
 
         }
 
-        function similarHtml(res, i) {
-            if (res['preview'] != '') {
-            img = '<a href="/history/' + res['pk'] + '/results/" target="_blank"><img src="{{PREVIEW_URL}}' + res['preview'] + '" width="200"/></a><br/>';
-            } else {
-                img = '';
+        function historyLinkWrapper(res, stringTag) {
+            return `<a href="/history/${res['pk']}/results/" target="_blank">
+                      ${stringTag}
+                    </a>`
+        }
+
+        function getPreview(res, width) {
+            let img = '';
+            if (res['preview'] != '' && res['preview'].endsWith(".mp4")) {
+                img = historyLinkWrapper(res, `<video src="{{PREVIEW_URL}}${res['preview']}" width="${width}"/>`) + '<br/>';
+            } else if (res['preview'] != '') {
+                img = historyLinkWrapper(res, `<img src="{{PREVIEW_URL}}${res['preview']}" width="${width}"/>`) + '<br/>';
             }
-            html = img + '<a href="/history/' + res['pk'] + '/results/" target="_blank">' + res['tool'] + ' result #' + res['pk'] + '</a> by ' + res['uid'] + '<br/><br/>';
+            return img;
+        }
+
+        function similarHtml(res, i) {
+            const img = getPreview(res, 200)
+            const html = `${img} ${historyLinkWrapper(res, res['tool'] + ` Result #${res['pk']}`)} by  ${res['uid']} <br/><br/>`;
             return html;
         }
 
         function similarDialog(res, i) {
-            if (res['preview'] != '') {
-                img = '<a href="/history/' + res['pk'] + '/results/" target="_blank"><img src="{{PREVIEW_URL}}' + res['preview'] + '" width="130"/></a><br/>';
-            } else {
-                img = '';
-            }
-            html = '<td>' + img + '<a href="/history/' + res['pk'] + '/results/" target="_blank">Result #' + res['pk'] + '</a> by ' + res['uid'] + '</td>';
+            const img = getPreview(res, 130)
+            const html = `<td> ${img} ${historyLinkWrapper(res, `Result #${res['pk']}`)} by ${res['uid']} </td>`;
             return html;
         }
 

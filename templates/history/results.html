@@ -13,7 +13,7 @@
         <div class="row">
             <div class="col-md-12">
                 <h1 id='result_caption'>{{ result_caption }}</h1>
-                <div class="d-flex justify-content-between">
+                <div class="d-flex justify-content-between mb-2">
                     <span>Analysis from {{ history_object.timestamp|date:"d.m.y H:i:s" }} done by
                         <a href="{% url 'history:history' history_object.uid %}">{{history_object.uid}}</a>
                     </span>
@@ -29,8 +29,12 @@
                 </div>
             </div>
         </div>
+        {% if not is_plugin_available %}
+        <div class="alert alert-warning mb-2">
+            This result has been produced with an user-imported plugin. Configuration changes are not possible.
+        </div>
+        {% endif %}
         <div class="row">
-
             <div class="alert alert-success alert-dismissible" role="alert" id='alert_send_developer_success' style='display:none'>
                 Mail sent to {{developer.name}}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -53,34 +57,30 @@
         </div> <!-- row -->
 
         {% if not request.user.isGuest %}
-            <div class="row mb-3">
+            <div class="row">
                 <div class="col-md-12">
                     {% if is_plugin_available %}
-                        <a class="btn btn-primary mb-2" href="{% url 'plugins:setup' history_object.tool history_object.id%}" id="config_button">Edit configuration</a>
-                    {% else %}
-                        <div class="alert alert-warning">
-                            This result has been produced with an user-imported plugin. Configuration changes are not possible.
-                        </div>
+                        <a class="btn btn-primary mb-3" href="{% url 'plugins:setup' history_object.tool history_object.id%}" id="config_button">Edit configuration</a>
                     {% endif %}
                     {% if documentation %}
-                        <a class="btn btn-success mb-2" href="{{documentation.url}}">Documentation</a>
+                        <a class="btn btn-success mb-3" href="{{documentation.url}}">Documentation</a>
                     {%endif%}
                     {% if history_object.status > 2 and history_object.slurm_output != '0' and history_object.uid == request.user %}
 
-                        <button class="btn btn-danger mb-2 mybtn-cancel" id="cancelButton" onClick="cancelDialog.show({{history_object.id}})">Cancel job</button>
+                        <button class="btn btn-danger mb-3 mybtn-cancel" id="cancelButton" onClick="cancelDialog.show({{history_object.id}})">Cancel job</button>
                         {# Render a Bootstrap password/cancel dialog #}
                         {% cancel_dialog %}
                     {%endif%}
 
                     {% if request.user == history_object.uid %}
-                        <button class="btn btn-secondary mb-2 mybtn-sendmail" id="sendButton" onClick="$('#sendmail_modal').modal('show')">Share Results</button>
+                        <button class="btn btn-secondary mb-3 mybtn-sendmail" id="sendButton" onClick="$('#sendmail_modal').modal('show')">Share Results</button>
 
-                        <button class="btn btn-secondary mb-2 mybtn-caption" id="captionButton" onClick="$('#caption_modal').modal('show')">Set Caption</button>
+                        <button class="btn btn-secondary mb-3 mybtn-caption" id="captionButton" onClick="$('#caption_modal').modal('show')">Set Caption</button>
                     {%endif%}
                     {# Render a Bootstrap caption dialog #}
                     {% caption_dialog result_caption default_caption history_object request.user %}
 
-                    <button class="btn btn-warning mb-2 " id="followButton"><span id='followText'>{{follow}}</span></button>
+                    <button class="btn btn-warning mb-3 " id="followButton"><span id='followText'>{{follow}}</span></button>
                     {%if developer %}
                         {% mail_to_developer history_object.tool request.user.username request.build_absolute_uri %}
                     {%endif%}
@@ -108,37 +108,39 @@
                                     <td>{{value|mask_uid:request.user.isGuest}}</td>
                                 </tr>
                             {% endfor %}
-                            <tr class='additional' style='display:none;'>
+                            <tr>
                                 <th colspan="2">Additional Information</th>
                             </tr>
-                            <tr class='additional' style='display:none;'>
-                                <td>Analyze command:</td>
-                                <td><pre>{{analyze_command|mask_uid:request.user.isGuest}}</pre></td>
+                            <tr>
+                                <td>Freva plugin command:</td>
+                                <td>
+                                    <div class="d-flex justify-content-between">
+                                        <pre style="white-space: pre-wrap;">{{analyze_command.strip|mask_uid:request.user.isGuest}}</pre>
+                                        <div>
+                                            <button class="btn btn-primary text-nowrap"
+                                                onClick="copyTextToClipboard('{{analyze_command | mask_uid:request.user.isGuest | escapejs}}');"
+                                                id="copy_button">
+                                                <i class="fw-bold fa fa-clone me-2"></i> Copy
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
                             </tr>
-                            <tr class='additional' style='display:none;'>
+                            <tr>
                                 <td>Tool repository:</td>
                                 <td>{{tool_repos}}</td>
                             </tr>
-                            <tr class='additional' style='display:none;'>
+                            <tr>
                                 <td>Tool internal version:</td>
                                 <td>{{tool_version}}</td>
                             </tr>
-                            <tr class='additional' style='display:none;'>
-                                <td>System repository:</td>
-                                <td>{{api_repos}}</td>
-                            </tr>
-                            <tr class='additional' style='display:none;'>
+                            <tr>
                                 <td>System internal version:</td>
                                 <td>{{api_version}}</td>
                             </tr>
                         </table>
                     </div> <!-- col-md-12 -->
-                    <button class="btn btn-info mb-2" onClick="$('.additional').toggle()">Additional information</button>
-                    <button class="btn btn-info mb-2"
-                        onClick="copyTextToClipboard('{{analyze_command | mask_uid:request.user.isGuest | escapejs}}');"
-                        id="copy_button">
-                        Copy analyse command
-                    </button>
+
 
                     <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
                         <div id="clipboard-toast" class="toast hide" style="background-color: #ddede5;" role="alert" aria-live="assertive" aria-atomic="true">

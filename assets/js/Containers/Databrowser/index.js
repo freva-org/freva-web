@@ -11,9 +11,10 @@ import {
   Button,
   Alert,
   Badge,
+  Toast,
 } from "react-bootstrap";
 
-import { FaInfoCircle } from "react-icons/fa";
+import { FaInfoCircle, FaRegClone } from "react-icons/fa";
 
 import queryString from "query-string";
 import { withRouter } from "react-router";
@@ -22,6 +23,8 @@ import NcdumpDialog from "../../Components/NcdumpDialog";
 import AccordionItemBody from "../../Components/AccordionItemBody";
 import OwnPanel from "../../Components/OwnPanel";
 import Spinner from "../../Components/Spinner";
+
+import { initCap, underscoreToBlank } from "../../utils";
 
 import {
   loadFacets,
@@ -40,10 +43,51 @@ import {
 
 import TimeRangeSelector from "./TimeRangeSelector";
 
+function ClipboardToast({ show, setShow }) {
+  return (
+    <div className="position-fixed top-0 end-0 p-3" style={{ zIndex: 11 }}>
+      <Toast
+        onClose={() => setShow(false)}
+        show={show}
+        delay={3000}
+        style={{ backgroundColor: "#ddede5" }}
+        autohide
+      >
+        <Toast.Body>
+          <strong id="clipboard-toast-text">Copied command to clipboard</strong>
+        </Toast.Body>
+      </Toast>
+    </div>
+  );
+}
+
+ClipboardToast.propTypes = {
+  setShow: PropTypes.func.isRequired,
+  show: PropTypes.bool.isRequired,
+};
+
+function copyTextFallback(text) {
+  // Fallback: Show window prompt to copy-paste the command
+  window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
+}
+
+function copyTextToClipboard(text, showToast) {
+  if (!navigator.clipboard) {
+    copyTextFallback(text);
+    return;
+  }
+  // writeText handles it errors inside the second function. No need
+  // to catch Promise
+  // eslint-disable-next-line promise/catch-or-return
+  navigator.clipboard.writeText(text).then(showToast, function () {
+    copyTextFallback(text);
+  });
+}
+
 class Databrowser extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { showDialog: false, fn: null };
+    this.state = { showDialog: false, fn: null, showToast: false };
   }
 
   /**
@@ -89,20 +133,21 @@ class Databrowser extends React.Component {
       if (isFacetSelected) {
         panelHeader = (
           <span>
-            {key}: <strong>{selectedFacets[key]}</strong>
+            {initCap(underscoreToBlank(key))}:{" "}
+            <strong>{selectedFacets[key]}</strong>
           </span>
         );
       } else if (value.length === 2) {
         panelHeader = (
           <span>
-            {key}: <strong>{value[0]}</strong>
+            {initCap(underscoreToBlank(key))}: <strong>{value[0]}</strong>
           </span>
         );
       } else {
         const numberOfValues = value.length / 2;
         panelHeader = (
           <span className="d-flex justify-content-between">
-            <span>{key}</span>
+            <span>{initCap(underscoreToBlank(key))}</span>
             <Badge bg="secondary">{numberOfValues}</Badge>
           </span>
         );
@@ -264,6 +309,22 @@ class Databrowser extends React.Component {
       dateSelectorToCli = "file";
     }
 
+    const fullCommand = (
+      "freva databrowser " +
+      (this.props.databrowser.minDate
+        ? `time=${this.props.databrowser.minDate}to${this.props.databrowser.maxDate} `
+        : "") +
+      Object.keys(selectedFacets)
+        .map((key) => {
+          const value = selectedFacets[key];
+          return `${key}=${value}`;
+        })
+        .join(" ") +
+      (dateSelectorToCli && this.props.databrowser.minDate
+        ? ` --time-select ${dateSelectorToCli}`
+        : "")
+    ).trimEnd();
+
     return (
       <Container>
         <Row>
@@ -295,36 +356,55 @@ class Databrowser extends React.Component {
             {this.renderTimeSelectionPanel()}
           </Col>
           <Col md={8}>
-            <Card className="p-3 d-block shadow-sm">
-              freva databrowser
-              {this.props.databrowser.minDate && (
-                <React.Fragment>
-                  &nbsp;time=
-                  <span className="fw-bold">
-                    {`${this.props.databrowser.minDate}to${this.props.databrowser.maxDate}`}
-                  </span>
-                </React.Fragment>
-              )}
-              {Object.keys(selectedFacets).map((key) => {
-                const value = selectedFacets[key];
-                return (
-                  <React.Fragment key={`command-${key}`}>
-                    {" "}
-                    {key}=<strong>{value}</strong>
+            <Card className="p-3 py-2 d-block shadow-sm">
+              <div className="fw-bold d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                <div>Freva databrowser command</div>
+                <Button
+                  variant="primary"
+                  className="d-flex align-items-center"
+                  onClick={() =>
+                    copyTextToClipboard(fullCommand, () =>
+                      this.setState({ showToast: true })
+                    )
+                  }
+                >
+                  <FaRegClone className="me-1" /> Copy command
+                </Button>
+              </div>
+              <pre className="mb-1" style={{ whiteSpace: "pre-wrap" }}>
+                freva databrowser
+                {this.props.databrowser.minDate && (
+                  <React.Fragment>
+                    &nbsp;time=
+                    <span className="fw-bold">
+                      {`${this.props.databrowser.minDate}to${this.props.databrowser.maxDate}`}
+                    </span>
                   </React.Fragment>
-                );
-              })}
-              {dateSelectorToCli && this.props.databrowser.minDate && (
-                <React.Fragment>
-                  &nbsp;--time-select
-                  <span className="fw-bold">
-                    &nbsp;
-                    {`${dateSelectorToCli}`}
-                  </span>
-                </React.Fragment>
-              )}
+                )}
+                {Object.keys(selectedFacets).map((key) => {
+                  const value = selectedFacets[key];
+                  return (
+                    <React.Fragment key={`command-${key}`}>
+                      {" "}
+                      {key}=<strong>{value}</strong>
+                    </React.Fragment>
+                  );
+                })}
+                {dateSelectorToCli && this.props.databrowser.minDate && (
+                  <React.Fragment>
+                    &nbsp;--time-select
+                    <span className="fw-bold">
+                      &nbsp;
+                      {`${dateSelectorToCli}`}
+                    </span>
+                  </React.Fragment>
+                )}
+              </pre>
             </Card>
-
+            <ClipboardToast
+              show={this.state.showToast}
+              setShow={(val) => this.setState({ showToast: val })}
+            />
             {this.renderFilesPanel()}
 
             <NcdumpDialog

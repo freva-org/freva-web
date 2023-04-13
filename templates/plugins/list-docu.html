@@ -9,26 +9,43 @@
             {% load flatpages %}
             {% get_flatpages '/about/' for request.user as flatpages %}
             {% get_flatpages '/extern/' for request.user as extern %}
-            <h2 class="my-3">System documentation</h2>
-            <div class="list-group mt-3">
-                <a href="https://freva.gitlab-pages.dkrz.de/evaluation_system/sphinx_docs/index.html" class="list-group-item"><h4 class="list-group-item-heading">Freva-Docs</h4></a>
-                <a href="/contact/" class="list-group-item">
-                    <h4 class="list-group-item-heading">Contact</h4>
-                </a>
-                {% for page in extern %}
-                    <a href="{{ page.url }}" class="list-group-item">
-                        <h4 class="list-group-item-heading">{{ page.title }}</h4>
-                    </a>
-                {% endfor %}
-            </div>
-            <h2 class="my-3">Plugin documentation</h2>
-            <div class="list-group">
-                {% for page in flatpages %}
-                    <a href="{{ page.url }}" class="list-group-item">
-                        <h4 class="list-group-item-heading">{{ page.title }}</h4>
-                    </a>
-                {% endfor %}
-            </div>
+            <h1 class="fs-2">Documentation</h1>
+            <ul class="list-unstyled">
+                <li><h2 class="fs-5">System documentation</h2></li>
+                <ul>
+                    <li>
+                        <a href="https://freva.gitlab-pages.dkrz.de/evaluation_system/sphinx_docs/index.html" class="">
+                            Freva-Docs
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/contact/">
+                            Contact
+                        </a>
+                    </li>
+                    {% for page in extern %}
+                        <li>
+                            <a href="{{ page.url }}">
+                                {{ page.title }}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </ul>
+            {% if flatpages %}
+                <ul class="list-unstyled">
+                    <li><h2 class="fs-5">Plugin documentation</h2></li>
+                    <ul>
+                        {% for page in flatpages %}
+                            <li>
+                                <a href="{{ page.url }}">
+                                    {{ page.title }}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </ul>
+            {% endif %}
         </div>
     </div>
 {% endblock %}

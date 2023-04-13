@@ -9,7 +9,12 @@ import _ from "lodash";
 import AccordionItemBody from "../../Components/AccordionItemBody";
 import OwnPanel from "../../Components/OwnPanel";
 import Spinner from "../../Components/Spinner";
-import { dateformatter, getCookie } from "../../utils";
+import {
+  dateformatter,
+  getCookie,
+  initCap,
+  underscoreToBlank,
+} from "../../utils";
 
 import ResultTable from "./ResultTable";
 
@@ -164,20 +169,23 @@ class Resultbrowser extends React.Component {
       if (isFacetSelected) {
         panelHeader = (
           <span>
-            {key}: <span className="fw-bold">{selectedFacets[key]}</span>
+            {initCap(underscoreToBlank(key))}:{" "}
+            <span className="fw-bold">{selectedFacets[key]}</span>
           </span>
         );
       } else if (value.length === 2) {
         panelHeader = (
           <span>
-            {key}: <span className="fw-bold">{value[0]}</span>
+            {initCap(underscoreToBlank(key))}:{" "}
+            <span className="fw-bold">{value[0]}</span>
           </span>
         );
       } else {
         const numberOfValues = value.length / 2;
         panelHeader = (
           <span className="d-flex justify-content-between">
-            <span>{key}</span> <Badge bg="secondary">{numberOfValues}</Badge>
+            <span>{initCap(underscoreToBlank(key))}</span>{" "}
+            <Badge bg="secondary">{numberOfValues}</Badge>
           </span>
         );
       }

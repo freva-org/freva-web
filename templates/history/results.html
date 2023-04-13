@@ -13,11 +13,28 @@
         <div class="row">
             <div class="col-md-12">
                 <h1 id='result_caption'>{{ result_caption }}</h1>
-                <p>Analysis from {{ history_object.timestamp|date:"d.m.y H:i:s" }} done by <a href="{% url 'history:history' history_object.uid %}">{{history_object.uid}}</a></p>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Analysis from {{ history_object.timestamp|date:"d.m.y H:i:s" }} done by
+                        <a href="{% url 'history:history' history_object.uid %}">{{history_object.uid}}</a>
+                    </span>
+                    {% if history_object.status < 2 %}
+                    <span class="badge bg-success">
+                    {% elif history_object.status > 2%}
+                    <span class="badge bg-warning text-black">
+                    {% else %}
+                    <span class="badge bg-danger">
+                    {% endif %}
+                        <span class="align-middle">{{ history_object.status_name }}<span>
+                    </span>
+                </div>
             </div>
         </div>
+        {% if not is_plugin_available %}
+        <div class="alert alert-warning mb-2">
+            This result has been produced with an user-imported plugin. Configuration changes are not possible.
+        </div>
+        {% endif %}
         <div class="row">
-
             <div class="alert alert-success alert-dismissible" role="alert" id='alert_send_developer_success' style='display:none'>
                 Mail sent to {{developer.name}}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -40,34 +57,30 @@
         </div> <!-- row -->
 
         {% if not request.user.isGuest %}
-            <div class="row mb-3">
+            <div class="row">
                 <div class="col-md-12">
                     {% if is_plugin_available %}
-                        <a class="btn btn-primary mb-2" href="{% url 'plugins:setup' history_object.tool history_object.id%}" id="config_button">Edit configuration</a>
-                    {% else %}
-                        <div class="alert alert-warning">
-                            This result has been produced with an user-imported plugin. Configuration changes are not possible.
-                        </div>
+                        <a class="btn btn-primary mb-3" href="{% url 'plugins:setup' history_object.tool history_object.id%}" id="config_button">Edit configuration</a>
                     {% endif %}
                     {% if documentation %}
-                        <a class="btn btn-success mb-2" href="{{documentation.url}}">Documentation</a>
+                        <a class="btn btn-success mb-3" href="{{documentation.url}}">Documentation</a>
                     {%endif%}
                     {% if history_object.status > 2 and history_object.slurm_output != '0' and history_object.uid == request.user %}
 
-                        <button class="btn btn-danger mb-2 mybtn-cancel" id="cancelButton" onClick="cancelDialog.show({{history_object.id}})">Cancel job</button>
+                        <button class="btn btn-danger mb-3 mybtn-cancel" id="cancelButton" onClick="cancelDialog.show({{history_object.id}})">Cancel job</button>
                         {# Render a Bootstrap password/cancel dialog #}
                         {% cancel_dialog %}
                     {%endif%}
 
                     {% if request.user == history_object.uid %}
-                        <button class="btn btn-secondary mb-2 mybtn-sendmail" id="sendButton" onClick="$('#sendmail_modal').modal('show')">Share Results</button>
+                        <button class="btn btn-secondary mb-3 mybtn-sendmail" id="sendButton" onClick="$('#sendmail_modal').modal('show')">Share Results</button>
 
-                        <button class="btn btn-secondary mb-2 mybtn-caption" id="captionButton" onClick="$('#caption_modal').modal('show')">Set Caption</button>
+                        <button class="btn btn-secondary mb-3 mybtn-caption" id="captionButton" onClick="$('#caption_modal').modal('show')">Set Caption</button>
                     {%endif%}
                     {# Render a Bootstrap caption dialog #}
                     {% caption_dialog result_caption default_caption history_object request.user %}
 
-                    <button class="btn btn-warning mb-2 " id="followButton"><span id='followText'>{{follow}}</span></button>
+                    <button class="btn btn-warning mb-3 " id="followButton"><span id='followText'>{{follow}}</span></button>
                     {%if developer %}
                         {% mail_to_developer history_object.tool request.user.username request.build_absolute_uri %}
                     {%endif%}
@@ -95,177 +108,179 @@
                                     <td>{{value|mask_uid:request.user.isGuest}}</td>
                                 </tr>
                             {% endfor %}
-                            <tr class='additional' style='display:none;'>
+                            <tr>
                                 <th colspan="2">Additional Information</th>
                             </tr>
-                            <tr class='additional' style='display:none;'>
-                                <td>Analyze command:</td>
-                                <td>{{analyze_command|mask_uid:request.user.isGuest}}</td>
+                            <tr>
+                                <td>Freva plugin command:</td>
+                                <td>
+                                    <div class="d-flex justify-content-between">
+                                        <pre style="white-space: pre-wrap;">{{analyze_command.strip|mask_uid:request.user.isGuest}}</pre>
+                                        <div>
+                                            <button class="btn btn-primary text-nowrap"
+                                                onClick="copyTextToClipboard('{{analyze_command | mask_uid:request.user.isGuest | escapejs}}');"
+                                                id="copy_button">
+                                                <i class="fw-bold fa fa-clone me-2"></i> Copy
+                                            </button>
+                                        </div>
+                                    </div>
+                                </td>
                             </tr>
-                            <tr class='additional' style='display:none;'>
+                            <tr>
                                 <td>Tool repository:</td>
                                 <td>{{tool_repos}}</td>
-                                <tr class='additional' style='display:none;'>
-                                    <td>Tool internal version:</td>
-                                    <td>{{tool_version}}</td>
-                                </tr>
-                                <tr class='additional' style='display:none;'>
-                                    <td>System repository:</td>
-                                    <td>{{api_repos}}</td>
-                                </tr>
-                                <tr class='additional' style='display:none;'>
-                                    <td>System internal version:</td>
-                                    <td>{{api_version}}</td>
-                                </tr>
-                            </table>
-                        </div> <!-- col-md-12 -->
-                        <button class="btn btn-info mb-2" onClick="$('.additional').toggle()">Additional information</button>
-                        <button class="btn btn-info mb-2"
-                            onClick="copyTextToClipboard('{{analyze_command | mask_uid:request.user.isGuest | escapejs}}');"
-                            id="copy_button">
-                            Copy analyse command
-                        </button>
+                            </tr>
+                            <tr>
+                                <td>Tool internal version:</td>
+                                <td>{{tool_version}}</td>
+                            </tr>
+                            <tr>
+                                <td>System internal version:</td>
+                                <td>{{api_version}}</td>
+                            </tr>
+                        </table>
+                    </div> <!-- col-md-12 -->
 
-                        <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
-                          <div id="clipboard-toast" class="toast hide" style="background-color: #ddede5;" role="alert" aria-live="assertive" aria-atomic="true">
+
+                    <div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+                        <div id="clipboard-toast" class="toast hide" style="background-color: #ddede5;" role="alert" aria-live="assertive" aria-atomic="true">
                             <div class="d-flex">
-                              <div class="toast-body">
-                                <strong id="clipboard-toast-text">Copied command to clipboard</strong>
-                              </div>
-                              <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                                <div class="toast-body">
+                                    <strong id="clipboard-toast-text">Copied command to clipboard</strong>
+                                </div>
+                                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                             </div>
-                          </div>
                         </div>
+                    </div>
 
-                    </div><!-- panel-body -->
-                </div><!-- panel-collapse collapse-->
-            </div><!-- panel panel-default-->
+                </div><!-- panel-body -->
+            </div><!-- panel-collapse collapse-->
+        </div><!-- panel panel-default-->
 
 
             <!-- Slurm File -->
-            <div class="card mb-3">
-                <div class="btn btn-outline-secondary border-0 p-3 rounded-top text-start card-header shadow-sm button-div"  data-bs-toggle="collapse" href="#collapseOutput">
-                    <span>
-                        Program&#039;s output
-                    </span>
-                </div>
-                <div id="collapseOutput" class="collapse">
-                    <div>
-                        {% if file_content %}
-                            {% if history_object.status > 2 %}
-                                <script>
-                                    function doUpdate() {
-                                        var tailServiceUrl = '{% url 'history:tailFile' history_object.id %}';
-                                        $.ajax({type: "GET", url : tailServiceUrl,
-                                            success: function (data) {
-                                                if (!data)
-                                                {
-                                                    window.location.reload(true)
-                                                }
-                                                if (data.length > 0)
-                                                {
-                                                    var output = '';
-                                                    $.each(data, function(index,value){
-                                                        output += value;
-                                                    });
-                                                    $("#logOutputDiv").append(output);
-                                                    $('#logOutputDiv').stop().animate({
-                                                        scrollTop: $("#logOutputDiv")[0].scrollHeight
-                                                    }, 800);
-                                                }
-                                                setTimeout("doUpdate()", 5000);
-                                            }});
-                                    }
-                                    setTimeout("doUpdate()", 2000);
-                                </script>
-                            {% endif %}
+        <div class="card mb-3">
+            <div class="btn btn-outline-secondary border-0 p-3 rounded-top text-start card-header shadow-sm button-div"  data-bs-toggle="collapse" href="#collapseOutput">
+                <span>
+                    Program&#039;s output
+                </span>
+            </div>
+            <div id="collapseOutput" class="collapse">
+                <div>
+                    {% if file_content %}
+                        {% if history_object.status > 2 %}
+                            <script>
+                                function doUpdate() {
+                                    var tailServiceUrl = '{% url 'history:tailFile' history_object.id %}';
+                                    $.ajax({type: "GET", url : tailServiceUrl,
+                                        success: function (data) {
+                                            if (!data)
+                                            {
+                                                window.location.reload(true)
+                                            }
+                                            if (data.length > 0)
+                                            {
+                                                var output = '';
+                                                $.each(data, function(index,value){
+                                                    output += value;
+                                                });
+                                                $("#logOutputDiv").append(output);
+                                                $('#logOutputDiv').stop().animate({
+                                                    scrollTop: $("#logOutputDiv")[0].scrollHeight
+                                                }, 800);
+                                            }
+                                            setTimeout("doUpdate()", 5000);
+                                        }});
+                                }
+                                setTimeout("doUpdate()", 2000);
+                            </script>
+                        {% endif %}
 
-                            <div class="row">
-                                <div class="col-md-12">
-                                    {% if history_object.status > 2 %}
-                                        <p class="p-2">The tool is still running. Here you can see the output:</p>
-                                    {% endif %}
-                                    <div id="logOutputDiv" class="well well-lg" style="height:450px; overflow-y:scroll; overflow-x: hidden;">
-
-                                        {% for line in file_content %}
-
-                                            {{line}}<br>
-
-                                        {%endfor%}
-
-                                    </div>
-                                </div>
-                            </div>
-                        {%else%}
-                            </div>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <p>Process status is <strong>{{ history_object.status_name }}</strong><br/>Because you did not use batchmode we can't display any information</p>
-                                </div>
-
-                        {%endif%}
-
-
-                    </div><!-- panel-body -->
-                </div><!-- panel-collapse collapse-->
-            </div><!-- panel panel-default-->
-
-            <!-- Notes -->
-            <div class="card mb-3">
-                <div class="btn btn-outline-secondary border-0 p-3 rounded-top text-start card-header shadow-sm button-div"  data-bs-toggle="collapse" href="#collapseNotes">
-                    <span data-bs-toggle="collapse" href="#collapseNotes">
-                        Notes <span id='note_count'>(0)</span>
-                    </span>
-                </div>
-                <div id="collapseNotes" class="panel-collapse collapse">
-                    <div class="card-body" id='loadComments'>
-                    </div><!-- panel-body -->
-                </div><!-- panel-collapse collapse-->
-            </div><!-- panel panel-default-->
-
-
-            <!-- Results -->
-            <div class="card mb-3">
-                <div class="btn btn-outline-secondary border-0 p-3 rounded-top text-start card-header shadow-sm button-div"  data-bs-toggle="collapse" href="#collapseResults">
-                    <span data-bs-toggle="collapse" href="#collapseResults">
-
-                        {% if history_object.status > 0 %}
-                            No Results (Process status: {{history_object.status_name}})
-                        {% else %}
-                            Results
-                        {%endif%}
-                    </span>
-                </div>
-                <div id="collapseResults" class="panel-collapse collapse">
-                    <div class="card-body">
                         <div class="row">
-                            {%if not file_list %}
-                                {% if history_object.status == history_object.processStatus.finished_no_output %}
-                                    <div class="col-md-3">
-                                        <p>There was no output produced!</p>
-                                    </div>
+                            <div class="col-md-12">
+                                {% if history_object.status > 2 %}
+                                    <p class="p-2">The tool is still running. Here you can see the output:</p>
                                 {% endif %}
-                                <div class="col-md-3">
-                                    <p>{{history_object.tool}} produced no plots.</p>
-                                </div>
-                                <div class="col-md-12">
-                                </div>
+                                <div id="logOutputDiv" class="well well-lg" style="height:450px; overflow-y:scroll; overflow-x: hidden;">
 
+                                    {% for line in file_content %}
 
-                            {%else%}
+                                        {{line}}<br>
 
-                                <div class="col-md-12">
-                                    <ul class="jqueryFileTree">
-                                        {{ file_list|preview_tree|mask_safe_uid:request.user.isGuest }}
-                                    </ul>
+                                    {%endfor%}
+
                                 </div>
-                            {%endif%}
+                            </div>
                         </div>
+                    {%else%}
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <p>Process status is <strong>{{ history_object.status_name }}</strong><br/>Because you did not use batchmode we can't display any information</p>
+                            </div>
 
-                    </div><!-- panel-body -->
-                </div><!-- panel-collapse collapse-->
-            </div><!-- panel panel-default-->
-        </div>
+                    {%endif%}
+
+
+                </div><!-- panel-body -->
+            </div><!-- panel-collapse collapse-->
+        </div><!-- panel panel-default-->
+
+        <!-- Notes -->
+        <div class="card mb-3">
+            <div class="btn btn-outline-secondary border-0 p-3 rounded-top text-start card-header shadow-sm button-div"  data-bs-toggle="collapse" href="#collapseNotes">
+                <span data-bs-toggle="collapse" href="#collapseNotes">
+                    Notes <span id='note_count'>(0)</span>
+                </span>
+            </div>
+            <div id="collapseNotes" class="panel-collapse collapse">
+                <div class="card-body" id='loadComments'>
+                </div><!-- panel-body -->
+            </div><!-- panel-collapse collapse-->
+        </div><!-- panel panel-default-->
+
+
+        <!-- Results -->
+        <div class="card mb-3">
+            <div class="btn btn-outline-secondary border-0 p-3 rounded-top text-start card-header shadow-sm button-div"  data-bs-toggle="collapse" href="#collapseResults">
+                <span data-bs-toggle="collapse" href="#collapseResults">
+
+                    {% if history_object.status > 0 %}
+                        No Results (Process status: {{history_object.status_name}})
+                    {% else %}
+                        Results
+                    {%endif%}
+                </span>
+            </div>
+            <div id="collapseResults" class="panel-collapse collapse">
+                <div class="card-body">
+                    <div class="row">
+                        {%if not file_list %}
+                            {% if history_object.status == history_object.processStatus.finished_no_output %}
+                                <div class="col-md-3">
+                                    <p>There was no output produced!</p>
+                                </div>
+                            {% endif %}
+                            <div class="col-md-3">
+                                <p>{{history_object.tool}} produced no plots.</p>
+                            </div>
+                            <div class="col-md-12">
+                            </div>
+
+
+                        {%else%}
+
+                            <div class="col-md-12">
+                                <ul class="jqueryFileTree">
+                                    {{ file_list|preview_tree|mask_safe_uid:request.user.isGuest }}
+                                </ul>
+                            </div>
+                        {%endif%}
+                    </div>
+
+                </div><!-- panel-body -->
+            </div><!-- panel-collapse collapse-->
+        </div><!-- panel panel-default-->
     </div>
 
     <script>

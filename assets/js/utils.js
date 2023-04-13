@@ -26,3 +26,22 @@ export const dateformatter = (isodate) => {
     m <= 9 ? "0" + m : m
   }.${newdate.getFullYear()}`;
 };
+
+export function initCap(str) {
+  if (!str) {
+    return str;
+  }
+  if (str.length === 1) {
+    return str.substring(0, 1).toUpperCase();
+  } else if (str.length >= 1) {
+    return str.substring(0, 1).toUpperCase() + str.substring(1);
+  }
+  return str;
+}
+
+export function underscoreToBlank(str) {
+  if (!str) {
+    return str;
+  }
+  return str.replaceAll(/_/g, " ");
+}

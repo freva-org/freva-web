@@ -88,44 +88,61 @@ function AccordionItemBody(props) {
       const count = item.count;
       if (metadata && metadata[value]) {
         return (
-          <div className="col-md-12 col-sm-6" key={value}>
-            <OverlayTrigger
-              overlay={
-                <Tooltip>
-                  <div dangerouslySetInnerHTML={{ __html: metadata[value] }} />
-                </Tooltip>
-              }
-            >
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  facetClick(eventKey, value);
-                  props.togglePanel();
-                }}
+          <div
+            className="col-md-12 col-sm-6 flex-nowrap d-flex justify-content-between"
+            key={value}
+          >
+            <div>
+              <OverlayTrigger
+                overlay={
+                  <Tooltip>
+                    <div
+                      dangerouslySetInnerHTML={{ __html: metadata[value] }}
+                    />
+                  </Tooltip>
+                }
               >
-                {value}
-              </a>
-            </OverlayTrigger>{" "}
-            <Badge bg="secondary">{count}</Badge>
+                <a
+                  href="#"
+                  className="text-wrap"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    facetClick(eventKey, value);
+                    props.togglePanel();
+                  }}
+                >
+                  {value}
+                </a>
+              </OverlayTrigger>{" "}
+            </div>
+            <div>
+              <Badge bg="secondary">{count}</Badge>
+            </div>
           </div>
         );
       }
       return (
-        <div className="col-md-12 col-sm-6" key={value}>
-          <a
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              facetClick(eventKey, value);
-              if (props.togglePanel) {
-                props.togglePanel();
-              }
-            }}
-          >
-            {value}
-          </a>{" "}
-          <Badge bg="secondary">{item.count}</Badge>
+        <div
+          className="col-md-12 col-sm-6 flex-nowrap d-flex justify-content-between"
+          key={value}
+        >
+          <div>
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                facetClick(eventKey, value);
+                if (props.togglePanel) {
+                  props.togglePanel();
+                }
+              }}
+            >
+              {value}
+            </a>{" "}
+          </div>
+          <div>
+            <Badge bg="secondary">{item.count}</Badge>
+          </div>
         </div>
       );
     });

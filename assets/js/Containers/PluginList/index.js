@@ -17,6 +17,7 @@ import {
   FormControl,
   InputGroup,
   Alert,
+  Badge,
 } from "react-bootstrap";
 
 import _ from "lodash";
@@ -30,6 +31,8 @@ import {
 
 import Spinner from "../../Components/Spinner";
 
+import { initCap } from "../../utils";
+
 import {
   exportPlugin,
   loadPlugins,
@@ -37,18 +40,6 @@ import {
   updateTagFilter,
   updateSearchFilter,
 } from "./actions";
-
-function initCap(str) {
-  if (!str) {
-    return str;
-  }
-  if (str.length === 1) {
-    return str.substring(0, 1).toUpperCase();
-  } else if (str.length >= 1) {
-    return str.substring(0, 1).toUpperCase() + str.substring(1);
-  }
-  return str;
-}
 
 class PluginList extends React.Component {
   constructor(props) {
@@ -129,18 +120,27 @@ class PluginList extends React.Component {
     }
 
     return (
-      <FormCheck key={categoryName + "checkbox"}>
-        <FormCheck.Input
-          type="checkbox"
-          onChange={() =>
-            this.props.dispatch(updateCategoryFilter(categoryName))
-          }
-          checked={_.includes(categoriesFilter, categoryName)}
-          id={categoryName + "-cat"}
-        />
-        <FormCheck.Label htmlFor={categoryName + "-cat"}>
-          {initCap(categoryName)} ({categories[categoryName].length})
-        </FormCheck.Label>
+      <FormCheck
+        className="d-flex justify-content-between"
+        key={categoryName + "checkbox"}
+      >
+        <span>
+          <FormCheck.Input
+            className="me-2"
+            type="checkbox"
+            onChange={() =>
+              this.props.dispatch(updateCategoryFilter(categoryName))
+            }
+            checked={_.includes(categoriesFilter, categoryName)}
+            id={categoryName + "-cat"}
+          />
+          <FormCheck.Label htmlFor={categoryName + "-cat"}>
+            {initCap(categoryName)}
+          </FormCheck.Label>
+        </span>
+        <div>
+          <Badge bg="secondary">{categories[categoryName].length}</Badge>
+        </div>
       </FormCheck>
     );
   }

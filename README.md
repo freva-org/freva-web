@@ -47,7 +47,7 @@ created a `freva-dev` cona miniconda environment you can run the tests after
 activating this environment:
 
 ```bash
-conda activate freva-dev
+conda activate freva-web
 python -m pytest -vv tests
 ```
 

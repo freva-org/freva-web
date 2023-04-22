@@ -95,7 +95,6 @@ Build project:
 ```bash
 npm run build
 npm run build-production   # optimized production build
-
 ```
 
 Development:

@@ -1,4 +1,4 @@
-name: Linter
+name: Tests
 run-name: ${{ github.actor }} is linting the code
 
 on: [push, pull_request]
@@ -14,8 +14,10 @@ jobs:
         with:
           activate-environment: freva-web
           environment-file: conda-env.yml
-          python-version: "3.10"
+          python-version: "3.11"
           auto-activate-base: false
+      - name: Run checks in python
+        run: make tests
       - name: Lint python
         run: make lint
       - name: Prepare node

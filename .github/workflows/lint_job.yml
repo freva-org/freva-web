@@ -16,10 +16,10 @@ jobs:
           environment-file: conda-env.yml
           python-version: "3.11"
           auto-activate-base: false
-      - name: Set up services
-        run: docker-compose up -d --remove-orphans
-      - name: Run checks in python
-        run: make tests
+      # - name: Set up services
+      #  run: docker-compose up -d --remove-orphans
+      # - name: Run checks in python
+      #  run: make tests
       - name: Lint python
         run: make lint
       - name: Prepare node

@@ -1,7 +1,6 @@
 from pathlib import Path
 import os
 import sys
-import pymysql
 import ldap
 from django_auth_ldap.config import (
     LDAPSearch,
@@ -17,8 +16,6 @@ from base.exceptions import UnknownLDAPGroupTypeError
 
 freva_share_path = Path(os.environ["EVALUATION_SYSTEM_CONFIG_FILE"]).parent
 web_config_path = freva_share_path / "web" / "freva_web_conf.toml"
-pymysql.version_info = (1, 4, 2, "final", 0)
-pymysql.install_as_MySQLdb()
 
 
 def _get_conf_key(config, key, alternative, is_file=True):

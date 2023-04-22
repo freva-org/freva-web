@@ -1,5 +1,7 @@
 .PHONY: tests
 
+export EVALUATION_SYSTEM_CONFIG_FILE := $(PWD)/docker/local-eval-system.conf
+export EVALUATION_SYSTEM_DRS_CONFIG_FILE := $(PWD)/docker/drs_config.toml
 run:
 	python manage.py runserver
 

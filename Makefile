@@ -13,4 +13,5 @@ lint:
 	black -t py310 --check .
 
 tests:
+	rm -rf node_modules
 	pytest -vv $(PWD) tests/

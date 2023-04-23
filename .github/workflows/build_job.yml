@@ -1,4 +1,5 @@
 name: Build and publish the container image
+run-name: ${{ github.actor }} is building the container
 
 "on":
   workflow_dispatch:

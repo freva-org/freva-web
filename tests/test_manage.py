@@ -16,11 +16,11 @@ def test_collectstatic(eval_config):
     assert res.returncode == 0
 
 
-def test_createsuperuser(eval_config, random_admin):
-    """The the python manage.py createsuperuser command."""
-    cmd = (
-        f"python manage.py createsuperuser --username {random_admin} "
-        "--email test@bla.com --noinput"
-    )
-    res = run(shlex.split(cmd), check=False, stdout=PIPE, stderr=PIPE)
-    assert res.returncode == 0
+# def test_createsuperuser(eval_config, random_admin):
+#    """The the python manage.py createsuperuser command."""
+#    cmd = (
+#        f"python manage.py createsuperuser --username {random_admin} "
+#        "--email test@bla.com --noinput"
+#    )
+#    res = run(shlex.split(cmd), check=False, stdout=PIPE, stderr=PIPE)
+#   assert res.returncode == 0

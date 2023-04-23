@@ -9,15 +9,17 @@ jobs:
       run:
         shell: bash -l {0}
     steps:
-      - uses: actions/checkout@v3
-      - uses: conda-incubator/setup-miniconda@v2
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Set up services
+        run: docker-compose up -d --remove-orphans
+      - name: Create conda env
+        uses: conda-incubator/setup-miniconda@v2
         with:
           activate-environment: freva-web
           environment-file: conda-env.yml
           python-version: "3.11"
           auto-activate-base: false
-      - name: Set up services
-        run: docker-compose up -d --remove-orphans
       - name: Run checks in python
         run: make tests
       - name: Lint python

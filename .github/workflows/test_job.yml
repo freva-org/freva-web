@@ -1,5 +1,5 @@
 name: Tests
-run-name: ${{ github.actor }} is linting the code
+run-name: ${{ github.actor }} is doing some smoke tests
 
 on: [push, pull_request]
 jobs:

@@ -28,6 +28,10 @@ jobs:
         run: make lint
       - name: Prepare node
         run: npm install
+      - name: Test building the prod system
+        run: npm run build-production
+      - name: Test building the dev system
+        run: npm run build
       - name: Lint js formatting
         run: npm run lint-format
       - name: Lint javascript

@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 import mock
 import random
+import shutil
 import string
 import sys
 from tempfile import NamedTemporaryFile
@@ -61,6 +62,8 @@ def eval_config(eval_pubkey):
             config.write(f)
         with mock.patch.dict(os.environ, env, clear=True):
             yield config
+    node_path = Path(__file__).absolute().parent.parent / "node_modules"
+    shutil.rmtree(node_path, ignore_errors=True)
 
 
 @pytest.fixture(scope="function")

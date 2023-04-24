@@ -1,11 +1,11 @@
 {
   "name": "evaluation_system_web",
-  "version": "2023.04.22",
-  "description": "convert static/img/freva-favicon-black.png -fill '#A020F0' -opaque black -resize 64x64 static/img/freva-favicon.png",
+  "version": "2023.04.24",
+  "description": "React-bits of the freva-web interface. The react-parts of the web interface include the plugin-selection, the data-browser and the result-browser",
   "main": "index.js",
-  "directories": {
-    "doc": "docs",
-    "test": "tests"
+  "engines" : {
+    "npm" : ">=8.19.0",
+    "node" : ">=16.5.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

@@ -82,6 +82,8 @@ can change the port number with help of a command line argument
 
 ## Building the JS application :
 
+**Please note:** You need a Node version of at least 16.5 along a npm version of 8.19
+
 Install dependencies:
 
 ```bash

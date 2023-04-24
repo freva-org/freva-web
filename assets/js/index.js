@@ -19,7 +19,7 @@ const store = configureStore(initialState);
 
 ReactDOM.render(
   <Provider store={store}>
-    <Router history={browserHistory} onUpdate={() => window.scrollTo(0, 0)}>
+    <Router history={browserHistory}>
       <Route path="/" component={App}>
         <Route path="plugins/" component={PluginList} />
         <Route path="history/result-browser/" component={Resultbrowser} />

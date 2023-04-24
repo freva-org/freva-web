@@ -9,8 +9,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint assets",
-    "lint-format": "prettier -l assets",
+    "lint": "eslint assets/js",
+    "lint-format": "prettier -l assets/js",
     "dev": "webpack serve --config webpack.config.js",
     "build": "webpack --config webpack.config.js --progress --color --mode=development",
     "build-production": "webpack --config webpack.config.js --progress --color --mode=production"
@@ -47,9 +47,7 @@
   "dependencies": {
     "date-fns": "^2.29",
     "isomorphic-fetch": "^3.0.0",
-    "linkify": "^0.2.1",
     "linkify-react": "^3.0.4",
-    "linkifyjs": "^4.1.1",
     "lodash": "^4.17.21",
     "prop-types": "^15.7.2",
     "query-string": "^7.1.3",

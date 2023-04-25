@@ -173,7 +173,10 @@ class FUUserInformation(LdapUserInformation):
             except TypeError:
                 res_str = dict(res[1].items())
             uid = res_str.get("uid", [None])[0]
-            prename, _, lastname = res_str.get("cn", [""]).partition(" ")
+            cn = res_str.get("cn", [""])
+            if isinstance(cn, list):
+                cn = cn[0]
+            prename, _, lastname = cn.partition(" ")
             mail = res_str.get("mail", [None])[0]
             gecos = res_str.get("gecos", [None])[0]
             home_dir = res_str.get("homeDirectory", [None])[0]

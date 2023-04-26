@@ -123,7 +123,8 @@
                     <h4>About Us</h4>
                     <!--    INTEGRAted data and evaluation system for decadal scale predicTION. -->
                     <p>
-                        {% settings_val 'ABOUT_US_TEXT' %}
+                        {% settings_val 'ABOUT_US_TEXT' as about_us_text %}
+                        {{ about_us_text|safe }}
                     </p>
                 </div>
                 <!-- widget 2 -->

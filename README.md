@@ -2,7 +2,7 @@
 The deployment of a production system is done by a dedicated deployment
 repository that sets up the backend, front end and all services. To deploy the
 web front end in a production environment use the
-[deployment prodecure](https://freva-deployment.readthedocs.io/en/latest/)
+[deployment procedure](https://freva-deployment.readthedocs.io/en/latest/)
 
 # Setting up a development version:
 

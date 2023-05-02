@@ -2,14 +2,14 @@
 The deployment of a production system is done by a dedicated deployment
 repository that sets up the backend, front end and all services. To deploy the
 web front end in a production environment use the
-[deployment repository](https://gitlab.dkrz.de/freva/deployment)
+[deployment procedure](https://freva-deployment.readthedocs.io/en/latest/)
 
 # Setting up a development version:
 
 To start development with freva clone the repository and its sub-modules:
 
-```
-git clone --recursive https://gitlab.dkrz.de/freva/freva_web.git
+```console
+git clone --recursive git@github.com:FREVA-CLINT/freva-web.git
 ```
 
 
@@ -53,7 +53,7 @@ python -m pytest -vv tests
 
 ## Django deployment
 
-you can check if django is working and correctly configured by:
+You can check if django is working and correctly configured by:
 
 ```bash
 python manage.py check

@@ -50,7 +50,7 @@ function OwnPanel(props) {
           </Button>
         ) : null}
       </div>
-      <Collapse in={open} className="p-3">
+      <Collapse in={open} className="p-3 py-2">
         <div>{childrenWithProps}</div>
       </Collapse>
     </Card>

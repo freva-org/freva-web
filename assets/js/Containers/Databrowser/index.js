@@ -6,20 +6,18 @@ import {
   Row,
   Col,
   Card,
-  Tooltip,
-  OverlayTrigger,
   Button,
   Alert,
   Badge,
-  Toast,
+  OverlayTrigger,
+  Tooltip,
 } from "react-bootstrap";
 
-import { FaInfoCircle, FaRegClone } from "react-icons/fa";
+import { FaAlignJustify, FaList } from "react-icons/fa";
 
 import queryString from "query-string";
 import { withRouter } from "react-router";
 
-import NcdumpDialog from "../../Components/NcdumpDialog";
 import AccordionItemBody from "../../Components/AccordionItemBody";
 import OwnPanel from "../../Components/OwnPanel";
 import Spinner from "../../Components/Spinner";
@@ -30,64 +28,25 @@ import {
   loadFacets,
   setMetadata,
   loadFiles,
-  loadNcdump,
-  resetNcdump,
   updateFacetSelection,
 } from "./actions";
 
-import {
-  TIME_RANGE_FILE,
-  TIME_RANGE_STRICT,
-  TIME_RANGE_FLEXIBLE,
-} from "./constants";
-
 import TimeRangeSelector from "./TimeRangeSelector";
+import FilesPanel from "./FilesPanel";
+import DataBrowserCommand from "./DataBrowserCommand";
+import FacetDropdown from "./FacetDropdown";
 
-function ClipboardToast({ show, setShow }) {
-  return (
-    <div className="position-fixed top-0 end-0 p-3" style={{ zIndex: 11 }}>
-      <Toast
-        onClose={() => setShow(false)}
-        show={show}
-        delay={3000}
-        style={{ backgroundColor: "#ddede5" }}
-        autohide
-      >
-        <Toast.Body>
-          <strong id="clipboard-toast-text">Copied command to clipboard</strong>
-        </Toast.Body>
-      </Toast>
-    </div>
-  );
-}
-
-ClipboardToast.propTypes = {
-  setShow: PropTypes.func.isRequired,
-  show: PropTypes.bool.isRequired,
+const ViewTypes = {
+  RESULT_CENTERED: "RESULT_CENTERED",
+  FACET_CENTERED: "FACET_CENTERED",
 };
-
-function copyTextFallback(text) {
-  // Fallback: Show window prompt to copy-paste the command
-  window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
-}
-
-function copyTextToClipboard(text, showToast) {
-  if (!navigator.clipboard) {
-    copyTextFallback(text);
-    return;
-  }
-  // writeText handles it errors inside the second function. No need
-  // to catch Promise
-  // eslint-disable-next-line promise/catch-or-return
-  navigator.clipboard.writeText(text).then(showToast, function () {
-    copyTextFallback(text);
-  });
-}
 
 class Databrowser extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { showDialog: false, fn: null, showToast: false };
+    this.clickFacet = this.clickFacet.bind(this);
+    this.dropFacet = this.dropFacet.bind(this);
+    this.state = { viewPort: ViewTypes.RESULT_CENTERED };
   }
 
   /**
@@ -119,6 +78,27 @@ class Databrowser extends React.Component {
       this.props.dispatch(updateFacetSelection(this.props.location.query));
     }
   }
+
+  clickFacet(category, value) {
+    const currentLocation = this.props.location.pathname;
+    const query = queryString.stringify({
+      ...this.props.location.query,
+      [category]: value,
+    });
+    if (query) {
+      this.props.router.push(currentLocation + "?" + query);
+    } else {
+      this.props.router.push(currentLocation);
+    }
+  }
+
+  dropFacet(category) {
+    const currentLocation = this.props.location.pathname;
+    const { [category]: toRemove, ...queryObject } = this.props.location.query;
+    const query = queryString.stringify(queryObject);
+    this.props.router.push(currentLocation + "?" + query);
+  }
+
   /**
    * Loop all facets and render the panels
    */
@@ -156,33 +136,13 @@ class Databrowser extends React.Component {
         <OwnPanel
           header={panelHeader}
           key={key}
-          removeFacet={
-            isFacetSelected
-              ? () => {
-                  const currentLocation = this.props.location.pathname;
-                  const { [key]: toRemove, ...queryObject } =
-                    this.props.location.query;
-                  const query = queryString.stringify(queryObject);
-                  this.props.router.push(currentLocation + "?" + query);
-                }
-              : null
-          }
+          removeFacet={isFacetSelected ? () => this.dropFacet(key) : null}
         >
           <AccordionItemBody
             eventKey={key}
             value={value}
-            facetClick={(key, item) => {
-              const currentLocation = this.props.location.pathname;
-              const query = queryString.stringify({
-                ...this.props.location.query,
-                [key]: item,
-              });
-              if (query) {
-                this.props.router.push(currentLocation + "?" + query);
-              } else {
-                this.props.router.push(currentLocation);
-              }
-            }}
+            isFacetCentered={this.state.viewPort === ViewTypes.FACET_CENTERED}
+            facetClick={this.clickFacet}
             metadata={metadata[key] ? metadata[key] : null}
           />
         </OwnPanel>
@@ -233,56 +193,8 @@ class Databrowser extends React.Component {
     );
   }
 
-  renderFilesPanel() {
-    //TODO: This should be a separate component
-    const { files, numFiles, fileLoading } = this.props.databrowser;
-    return (
-      <div className="py-3">
-        <h3 className="d-flex justify-content-between">
-          <span>Files</span>
-          <Badge bg="secondary">{numFiles.toLocaleString("en-US")}</Badge>
-        </h3>
-        <ul
-          className="jqueryFileTree border shadow-sm py-3 rounded"
-          style={{ maxHeight: "1000px", overflow: "auto" }}
-        >
-          {fileLoading ? (
-            <Spinner />
-          ) : (
-            files.map((fn) => {
-              return (
-                <li
-                  className="ext_nc"
-                  key={fn}
-                  style={{ whiteSpace: "normal" }}
-                >
-                  <OverlayTrigger
-                    overlay={<Tooltip>Click here to inspect metadata</Tooltip>}
-                  >
-                    <Button
-                      variant="link"
-                      className="p-0 me-1"
-                      onClick={() => {
-                        this.setState({ showDialog: true, fn });
-                      }}
-                    >
-                      <FaInfoCircle className="ncdump" />
-                    </Button>
-                  </OverlayTrigger>
-                  {fn}
-                </li>
-              );
-            })
-          )}
-        </ul>
-      </div>
-    );
-  }
-
   render() {
-    const { facets, selectedFacets, ncdumpStatus, ncdumpOutput, ncdumpError } =
-      this.props.databrowser;
-    const { dispatch } = this.props;
+    const { facets, selectedFacets } = this.props.databrowser;
     if (this.props.error) {
       return (
         <Container>
@@ -298,44 +210,54 @@ class Databrowser extends React.Component {
     }
 
     const facetPanels = this.renderFacetPanels();
-
-    let dateSelectorToCli;
-    const dateSelector = this.props.databrowser.dateSelector;
-    if (dateSelector === TIME_RANGE_FLEXIBLE) {
-      dateSelectorToCli = "flexible";
-    } else if (dateSelector === TIME_RANGE_STRICT) {
-      dateSelectorToCli = "strict";
-    } else if (dateSelector === TIME_RANGE_FILE) {
-      dateSelectorToCli = "file";
-    }
-
-    const fullCommand = (
-      "freva databrowser " +
-      (this.props.databrowser.minDate
-        ? `time=${this.props.databrowser.minDate}to${this.props.databrowser.maxDate} `
-        : "") +
-      Object.keys(selectedFacets)
-        .map((key) => {
-          const value = selectedFacets[key];
-          return `${key}=${value}`;
-        })
-        .join(" ") +
-      (dateSelectorToCli && this.props.databrowser.minDate
-        ? ` --time-select ${dateSelectorToCli}`
-        : "")
-    ).trimEnd();
-
+    const isFacetCentered = this.state.viewPort === ViewTypes.FACET_CENTERED;
     return (
       <Container>
         <Row>
-          <h2>
-            Data-Browser&nbsp;
-            {this.props.databrowser.facetLoading && (
-              <Spinner outerClassName="d-inline fs-6 align-bottom" />
-            )}
-          </h2>
+          <FacetDropdown
+            clickFacet={this.clickFacet}
+            dropFacet={this.dropFacet}
+          />
+          <div className="d-flex justify-content-between">
+            <h2>
+              Data-Browser&nbsp;
+              {this.props.databrowser.facetLoading && (
+                <Spinner outerClassName="d-inline fs-6 align-bottom" />
+              )}
+            </h2>
+            <div>
+              <OverlayTrigger
+                overlay={<Tooltip>Change view with results in focus</Tooltip>}
+              >
+                <Button
+                  className="me-1"
+                  variant="outline-secondary"
+                  active={!isFacetCentered}
+                  onClick={() =>
+                    this.setState({ viewPort: ViewTypes.RESULT_CENTERED })
+                  }
+                >
+                  <FaList />
+                </Button>
+              </OverlayTrigger>
+              <OverlayTrigger
+                overlay={<Tooltip>Change view with facets in focus</Tooltip>}
+              >
+                <Button
+                  variant="outline-secondary"
+                  active={isFacetCentered}
+                  onClick={() =>
+                    this.setState({ viewPort: ViewTypes.FACET_CENTERED })
+                  }
+                >
+                  <FaAlignJustify />
+                </Button>
+              </OverlayTrigger>
+            </div>
+          </div>
 
-          <Col md={4}>
+          <Col md={isFacetCentered ? 12 : 4}>
+            {isFacetCentered && <DataBrowserCommand className="mb-3" />}
             {Object.keys(selectedFacets).length !== 0 ? (
               <Col md={12}>
                 <Card className="shadow-sm mb-3">
@@ -355,70 +277,9 @@ class Databrowser extends React.Component {
             {facetPanels}
             {this.renderTimeSelectionPanel()}
           </Col>
-          <Col md={8}>
-            <Card className="p-3 py-2 d-block shadow-sm">
-              <div className="fw-bold d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
-                <div>Freva databrowser command</div>
-                <Button
-                  variant="primary"
-                  className="d-flex align-items-center"
-                  onClick={() =>
-                    copyTextToClipboard(fullCommand, () =>
-                      this.setState({ showToast: true })
-                    )
-                  }
-                >
-                  <FaRegClone className="me-1" /> Copy command
-                </Button>
-              </div>
-              <pre className="mb-1" style={{ whiteSpace: "pre-wrap" }}>
-                freva databrowser
-                {this.props.databrowser.minDate && (
-                  <React.Fragment>
-                    &nbsp;time=
-                    <span className="fw-bold">
-                      {`${this.props.databrowser.minDate}to${this.props.databrowser.maxDate}`}
-                    </span>
-                  </React.Fragment>
-                )}
-                {Object.keys(selectedFacets).map((key) => {
-                  const value = selectedFacets[key];
-                  return (
-                    <React.Fragment key={`command-${key}`}>
-                      {" "}
-                      {key}=<strong>{value}</strong>
-                    </React.Fragment>
-                  );
-                })}
-                {dateSelectorToCli && this.props.databrowser.minDate && (
-                  <React.Fragment>
-                    &nbsp;--time-select
-                    <span className="fw-bold">
-                      &nbsp;
-                      {`${dateSelectorToCli}`}
-                    </span>
-                  </React.Fragment>
-                )}
-              </pre>
-            </Card>
-            <ClipboardToast
-              show={this.state.showToast}
-              setShow={(val) => this.setState({ showToast: val })}
-            />
-            {this.renderFilesPanel()}
-
-            <NcdumpDialog
-              show={this.state.showDialog}
-              file={this.state.fn}
-              onClose={() => {
-                this.setState({ showDialog: false });
-                dispatch(resetNcdump());
-              }}
-              submitNcdump={(fn, pw) => dispatch(loadNcdump(fn, pw))}
-              status={ncdumpStatus}
-              output={ncdumpOutput}
-              error={ncdumpError}
-            />
+          <Col md={isFacetCentered ? 12 : 8}>
+            {!isFacetCentered && <DataBrowserCommand />}
+            <FilesPanel />
           </Col>
         </Row>
       </Container>

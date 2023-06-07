@@ -1212,3 +1212,8 @@ a.dropdown-item:hover {
   flex-grow: 1;
   min-width: 25%;
 }
+
+.flex-after::after {
+  content: "";
+  flex: auto;
+}

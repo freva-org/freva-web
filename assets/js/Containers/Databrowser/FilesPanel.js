@@ -22,7 +22,7 @@ function FilesPanelImpl(props) {
   const [showDialog, setShowDialog] = useState(false);
   const [filename, setFilename] = useState(null);
   return (
-    <div className="py-3">
+    <div className="pb-3">
       <h3 className="d-flex justify-content-between">
         <span>Files</span>
         <Badge bg="secondary">{numFiles.toLocaleString("en-US")}</Badge>

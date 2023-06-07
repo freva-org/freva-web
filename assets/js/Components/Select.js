@@ -192,7 +192,6 @@ export default function Select(props) {
   //     />
   //   );
   // }
-  console.log("opts", props.options.length);
   return (
     <RDropdown
       components={{

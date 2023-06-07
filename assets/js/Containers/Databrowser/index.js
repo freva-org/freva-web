@@ -13,7 +13,7 @@ import {
   Tooltip,
 } from "react-bootstrap";
 
-import { FaAlignJustify, FaList } from "react-icons/fa";
+import { FaAlignJustify, FaList, FaTimes } from "react-icons/fa";
 
 import queryString from "query-string";
 import { withRouter } from "react-router";
@@ -193,6 +193,32 @@ class Databrowser extends React.Component {
     );
   }
 
+  renderFacetBadges() {
+    const values = Object.keys(this.props.databrowser.selectedFacets).map(
+      (x) => {
+        return (
+          <Button
+            variant="secondary"
+            className="me-2 mb-2 badge"
+            onClick={() => {
+              this.dropFacet(x);
+            }}
+            key={"selected-" + x + this.props.databrowser.selectedFacets[x]}
+          >
+            {initCap(underscoreToBlank(x))}:{" "}
+            {this.props.databrowser.selectedFacets[x]}
+            <FaTimes className="ms-2 fs-6" />
+          </Button>
+        );
+      }
+    );
+    return (
+      <div className="d-flex justify-content-between flex-after flex-wrap my-2">
+        {values}
+      </div>
+    );
+  }
+
   render() {
     const { facets, selectedFacets } = this.props.databrowser;
     if (this.props.error) {
@@ -214,10 +240,6 @@ class Databrowser extends React.Component {
     return (
       <Container>
         <Row>
-          <FacetDropdown
-            clickFacet={this.clickFacet}
-            dropFacet={this.dropFacet}
-          />
           <div className="d-flex justify-content-between">
             <h2>
               Data-Browser&nbsp;
@@ -257,7 +279,12 @@ class Databrowser extends React.Component {
           </div>
 
           <Col md={isFacetCentered ? 12 : 4}>
+            <FacetDropdown
+              clickFacet={this.clickFacet}
+              dropFacet={this.dropFacet}
+            />
             {isFacetCentered && <DataBrowserCommand className="mb-3" />}
+            {isFacetCentered && this.renderFacetBadges()}
             {Object.keys(selectedFacets).length !== 0 ? (
               <Col md={12}>
                 <Card className="shadow-sm mb-3">
@@ -279,6 +306,7 @@ class Databrowser extends React.Component {
           </Col>
           <Col md={isFacetCentered ? 12 : 8}>
             {!isFacetCentered && <DataBrowserCommand />}
+            {!isFacetCentered && this.renderFacetBadges()}
             <FilesPanel />
           </Col>
         </Row>

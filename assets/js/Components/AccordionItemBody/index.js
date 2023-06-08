@@ -169,7 +169,7 @@ function AccordionItemBody(props) {
     <div
       className={props.isFacetCentered ? "row" : ""}
       style={
-        props.isFacetCentered ? { overflowY: "auto", maxHeight: "338px" } : {}
+        props.isFacetCentered ? { overflowY: "auto", maxHeight: "450px" } : {}
       }
     >
       <div>

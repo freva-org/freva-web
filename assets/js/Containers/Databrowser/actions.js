@@ -15,10 +15,6 @@ export const updateFacetSelection = (queryObject) => (dispatch) => {
   });
 };
 
-export const resetNcdump = () => ({
-  type: constants.RESET_NCDUMP,
-});
-
 export const setMetadata = (metadata) => ({
   type: constants.SET_METADATA,
   metadata,
@@ -92,44 +88,3 @@ function fetchResults(dispatch, location, additionalParams, actionType) {
       });
     });
 }
-
-export const loadNcdump = (fn, pw) => (dispatch) => {
-  const url = "/api/solr/ncdump/";
-  dispatch({ type: constants.LOAD_NCDUMP, fn });
-  return fetch(url, {
-    credentials: "same-origin",
-    method: "POST",
-    headers: {
-      "X-CSRFToken": getCookie("csrftoken"),
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      file: fn,
-      pass: pw,
-    }),
-  })
-    .then((resp) => {
-      if (!resp.ok) {
-        /* eslint-disable */
-        return resp.json().then((json) => {
-          console.log(resp.statusText);
-          if (json.error_msg) {
-            throw new Error(json.error_msg);
-          } else {
-            throw new Error(resp.statusText);
-          }
-        });
-      }
-      return resp.json();
-    })
-    .then((json) => {
-      return dispatch({
-        type: constants.LOAD_NCDUMP_SUCCESS,
-        message: json.ncdump,
-      });
-    })
-    .catch((error) => {
-      dispatch({ type: constants.LOAD_NCDUMP_ERROR, message: error.message });
-    });
-};

@@ -1,19 +1,7 @@
-/* eslint-disable no-unused-vars */
-/* eslint-disable import/named */
-/* eslint-disable react/prop-types */
 import React from "react";
-import RDropdown, {
-  StylesConfig,
-  GroupBase,
-  Props,
-  components,
-  IndicatorsContainerProps,
-  IndicatorSeparatorProps,
-  OptionsOrGroups,
-  createFilter,
-} from "react-select";
+import PropTypes from "prop-types";
+import RDropdown, { components, createFilter } from "react-select";
 
-import AsyncSelect from "react-select/async";
 import { FixedSizeList as List } from "react-window";
 
 function IndicatorsContainer({ children, ...props }) {
@@ -29,6 +17,11 @@ function IndicatorsContainer({ children, ...props }) {
     </components.IndicatorsContainer>
   );
 }
+
+IndicatorsContainer.propTypes = {
+  children: PropTypes.any,
+  selectProps: PropTypes.object,
+};
 
 const OPTION_HEIGHT = 35;
 const ROWS = 7;
@@ -62,6 +55,15 @@ const CustomMenuList = ({ options, children, getValue }) => {
   ) : (
     <div>{children}</div>
   );
+};
+
+CustomMenuList.propTypes = {
+  children: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.node),
+    PropTypes.node,
+  ]).isRequired,
+  options: PropTypes.object.isRequired,
+  getValue: PropTypes.func.isRequired,
 };
 
 // const CustomMenuList = (props) => {
@@ -159,3 +161,21 @@ export default function Select(props) {
     />
   );
 }
+
+Select.propTypes = {
+  instanceId: PropTypes.string,
+  components: PropTypes.object,
+  options: PropTypes.arrayOf(PropTypes.object),
+  onChange: PropTypes.func,
+  onBlur: PropTypes.func,
+  isInvalid: PropTypes.bool,
+  isRequired: PropTypes.bool,
+  isMulti: PropTypes.bool,
+  placeholder: PropTypes.node,
+  defaultValue: PropTypes.string,
+  prependButton: PropTypes.node,
+  value: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.object),
+    PropTypes.object,
+  ]),
+};

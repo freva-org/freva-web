@@ -9,9 +9,6 @@ const databrowserInitialState = {
   maxDate: "",
   dateSelector: constants.TIME_RANGE_FLEXIBLE,
   metadata: {},
-  ncdumpStatus: "pw",
-  ncdumpOutput: null,
-  ncdumpError: null,
   facetLoading: false,
   fileLoading: false,
 };
@@ -65,24 +62,6 @@ export const databrowserReducer = (state = databrowserInitialState, action) => {
         files: action.payload.data,
         numFiles: action.payload.metadata.numFound,
         fileLoading: false,
-      };
-    case constants.LOAD_NCDUMP_ERROR:
-      return { ...state, ncdumpStatus: "error", ncdumpError: action.message };
-    case constants.LOAD_NCDUMP:
-      return { ...state, ncdumpStatus: "loading" };
-    case constants.LOAD_NCDUMP_SUCCESS:
-      return {
-        ...state,
-        ncdumpStatus: "ready",
-        ncdumpOutput: action.message,
-        ncdumpError: null,
-      };
-    case constants.RESET_NCDUMP:
-      return {
-        ...state,
-        ncdumpStatus: "pw",
-        ncdumpOutput: null,
-        ncdumpError: null,
       };
     default:
       return state;

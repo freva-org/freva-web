@@ -8,18 +8,59 @@ import { FaInfoCircle } from "react-icons/fa";
 import NcdumpDialog from "../../Components/NcdumpDialog";
 import CircularSpinner from "../../Components/Spinner";
 
-import { loadNcdump, resetNcdump } from "./actions";
+import { getCookie } from "../../utils";
+
+// import { loadNcdump } from "./actions";
 
 function FilesPanelImpl(props) {
-  const {
-    files,
-    numFiles,
-    fileLoading,
-    ncdumpStatus,
-    ncdumpOutput,
-    ncdumpError,
-  } = props.databrowser;
+  const { files, numFiles, fileLoading } = props.databrowser;
   const [showDialog, setShowDialog] = useState(false);
+
+  const [ncdump, setNcDump] = useState({
+    status: "pw",
+    output: null,
+    error: null,
+  });
+
+  function loadNcdump(fn, pw) {
+    const url = "/api/solr/ncdump/";
+    // dispatch({ type: constants.LOAD_NCDUMP, fn });
+    setNcDump({ ...ncdump, status: "loading" });
+    return fetch(url, {
+      credentials: "same-origin",
+      method: "POST",
+      headers: {
+        "X-CSRFToken": getCookie("csrftoken"),
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        file: fn,
+        pass: pw,
+      }),
+    })
+      .then((resp) => {
+        if (!resp.ok) {
+          /* eslint-disable */
+          return resp.json().then((json) => {
+            console.log(resp.statusText);
+            if (json.error_msg) {
+              throw new Error(json.error_msg);
+            } else {
+              throw new Error(resp.statusText);
+            }
+          });
+        }
+        return resp.json();
+      })
+      .then((json) => {
+        setNcDump({ output: json.ncdump, status: "ready", error: null });
+      })
+      .catch((error) => {
+        setNcDump({ output: null, status: "error", error: error.message });
+      });
+  }
+
   const [filename, setFilename] = useState(null);
   return (
     <div className="pb-3">
@@ -44,7 +85,7 @@ function FilesPanelImpl(props) {
                     variant="link"
                     className="p-0 me-1"
                     onClick={() => {
-                      setFilename(filename);
+                      setFilename(fn);
                       setShowDialog(true);
                     }}
                   >
@@ -62,12 +103,13 @@ function FilesPanelImpl(props) {
         file={filename}
         onClose={() => {
           setShowDialog(false);
-          props.dispatch(resetNcdump());
+          setNcDump({ status: "pw", error: null, output: null });
+          // props.dispatch(resetNcdump());
         }}
-        submitNcdump={(fn, pw) => props.dispatch(loadNcdump(fn, pw))}
-        status={ncdumpStatus}
-        output={ncdumpOutput}
-        error={ncdumpError}
+        submitNcdump={(fn, pw) => loadNcdump(fn, pw)}
+        status={ncdump.status}
+        output={ncdump.output}
+        error={ncdump.error}
       />
     </div>
   );
@@ -81,9 +123,6 @@ FilesPanelImpl.propTypes = {
     facetLoading: PropTypes.bool,
     numFiles: PropTypes.number,
     selectedFacets: PropTypes.object,
-    ncdumpStatus: PropTypes.string,
-    ncdumpOutput: PropTypes.string,
-    ncdumpError: PropTypes.string,
     metadata: PropTypes.object,
     dateSelector: PropTypes.string,
     minDate: PropTypes.string,

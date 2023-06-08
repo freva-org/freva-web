@@ -9,13 +9,18 @@ import { initCap, underscoreToBlank } from "../../utils";
 
 function FacetDropdownImpl(props) {
   const options = [];
+
+  function constructValueName(category, value) {
+    const additionalInfo = props.metadata[category];
+    const valueInfos = additionalInfo && additionalInfo[value];
+    return value + (valueInfos ? " " + valueInfos : "");
+  }
+
   for (const f in props.facets) {
     const facet = props.facets[f];
-    const additionalInfo = props.metadata[f];
     for (let i = 0; i < facet.length; i = i + 2) {
-      const valueInfos = additionalInfo && additionalInfo[facet[i]];
       options.push({
-        value: facet[i] + (valueInfos ? " " + valueInfos : ""),
+        value: constructValueName(f, facet[i]),
         realValue: facet[i],
         category: f,
         label: (
@@ -31,12 +36,20 @@ function FacetDropdownImpl(props) {
     }
   }
 
+  function getSelectedValues() {
+    return Object.keys(props.selectedFacets).map((key) => {
+      return { value: constructValueName(key, props.selectedFacets[key]) };
+    });
+  }
+
   return (
     <div className="mb-3 shadow-sm">
       <Select
         options={options}
         placeholder={"Search through all facets..."}
+        value={getSelectedValues()}
         onChange={(elem) => {
+          console.log("fooo");
           props.clickFacet(elem.category, elem.realValue);
         }}
       />
@@ -47,7 +60,6 @@ function FacetDropdownImpl(props) {
 FacetDropdownImpl.propTypes = {
   className: PropTypes.string,
   clickFacet: PropTypes.func.isRequired,
-  dropFacet: PropTypes.func.isRequired,
   facets: PropTypes.object,
   metadata: PropTypes.object,
   selectedFacets: PropTypes.object,

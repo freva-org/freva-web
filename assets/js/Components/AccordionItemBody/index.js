@@ -90,7 +90,7 @@ function AccordionItemBody(props) {
       let renderedElem;
       const badge = (
         <div>
-          <Badge bg="secondary">{count}</Badge>
+          <Badge bg="secondary d-flex align-items-center">{count}</Badge>
         </div>
       );
       const link = (

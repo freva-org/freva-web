@@ -5,7 +5,6 @@ import {
   Container,
   Row,
   Col,
-  Card,
   Button,
   Alert,
   Badge,
@@ -45,8 +44,8 @@ class Databrowser extends React.Component {
   constructor(props) {
     super(props);
     this.clickFacet = this.clickFacet.bind(this);
-    this.dropFacet = this.dropFacet.bind(this);
-    this.state = { viewPort: ViewTypes.RESULT_CENTERED };
+    this.renderFacetBadges = this.renderFacetBadges.bind(this);
+    this.state = { viewPort: ViewTypes.FACET_CENTERED };
   }
 
   /**
@@ -79,8 +78,18 @@ class Databrowser extends React.Component {
     }
   }
 
-  clickFacet(category, value) {
+  clickFacet(category, value = null) {
     const currentLocation = this.props.location.pathname;
+    const originalQueryObject = this.props.location.query;
+    const previousValue = originalQueryObject[category];
+    if (previousValue && (value === null || value === previousValue)) {
+      // delete
+      const { [category]: toRemove, ...queryObject } =
+        this.props.location.query;
+      const query = queryString.stringify(queryObject);
+      this.props.router.push(currentLocation + "?" + query);
+      return;
+    }
     const query = queryString.stringify({
       ...this.props.location.query,
       [category]: value,
@@ -92,12 +101,12 @@ class Databrowser extends React.Component {
     }
   }
 
-  dropFacet(category) {
-    const currentLocation = this.props.location.pathname;
-    const { [category]: toRemove, ...queryObject } = this.props.location.query;
-    const query = queryString.stringify(queryObject);
-    this.props.router.push(currentLocation + "?" + query);
-  }
+  // dropFacet(category) {
+  //   const currentLocation = this.props.location.pathname;
+  //   const { [category]: toRemove, ...queryObject } = this.props.location.query;
+  //   const query = queryString.stringify(queryObject);
+  //   this.props.router.push(currentLocation + "?" + query);
+  // }
 
   /**
    * Loop all facets and render the panels
@@ -128,7 +137,9 @@ class Databrowser extends React.Component {
         panelHeader = (
           <span className="d-flex justify-content-between">
             <span>{initCap(underscoreToBlank(key))}</span>
-            <Badge bg="secondary">{numberOfValues}</Badge>
+            <Badge bg="secondary d-flex align-items-center">
+              {numberOfValues}
+            </Badge>
           </span>
         );
       }
@@ -136,7 +147,7 @@ class Databrowser extends React.Component {
         <OwnPanel
           header={panelHeader}
           key={key}
-          removeFacet={isFacetSelected ? () => this.dropFacet(key) : null}
+          removeFacet={isFacetSelected ? () => this.clickFacet(key) : null}
         >
           <AccordionItemBody
             eventKey={key}
@@ -148,6 +159,22 @@ class Databrowser extends React.Component {
         </OwnPanel>
       );
     });
+  }
+
+  dropTimeSelection() {
+    const currentLocation = this.props.location.pathname;
+    const {
+      dateSelector: ignore1,
+      minDate: ignore2,
+      maxDate: ignore3,
+      ...queryObject
+    } = this.props.location.query;
+    const query = queryString.stringify(queryObject);
+    if (query) {
+      this.props.router.push(currentLocation + "?" + query);
+    } else {
+      this.props.router.push(currentLocation);
+    }
   }
 
   renderTimeSelectionPanel() {
@@ -168,25 +195,7 @@ class Databrowser extends React.Component {
       <OwnPanel
         header={title}
         key={key}
-        removeFacet={
-          isDateSelected
-            ? () => {
-                const currentLocation = this.props.location.pathname;
-                const {
-                  dateSelector: ignore1,
-                  minDate: ignore2,
-                  maxDate: ignore3,
-                  ...queryObject
-                } = this.props.location.query;
-                const query = queryString.stringify(queryObject);
-                if (query) {
-                  this.props.router.push(currentLocation + "?" + query);
-                } else {
-                  this.props.router.push(currentLocation);
-                }
-              }
-            : null
-        }
+        removeFacet={isDateSelected ? () => this.dropTimeSelection() : null}
       >
         <TimeRangeSelector />
       </OwnPanel>
@@ -194,14 +203,37 @@ class Databrowser extends React.Component {
   }
 
   renderFacetBadges() {
-    const values = Object.keys(this.props.databrowser.selectedFacets).map(
-      (x) => {
+    const { dateSelector, minDate, maxDate } = this.props.databrowser;
+    const isDateSelected = !!minDate;
+    let values = [];
+    if (
+      Object.keys(this.props.databrowser.selectedFacets).length > 0 ||
+      isDateSelected
+    ) {
+      values.push(
+        <Button
+          variant="danger"
+          className="me-2 mb-2 badge d-flex align-items-center"
+          onClick={(e) => {
+            e.preventDefault();
+            this.props.router.push(this.props.location.pathname);
+          }}
+          key={"clearall"}
+        >
+          Clear all
+          <FaTimes className="ms-2 fs-6" />
+        </Button>
+      );
+    }
+    values = [
+      ...values,
+      ...Object.keys(this.props.databrowser.selectedFacets).map((x) => {
         return (
           <Button
             variant="secondary"
-            className="me-2 mb-2 badge"
+            className="me-2 mb-2 badge d-flex align-items-center"
             onClick={() => {
-              this.dropFacet(x);
+              this.clickFacet(x);
             }}
             key={"selected-" + x + this.props.databrowser.selectedFacets[x]}
           >
@@ -210,8 +242,24 @@ class Databrowser extends React.Component {
             <FaTimes className="ms-2 fs-6" />
           </Button>
         );
-      }
-    );
+      }),
+    ];
+
+    if (isDateSelected) {
+      const timeBadge = (
+        <Button
+          variant="secondary"
+          className="me-2 mb-2 badge d-flex align-items-center"
+          onClick={() => this.dropTimeSelection()}
+          key={"time-selection" + { dateSelector } + { minDate } + { maxDate }}
+        >
+          Time: {minDate} to {maxDate} ({dateSelector})
+          <FaTimes className="ms-2 fs-6" />
+        </Button>
+      );
+      values.push(timeBadge);
+    }
+
     return (
       <div className="d-flex justify-content-between flex-after flex-wrap my-2">
         {values}
@@ -220,7 +268,7 @@ class Databrowser extends React.Component {
   }
 
   render() {
-    const { facets, selectedFacets } = this.props.databrowser;
+    const { facets } = this.props.databrowser;
     if (this.props.error) {
       return (
         <Container>
@@ -249,23 +297,10 @@ class Databrowser extends React.Component {
             </h2>
             <div>
               <OverlayTrigger
-                overlay={<Tooltip>Change view with results in focus</Tooltip>}
-              >
-                <Button
-                  className="me-1"
-                  variant="outline-secondary"
-                  active={!isFacetCentered}
-                  onClick={() =>
-                    this.setState({ viewPort: ViewTypes.RESULT_CENTERED })
-                  }
-                >
-                  <FaList />
-                </Button>
-              </OverlayTrigger>
-              <OverlayTrigger
                 overlay={<Tooltip>Change view with facets in focus</Tooltip>}
               >
                 <Button
+                  className="me-1"
                   variant="outline-secondary"
                   active={isFacetCentered}
                   onClick={() =>
@@ -275,32 +310,27 @@ class Databrowser extends React.Component {
                   <FaAlignJustify />
                 </Button>
               </OverlayTrigger>
+              <OverlayTrigger
+                overlay={<Tooltip>Change view with results in focus</Tooltip>}
+              >
+                <Button
+                  variant="outline-secondary"
+                  active={!isFacetCentered}
+                  onClick={() =>
+                    this.setState({ viewPort: ViewTypes.RESULT_CENTERED })
+                  }
+                >
+                  <FaList />
+                </Button>
+              </OverlayTrigger>
             </div>
           </div>
 
           <Col md={isFacetCentered ? 12 : 4}>
-            <FacetDropdown
-              clickFacet={this.clickFacet}
-              dropFacet={this.dropFacet}
-            />
+            <FacetDropdown clickFacet={this.clickFacet} />
             {isFacetCentered && <DataBrowserCommand className="mb-3" />}
             {isFacetCentered && this.renderFacetBadges()}
-            {Object.keys(selectedFacets).length !== 0 ? (
-              <Col md={12}>
-                <Card className="shadow-sm mb-3">
-                  <a
-                    className="m-3"
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      this.props.router.push(this.props.location.pathname);
-                    }}
-                  >
-                    Clear all
-                  </a>
-                </Card>
-              </Col>
-            ) : null}
+
             {facetPanels}
             {this.renderTimeSelectionPanel()}
           </Col>

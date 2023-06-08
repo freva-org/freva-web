@@ -49,7 +49,6 @@ function FacetDropdownImpl(props) {
         placeholder={"Search through all facets..."}
         value={getSelectedValues()}
         onChange={(elem) => {
-          console.log("fooo");
           props.clickFacet(elem.category, elem.realValue);
         }}
       />

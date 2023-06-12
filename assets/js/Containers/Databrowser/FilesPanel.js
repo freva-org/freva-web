@@ -5,27 +5,24 @@ import { Tooltip, OverlayTrigger, Button, Badge } from "react-bootstrap";
 
 import { FaInfoCircle } from "react-icons/fa";
 
-import NcdumpDialog from "../../Components/NcdumpDialog";
+import NcdumpDialog, { NcDumpDialogState } from "../../Components/NcdumpDialog";
 import CircularSpinner from "../../Components/Spinner";
 
 import { getCookie } from "../../utils";
-
-// import { loadNcdump } from "./actions";
 
 function FilesPanelImpl(props) {
   const { files, numFiles, fileLoading } = props.databrowser;
   const [showDialog, setShowDialog] = useState(false);
 
   const [ncdump, setNcDump] = useState({
-    status: "pw",
+    status: NcDumpDialogState.ENTER_PASSWORD,
     output: null,
     error: null,
   });
 
   function loadNcdump(fn, pw) {
     const url = "/api/solr/ncdump/";
-    // dispatch({ type: constants.LOAD_NCDUMP, fn });
-    setNcDump({ ...ncdump, status: "loading" });
+    setNcDump({ ...ncdump, status: NcDumpDialogState.LOADING });
     return fetch(url, {
       credentials: "same-origin",
       method: "POST",
@@ -54,10 +51,18 @@ function FilesPanelImpl(props) {
         return resp.json();
       })
       .then((json) => {
-        setNcDump({ output: json.ncdump, status: "ready", error: null });
+        setNcDump({
+          output: json.ncdump,
+          status: NcDumpDialogState.READY,
+          error: null,
+        });
       })
       .catch((error) => {
-        setNcDump({ output: null, status: "error", error: error.message });
+        setNcDump({
+          output: null,
+          status: NcDumpDialogState.ERROR,
+          error: error.message,
+        });
       });
   }
 
@@ -103,8 +108,11 @@ function FilesPanelImpl(props) {
         file={filename}
         onClose={() => {
           setShowDialog(false);
-          setNcDump({ status: "pw", error: null, output: null });
-          // props.dispatch(resetNcdump());
+          setNcDump({
+            status: NcDumpDialogState.ENTER_PASSWORD,
+            error: null,
+            output: null,
+          });
         }}
         submitNcdump={(fn, pw) => loadNcdump(fn, pw)}
         status={ncdump.status}

@@ -127,7 +127,7 @@ function DataBrowserCommandImpl(props) {
 
             <OverlayTrigger overlay={<Tooltip>Show python command</Tooltip>}>
               <Button
-                className="me-2 d-flex align-items-center"
+                className="d-flex align-items-center me-1"
                 active={mode === Modes.PYTHON}
                 variant="outline-secondary"
                 onClick={() => setMode(Modes.PYTHON)}

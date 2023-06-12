@@ -62,8 +62,29 @@ CustomMenuList.propTypes = {
     PropTypes.arrayOf(PropTypes.node),
     PropTypes.node,
   ]).isRequired,
-  options: PropTypes.object.isRequired,
+  options: PropTypes.array.isRequired,
   getValue: PropTypes.func.isRequired,
+};
+
+// onMouseMove and onMouseOver force a re-render of the MenuList-Component which is
+// extremely heavy performance-wise. We remove them and replace it's behaviour by CSS
+// (absolutely unclear why this is not default-behaviour)
+const CustomOption = ({ children, ...props }) => {
+  const { onMouseMove, onMouseOver, ...rest } = props.innerProps;
+  const newProps = { ...props, innerProps: rest };
+  return (
+    <components.Option {...newProps} className="custom-option">
+      {children}
+    </components.Option>
+  );
+};
+
+CustomOption.propTypes = {
+  innerProps: PropTypes.object.isRequired,
+  children: PropTypes.oneOfType([
+    PropTypes.arrayOf(PropTypes.node),
+    PropTypes.node,
+  ]).isRequired,
 };
 
 // const CustomMenuList = (props) => {
@@ -140,6 +161,7 @@ export default function Select(props) {
       components={{
         ...props.components,
         IndicatorsContainer,
+        Option: CustomOption,
         MenuList: CustomMenuList,
       }}
       classNamePrefix="react-select"

@@ -4,6 +4,13 @@ import { Modal, Button, FormControl, Alert } from "react-bootstrap";
 
 import Spinner from "../Spinner";
 
+export const NcDumpDialogState = {
+  ENTER_PASSWORD: "pw",
+  ERROR: "error",
+  READY: "ready",
+  LOADING: "loading",
+};
+
 class NcdumpDialog extends React.Component {
   constructor(props) {
     super(props);
@@ -42,9 +49,12 @@ class NcdumpDialog extends React.Component {
         </Modal.Header>
 
         <Modal.Body>
-          {(status === "pw" || status === "error") && (
+          {(status === NcDumpDialogState.ENTER_PASSWORD ||
+            status === NcDumpDialogState.ERROR) && (
             <span>
-              {status === "error" && <Alert variant="danger">{error}</Alert>}
+              {status === NcDumpDialogState.ERROR && (
+                <Alert variant="danger">{error}</Alert>
+              )}
               <p>To inspect metadata you have to re-enter your password</p>
               <form onSubmit={this.submitNcdump} id="passForm" name="passForm">
                 <FormControl
@@ -57,7 +67,7 @@ class NcdumpDialog extends React.Component {
               </form>
             </span>
           )}
-          {status === "loading" ? <Spinner /> : null}
+          {status === NcDumpDialogState.LOADING ? <Spinner /> : null}
           {output && (
             <div>
               <pre

@@ -1212,3 +1212,27 @@ a.dropdown-item:hover {
   flex-grow: 1;
   min-width: 25%;
 }
+
+.flex-after::after {
+  content: "";
+  flex: auto;
+}
+
+.custom-option {
+  transition: background 60ms;
+}
+.custom-option:hover {
+  transition-delay: 60ms;
+  background: #f0f5fb;
+}
+.custom-option.react-select__option--is-focused {
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.4
+  ); /* Transparent "color" - workaround in react-select as the first element is always in focus for some reason. */
+}
+.custom-option.react-select__option--is-selected {
+  background: #e0e5eb;
+}

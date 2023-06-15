@@ -45,3 +45,21 @@ export function underscoreToBlank(str) {
   }
   return str.replaceAll(/_/g, " ");
 }
+
+function copyTextFallback(text) {
+  // Fallback: Show window prompt to copy-paste the command
+  window.prompt("Copy to clipboard: Ctrl+C, Enter", text);
+}
+
+export function copyTextToClipboard(text, showToast) {
+  if (!navigator.clipboard) {
+    copyTextFallback(text);
+    return;
+  }
+  // writeText handles it errors inside the second function. No need
+  // to catch Promise
+  // eslint-disable-next-line promise/catch-or-return
+  navigator.clipboard.writeText(text).then(showToast, function () {
+    copyTextFallback(text);
+  });
+}

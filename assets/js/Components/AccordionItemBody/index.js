@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useCallback, useLayoutEffect, useRef, useState } from "react";
 import PropTypes from "prop-types";
 import { FormControl, Tooltip, OverlayTrigger, Badge } from "react-bootstrap";
@@ -86,63 +87,60 @@ function AccordionItemBody(props) {
     return filteredValues.map((item) => {
       const value = item.value;
       const count = item.count;
+      let renderedElem;
+      const badge = (
+        <div>
+          <Badge bg="secondary d-flex align-items-center">{count}</Badge>
+        </div>
+      );
+      const link = (
+        <a
+          href="#"
+          className="text-wrap"
+          onClick={(e) => {
+            e.preventDefault();
+            facetClick(eventKey, value);
+            if (props.togglePanel) {
+              props.togglePanel();
+            }
+          }}
+        >
+          {value}
+        </a>
+      );
       if (metadata && metadata[value]) {
-        return (
-          <div
-            className="col-md-12 col-sm-6 flex-nowrap d-flex justify-content-between"
-            key={value}
-          >
-            <div>
-              <OverlayTrigger
-                overlay={
-                  <Tooltip>
-                    <div
-                      dangerouslySetInnerHTML={{ __html: metadata[value] }}
-                    />
-                  </Tooltip>
-                }
-              >
-                <a
-                  href="#"
-                  className="text-wrap"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    facetClick(eventKey, value);
-                    props.togglePanel();
-                  }}
-                >
-                  {value}
-                </a>
-              </OverlayTrigger>{" "}
-            </div>
-            <div>
-              <Badge bg="secondary">{count}</Badge>
-            </div>
-          </div>
+        renderedElem = (
+          <React.Fragment>
+            <OverlayTrigger
+              overlay={
+                <Tooltip>
+                  <div dangerouslySetInnerHTML={{ __html: metadata[value] }} />
+                </Tooltip>
+              }
+            >
+              {link}
+            </OverlayTrigger>
+            {badge}
+          </React.Fragment>
+        );
+      } else {
+        renderedElem = (
+          <React.Fragment>
+            {link}
+            {badge}
+          </React.Fragment>
         );
       }
       return (
         <div
-          className="col-md-12 col-sm-6 flex-nowrap d-flex justify-content-between"
+          className={
+            "col-md-" +
+            (props.isFacetCentered ? "3" : "12") +
+            " col-sm-6 forced-textwrap d-flex justify-content-between"
+          }
           key={value}
         >
-          <div>
-            <a
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                facetClick(eventKey, value);
-                if (props.togglePanel) {
-                  props.togglePanel();
-                }
-              }}
-            >
-              {value}
-            </a>{" "}
-          </div>
-          <div>
-            <Badge bg="secondary">{item.count}</Badge>
-          </div>
+          {renderedElem}
         </div>
       );
     });
@@ -168,15 +166,23 @@ function AccordionItemBody(props) {
   const getSize = (index) => sizeMap.current[index] || 24;
 
   return (
-    <div>
-      <FormControl
-        className="mb-2"
-        id="search"
-        type="text"
-        placeholder={`Search ${eventKey} name`}
-        onChange={handleChange}
-      />
-      {filteredItems.length <= 12 ? (
+    <div
+      className={props.isFacetCentered ? "row" : ""}
+      style={
+        props.isFacetCentered ? { overflowY: "auto", maxHeight: "450px" } : {}
+      }
+    >
+      <div>
+        <FormControl
+          className="my-2"
+          id="search"
+          type="text"
+          placeholder={`Search ${eventKey} name`}
+          onChange={handleChange}
+        />
+      </div>
+
+      {filteredItems.length <= 12 || props.isFacetCentered ? (
         filteredItems
       ) : (
         <List
@@ -209,6 +215,7 @@ function AccordionItemBody(props) {
 AccordionItemBody.propTypes = {
   eventKey: PropTypes.string,
   value: PropTypes.array,
+  isFacetCentered: PropTypes.bool,
   metadata: PropTypes.object,
   elemRef: PropTypes.oneOfType([
     PropTypes.func,

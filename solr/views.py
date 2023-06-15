@@ -94,11 +94,13 @@ def solr_search(request):
                 pass
         for k, v in res.items():
             results[k] = [f for sub in v.items() for f in sub]
+
         return results
 
     if facets:
         args["facet.limit"] = -1
         logging.debug(args)
+        print(args)
         args.pop("facet")
         if facets == "*":
             # means select all,
@@ -129,7 +131,7 @@ def solr_search(request):
         n_files = freva.databrowser(count=True, **args)
         if rows:
             args["rows"] = rows
-        results = freva.databrowser(uniq_key="uri", **args)
+        results = freva.databrowser(uniq_key="file", **args)
         return HttpResponse(
             json.dumps(dict(data=sorted(results), metadata={"numFound": n_files})),
             content_type="application/json",

@@ -199,7 +199,7 @@ class FUUserInformation(LdapUserInformation):
             # print to see the structure of the user
 
             if user in user_info_dict:
-                user_info.add(user_info_dict[uid])
+                user_info.add(user_info_dict[user])
         self.user_info = sorted(user_info, key=lambda tup: tup[1])
         return self.user_info
 

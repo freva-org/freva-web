@@ -173,7 +173,7 @@ class FUUserInformation(LdapUserInformation):
             except TypeError:
                 res_str = dict(res[1].items())
             uid = res_str.get("uid", [None])[0]
-            prename, _, lastname = res_str.get("cn", [""]).partition(" ")
+            prename, _, lastname = res_str.get("cn", [""])[0].partition(" ")
             mail = res_str.get("mail", [None])[0]
             gecos = res_str.get("gecos", [None])[0]
             home_dir = res_str.get("homeDirectory", [None])[0]
@@ -199,7 +199,7 @@ class FUUserInformation(LdapUserInformation):
             # print to see the structure of the user
 
             if user in user_info_dict:
-                user_info.add(user_info_dict[uid])
+                user_info.add(user_info_dict[user])
         self.user_info = sorted(user_info, key=lambda tup: tup[1])
         return self.user_info
 

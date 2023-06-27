@@ -328,14 +328,13 @@ class Databrowser extends React.Component {
 
           <Col md={isFacetCentered ? 12 : 4}>
             <FacetDropdown clickFacet={this.clickFacet} />
-            {isFacetCentered && <DataBrowserCommand className="mb-3" />}
             {isFacetCentered && this.renderFacetBadges()}
 
             {facetPanels}
             {this.renderTimeSelectionPanel()}
           </Col>
           <Col md={isFacetCentered ? 12 : 8}>
-            {!isFacetCentered && <DataBrowserCommand />}
+            <DataBrowserCommand className={isFacetCentered ? "mb-3" : ""} />
             {!isFacetCentered && this.renderFacetBadges()}
             <FilesPanel />
           </Col>

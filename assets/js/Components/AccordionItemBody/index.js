@@ -166,12 +166,7 @@ function AccordionItemBody(props) {
   const getSize = (index) => sizeMap.current[index] || 24;
 
   return (
-    <div
-      className={props.isFacetCentered ? "row" : ""}
-      style={
-        props.isFacetCentered ? { overflowY: "auto", maxHeight: "450px" } : {}
-      }
-    >
+    <div className={props.isFacetCentered ? "facet-container" : ""}>
       <div>
         <FormControl
           className="my-2"
@@ -182,9 +177,12 @@ function AccordionItemBody(props) {
         />
       </div>
 
-      {filteredItems.length <= 12 || props.isFacetCentered ? (
+      {filteredItems.length <= 12 && !props.isFacetCentered ? (
         filteredItems
+      ) : props.isFacetCentered ? (
+        <div className="facet-content row">{filteredItems}</div>
       ) : (
+        // </div>
         <List
           ref={listRef}
           className="infinite-body"

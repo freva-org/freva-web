@@ -43,16 +43,14 @@ function FacetDropdownImpl(props) {
   }
 
   return (
-    <div className="mb-3 shadow-sm">
-      <Select
-        options={options}
-        placeholder={"Search through all facets..."}
-        value={getSelectedValues()}
-        onChange={(elem) => {
-          props.clickFacet(elem.category, elem.realValue);
-        }}
-      />
-    </div>
+    <Select
+      options={options}
+      placeholder={"Search through all facets..."}
+      value={getSelectedValues()}
+      onChange={(elem) => {
+        props.clickFacet(elem.category, elem.realValue);
+      }}
+    />
   );
 }
 

@@ -1250,3 +1250,7 @@ a.dropdown-item:hover {
   flex: 0 1 auto;
   overflow: auto;
 }
+
+.row [class*="col-"] {
+  transition: all 0.5s ease-in-out;
+}

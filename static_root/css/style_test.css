@@ -1236,3 +1236,23 @@ a.dropdown-item:hover {
 .custom-option.react-select__option--is-selected {
   background: #e0e5eb;
 }
+
+.facet-container {
+  display: flex;
+  max-height: 450px;
+  flex-direction: column;
+}
+
+.facet-container > div {
+  flex: 0 0 auto;
+}
+.facet-container > div.facet-content {
+  flex: 0 1 auto;
+  overflow: auto;
+}
+
+.row [class*="col-"] {
+  transition: all 0.5s ease-in-out;
+  -moz-transition: all 0.5s ease-in-out;
+  -webkit-transition: all 0.5s ease-in-out;
+}

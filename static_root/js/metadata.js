@@ -1741,7 +1741,7 @@ var model = {
 };
 var institute = {
 "atmos" : "Deutscher Wetterdienst",
-"awi" : "Max-Planck-Institute for Meteorology",
+"awi" : "Alfred Wegener Institute",
 "b1" : "Max Planck Institute for Meteorology",
 "bcc" : "Beijing Climate Center(BCC),China Meteorological Administration,China",
 "bnu" : "GCESS,BNU,Beijing,China",
@@ -1801,7 +1801,7 @@ var institute = {
 "mpi" : "Max Planck Institute for Meteorology",
 "mpi-csc" : "Helmholtz-Zentrum Geesthacht, Climate Service Center, Max Planck Institute for Meteorology",
 "mpi-dwd" : "Max Planck Institute for Meteorology",
-"mpi-m" : "",
+"mpi-m" : "Max Planck Institute for Meteorology",
 "mpi-m-1" : "Max Planck Institute for Meteorology",
 "mpi-m-2" : "Max Planck Institute for Meteorology",
 "mpi-m-3" : "Max Planck Institute for Meteorology",
@@ -1809,7 +1809,7 @@ var institute = {
 "mpi-m-5" : "Max Planck Institute for Meteorology",
 "mpim-dwd" : "Freie Universitaet Berlin - Institute of Meteorology",
 "mri" : "MRI (Meteorological Research Institute, Tsukuba, Japan)",
-"nasa" : "",
+"nasa" : "National Aeronautics and Space Administration",
 "nasa-giss" : "Goddard Institute for Space Studies, New York, NY 10025, USA",
 "nasa-gmao" : "Global Modeling and Assimilation Office, NASA Goddard Space Flight Center, Greenbelt, MD 20771",
 "nasa-gsfc" : "NASA Goddard Space Flight Center, Greenbelt MD, USA",
@@ -1837,4 +1837,8 @@ var institute = {
 "uoc" : "University of Cologne",
 "uor" : "TAMSAT Research Group, Meteorology Department, University of Reading, UK",
 "zmaw" : "Institute of Oceanography, University of Hamburg",
+};
+var fs_type = {
+    "posix" : "DKRZ Lustre filesystem (/work/{project})",
+    "hsm" : "DKRZ tape archive (it can be accessed with slk)",
 };

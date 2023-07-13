@@ -1,3 +1,15 @@
+var project = {
+"cmip5" : "Coupled Model Intercomparison Project 5",
+"cmip6" : "Coupled Model Intercomparison Project 6",
+"cordex" : "Coordinated Regional Climate Downscaling experiment",
+"dyamond_winter" : "DYnamics of the Atmospheric general circulation Modeled On Non-hydrostatic Domains (DYAMOND) Winter Simulations",
+"dcpp" : "Decadal Climate Prediction Project: https://gmd.copernicus.org/articles/9/3751/2016/",
+"miklip-forecast" : "Mittelfristige Klimaprognosen (Medium-term Climate Predictions)",
+"miklip-ini" : "Mittelfristige Klimaprognosen (Medium-term Climate Predictions)",
+"mpi-ge" : "Max Planck Institute for Meteorology (MPI-M) Grand Ensemble (MPI-GE)",
+"nextgems" : "Next Generation Earth Modelling Systems",
+"nukleus" : "Nutzbare lokale Klimainformationen für Deutschland (a cross-sectional activity of RegIKlim)",
+};
 var variable = {
 "abs550aer" : "Ambient Aerosol Absorption Optical Thickness at 550 nm",
 "acabf" : "Surface Mass Balance Flux",
@@ -1752,7 +1764,6 @@ var institute = {
 "clmcom" : "Climate Limited-area Modelling Community (CLM-Community)",
 "cm-saf" : "EUMETSAT/CMSAF",
 "cmcc" : "CMCC - Centro Euro-Mediterraneo per i Cambiamenti",
-"cmip5" : "Max Planck Institute for Meteorology",
 "cnes" : "CNES, CLS",
 "cnrm" : "Centre National de Recherches Meteorologiques",
 "cnrm-cerfacs" : "CNRM (Centre National de Recherches Meteorologiques, Meteo-France, Toulouse,France) and CERFACS (Centre Europeen de Recherches et de Formation Avancee en Calcul Scientifique, Toulouse, France)",

@@ -1851,6 +1851,7 @@ var institute = {
 "zmaw" : "Institute of Oceanography, University of Hamburg",
 };
 var fs_type = {
-    "posix" : "DKRZ Lustre filesystem (/work/{project})",
-    "hsm" : "DKRZ tape archive (it can be accessed with slk)",
+    "hsm" : "StrongLink tape archive",
+    "posix" : "normal unix filesystem",
+    "swift" : "OpenStack cloud storage",
 };

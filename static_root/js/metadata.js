@@ -2,6 +2,7 @@ var project = {
 "cmip5" : "Coupled Model Intercomparison Project 5",
 "cmip6" : "Coupled Model Intercomparison Project 6",
 "cordex" : "Coordinated Regional Climate Downscaling experiment",
+"dyamond" : "DYnamics of the Atmospheric general circulation Modeled On Non-hydrostatic Domains (DYAMOND)",
 "dyamond_winter" : "DYnamics of the Atmospheric general circulation Modeled On Non-hydrostatic Domains (DYAMOND) Winter Simulations",
 "dcpp" : "Decadal Climate Prediction Project: https://gmd.copernicus.org/articles/9/3751/2016/",
 "miklip-forecast" : "Mittelfristige Klimaprognosen (Medium-term Climate Predictions)",

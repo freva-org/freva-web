@@ -65,6 +65,8 @@ class Databrowser extends React.Component {
           variable: window.variable,
           model: window.model,
           institute: window.institute,
+          project: window.project,
+          fs_type: window.fs_type,
         })
       );
     document.body.appendChild(script);

@@ -1,3 +1,16 @@
+var project = {
+"cmip5" : "Coupled Model Intercomparison Project 5",
+"cmip6" : "Coupled Model Intercomparison Project 6",
+"cordex" : "Coordinated Regional Climate Downscaling experiment",
+"dyamond" : "DYnamics of the Atmospheric general circulation Modeled On Non-hydrostatic Domains (DYAMOND)",
+"dyamond_winter" : "DYnamics of the Atmospheric general circulation Modeled On Non-hydrostatic Domains (DYAMOND) Winter Simulations",
+"dcpp" : "Decadal Climate Prediction Project: https://gmd.copernicus.org/articles/9/3751/2016/",
+"miklip-forecast" : "Mittelfristige Klimaprognosen (Medium-term Climate Predictions)",
+"miklip-ini" : "Mittelfristige Klimaprognosen (Medium-term Climate Predictions)",
+"mpi-ge" : "Max Planck Institute for Meteorology (MPI-M) Grand Ensemble (MPI-GE)",
+"nextgems" : "Next Generation Earth Modelling Systems",
+"nukleus" : "Nutzbare lokale Klimainformationen für Deutschland (a cross-sectional activity of RegIKlim)",
+};
 var variable = {
 "abs550aer" : "Ambient Aerosol Absorption Optical Thickness at 550 nm",
 "acabf" : "Surface Mass Balance Flux",
@@ -1741,7 +1754,7 @@ var model = {
 };
 var institute = {
 "atmos" : "Deutscher Wetterdienst",
-"awi" : "Max-Planck-Institute for Meteorology",
+"awi" : "Alfred Wegener Institute",
 "b1" : "Max Planck Institute for Meteorology",
 "bcc" : "Beijing Climate Center(BCC),China Meteorological Administration,China",
 "bnu" : "GCESS,BNU,Beijing,China",
@@ -1752,7 +1765,6 @@ var institute = {
 "clmcom" : "Climate Limited-area Modelling Community (CLM-Community)",
 "cm-saf" : "EUMETSAT/CMSAF",
 "cmcc" : "CMCC - Centro Euro-Mediterraneo per i Cambiamenti",
-"cmip5" : "Max Planck Institute for Meteorology",
 "cnes" : "CNES, CLS",
 "cnrm" : "Centre National de Recherches Meteorologiques",
 "cnrm-cerfacs" : "CNRM (Centre National de Recherches Meteorologiques, Meteo-France, Toulouse,France) and CERFACS (Centre Europeen de Recherches et de Formation Avancee en Calcul Scientifique, Toulouse, France)",
@@ -1801,7 +1813,7 @@ var institute = {
 "mpi" : "Max Planck Institute for Meteorology",
 "mpi-csc" : "Helmholtz-Zentrum Geesthacht, Climate Service Center, Max Planck Institute for Meteorology",
 "mpi-dwd" : "Max Planck Institute for Meteorology",
-"mpi-m" : "",
+"mpi-m" : "Max Planck Institute for Meteorology",
 "mpi-m-1" : "Max Planck Institute for Meteorology",
 "mpi-m-2" : "Max Planck Institute for Meteorology",
 "mpi-m-3" : "Max Planck Institute for Meteorology",
@@ -1809,7 +1821,7 @@ var institute = {
 "mpi-m-5" : "Max Planck Institute for Meteorology",
 "mpim-dwd" : "Freie Universitaet Berlin - Institute of Meteorology",
 "mri" : "MRI (Meteorological Research Institute, Tsukuba, Japan)",
-"nasa" : "",
+"nasa" : "National Aeronautics and Space Administration",
 "nasa-giss" : "Goddard Institute for Space Studies, New York, NY 10025, USA",
 "nasa-gmao" : "Global Modeling and Assimilation Office, NASA Goddard Space Flight Center, Greenbelt, MD 20771",
 "nasa-gsfc" : "NASA Goddard Space Flight Center, Greenbelt MD, USA",
@@ -1837,4 +1849,9 @@ var institute = {
 "uoc" : "University of Cologne",
 "uor" : "TAMSAT Research Group, Meteorology Department, University of Reading, UK",
 "zmaw" : "Institute of Oceanography, University of Hamburg",
+};
+var fs_type = {
+    "hsm" : "StrongLink tape archive",
+    "posix" : "normal unix filesystem",
+    "swift" : "OpenStack cloud storage",
 };

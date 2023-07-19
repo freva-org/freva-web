@@ -106,12 +106,8 @@ def solr_search(request):
             results = reorder_results(freva.count_values(facet="*", **args))
         elif facets == "experiment_prefix":
             args["experiment"] = args.pop("experiment_prefix")
-            results = reorder_results(
-                freva.count_values(facet="experiment", **args)
-            )
-            results["experiment_prefix"] = remove_year(
-                results.pop("experiment")
-            )
+            results = reorder_results(freva.count_values(facet="experiment", **args))
+            results["experiment_prefix"] = remove_year(results.pop("experiment"))
         else:
             if "experiment_prefix" in args:
                 args["experiment"] = args.pop("experiment_prefix")[0] + "*"
@@ -130,8 +126,6 @@ def solr_search(request):
             args["rows"] = rows
         results = freva.databrowser(uniq_key="file", **args)
         return HttpResponse(
-            json.dumps(
-                dict(data=sorted(results), metadata={"numFound": n_files})
-            ),
+            json.dumps(dict(data=sorted(results), metadata={"numFound": n_files})),
             content_type="application/json",
         )

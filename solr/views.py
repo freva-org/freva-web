@@ -100,25 +100,18 @@ def solr_search(request):
     if facets:
         args["facet.limit"] = -1
         logging.debug(args)
-        print(args)
         args.pop("facet")
         if facets == "*":
             # means select all,
-            results = reorder_results(
-                freva.databrowser(count=True, all_facets=True, **args)
-            )
+            results = reorder_results(freva.count_values(facet="*", **args))
         elif facets == "experiment_prefix":
             args["experiment"] = args.pop("experiment_prefix")
-            results = reorder_results(
-                freva.databrowser(count=True, facet="experiment", **args)
-            )
+            results = reorder_results(freva.count_values(facet="experiment", **args))
             results["experiment_prefix"] = remove_year(results.pop("experiment"))
         else:
             if "experiment_prefix" in args:
                 args["experiment"] = args.pop("experiment_prefix")[0] + "*"
-            results = reorder_results(
-                freva.databrowser(count=True, facet=facets, **args)
-            )
+            results = reorder_results(freva.count_values(facet=facets, **args))
         return HttpResponse(
             json.dumps(dict(data=results)),
             content_type="application/json",
@@ -128,7 +121,7 @@ def solr_search(request):
         if "rows" in args:
             rows = int(request.GET["rows"])
             args.pop("rows")
-        n_files = freva.databrowser(count=True, **args)
+        n_files = freva.count_values(**args)
         if rows:
             args["rows"] = rows
         results = freva.databrowser(uniq_key="file", **args)

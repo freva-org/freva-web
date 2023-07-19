@@ -20,7 +20,7 @@ you need [anaconda](https://www.anaconda.com/products/distribution) to be
 installed on you computer. Once anaconda is set up the installation of all
 required packages is quite simple:
 
-```bash
+```console
 conda env create -f conda-env.yml
 source .envrc
 ```
@@ -29,13 +29,13 @@ The web ui will need a connection to a solr and mariadb service.
 This services can be deployed using
 [`docker-compose`](https://docs.docker.com/compose/install/).
 
-```bash
+```console
 docker-compose up -d
 ```
 
 When finished, tear down the environment with
 
-```bash
+```console
 docker-compose down
 ```
 
@@ -46,7 +46,7 @@ There are some rudimentary tests that check the integration of `django` and the
 created a `freva-dev` cona miniconda environment you can run the tests after
 activating this environment:
 
-```bash
+```console
 conda activate freva-web
 python -m pytest -vv tests
 ```
@@ -55,14 +55,16 @@ python -m pytest -vv tests
 
 You can check if django is working and correctly configured by:
 
-```bash
+```console
 python manage.py check
 ```
 
 If checks are passing issue the following command
 
-```bash
+```console
+python manage.py makemigrations base
 python manage.py migrate --fake-initial
+python manage.py migrate --fake contenttypes
 python manage.py createsuperuser
 ```
 
@@ -73,7 +75,7 @@ database tables.
 
 A development server can be set using the following command:
 
-```bash
+```console
 python manage.py runserver [port_number]
 ```
 
@@ -86,7 +88,7 @@ can change the port number with help of a command line argument
 
 Install dependencies:
 
-```bash
+```console
 
 npm install
 
@@ -94,19 +96,41 @@ npm install
 
 Build project:
 
-```bash
+```console
 npm run build
 npm run build-production   # optimized production build
 ```
 
 Development:
 
-```bash
+```console
 npm run dev   # starts webpack-dev-server including hot-reloading
 ```
 
-# Deploy a new version:
+# Create a new web release.
+The production systems are deployed in a docker image hosted on the GitHub
+container registry: `ghcr.io/freva-clint/freva-web`. A GitHub workflow has to
+be triggered in order to build an updated version of the docker image and push
+it to the registry. To do so please follow the following steps.
 
-```bash
-python manage.py collectstatic  # get new js files
-```
+- Make sure the main branch is up to date
+- Bump the version in the `package.json` file. Currently caldev versioning is
+  used. An example would be
+   ```json
+        "version": "2023.07.19"
+   ```.
+- After you have push the version changes to the main branch you can create
+  a new tag with the same version:
+   ```console
+    git tag git tag -a vVERSION -m "comment"
+  ```
+  for example:
+    ```console
+        git tag -a v2023.07.19 -m "Some prettifications."
+    ```
+- Push the tag to the remote repository:
+    ```console
+        git push origin vVERSION
+    ```
+
+These steps trigger the creation of a new container image.

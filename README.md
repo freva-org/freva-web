@@ -118,12 +118,12 @@ it to the registry. To do so please follow the following steps.
   used. An example would be
    ```json
         "version": "2023.07.19"
-   ```.
+   ```
 - After you have push the version changes to the main branch you can create
   a new tag with the same version:
-   ```console
-    git tag git tag -a vVERSION -m "comment"
-  ```
+    ```console
+        git tag -a vVERSION -m "comment"
+    ```
   for example:
     ```console
         git tag -a v2023.07.19 -m "Some prettifications."

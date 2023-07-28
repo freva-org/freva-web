@@ -45,7 +45,7 @@ class Databrowser extends React.Component {
     super(props);
     this.clickFacet = this.clickFacet.bind(this);
     this.renderFacetBadges = this.renderFacetBadges.bind(this);
-    this.state = { viewPort: ViewTypes.FACET_CENTERED };
+    this.state = { viewPort: ViewTypes.RESULT_CENTERED };
   }
 
   /**

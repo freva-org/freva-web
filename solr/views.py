@@ -9,10 +9,12 @@ from typing import Union
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
-
-
-import freva
+from django.shortcuts import redirect
+from django.http import JsonResponse
 from django.conf import settings
+from urllib.parse import urlencode
+import requests
+import freva
 import json
 import logging
 
@@ -129,3 +131,27 @@ def solr_search(request):
             json.dumps(dict(data=sorted(results), metadata={"numFound": n_files})),
             content_type="application/json",
         )
+
+def search(request, core, unique_key):
+    return reverse_proxy(
+        request, f"http://localhost:7777/metadata_search/{core}/{unique_key}"
+    )
+
+
+def get_search_overview(request):
+    return reverse_proxy(request, "http://localhost:7777/overview")
+
+
+def reverse_proxy(request, path):
+    api_url = path
+    try:
+        response = requests.request(
+            method="GET",
+            url=api_url,
+            params=request.GET,
+            timeout=100,
+        )
+        return JsonResponse(response.json(), status=response.status_code)
+    except requests.RequestException as e:
+        print(e)
+        return JsonResponse({"error": str(e)}, status=500)

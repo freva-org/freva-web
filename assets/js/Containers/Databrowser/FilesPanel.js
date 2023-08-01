@@ -2,13 +2,17 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Tooltip, OverlayTrigger, Button, Badge } from "react-bootstrap";
+import { withRouter } from "react-router";
 
 import { FaInfoCircle } from "react-icons/fa";
+
+import queryString from "query-string";
 
 import NcdumpDialog, { NcDumpDialogState } from "../../Components/NcdumpDialog";
 import CircularSpinner from "../../Components/Spinner";
 
 import { getCookie } from "../../utils";
+import Pagination from "../../Components/Pagination";
 
 function FilesPanelImpl(props) {
   const { files, numFiles, fileLoading } = props.databrowser;
@@ -19,6 +23,15 @@ function FilesPanelImpl(props) {
     output: null,
     error: null,
   });
+
+  function setPageOffset(offset) {
+    const currentLocation = props.location.pathname;
+    const query = queryString.stringify({
+      ...props.location.query,
+      start: (offset - 1) * 100,
+    });
+    props.router.push(currentLocation + "?" + query);
+  }
 
   function loadNcdump(fn, pw) {
     const url = "/api/solr/ncdump/";
@@ -40,7 +53,6 @@ function FilesPanelImpl(props) {
         if (!resp.ok) {
           /* eslint-disable */
           return resp.json().then((json) => {
-            console.log(resp.statusText);
             if (json.error_msg) {
               throw new Error(json.error_msg);
             } else {
@@ -67,12 +79,20 @@ function FilesPanelImpl(props) {
   }
 
   const [filename, setFilename] = useState(null);
+
   return (
     <div className="pb-3">
       <h3 className="d-flex justify-content-between">
         <span>Files</span>
         <Badge bg="secondary">{numFiles.toLocaleString("en-US")}</Badge>
       </h3>
+      <div className="mb-2 d-flex align-items-end flex-column">
+        <Pagination
+          items={Math.ceil(props.databrowser.numFiles / 100)}
+          active={Math.floor(props.databrowser.start / 100) + 1}
+          handleSubmit={setPageOffset}
+        />
+      </div>
       <ul
         className="jqueryFileTree border shadow-sm py-3 rounded"
         style={{ maxHeight: "1000px", overflow: "auto" }}
@@ -130,12 +150,15 @@ FilesPanelImpl.propTypes = {
     fileLoading: PropTypes.bool,
     facetLoading: PropTypes.bool,
     numFiles: PropTypes.number,
+    start: PropTypes.number,
     selectedFacets: PropTypes.object,
     metadata: PropTypes.object,
     dateSelector: PropTypes.string,
     minDate: PropTypes.string,
     maxDate: PropTypes.string,
   }),
+  location: PropTypes.object.isRequired,
+  router: PropTypes.object.isRequired,
   error: PropTypes.string,
   dispatch: PropTypes.func.isRequired,
 };
@@ -145,4 +168,4 @@ const mapStateToProps = (state) => ({
   error: state.appReducer.error,
 });
 
-export default connect(mapStateToProps)(FilesPanelImpl);
+export default withRouter(connect(mapStateToProps)(FilesPanelImpl));

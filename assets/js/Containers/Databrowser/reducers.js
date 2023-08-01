@@ -4,6 +4,7 @@ const databrowserInitialState = {
   facets: null,
   files: [],
   numFiles: 0,
+  start: 0,
   selectedFacets: {},
   minDate: "",
   maxDate: "",
@@ -11,6 +12,7 @@ const databrowserInitialState = {
   metadata: {},
   facetLoading: false,
   fileLoading: false,
+  flavours: ["freva"],
 };
 
 export const databrowserReducer = (state = databrowserInitialState, action) => {
@@ -27,7 +29,7 @@ export const databrowserReducer = (state = databrowserInitialState, action) => {
         facetLoading: false,
       };
     case constants.UPDATE_FACET_SELECTION: {
-      const { minDate, maxDate, dateSelector, ...queryObject } =
+      const { minDate, maxDate, dateSelector, start, ...queryObject } =
         action.queryObject;
       // let newObject = {}
       // if (state.facets) {
@@ -49,6 +51,7 @@ export const databrowserReducer = (state = databrowserInitialState, action) => {
       return {
         ...state,
         selectedFacets: { ...queryObject },
+        start,
         dateSelector: myDateSelector,
         minDate: myMinDate,
         maxDate: myMaxDate,
@@ -56,12 +59,18 @@ export const databrowserReducer = (state = databrowserInitialState, action) => {
     }
     case constants.SET_METADATA:
       return { ...state, metadata: action.metadata };
+    case constants.SET_FLAVOURS:
+      return { ...state, flavours: action.payload.flavours };
     case constants.LOAD_FILES:
       return {
         ...state,
-        files: action.payload.data,
-        numFiles: action.payload.metadata.numFound,
+        facets: action.payload.facets,
+        primaryFacets: action.payload.primary_facets,
+        facetMapping: action.payload.facet_mapping,
+        files: action.payload.search_results.map((x) => x.file),
+        numFiles: action.payload.total_count,
         fileLoading: false,
+        start: action.payload.start,
       };
     default:
       return state;

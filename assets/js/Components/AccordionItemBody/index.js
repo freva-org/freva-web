@@ -45,7 +45,7 @@ Row.propTypes = {
   data: PropTypes.array,
   rowData: PropTypes.shape({
     value: PropTypes.string,
-    count: PropTypes.number,
+    count: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   }),
   elemRef: PropTypes.oneOfType([
     PropTypes.func,

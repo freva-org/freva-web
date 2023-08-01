@@ -6,6 +6,8 @@ export const UPDATE_FACET_SELECTION = "UPDATE_FACET_SELECTION";
 
 export const SET_METADATA = "SET_METADATA";
 
+export const SET_FLAVOURS = "SET_FLAVOURS";
+
 export const SET_FACET_LOADING = "SET_FACET_LOADING";
 export const SET_FILE_LOADING = "SET_FILE_LOADING";
 
@@ -17,3 +19,8 @@ export const RESET_NCDUMP = "RESET_NCDUMP";
 export const TIME_RANGE_FLEXIBLE = "flexible";
 export const TIME_RANGE_STRICT = "strict";
 export const TIME_RANGE_FILE = "file";
+
+export const ViewTypes = {
+  RESULT_CENTERED: "RESULT_CENTERED",
+  FACET_CENTERED: "FACET_CENTERED",
+};

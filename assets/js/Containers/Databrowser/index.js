@@ -62,10 +62,15 @@ class Databrowser extends React.Component {
     script.onload = () =>
       this.props.dispatch(
         setMetadata({
-          variable: window.variable,
+          project: window.project,
+          product: window.product,
           model: window.model,
           institute: window.institute,
-          project: window.project,
+          time_frequency: window.time_frequency,
+          realm: window.realm,
+          variable: window.variable,
+          grid_label: window.grid_label,
+          time_aggregation: window.time_aggregation,
           fs_type: window.fs_type,
         })
       );

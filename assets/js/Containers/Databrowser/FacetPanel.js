@@ -39,7 +39,9 @@ export function FacetPanel({
     panelHeader = (
       <span className="d-flex justify-content-between">
         <span>{facetTitle}</span>
-        <Badge bg="secondary d-flex align-items-center">{numberOfValues}</Badge>
+        <Badge bg="secondary d-flex align-items-center">
+          {numberOfValues.toLocaleString("en-US")}
+        </Badge>
       </span>
     );
   }
@@ -51,6 +53,7 @@ export function FacetPanel({
     >
       <AccordionItemBody
         eventKey={keyVar}
+        mappedName={facetTitle}
         value={value}
         isFacetCentered={isFacetCentered}
         facetClick={clickFacet}

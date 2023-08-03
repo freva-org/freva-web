@@ -13,12 +13,11 @@ const databrowserInitialState = {
   facetLoading: false,
   fileLoading: false,
   flavours: ["freva"],
+  selectedFlavour: constants.DEFAULT_FLAVOUR,
 };
 
 export const databrowserReducer = (state = databrowserInitialState, action) => {
   switch (action.type) {
-    case constants.SET_FACET_LOADING:
-      return { ...state, facetLoading: true };
     case constants.SET_FILE_LOADING:
       return { ...state, fileLoading: true };
     case constants.LOAD_FACETS:
@@ -29,7 +28,7 @@ export const databrowserReducer = (state = databrowserInitialState, action) => {
         facetLoading: false,
       };
     case constants.UPDATE_FACET_SELECTION: {
-      const { minDate, maxDate, dateSelector, start, ...queryObject } =
+      const { minDate, maxDate, dateSelector, start, flavour, ...queryObject } =
         action.queryObject;
       // let newObject = {}
       // if (state.facets) {
@@ -51,10 +50,11 @@ export const databrowserReducer = (state = databrowserInitialState, action) => {
       return {
         ...state,
         selectedFacets: { ...queryObject },
-        start,
+        start: parseInt(start),
         dateSelector: myDateSelector,
         minDate: myMinDate,
         maxDate: myMaxDate,
+        selectedFlavour: flavour,
       };
     }
     case constants.SET_METADATA:
@@ -70,7 +70,8 @@ export const databrowserReducer = (state = databrowserInitialState, action) => {
         files: action.payload.search_results.map((x) => x.file),
         numFiles: action.payload.total_count,
         fileLoading: false,
-        start: action.payload.start,
+        start: parseInt(action.payload.start),
+        selectedFlavour: action.payload.flavour,
       };
     default:
       return state;

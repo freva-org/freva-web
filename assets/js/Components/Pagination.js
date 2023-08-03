@@ -20,7 +20,6 @@ export default function Pagination(props) {
   }
 
   function getNext() {
-    console.log("next", props.active);
     return props.handleSubmit(props.active + 1);
   }
 
@@ -37,7 +36,6 @@ export default function Pagination(props) {
   const lastPage = props.items;
   const activePage = props.active;
   const valid = active >= 1 && active <= lastPage;
-  console.log("ACTIVE", active);
   return (
     <div className="d-flex justify-content-end">
       <Button
@@ -56,6 +54,7 @@ export default function Pagination(props) {
           min={1}
           max={lastPage}
           value={active}
+          type="number"
         />{" "}
       </React.Fragment>
       <span className="m-2 me-0 text-nowrap">of {lastPage} </span>

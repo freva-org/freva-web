@@ -90,7 +90,9 @@ function AccordionItemBody(props) {
       let renderedElem;
       const badge = (
         <div>
-          <Badge bg="secondary d-flex align-items-center">{count}</Badge>
+          <Badge bg="secondary d-flex align-items-center">
+            {parseInt(count).toLocaleString("en-US")}
+          </Badge>
         </div>
       );
       const link = (
@@ -165,6 +167,7 @@ function AccordionItemBody(props) {
   const [windowWidth] = useWindowSize();
   const getSize = (index) => sizeMap.current[index] || 24;
 
+  const facetName = props.mappedName ?? eventKey;
   return (
     <div className={props.isFacetCentered ? "facet-container" : ""}>
       <div>
@@ -172,7 +175,7 @@ function AccordionItemBody(props) {
           className="my-2"
           id="search"
           type="text"
-          placeholder={`Search ${eventKey} name`}
+          placeholder={`Search ${facetName} name`}
           onChange={handleChange}
         />
       </div>
@@ -212,6 +215,7 @@ function AccordionItemBody(props) {
 
 AccordionItemBody.propTypes = {
   eventKey: PropTypes.string,
+  mappedName: PropTypes.string,
   value: PropTypes.array,
   isFacetCentered: PropTypes.bool,
   metadata: PropTypes.object,

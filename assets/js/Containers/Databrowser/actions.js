@@ -20,11 +20,6 @@ export const setMetadata = (metadata) => ({
   metadata,
 });
 
-// export const loadFacets = (location) => (dispatch) => {
-//   dispatch({ type: constants.SET_FACET_LOADING });
-//   return fetchResults(dispatch, location, "facet=*", constants.LOAD_FACETS);
-// };
-
 export const setFlavours = () => (dispatch) => {
   return fetch("/solr/overview", {
     credentials: "same-origin",
@@ -59,18 +54,18 @@ export const loadFiles = (location) => (dispatch) => {
   return fetchResults(
     dispatch,
     location,
-    "batch_size=100",
+    `batch_size=${constants.BATCH_SIZE}`,
     constants.LOAD_FILES
   );
 };
 
 function fetchResults(dispatch, location, additionalParams, actionType) {
-  // const { selectedFacets, dateSelector, minDate, maxDate } = getState().databrowserReducer;
   let params = "";
+  let flavourValue = constants.DEFAULT_FLAVOUR;
   if (location) {
     const queryObject = location.query;
-    const { dateSelector, minDate, maxDate, ...facets } = queryObject;
-
+    const { dateSelector, minDate, maxDate, flavour, ...facets } = queryObject;
+    flavourValue = flavour ?? flavourValue;
     params = queryString.stringify(facets);
 
     if (params) {
@@ -82,9 +77,7 @@ function fetchResults(dispatch, location, additionalParams, actionType) {
       params += `&time_select=${dateSelector}&time=${minDate} TO ${maxDate}`;
     }
   }
-
-  const url = `/solr/search/freva/file?${additionalParams}${params}`;
-  console.log("FETCH RESULTS", location.query.start);
+  const url = `/solr/search/${flavourValue}/file?${additionalParams}${params}&translate=false`;
   return fetch(url, {
     credentials: "same-origin",
     headers: {
@@ -102,7 +95,11 @@ function fetchResults(dispatch, location, additionalParams, actionType) {
     .then((json) => {
       return dispatch({
         type: actionType,
-        payload: { ...json, start: location.query.start ?? 0 },
+        payload: {
+          ...json,
+          start: location.query.start ?? 0,
+          flavour: location.query.flavour ?? constants.DEFAULT_FLAVOUR,
+        },
       });
     })
     .catch(() => {

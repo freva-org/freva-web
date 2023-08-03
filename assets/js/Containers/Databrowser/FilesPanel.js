@@ -14,6 +14,8 @@ import CircularSpinner from "../../Components/Spinner";
 import { getCookie } from "../../utils";
 import Pagination from "../../Components/Pagination";
 
+import { BATCH_SIZE } from "./constants";
+
 function FilesPanelImpl(props) {
   const { files, numFiles, fileLoading } = props.databrowser;
   const [showDialog, setShowDialog] = useState(false);
@@ -88,8 +90,8 @@ function FilesPanelImpl(props) {
       </h3>
       <div className="mb-2 d-flex align-items-end flex-column">
         <Pagination
-          items={Math.ceil(props.databrowser.numFiles / 100)}
-          active={Math.floor(props.databrowser.start / 100) + 1}
+          items={Math.ceil(props.databrowser.numFiles / BATCH_SIZE)}
+          active={Math.floor(props.databrowser.start / BATCH_SIZE) + 1}
           handleSubmit={setPageOffset}
         />
       </div>

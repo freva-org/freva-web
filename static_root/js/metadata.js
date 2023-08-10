@@ -387,22 +387,34 @@ var institute = {
     "zmaw" : "Institute of Oceanography, University of Hamburg",
 };
 var time_frequency = {
-    "1hr":"sampled hourly",
+    "1min":"1 minute mean samples",
+    "1minpt":"sampled every 1 minute, at specified time point within the time period",    
+    "2min":"2 minutes mean samples",
+    "2minpt":"sampled every 2 minutes, at specified time point within the time period",        
+    "5min":"5 minutes mean samples",
+    "5minpt":"sampled every 5 minutes, at specified time point within the time period",
+    "15min":"15 minutes mean samples",
+    "15minpt":"sampled every 15 minutes, at specified time poin within the time period",
+    "subhr":"sub-hourly mean samples",
+    "subhrpt":"sampled sub-hourly, at specified time point within the time period",
+    "1hr":"hourly mean samples",
     "1hrcm":"monthly-mean diurnal cycle resolving each day into 1-hour means",
-    "1hrpt":"sampled hourly, at specified time point within an hour",
+    "1hrpt":"sampled hourly, at specified time point within the time period",
     "3hr":"3 hourly mean samples",
     "3hrpt":"sampled 3 hourly, at specified time point within the time period",
     "6hr":"6 hourly mean samples",
     "6hrpt":"sampled 6 hourly, at specified time point within the time period",
-    "day":"daily mean samples",
-    "dec":"decadal mean samples",
-    "fx":"fixed (time invariant) field",
+    "1day":"daily mean samples",
+    "1daypt":"sampled daily, at specified time point within the time period",
+    "sem":"weekly mean samples",
     "mon":"monthly mean samples",
     "monc":"monthly climatology computed from monthly mean samples",
     "monpt":"sampled monthly, at specified time point within the time period",
-    "subhrpt":"sampled sub-hourly, at specified time point within an hour",
     "yr":"annual mean samples",
-    "yrpt":"sampled yearly, at specified time point within the time period"
+    "yrc":"annual climatology computed from annual mean samples",
+    "yrpt":"sampled yearly, at specified time point within the time period",
+    "dec":"decadal mean samples",
+    "fx":"fixed (time invariant) field",
 };
 var realm = {
     "aerosol":"Aerosol",
@@ -1985,10 +1997,10 @@ var grid_label = {
     "grz":"regridded zonal mean data reported on the data provider's preferred latitude target grid"
 };
 var time_aggregation = {
-    "maximum" : "maximum value within the time period",
-    "minimum" : "minimum value within the time period",
-    "point" : "specified time point within the time period",
-    "sum" : "sum of values within the time period",
+    "max" : "maximum value within the time period",
+    "min" : "minimum value within the time period",
+    "inst" : "specified time point within the time period",
+    "acc" : "sum of values within the time period",
     "mean" : "mean value within the time period",
 };
 var fs_type = {

@@ -54,7 +54,7 @@ export const loadFiles = (location) => (dispatch) => {
   return fetchResults(
     dispatch,
     location,
-    `batch_size=${constants.BATCH_SIZE}`,
+    `max-results=${constants.BATCH_SIZE}`,
     constants.LOAD_FILES
   );
 };

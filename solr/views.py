@@ -28,114 +28,9 @@ def databrowser(request):
     return render(request, "plugins/list.html", {"title": "Databrowser"})
 
 
-@login_required()
-def solr_search(request):
-    args = dict(request.GET)
-    try:
-        facets = request.GET["facet"]
-    except KeyError:
-        facets = False
-
-    # remove page_limit and the "_" argument
-    # from out argument list in order to iterate through
-    # it later. "_" is added by the jquery-ajax function
-    # to prevent requests from caching
-    args.pop("page_limit", None)
-    args.pop("_", None)
-
-    if "start" in args:
-        args["start"] = int(request.GET["start"])
-    if "time_select" in args:
-        args["time_select"] = request.GET["time_select"]
-    if "time" in args:
-        args["time"] = request.GET["time"]
-
-    metadata = None
-
-    def remove_year(d):
-        tmp = []
-        for i, val in enumerate(d):
-            try:
-                if i % 2 == 0:
-                    try:
-                        int(val[-6:])
-                        tmp_val = val[:-6]
-                    except:
-                        int(val[-4:])
-                        tmp_val = val[:-4]
-                    if tmp_val not in tmp:
-                        tmp.append(tmp_val)
-                        tmp.append(d[i + 1])
-            except:
-                tmp.append(val)
-                tmp.append(d[i + 1])
-        return tmp
-
-    def reorder_results(
-        res: dict[str, dict[str, int]]
-    ) -> dict[str, list[Union[str, int]]]:
-        import collections
-
-        cmor = [
-            "project",
-            "product",
-            "institute",
-            "model",
-            "experiment",
-            "time_frequency",
-            "realm",
-            "variable",
-            "ensemble",
-            "data_type",
-        ]
-        results = collections.OrderedDict()
-        for cm in cmor:
-            try:
-                results[cm] = [f for sub in res.pop(cm).items() for f in sub]
-            except KeyError:
-                pass
-        for k, v in res.items():
-            results[k] = [f for sub in v.items() for f in sub]
-
-        return results
-
-    if facets:
-        args["facet.limit"] = -1
-        logging.debug(args)
-        args.pop("facet")
-        if facets == "*":
-            # means select all,
-            results = reorder_results(freva.count_values(facet="*", **args))
-        elif facets == "experiment_prefix":
-            args["experiment"] = args.pop("experiment_prefix")
-            results = reorder_results(freva.count_values(facet="experiment", **args))
-            results["experiment_prefix"] = remove_year(results.pop("experiment"))
-        else:
-            if "experiment_prefix" in args:
-                args["experiment"] = args.pop("experiment_prefix")[0] + "*"
-            results = reorder_results(freva.count_values(facet=facets, **args))
-        return HttpResponse(
-            json.dumps(dict(data=results)),
-            content_type="application/json",
-        )
-    else:
-        rows = 0
-        if "rows" in args:
-            rows = int(request.GET["rows"])
-            args.pop("rows")
-        n_files = freva.count_values(**args)
-        if rows:
-            args["rows"] = rows
-        results = freva.databrowser(uniq_key="file", **args)
-        return HttpResponse(
-            json.dumps(dict(data=sorted(results), metadata={"numFound": n_files})),
-            content_type="application/json",
-        )
-
-
 def search(request, flavour, unique_key):
     return reverse_proxy(
-        request, f"http://localhost:7777/metadata_search/{flavour}/{unique_key}"
+        request, f"{settings.DATA_BROWSER_HOST}/metadata_search/{flavour}/{unique_key}"
     )
 
 
@@ -147,15 +42,12 @@ def get_single_facet(request, flavour):
             {"error": "Only one queried facet at a time allowed"}, status=400
         )
     facet = facets[0]
-    # filtered_facets = query_params.get(facet)
-    # if filtered_facets:
-    # del query_params[facet]
 
-    query_params["batch_size"] = 1
+    query_params["max-results"] = 1
     request.GET = query_params
 
     response = reverse_proxy(
-        request, f"http://localhost:7777/metadata_search/{flavour}/file"
+        request, f"{settings.DATA_BROWSER_HOST}/metadata_search/{flavour}/file"
     )
     print(response.content)
     data = json.loads(response.content)["facets"]
@@ -167,16 +59,18 @@ def get_single_facet(request, flavour):
 
 
 def get_search_overview(request):
-    return reverse_proxy(request, "http://localhost:7777/overview")
+    return reverse_proxy(request, f"{settings.DATA_BROWSER_HOST}/overview")
 
 
 def get_intake_catalogue(request, flavour, unique_key):
     return reverse_proxy(
-        request, f"http://localhost:7777/intake_catalouge/{flavour}/{unique_key}"
+        request, f"{settings.DATA_BROWSER_HOST}/intake_catalouge/{flavour}/{unique_key}"
     )
+
 
 def reverse_proxy(request, path):
     api_url = path
+    print(api_url)
     try:
         response = requests.request(
             method="GET",

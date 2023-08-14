@@ -11,7 +11,6 @@ from django.urls import path
 import solr.views
 
 urlpatterns = [
-    url(r"^solr-search/$", solr.views.solr_search, name="solr_search"),
     url(r"^data-browser/$", solr.views.databrowser, name="data_browser"),
     path(
         "search/<str:flavour>/<str:unique_key>/",

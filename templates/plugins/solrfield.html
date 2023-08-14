@@ -54,26 +54,21 @@
                      //page_limit: 10,
                   };
                   tmp_data2 = getActiveFacets('{{facet}}','{{group}}');
-                  var res = '/solr/facet/freva?';
+                  let res = '/solr/facet/freva?';
                   $.each(tmp_data, function(index,value){
                       res += index+'='+value+'&';
                   });
-                  //res += tmp_data2 + '{{predefined_facets|dict_to_url}}';
-                  console.log("RES", res.slice(0, -1))
+                  res += tmp_data2 + '{{predefined_facets|dict_to_url}}';
                   return res.slice(0, -1);
               },
               results: function (data, page) { // parse the results into the format expected by Select2.
-
-                  console.log(data, page)
-                  var res_data = [];
+                  const res_data = [];
                   $.each(data['facets']['{{facet}}'], function(index,value){
-                      //console.log(index+':'+value);
                       if(index%2 == 0){
-                          var tmp = {'id':value,'text':value};
+                          const tmp = {'id': value,'text': value};
                           res_data.push(tmp);
                       }
                   });
-                  //console.log(res_data);
                   return {results: res_data};
               },
 

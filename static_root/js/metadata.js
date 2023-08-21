@@ -1741,7 +1741,7 @@ var variable = {
     "sidmassmelttop" : "Sea-Ice Mass Change Through Surface Melting",
     "sidmasssi" : "Sea-Ice Mass Change Through Snow-to-Ice Conversion",
     "sidmassth" : "Sea-Ice Mass Change from Thermodynamics",
-    "sidmasstranx" : "X-Component of Sea-Ice Mass Transport",,
+    "sidmasstranx" : "X-Component of Sea-Ice Mass Transport",
     "sidmasstrany" : "Y-Component of Sea-Ice Mass Transport",
     "sidragbot" : "Ocean Drag Coefficient",
     "sidragtop" : "Atmospheric Drag Coefficient",

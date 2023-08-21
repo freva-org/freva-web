@@ -254,7 +254,7 @@ AUTHENTICATION_BACKENDS = (
 REDIS_HOST = web_config.get("REDIS_HOST", "127.0.0.1")
 REDIS_PORT = web_config.get("REDIS_PORT", 6379)
 
-DATA_BROWSER_HOST = web_config.get("DATA_BROWSER_HOST", "http://localhost:7777")
+DATA_BROWSER_HOST = config.get("databrowser.host", "http://localhost:7777")
 
 SERVER_EMAIL = web_config.get("SERVER_EMAIL", "freva@dkrz.de")
 DEFAULT_FROM_EMAIL = SERVER_EMAIL

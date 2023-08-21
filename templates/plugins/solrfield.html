@@ -51,10 +51,9 @@
                       {%if editable %}
                          {{facet}}: term+'*', // search term
                       {%endif%}
-                     //page_limit: 10,
                   };
                   tmp_data2 = getActiveFacets('{{facet}}','{{group}}');
-                  let res = '/solr/facet/freva?';
+                  let res = '/api/databrowser/metadata-search/freva/file?';
                   $.each(tmp_data, function(index,value){
                       res += index+'='+value+'&';
                   });

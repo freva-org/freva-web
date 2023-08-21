@@ -26,3 +26,5 @@ export const ViewTypes = {
   RESULT_CENTERED: "RESULT_CENTERED",
   FACET_CENTERED: "FACET_CENTERED",
 };
+
+export const INTAKE_MAXIMUM = 100_000;

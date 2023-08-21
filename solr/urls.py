@@ -11,25 +11,30 @@ from django.urls import path
 import solr.views
 
 urlpatterns = [
-    url(r"^data-browser/$", solr.views.databrowser, name="data_browser"),
-    path(
-        "search/<str:flavour>/<str:unique_key>/",
-        solr.views.search,
-        name="api_search",
-    ),
-    path(
-        "facet/<str:flavour>/",
-        solr.views.get_single_facet,
-        name="api_facet",
-    ),
-    path(
-        "intake_catalogue/<str:flavour>/<str:unique_key>/",
-        solr.views.get_intake_catalogue,
-        name="api_intake",
-    ),
+    url(r"^databrowser/$", solr.views.databrowser, name="data_browser"),
     url(
-        r"^overview/$",
-        solr.views.get_search_overview,
-        name="api_search_overview",
+        r"^api/databrowser/overview/$",
+        solr.views.search_overview,
+        name="databrowser_overview",
+    ),
+    path(
+        "api/databrowser/extended-search/<str:flavour>/<str:unique_key>/",
+        solr.views.extended_search,
+        name="databrowser_extended_search",
+    ),
+    path(
+        "api/databrowser/metadata-search/<str:flavour>/<str:unique_key>/",
+        solr.views.metadata_search,
+        name="databrowser_metadata_search",
+    ),
+    path(
+        "api/databrowser/data-search/<str:flavour>/<str:unique_key>/",
+        solr.views.data_search,
+        name="databrowser_data_search",
+    ),
+    path(
+        "api/databrowser/intake_catalogue/<str:flavour>/<str:unique_key>/",
+        solr.views.intake_catalogue,
+        name="databrowser_intake_catalogue",
     ),
 ]

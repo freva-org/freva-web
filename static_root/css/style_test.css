@@ -1260,3 +1260,11 @@ a.dropdown-item:hover {
 input[type="number"] {
   -moz-appearance: textfield;
 }
+
+.export-intake:hover {
+  color: white !important;
+}
+
+.pagination-form {
+  width: 5em;
+}

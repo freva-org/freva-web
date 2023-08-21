@@ -15,6 +15,7 @@ import {
 
 import {
   FaAlignJustify,
+  FaFileExport,
   FaList,
   FaMinusSquare,
   FaPlusSquare,
@@ -40,8 +41,14 @@ import TimeRangeSelector from "./TimeRangeSelector";
 import FilesPanel from "./FilesPanel";
 import DataBrowserCommand from "./DataBrowserCommand";
 import FacetDropdown from "./MetaFacet";
-import { ViewTypes, DEFAULT_FLAVOUR, TIME_FACET_NAME } from "./constants";
+import {
+  ViewTypes,
+  DEFAULT_FLAVOUR,
+  TIME_FACET_NAME,
+  INTAKE_MAXIMUM,
+} from "./constants";
 import { FacetPanel } from "./FacetPanel";
+import { prepareSearchParams } from "./utils";
 
 class Databrowser extends React.Component {
   constructor(props) {
@@ -198,6 +205,13 @@ class Databrowser extends React.Component {
     }
   }
 
+  createIntakeLink() {
+    return (
+      "/api/databrowser/intake_catalogue/" +
+      prepareSearchParams(this.props.location, "translate=false")
+    );
+  }
+
   renderTimeSelectionPanel() {
     const key = "time_range";
     const { dateSelector, minDate, maxDate } = this.props.databrowser;
@@ -342,6 +356,39 @@ class Databrowser extends React.Component {
                   return <option key={x}>{x}</option>;
                 })}
               </Form.Select>
+              {this.props.databrowser.numFiles > INTAKE_MAXIMUM ? (
+                <OverlayTrigger
+                  overlay={
+                    <Tooltip>
+                      Please narrow down your search to a maximum of 100,000
+                      results in order to enable Intake exports
+                    </Tooltip>
+                  }
+                >
+                  <span>
+                    <Button
+                      className="me-1"
+                      variant="outline-secondary"
+                      disabled
+                    >
+                      <span className="text-nowrap d-flex align-items-center">
+                        <FaFileExport className="fs-5 me-2" /> Intake catalogue
+                      </span>
+                    </Button>
+                  </span>
+                </OverlayTrigger>
+              ) : (
+                <a
+                  className="btn btn-outline-secondary export-intake me-1 text-decoration-none text-secondary"
+                  href={this.createIntakeLink()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span className="text-nowrap d-flex align-items-center">
+                    <FaFileExport className="fs-5 me-2" /> Intake catalogue
+                  </span>
+                </a>
+              )}
               <OverlayTrigger
                 overlay={<Tooltip>Change view with facets in focus</Tooltip>}
               >

@@ -1,12 +1,11 @@
 import fetch from "isomorphic-fetch";
 
-import queryString from "query-string";
-
 import { getCookie } from "../../utils";
 
 import * as globalStateConstants from "../App/constants";
 
 import * as constants from "./constants";
+import { prepareSearchParams } from "./utils";
 
 export const updateFacetSelection = (queryObject) => (dispatch) => {
   dispatch({
@@ -21,7 +20,7 @@ export const setMetadata = (metadata) => ({
 });
 
 export const setFlavours = () => (dispatch) => {
-  return fetch("/solr/overview", {
+  return fetch("/api/databrowser/overview", {
     credentials: "same-origin",
     headers: {
       "X-CSRFToken": getCookie("csrftoken"),
@@ -54,30 +53,14 @@ export const loadFiles = (location) => (dispatch) => {
   return fetchResults(
     dispatch,
     location,
-    `max-results=${constants.BATCH_SIZE}`,
+    `max-results=${constants.BATCH_SIZE}&translate=false`,
     constants.LOAD_FILES
   );
 };
 
 function fetchResults(dispatch, location, additionalParams, actionType) {
-  let params = "";
-  let flavourValue = constants.DEFAULT_FLAVOUR;
-  if (location) {
-    const queryObject = location.query;
-    const { dateSelector, minDate, maxDate, flavour, ...facets } = queryObject;
-    flavourValue = flavour ?? flavourValue;
-    params = queryString.stringify(facets);
-
-    if (params) {
-      params = "&" + params;
-    }
-
-    const isDateSelected = !!minDate;
-    if (isDateSelected) {
-      params += `&time_select=${dateSelector}&time=${minDate} TO ${maxDate}`;
-    }
-  }
-  const url = `/solr/search/${flavourValue}/file?${additionalParams}${params}&translate=false`;
+  const searchParams = prepareSearchParams(location, additionalParams);
+  const url = `/api/databrowser/extended-search/${searchParams}`;
   return fetch(url, {
     credentials: "same-origin",
     headers: {

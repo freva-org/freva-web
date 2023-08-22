@@ -50,7 +50,7 @@ export const databrowserReducer = (state = databrowserInitialState, action) => {
       return {
         ...state,
         selectedFacets: { ...queryObject },
-        start: parseInt(start),
+        start: start !== undefined ? parseInt(start) : 0,
         dateSelector: myDateSelector,
         minDate: myMinDate,
         maxDate: myMaxDate,

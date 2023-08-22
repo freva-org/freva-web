@@ -60,7 +60,7 @@ export const loadFiles = (location) => (dispatch) => {
 
 function fetchResults(dispatch, location, additionalParams, actionType) {
   const searchParams = prepareSearchParams(location, additionalParams);
-  const url = `/api/databrowser/extended-search/${searchParams}`;
+  const url = `/api/databrowser/extended_search/${searchParams}`;
   return fetch(url, {
     credentials: "same-origin",
     headers: {

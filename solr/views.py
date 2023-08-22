@@ -5,10 +5,12 @@ Created on 14.11.2013
 
 views for the solr application
 """
+import logging
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.conf import settings
+from django.http import QueryDict
 import requests
 
 
@@ -55,17 +57,29 @@ def intake_catalogue(request, flavour, unique_key):
     )
 
 
+def get_all_parameters(query_string):
+    query_dict = QueryDict(query_string)
+    parameters = {}
+
+    for key in query_dict.keys():
+        values = query_dict.getlist(key)
+        parameters[key] = values
+
+    return parameters
+
+
 def reverse_proxy(request, path):
     api_url = path
-    print(api_url)
+    query_string = request.META["QUERY_STRING"]
+    all_parameters = get_all_parameters(query_string)
     try:
         response = requests.request(
             method="GET",
             url=api_url,
-            params=request.GET,
+            params=all_parameters,
             timeout=100,
         )
         return JsonResponse(response.json(), status=response.status_code)
     except requests.RequestException as e:
-        print(e)
+        logging.error(e)
         return JsonResponse({"error": str(e)}, status=500)

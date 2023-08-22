@@ -2,6 +2,8 @@ from django import template
 
 from django.utils.safestring import mark_safe
 
+import urllib.parse
+
 register = template.Library()
 
 
@@ -19,8 +21,4 @@ def lookup(d, key):
 def dict_to_url(d):
     if d is None:
         return ""
-    result = ""
-    for key, val in d.items():
-        for item in val:
-            result += "&" + key + "=" + item
-    return mark_safe(result)
+    return mark_safe(urllib.parse.urlencode(d, doseq=True))

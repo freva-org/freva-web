@@ -49,7 +49,7 @@ export function FacetPanel({
     <OwnPanel
       header={panelHeader}
       key={keyVar}
-      removeFacet={isFacetSelected ? () => this.clickFacet(keyVar) : null}
+      removeFacet={isFacetSelected ? () => clickFacet(keyVar) : null}
     >
       <AccordionItemBody
         eventKey={keyVar}

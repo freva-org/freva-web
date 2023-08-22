@@ -21,7 +21,6 @@ export const TIME_RANGE_FILE = "file";
 
 export const DEFAULT_FLAVOUR = "freva";
 export const BATCH_SIZE = 100;
-export const TIME_FACET_NAME = "time";
 export const ViewTypes = {
   RESULT_CENTERED: "RESULT_CENTERED",
   FACET_CENTERED: "FACET_CENTERED",

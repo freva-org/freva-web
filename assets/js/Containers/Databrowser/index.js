@@ -41,12 +41,7 @@ import TimeRangeSelector from "./TimeRangeSelector";
 import FilesPanel from "./FilesPanel";
 import DataBrowserCommand from "./DataBrowserCommand";
 import FacetDropdown from "./MetaFacet";
-import {
-  ViewTypes,
-  DEFAULT_FLAVOUR,
-  TIME_FACET_NAME,
-  INTAKE_MAXIMUM,
-} from "./constants";
+import { ViewTypes, DEFAULT_FLAVOUR, INTAKE_MAXIMUM } from "./constants";
 import { FacetPanel } from "./FacetPanel";
 import { prepareSearchParams } from "./utils";
 
@@ -213,34 +208,22 @@ class Databrowser extends React.Component {
   }
 
   renderTimeSelectionPanel() {
-    const key = "time_range";
     const { dateSelector, minDate, maxDate } = this.props.databrowser;
     const isDateSelected = !!minDate;
     const title = isDateSelected ? (
       <span>
-        {initCap(
-          underscoreToBlank(
-            this.props.databrowser.facetMapping[TIME_FACET_NAME]
-          )
-        )}{" "}
-        : &nbsp;
+        Time : &nbsp;
         <span className="fw-bold">
           {dateSelector}: {minDate} to {maxDate}
         </span>
       </span>
     ) : (
-      <span>
-        {initCap(
-          underscoreToBlank(
-            this.props.databrowser.facetMapping[TIME_FACET_NAME]
-          )
-        )}
-      </span>
+      <span>Time</span>
     );
     return (
       <OwnPanel
         header={title}
-        key={key}
+        key="time_range"
         removeFacet={isDateSelected ? () => this.dropTimeSelection() : null}
       >
         <TimeRangeSelector />

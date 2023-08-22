@@ -13,7 +13,6 @@ import {
   TIME_RANGE_FILE,
   TIME_RANGE_FLEXIBLE,
   TIME_RANGE_STRICT,
-  TIME_FACET_NAME,
 } from "./constants";
 
 const Modes = {
@@ -44,9 +43,7 @@ function DataBrowserCommandImpl(props) {
       (props.selectedFlavour !== constants.DEFAULT_FLAVOUR
         ? `--flavour ${props.selectedFlavour} `
         : "") +
-      (props.minDate
-        ? `${props.facetMapping[TIME_FACET_NAME]}=${props.minDate}to${props.maxDate} `
-        : "") +
+      (props.minDate ? `time=${props.minDate}to${props.maxDate} ` : "") +
       Object.keys(selectedFacets)
         .map((key) => {
           const value = selectedFacets[key];
@@ -68,7 +65,7 @@ function DataBrowserCommandImpl(props) {
           : ""}
         {props.minDate && (
           <React.Fragment>
-            &nbsp;{props.facetMapping[TIME_FACET_NAME]}=
+            &nbsp;time=
             <span className="fw-bold">
               {`${props.minDate}to${props.maxDate}`}
             </span>
@@ -108,10 +105,7 @@ function DataBrowserCommandImpl(props) {
         return `${props.facetMapping[key]}="${value}"`;
       }),
     ];
-    props.minDate &&
-      args.push(
-        `${props.facetMapping[TIME_FACET_NAME]}="${props.minDate} to ${props.maxDate}"`
-      );
+    props.minDate && args.push(`time="${props.minDate} to ${props.maxDate}"`);
     props.minDate && args.push(`time_select="${dateSelectorToCli}"`);
     return `freva.databrowser(${args.join(", ")})`.trimEnd();
   }

@@ -18,17 +18,17 @@ urlpatterns = [
         name="databrowser_overview",
     ),
     path(
-        "api/databrowser/extended-search/<str:flavour>/<str:unique_key>/",
+        "api/databrowser/extended_search/<str:flavour>/<str:unique_key>/",
         solr.views.extended_search,
         name="databrowser_extended_search",
     ),
     path(
-        "api/databrowser/metadata-search/<str:flavour>/<str:unique_key>/",
+        "api/databrowser/metadata_search/<str:flavour>/<str:unique_key>/",
         solr.views.metadata_search,
         name="databrowser_metadata_search",
     ),
     path(
-        "api/databrowser/data-search/<str:flavour>/<str:unique_key>/",
+        "api/databrowser/data_search/<str:flavour>/<str:unique_key>/",
         solr.views.data_search,
         name="databrowser_data_search",
     ),

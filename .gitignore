@@ -1,5 +1,6 @@
 *.pyc
 *.db
+*.log
 virt
 static_root/img/favicon.svg
 freva_web.conf
@@ -22,3 +23,5 @@ activate_web
 static/*
 assets/bundles/*
 webpack-stats.json
+base/migrations/*
+

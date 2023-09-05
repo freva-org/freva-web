@@ -3,7 +3,7 @@
 export EVALUATION_SYSTEM_CONFIG_FILE := $(PWD)/docker/local-eval-system.conf
 export EVALUATION_SYSTEM_DRS_CONFIG_FILE := $(PWD)/docker/drs_config.toml
 export DJANGO_SUPERUSER_PASSWORD := secret
-export DJANGO_DEV_MODE := 1
+export DEV_MODE := 1
 
 .PHONY: all run runserver runfrontend stopserver stopfrontend stop setup
 

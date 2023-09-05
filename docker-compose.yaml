@@ -24,6 +24,7 @@ services:
     volumes:
       - ./docker/config/solr/managed-schema.xml:/opt/solr/managed-schema.xml:ro
       - ./docker/config/solr/create_cores.sh:/docker-entrypoint-initdb.d/create_cores.sh:ro
+      - ./docker/config/solr/synonyms.txt:/opt/solr/synonyms.txt:ro
   redis:
     image: redis:latest
     ports:

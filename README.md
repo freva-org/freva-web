@@ -43,7 +43,7 @@ docker-compose down
 
 There are some rudimentary tests that check the integration of `django` and the
 `nodejs` building process. Assuming you have followed steps mentioned above and
-created a `freva-dev` cona miniconda environment you can run the tests after
+created a `freva-dev` conda miniconda environment you can run the tests after
 activating this environment:
 
 ```console
@@ -51,60 +51,21 @@ conda activate freva-web
 python -m pytest -vv tests
 ```
 
-## Django deployment
+## Using GNU `make`:
+We have created a Makefile that sets up a development version of the web. You
+can use:
 
-You can check if django is working and correctly configured by:
+- `make setup` to setup the node and django servers
+- `make run` to run the django and npm development servers
+- `make` or `make all` to do both, `make setup` and `make run`
+- `make stop` to stop the django and npm development servers
 
-```console
-python manage.py check
-```
+The django and npm development servers will write output into runserver.log and
+npm.log. You can observe the output of the processes using `tail -f` or something
+similar.
 
-If checks are passing issue the following command
-
-```console
-python manage.py makemigrations base
-python manage.py migrate --fake-initial
-python manage.py migrate --fake contenttypes
-python manage.py createsuperuser
-```
-
-The `--fake-inital` flag tells `django` not to create the already existing
-database tables.
-
-## Running the server in dev mode
-
-A development server can be set using the following command:
-
-```console
-python manage.py runserver [port_number]
-```
-
-Default port is 8000. If an application is already running on that port you
-can change the port number with help of a command line argument
-
-## Building the JS application :
-
-**Please note:** You need a Node version of at least 16.5 along a npm version of 8.19
-
-Install dependencies:
-
-```console
-
-npm install
-
-```
-
-Build project:
-
-```console
-npm run build
-npm run build-production   # optimized production build
-```
-
-Development:
-
-```console
-npm run dev   # starts webpack-dev-server including hot-reloading
+```note
+You need a Node version of at least 16.5 along a npm version of 8.19
 ```
 
 # Create a new web release.

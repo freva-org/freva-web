@@ -16,7 +16,7 @@ from .proxyviews import DataBrowserProxy
 urlpatterns = [
     url(r"^databrowser/$", databrowser, name="data_browser"),
 ]
-if settings.DEBUG or int(os.environ.get("DEV_MODE", "0")) == 1:
+if int(os.environ.get("DEV_MODE", "0")) == 1:
     urlpatterns.append(
         path(
             r"api/databrowser/<path:url>/",

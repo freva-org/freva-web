@@ -55,13 +55,25 @@ python -m pytest -vv tests
 We have created a Makefile that sets up a development version of the web. You
 can use:
 
-- `make setup` to setup the node and django servers
-- `make run` to run the django and npm development servers
-- `make` or `make all` to do both, `make setup` and `make run`
-- `make stop` to stop the django and npm development servers
+- To *setup* / *initialise* the nodejs and django servers use:
+    ```console
+    make setup
+    ```
+- To *run* node and django servers use:
+    ```console
+    make run
+    ```
+- To use both `setup` and `run` command use just use make:
+    ```console
+    make
+    ```
+- To stop the servers use:
+    ```console
+    make stop
+    ```
 
-The django and npm development servers will write output into runserver.log and
-npm.log. You can observe the output of the processes using `tail -f` or something
+The django and npm development servers will write output into `runserver.log` and
+`npm.log`. You can observe the output of the processes using `tail -f` or something
 similar.
 
 > **Note**: You need a Node version of at least 16.5 along a npm version of 8.19

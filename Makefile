@@ -9,8 +9,6 @@ export DEV_MODE := 1
 
 all: setup runserver runfrontend
 	@echo "All services are running in the background."
-	@echo "To watch the Django server logs, run 'tail -f runserver.log'"
-	@echo "To watch the npm logs, run 'tail -f npm.log'"
 
 dummy-data:
 	docker/dummy_plugin_runs.sh
@@ -30,14 +28,16 @@ runserver:
 	@echo "Starting Django development server..."
 	python manage.py runserver > runserver.log 2>&1 &
 	@echo "Django development server is running..."
+	@echo "To watch the Django server logs, run 'tail -f runserver.log'"
 
 runfrontend:
 	@echo "Starting npm development server..."
 	npm run dev > npm.log 2>&1 &
 	@echo "npm development server is running..."
+	@echo "To watch the npm logs, run 'tail -f npm.log'"
 
 stopserver:
-	pkill -f "python manage.py runserver"
+	ps aux | grep '[m]anage.py runserver' | awk '{print $$2}' | xargs -r kill
 	echo "Stopped Django development server..." > runserver.log
 
 stopfrontend:

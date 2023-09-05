@@ -64,9 +64,7 @@ The django and npm development servers will write output into runserver.log and
 npm.log. You can observe the output of the processes using `tail -f` or something
 similar.
 
-```note
-You need a Node version of at least 16.5 along a npm version of 8.19
-```
+> **Note**: You need a Node version of at least 16.5 along a npm version of 8.19
 
 # Create a new web release.
 The production systems are deployed in a docker image hosted on the GitHub

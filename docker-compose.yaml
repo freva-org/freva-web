@@ -11,6 +11,10 @@ services:
       - "3306:3306"
     volumes:
       - ./docker/config/mysql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql:ro
+    depends_on:
+      - redis
+      - solr
+      - databrowser
   solr:
     image: solr:latest
     environment:
@@ -24,3 +28,24 @@ services:
     image: redis:latest
     ports:
       - "6379:6379"
+  mongodb:
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo
+      MONGO_INITDB_ROOT_PASSWORD: secret
+      MONGO_INITDB_DATABASE: search_stats
+    ports:
+      - "27017:27017"
+  databrowser:
+    image: ghcr.io/freva-clint/databrowserapi:latest
+    ports:
+      - 7777:8080
+    environment:
+      MONGO_HOST: mongodb:27017
+      MONGO_PASSWORD: secret
+      MONGO_DB: search_stats
+      MONGO_USER: mongo
+      SOLR_HOST: solr:8983
+    depends_on:
+      - solr
+    command: ["sh", "-c", "sleep 3 && /opt/app/python/bin/python3 -m databrowser.cli --debug --dev"]

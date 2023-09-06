@@ -4,6 +4,7 @@
 virt
 static_root/img/favicon.svg
 freva_web.conf
+docker/databrowser_api_config.toml
 db
 node_modules
 venv/*

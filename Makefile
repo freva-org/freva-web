@@ -23,7 +23,6 @@ setup-django:
 setup-node:
 	npm install
 
-
 runserver:
 	@echo "Starting Django development server..."
 	python manage.py runserver > runserver.log 2>&1 &
@@ -51,9 +50,13 @@ setup: setup-node setup-django dummy-data
 
 run: runfrontend runserver
 
-lint:
+lint: setup-node
+	npm run lint-format
+	npm run lint
 	black -t py310 --check .
 
-tests:
+tests: setup-node
+	npm run build-production
+	npm run build
 	rm -rf node_modules
 	pytest -vv $(PWD) tests/

@@ -1,0 +1,13 @@
+# This is the default toml config file that is used by the databrowser API server.
+#
+[solr]
+hostname = "solr"
+port = 8983
+core = "files"
+
+# [mongo_db]
+# hostname = "mongodb"
+# port = 27017
+# user = "mongo"
+# password = "secret"
+# name = "search_stats"

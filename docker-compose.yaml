@@ -41,6 +41,8 @@ services:
     image: ghcr.io/freva-clint/databrowserapi:latest
     ports:
       - 7777:8080
+    volumes:
+      - ./docker/databrowser_api_config.toml:/opt/databrowser/api_config.toml:ro
     environment:
       MONGO_HOST: mongodb:27017
       MONGO_PASSWORD: secret

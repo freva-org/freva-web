@@ -78,9 +78,14 @@ similar.
 
 > ``📝`` You need a Node version of at least 16.5 along a npm version of 8.19
 
-# Production
-The web app is meant to be applied in a docker container. A pre-build image
-of the web app is available via:
+# The Production container
+This section only briefly describes the docker image that is automatically
+created (see the next section on how to trigger a build of the image) and is
+not meant for actual application. Please install and use the
+[freva-deployment package](https://pypi.org/project/freva-deployment/) to
+deploy the web app in production mode.
+
+A pre-build image of the web app is available via:
 
 ```console
 docker pull ghcr.io/freva-clint/freva-web:latest
@@ -97,12 +102,13 @@ environment variables:
 
 The web app app is running on port 8000, hence you want to publish this port
 via the `-p` flag. Ideally the path to the `$EVALUATION_SYSTEM_CONFIG_FILE`
-should be mounted into the container as a volume. Since static files are served
-by the http web server and not the django web app you have to add the location
-of the static files (e.g. `/srv/static`) as a volume into the container to the
-`/opt/freva_web/static` location. On startup of the container django app will
-create all static files that will then be available through `/srv/static` on
-the docker host.
+should be mounted into the container as a volume.
+
+Since static files are served by the http web server and not the django web app
+you have to add the location of the static files (e.g. `/srv/static`) as a
+volume into the container to the `/opt/freva_web/static` location.
+On startup of the container django app will create all static files that will
+then be available through `/srv/static` on the docker host.
 
 All together a minimal working example looks like this:
 

@@ -25,8 +25,16 @@ conda env create -f conda-env.yml
 source .envrc
 ```
 
-The web ui will need a connection to a solr and mariadb service.
-This services can be deployed using
+> ``📝`` If conda has issues solving dependencies you can install and use
+         [mamba](https://mamba.readthedocs.io/en/latest/user_guide/mamba.html)
+         instead of anaconda. This is recommended because the dependency solvers
+         that ship with mamba are usually much faster than those conda uses.
+
+### Additional services running on docker
+
+The web ui will need a connection to a solr,
+[freva-databrowser](https://github.com/FREVA-CLINT/databrowserAPI/) and
+mariadb service. This services can be deployed using
 [`docker-compose`](https://docs.docker.com/compose/install/).
 
 ```console

@@ -80,10 +80,10 @@ similar.
 
 # The Production container
 This section only briefly describes the docker image that is automatically
-created (see the next section on how to trigger a build of the image) and is
-not meant for actual application. Please install and use the
-[freva-deployment package](https://pypi.org/project/freva-deployment/) to
-deploy the web app in production mode.
+created (see the [next section](#create-a-new-web-release) on how to trigger a
+build of the image) and is not meant for actual application. Please install and
+use the [freva-deployment package](https://pypi.org/project/freva-deployment/)
+to deploy the web app in production mode.
 
 A pre-build image of the web app is available via:
 

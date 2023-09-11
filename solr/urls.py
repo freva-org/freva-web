@@ -5,36 +5,22 @@ Created on 14.11.2013
 
 urlconf for the solr application
 """
+import os
 
 from django.urls import re_path as url
 from django.urls import path
-import solr.views
+from django.conf import settings
+from .views import databrowser
+from .proxyviews import DataBrowserProxy
 
 urlpatterns = [
-    url(r"^databrowser/$", solr.views.databrowser, name="data_browser"),
-    url(
-        r"^api/databrowser/overview/$",
-        solr.views.search_overview,
-        name="databrowser_overview",
-    ),
-    path(
-        "api/databrowser/extended_search/<str:flavour>/<str:unique_key>/",
-        solr.views.extended_search,
-        name="databrowser_extended_search",
-    ),
-    path(
-        "api/databrowser/metadata_search/<str:flavour>/<str:unique_key>/",
-        solr.views.metadata_search,
-        name="databrowser_metadata_search",
-    ),
-    path(
-        "api/databrowser/data_search/<str:flavour>/<str:unique_key>/",
-        solr.views.data_search,
-        name="databrowser_data_search",
-    ),
-    path(
-        "api/databrowser/intake_catalogue/<str:flavour>/<str:unique_key>/",
-        solr.views.intake_catalogue,
-        name="databrowser_intake_catalogue",
-    ),
+    url(r"^databrowser/$", databrowser, name="data_browser"),
 ]
+if int(os.environ.get("DEV_MODE", "0")) == 1:
+    urlpatterns.append(
+        path(
+            r"api/databrowser/<path:url>/",
+            DataBrowserProxy.as_view(),
+            name="databrowser_proxy",
+        )
+    )

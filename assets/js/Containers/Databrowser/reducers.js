@@ -30,15 +30,6 @@ export const databrowserReducer = (state = databrowserInitialState, action) => {
     case constants.UPDATE_FACET_SELECTION: {
       const { minDate, maxDate, dateSelector, start, flavour, ...queryObject } =
         action.queryObject;
-      // let newObject = {}
-      // if (state.facets) {
-      //   Object.keys(state.facets).forEach(key => {
-      //     if (key in queryObject) {
-      //       newObject = { ...newObject, [key]: queryObject[key] };
-      //     }
-      //   });
-      // }
-      // let dateInfo = {};
       let myMinDate = minDate;
       let myMaxDate = maxDate;
       let myDateSelector = dateSelector;
@@ -54,7 +45,7 @@ export const databrowserReducer = (state = databrowserInitialState, action) => {
         dateSelector: myDateSelector,
         minDate: myMinDate,
         maxDate: myMaxDate,
-        selectedFlavour: flavour,
+        selectedFlavour: flavour || databrowserInitialState.selectedFlavour,
       };
     }
     case constants.SET_METADATA:

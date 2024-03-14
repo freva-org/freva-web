@@ -2,6 +2,7 @@
 This is an example code for restarting after code changes from
 http://code.google.com/p/modwsgi/wiki/ReloadingSourceCode#Restarting_Daemon_Processes
 """
+
 import os
 import sys
 import signal

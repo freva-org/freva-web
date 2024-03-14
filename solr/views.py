@@ -5,6 +5,7 @@ Created on 14.11.2013
 
 views for the solr application
 """
+
 from typing import Union
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required

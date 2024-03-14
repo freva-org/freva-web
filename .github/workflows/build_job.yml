@@ -7,7 +7,7 @@ run-name: ${{ github.actor }} is building the container
     tags:
       - '*'
     branches:
-      - 'main'
+      - 'version'
 
 jobs:
   build-and-push-image:
@@ -32,6 +32,10 @@ jobs:
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v1
+
+      -
+        name: Set docker version label
+        run: sed -i 's/<VERSION>/${{ steps.repository.outputs.repo }}/g'
 
       -
         name: Set up Docker Buildx

@@ -83,6 +83,7 @@ class Databrowser extends React.Component {
           grid_label: window.grid_label,
           time_aggregation: window.time_aggregation,
           fs_type: window.fs_type,
+          cmor_table: window.cmor_table,
         })
       );
     document.body.appendChild(script);

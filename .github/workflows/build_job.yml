@@ -35,7 +35,7 @@ jobs:
 
       -
         name: Set docker version label
-        run: sed -i 's/<VERSION>/${{ steps.repository.outputs.repo }}/g'
+        run: sed -i 's/<VERSION>/${{ steps.repository.outputs.tag }}/g'
 
       -
         name: Set up Docker Buildx

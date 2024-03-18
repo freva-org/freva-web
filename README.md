@@ -120,17 +120,11 @@ it to the registry. To do so please follow the following steps.
     "version": "2023.07.19"
     ```
 - After you have push the version changes to the main branch you can create
-  a new tag with the same version:
+  trigger the release procedure:
     ```console
-    git tag -a vVERSION -m "comment"
+    make release
     ```
-  for example:
-    ```console
-    git tag -a v2023.07.19 -m "Some prettifications."
-    ```
-- Push the tag to the remote repository:
-    ```console
-    git push origin vVERSION
-    ```
-
-These steps trigger the creation of a new container image.
+This will check the current version of the `main` branch and created a trigger
+a GitHub continuous integration pipeline to create a new release. The procedure
+performs a couple of checks, if theses checks fail please make sure to address
+the issues.

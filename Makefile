@@ -15,3 +15,7 @@ lint:
 tests:
 	rm -rf node_modules
 	pytest -vv $(PWD) tests/
+
+release:
+	pip install git-python packaging tomli
+	python3 release.py tag django_evaluation  -b version

@@ -1,10 +1,11 @@
 ARG CONDA_ENV_DIR=/opt/condaenv
 ARG FREVA_WEB_DIR=/opt/freva_web
+ARG VERSION
 
 FROM condaforge/mambaforge
 LABEL org.opencontainers.image.authors="DRKZ-CLINT"
 LABEL org.opencontainers.image.source="https://github.com/FREVA-CLINT/freva-web"
-LABEL org.opencontainers.image.version=<VERSION>
+LABEL org.opencontainers.image.version=$VERSION
 ARG CONDA_ENV_DIR
 ARG FREVA_WEB_DIR
 

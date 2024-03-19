@@ -6,8 +6,6 @@ run-name: ${{ github.actor }} is building the container
   push:
     tags:
       - '*'
-    branches:
-      - 'version'
 
 jobs:
   build-and-push-image:

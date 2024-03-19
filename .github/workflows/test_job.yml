@@ -1,7 +1,7 @@
 name: Tests
 run-name: ${{ github.actor }} is doing some smoke tests
 
-on: [push, pull_request]
+on: [push, pull_request, workflow_call]
 jobs:
   lint:
     runs-on: ubuntu-latest

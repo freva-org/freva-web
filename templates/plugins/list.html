@@ -15,4 +15,23 @@
     <div id="react-app"></div>
     {% render_bundle 'main' %}
 
+    <script>
+        /*
+         * If loading of the react-components fails (either because the Node.js-Dev Environment
+         * or the static JS files are not available), the website shows an empty page
+         * which is not helpful. This code adds an error message if the content
+         * could not be loaded
+         */
+        document.addEventListener('DOMContentLoaded', function() {
+            const reactAppNode = document.getElementById("react-app")
+            if (reactAppNode && reactAppNode.children.length === 0) {
+                const newDiv = document.createElement("div");
+                newDiv.textContent = "Dynamic content could not be loaded";
+                newDiv.classList.add("alert")
+                newDiv.classList.add("alert-danger")
+                newDiv.classList.add("container")
+                reactAppNode.append(newDiv)
+            }
+        }, false);
+    </script>
 {% endblock %}

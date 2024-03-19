@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import { Tooltip, OverlayTrigger, Button, Badge } from "react-bootstrap";
+import { Tooltip, OverlayTrigger, Button } from "react-bootstrap";
 import { withRouter } from "react-router";
 
 import { FaInfoCircle } from "react-icons/fa";
@@ -30,7 +30,7 @@ function FilesPanelImpl(props) {
     const currentLocation = props.location.pathname;
     const query = queryString.stringify({
       ...props.location.query,
-      start: (offset - 1) * 100,
+      start: (offset - 1) * BATCH_SIZE,
     });
     props.router.push(currentLocation + "?" + query);
   }
@@ -84,17 +84,20 @@ function FilesPanelImpl(props) {
 
   return (
     <div className="pb-3">
-      <h3 className="d-flex justify-content-between">
-        <span>Files</span>
-        <Badge bg="secondary">{numFiles.toLocaleString("en-US")}</Badge>
-      </h3>
-      <div className="mb-2 d-flex align-items-end flex-column">
-        <Pagination
-          items={Math.ceil(props.databrowser.numFiles / BATCH_SIZE)}
-          active={Math.floor(props.databrowser.start / BATCH_SIZE) + 1}
-          handleSubmit={setPageOffset}
-        />
-      </div>
+      <span className="d-flex justify-content-between">
+        <h3 className="d-inline">
+          <span>Files</span>
+        </h3>
+        <div className="mb-2 d-flex align-items-end flex-column">
+          <Pagination
+            items={Math.ceil(props.databrowser.numFiles / BATCH_SIZE)}
+            active={Math.floor(props.databrowser.start / BATCH_SIZE) + 1}
+            totalFiles={numFiles.toLocaleString("en-US")}
+            batchSize={BATCH_SIZE}
+            handleSubmit={setPageOffset}
+          />
+        </div>
+      </span>
       <ul
         className="jqueryFileTree border shadow-sm py-3 rounded"
         style={{ maxHeight: "1000px", overflow: "auto" }}

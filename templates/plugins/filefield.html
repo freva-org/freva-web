@@ -1,22 +1,33 @@
 <div class="input-group {{attrs.class}} p-0">
-    <button type="button" class="btn btn-primary" id="{{id}}_browse">Browse</button>
-    <button type="button" class="btn btn-primary" id="{{id}}_solr">Search file</button>
-    <input type="text" class="form-control border-0" value="{% if value %}{{ value }}{%endif%}" id="{{ id }}" placeholder="{{name}}" name="{{name}}">
+  <button type="button" class="btn btn-primary" id="{{id}}_browse">
+    Browse
+  </button>
+  <button type="button" class="btn btn-primary" id="{{id}}_solr">
+    Search file
+  </button>
+  <input
+    type="text"
+    class="form-control border-0"
+    value="{% if value %}{{ value }}{%endif%}"
+    id="{{ id }}"
+    placeholder="{{name}}"
+    name="{{name}}"
+  />
 </div>
 
 <script>
-    $(document).ready(function(){
-        $('#{{id}}_browse').on('click', function(e){
-            var sender = $(e.target).attr('id').replace('_browse','');
-            $('#senderField').val(sender);
-            $('#fileExtension').val('{{ file_extension }}')
-            activate_browse('{{user_scratch}}', '{{file_extension}}');
-            $('#myModal').modal('show');
-        });
-
-        $('#{{id}}_solr').on('click', function(e){
-            solr.target_container =  $('#{{ id }}');
-            $('#myModal_solr').modal('show');
-        });
+  $(document).ready(function () {
+    $("#{{id}}_browse").on("click", function (e) {
+      var sender = $(e.target).attr("id").replace("_browse", "");
+      $("#senderField").val(sender);
+      $("#fileExtension").val("{{ file_extension }}");
+      activate_browse("{{user_scratch}}", "{{file_extension}}");
+      $("#myModal").modal("show");
     });
+
+    $("#{{id}}_solr").on("click", function (e) {
+      solr.target_container = $("#{{ id }}");
+      $("#myModal_solr").modal("show");
+    });
+  });
 </script>

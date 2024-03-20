@@ -1268,3 +1268,9 @@ input[type="number"] {
 .pagination-form {
   width: 5em;
 }
+
+.btn-success-muted {
+  background-color: rgb(209, 231, 221) !important;
+  border-color: #a3cfbb !important;
+  color: #5fbb90 !important;
+}

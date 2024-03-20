@@ -2,6 +2,7 @@
 
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
+from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.views.decorators.debug import (
@@ -324,32 +325,28 @@ def list_dir(request):
     except UserNotFoundError:
         # This user has no access to the underlying system and therefore
         # must not be able to get a file listing
-        return HttpResponse(
-            json.dumps(
-                {
-                    "status": "You are not allowed to see the folder listing",
-                    "folders": [],
-                }
-            )
+        return JsonResponse(
+            {
+                "status": "You are not allowed to see the folder listing",
+                "folders": [],
+            }
         )
 
     # we can specify an ending in GET request
-    base_directory = Path(urllib.parse.unquote(request.GET.get("dir"))).resolve()
-    if not is_path_relative_to(base_directory, home_dir) and not is_path_relative_to(
-        base_directory, scratch_dir
-    ):
+    base_directory = Path(urllib.parse.unquote(request.GET.get("dir")))
+    resolved_dir = base_directory.resolve()
+    if (
+        not is_path_relative_to(base_directory, home_dir)
+        and not is_path_relative_to(base_directory, scratch_dir)
+    ) or not resolved_dir.exists():
         # user is trying to get a listing of a folder he is not allowed to see
-        return HttpResponse(
-            json.dumps({"status": "Invalid base folder requested", "folders": []})
-        )
+        return JsonResponse({"status": "Invalid base folder requested", "folders": []})
     elif not base_directory.exists():
-        return HttpResponse(
-            json.dumps(
-                {
-                    "status": f"The directory {base_directory} does not exists. Please create it on a HPC login-node first",
-                    "folders": [],
-                }
-            )
+        return JsonResponse(
+            {
+                "status": f"The directory {base_directory} does not exists. Please create it on a HPC login-node first",
+                "folders": [],
+            }
         )
 
     files = []
@@ -368,15 +365,13 @@ def list_dir(request):
                         files.append(dict(type="file", ext=e, path=ff, name=f))
         folders = folders + files
     except Exception as e:
-        return HttpResponse(
-            json.dumps(
-                {
-                    "status": "Could not load directory: %s" % str(e),
-                    "folders": [],
-                }
-            )
+        return JsonResponse(
+            {
+                "status": "Could not load directory: %s" % str(e),
+                "folders": [],
+            }
         )
-    return HttpResponse(json.dumps({"status": "success", "folders": folders}))
+    return JsonResponse({"status": "success", "folders": folders})
 
 
 def list_docu(request):

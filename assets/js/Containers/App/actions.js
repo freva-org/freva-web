@@ -22,10 +22,10 @@ export const getCurrentUser = () => (dispatch) => {
         payload: json,
       })
     )
-    .catch((error) => {
+    .catch(() => {
       dispatch({
         type: constants.SET_ERROR,
-        payload: error,
+        payload: "Could not load user information.",
       });
     });
 };

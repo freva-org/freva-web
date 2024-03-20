@@ -5,16 +5,13 @@ Created on 14.11.2013
 
 views for the solr application
 """
-from typing import Union
+import logging
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
-
-
-import freva
+from django.http import JsonResponse
 from django.conf import settings
-import json
-import logging
+from django.http import QueryDict
+import requests
 
 
 @login_required()
@@ -26,106 +23,63 @@ def databrowser(request):
     return render(request, "plugins/list.html", {"title": "Databrowser"})
 
 
-@login_required()
-def solr_search(request):
-    args = dict(request.GET)
+def search_overview(request):
+    return reverse_proxy(
+        request, f"{settings.DATA_BROWSER_HOST}/api/databrowser/overview"
+    )
+
+
+def extended_search(request, flavour, unique_key):
+    return reverse_proxy(
+        request,
+        f"{settings.DATA_BROWSER_HOST}/api/databrowser/extended_search/{flavour}/{unique_key}",
+    )
+
+
+def data_search(request, flavour, unique_key):
+    return reverse_proxy(
+        request,
+        f"{settings.DATA_BROWSER_HOST}/api/databrowser/data_search/{flavour}/{unique_key}",
+    )
+
+
+def metadata_search(request, flavour, unique_key):
+    return reverse_proxy(
+        request,
+        f"{settings.DATA_BROWSER_HOST}/api/databrowser/metadata_search/{flavour}/{unique_key}",
+    )
+
+
+def intake_catalogue(request, flavour, unique_key):
+    return reverse_proxy(
+        request,
+        f"{settings.DATA_BROWSER_HOST}/api/databrowser/intake_catalogue/{flavour}/{unique_key}",
+    )
+
+
+def get_all_parameters(query_string):
+    query_dict = QueryDict(query_string)
+    parameters = {}
+
+    for key in query_dict.keys():
+        values = query_dict.getlist(key)
+        parameters[key] = values
+
+    return parameters
+
+
+def reverse_proxy(request, path):
+    api_url = path
+    query_string = request.META["QUERY_STRING"]
+    all_parameters = get_all_parameters(query_string)
     try:
-        facets = request.GET["facet"]
-    except KeyError:
-        facets = False
-
-    # remove page_limit and the "_" argument
-    # from out argument list in order to iterate through
-    # it later. "_" is added by the jquery-ajax function
-    # to prevent requests from caching
-    args.pop("page_limit", None)
-    args.pop("_", None)
-
-    if "start" in args:
-        args["start"] = int(request.GET["start"])
-    if "time_select" in args:
-        args["time_select"] = request.GET["time_select"]
-    if "time" in args:
-        args["time"] = request.GET["time"]
-
-    metadata = None
-
-    def remove_year(d):
-        tmp = []
-        for i, val in enumerate(d):
-            try:
-                if i % 2 == 0:
-                    try:
-                        int(val[-6:])
-                        tmp_val = val[:-6]
-                    except:
-                        int(val[-4:])
-                        tmp_val = val[:-4]
-                    if tmp_val not in tmp:
-                        tmp.append(tmp_val)
-                        tmp.append(d[i + 1])
-            except:
-                tmp.append(val)
-                tmp.append(d[i + 1])
-        return tmp
-
-    def reorder_results(
-        res: dict[str, dict[str, int]]
-    ) -> dict[str, list[Union[str, int]]]:
-        import collections
-
-        cmor = [
-            "project",
-            "product",
-            "institute",
-            "model",
-            "experiment",
-            "time_frequency",
-            "realm",
-            "variable",
-            "ensemble",
-            "data_type",
-        ]
-        results = collections.OrderedDict()
-        for cm in cmor:
-            try:
-                results[cm] = [f for sub in res.pop(cm).items() for f in sub]
-            except KeyError:
-                pass
-        for k, v in res.items():
-            results[k] = [f for sub in v.items() for f in sub]
-
-        return results
-
-    if facets:
-        args["facet.limit"] = -1
-        logging.debug(args)
-        args.pop("facet")
-        if facets == "*":
-            # means select all,
-            results = reorder_results(freva.count_values(facet="*", **args))
-        elif facets == "experiment_prefix":
-            args["experiment"] = args.pop("experiment_prefix")
-            results = reorder_results(freva.count_values(facet="experiment", **args))
-            results["experiment_prefix"] = remove_year(results.pop("experiment"))
-        else:
-            if "experiment_prefix" in args:
-                args["experiment"] = args.pop("experiment_prefix")[0] + "*"
-            results = reorder_results(freva.count_values(facet=facets, **args))
-        return HttpResponse(
-            json.dumps(dict(data=results)),
-            content_type="application/json",
+        response = requests.request(
+            method="GET",
+            url=api_url,
+            params=all_parameters,
+            timeout=100,
         )
-    else:
-        rows = 0
-        if "rows" in args:
-            rows = int(request.GET["rows"])
-            args.pop("rows")
-        n_files = freva.count_values(**args)
-        if rows:
-            args["rows"] = rows
-        results = freva.databrowser(uniq_key="file", **args)
-        return HttpResponse(
-            json.dumps(dict(data=sorted(results), metadata={"numFound": n_files})),
-            content_type="application/json",
-        )
+        return JsonResponse(response.json(), status=response.status_code)
+    except requests.RequestException as e:
+        logging.error(e)
+        return JsonResponse({"error": str(e)}, status=500)

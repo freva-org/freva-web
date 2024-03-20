@@ -1,3 +1,4 @@
 [submodule "docker/config"]
 	path = docker/config
 	url = https://github.com/FREVA-CLINT/freva-service-config.git
+	branch = main

@@ -7,6 +7,8 @@ import { Button, Card, OverlayTrigger, Tooltip } from "react-bootstrap";
 import ClipboardToast from "../../Components/ClipboardToast";
 import { copyTextToClipboard } from "../../utils";
 
+import * as constants from "./constants";
+
 import {
   TIME_RANGE_FILE,
   TIME_RANGE_FLEXIBLE,
@@ -38,11 +40,14 @@ function DataBrowserCommandImpl(props) {
   function getFullCliCommand(dateSelectorToCli) {
     return (
       "freva databrowser " +
+      (props.selectedFlavour !== constants.DEFAULT_FLAVOUR
+        ? `--flavour ${props.selectedFlavour} `
+        : "") +
       (props.minDate ? `time=${props.minDate}to${props.maxDate} ` : "") +
       Object.keys(selectedFacets)
         .map((key) => {
           const value = selectedFacets[key];
-          return `${key}=${value}`;
+          return `${props.facetMapping[key]}=${value}`;
         })
         .join(" ") +
       (dateSelectorToCli && props.minDate
@@ -55,6 +60,9 @@ function DataBrowserCommandImpl(props) {
     return (
       <pre className="mb-1" style={{ whiteSpace: "pre-wrap" }}>
         freva databrowser
+        {props.selectedFlavour !== constants.DEFAULT_FLAVOUR
+          ? ` --flavour ${props.selectedFlavour} `
+          : ""}
         {props.minDate && (
           <React.Fragment>
             &nbsp;time=
@@ -68,7 +76,7 @@ function DataBrowserCommandImpl(props) {
           return (
             <React.Fragment key={`command-${key}`}>
               {" "}
-              {key}=<strong>{value}</strong>
+              {props.facetMapping[key]}=<strong>{value}</strong>
             </React.Fragment>
           );
         })}
@@ -86,10 +94,17 @@ function DataBrowserCommandImpl(props) {
   }
 
   function getFullPythonCommand(dateSelectorToCli) {
-    const args = Object.keys(selectedFacets).map((key) => {
-      const value = selectedFacets[key];
-      return `${key}="${value}"`;
-    });
+    let args = [];
+    if (props.selectedFlavour !== constants.DEFAULT_FLAVOUR) {
+      args.push(`flavour=${props.selectedFlavour}`);
+    }
+    args = [
+      ...args,
+      ...Object.keys(selectedFacets).map((key) => {
+        const value = selectedFacets[key];
+        return `${props.facetMapping[key]}="${value}"`;
+      }),
+    ];
     props.minDate && args.push(`time="${props.minDate} to ${props.maxDate}"`);
     props.minDate && args.push(`time_select="${dateSelectorToCli}"`);
     return `freva.databrowser(${args.join(", ")})`.trimEnd();
@@ -163,6 +178,8 @@ DataBrowserCommandImpl.propTypes = {
   dateSelector: PropTypes.string,
   minDate: PropTypes.string,
   maxDate: PropTypes.string,
+  selectedFlavour: PropTypes.string,
+  facetMapping: PropTypes.object,
 };
 
 const mapStateToProps = (state) => ({
@@ -170,6 +187,8 @@ const mapStateToProps = (state) => ({
   dateSelector: state.databrowserReducer.dateSelector,
   minDate: state.databrowserReducer.minDate,
   maxDate: state.databrowserReducer.maxDate,
+  facetMapping: state.databrowserReducer.facetMapping,
+  selectedFlavour: state.databrowserReducer.selectedFlavour,
 });
 
 export default connect(mapStateToProps)(DataBrowserCommandImpl);

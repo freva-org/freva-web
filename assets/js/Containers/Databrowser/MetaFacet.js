@@ -7,7 +7,7 @@ import { Badge } from "react-bootstrap";
 import Select from "../../Components/Select";
 import { initCap, underscoreToBlank } from "../../utils";
 
-function FacetDropdownImpl(props) {
+function MetaFacetImpl(props) {
   const options = [];
 
   function constructValueName(category, value) {
@@ -15,9 +15,17 @@ function FacetDropdownImpl(props) {
     const valueInfos = additionalInfo && additionalInfo[value];
     return value + (valueInfos ? " " + valueInfos : "");
   }
+  const primaryFacetsSets = new Set(props.primaryFacets);
+  const sortedFacets = [
+    ...props.primaryFacets,
+    ...Object.keys(props.facetMapping).filter((x) => !primaryFacetsSets.has(x)),
+  ];
 
-  for (const f in props.facets) {
+  for (const f of sortedFacets) {
     const facet = props.facets[f];
+    if (!facet) {
+      continue;
+    }
     for (let i = 0; i < facet.length; i = i + 2) {
       options.push({
         value: constructValueName(f, facet[i]),
@@ -26,10 +34,14 @@ function FacetDropdownImpl(props) {
         label: (
           <div className="d-flex justify-content-between">
             <div className="text-truncate">
-              <Badge bg="primary">{initCap(underscoreToBlank(f))}</Badge>{" "}
+              <Badge bg="primary">
+                {initCap(underscoreToBlank(props.facetMapping[f]))}
+              </Badge>{" "}
               {facet[i]}
             </div>
-            <Badge bg="secondary">{facet[i + 1]}</Badge>
+            <Badge bg="secondary">
+              {parseInt(facet[i + 1]).toLocaleString("en-US")}
+            </Badge>
           </div>
         ),
       });
@@ -54,18 +66,22 @@ function FacetDropdownImpl(props) {
   );
 }
 
-FacetDropdownImpl.propTypes = {
+MetaFacetImpl.propTypes = {
   className: PropTypes.string,
   clickFacet: PropTypes.func.isRequired,
   facets: PropTypes.object,
   metadata: PropTypes.object,
   selectedFacets: PropTypes.object,
+  primaryFacets: PropTypes.array,
+  facetMapping: PropTypes.object,
 };
 
 const mapStateToProps = (state) => ({
   facets: state.databrowserReducer.facets,
   metadata: state.databrowserReducer.metadata,
+  primaryFacets: state.databrowserReducer.primaryFacets,
+  facetMapping: state.databrowserReducer.facetMapping,
   selectedFacets: state.databrowserReducer.selectedFacets,
 });
 
-export default connect(mapStateToProps)(FacetDropdownImpl);
+export default connect(mapStateToProps)(MetaFacetImpl);

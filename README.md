@@ -119,12 +119,12 @@ it to the registry. To do so please follow the following steps.
     ```json
     "version": "2023.07.19"
     ```
-- After you have push the version changes to the main branch you can create
-  trigger the release procedure:
+- After you have pushed the version changes to the main branch you can trigger
+  the release procedure:
     ```console
     make release
     ```
-This will check the current version of the `main` branch and created a trigger
-a GitHub continuous integration pipeline to create a new release. The procedure
+This will check the current version of the `main` branch and trigger
+a GitHub continuous integration pipeline to create the new release. The procedure
 performs a couple of checks, if theses checks fail please make sure to address
 the issues.

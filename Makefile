@@ -17,5 +17,7 @@ tests:
 	pytest -vv $(PWD) tests/
 
 release:
-	pip install git-python packaging tomli
-	python3 release.py tag django_evaluation  -b version
+	pip install git-python requests packaging tomli
+	curl -H 'Cache-Control: no-cache' -Ls -o bump.py https://raw.githubusercontent.com/FREVA-CLINT/freva-deployment/versions/release.py
+	python3 bump.py tag django_evaluation -b version
+	rm bump.py

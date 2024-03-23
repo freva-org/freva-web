@@ -110,7 +110,7 @@ export const pluginListReducer = (state = pluginListInitialState, action) => {
         state.tagsFilter,
         state.searchFilter
       );
-      return { ...state, filteredPlugins, tags: createTags(filteredPlugins) };
+      return { ...state, filteredPlugins, tags: createTags(state.plugins) };
     }
     case constants.LOAD_PLUGINS: {
       const exported = action.payload.some((v) => {
@@ -139,7 +139,9 @@ export const pluginListReducer = (state = pluginListInitialState, action) => {
     }
     case constants.UPDATE_CATEGORY_FILTER: {
       const { categoriesFilter } = state;
-      if (_.includes(categoriesFilter, action.category)) {
+      if (!action.category) {
+        return { ...state, categoriesFilter: [] };
+      } else if (_.includes(categoriesFilter, action.category)) {
         _.pull(categoriesFilter, action.category);
       } else {
         categoriesFilter.push(action.category);
@@ -148,7 +150,9 @@ export const pluginListReducer = (state = pluginListInitialState, action) => {
     }
     case constants.UPDATE_TAG_FILTER: {
       const { tagsFilter } = state;
-      if (_.includes(tagsFilter, action.tag)) {
+      if (!action.tag) {
+        return { ...state, tagsFilter: [] };
+      } else if (_.includes(tagsFilter, action.tag)) {
         _.pull(tagsFilter, action.tag);
       } else {
         tagsFilter.push(action.tag);

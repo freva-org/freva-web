@@ -39,6 +39,7 @@ dependencies:
     - django-discover-runner
     - django-bootstrap-v5
     - django-model-utils
+    - djproxy
     - pep257
     - types-requests
     - types-toml

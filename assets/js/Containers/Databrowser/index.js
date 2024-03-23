@@ -7,45 +7,56 @@ import {
   Col,
   Button,
   Alert,
-  Badge,
   OverlayTrigger,
   Tooltip,
+  Form,
+  Collapse,
 } from "react-bootstrap";
 
-import { FaAlignJustify, FaList, FaTimes } from "react-icons/fa";
+import {
+  FaAlignJustify,
+  FaFileExport,
+  FaList,
+  FaMinusSquare,
+  FaPlusSquare,
+  FaTimes,
+} from "react-icons/fa";
 
 import queryString from "query-string";
 import { withRouter } from "react-router";
 
-import AccordionItemBody from "../../Components/AccordionItemBody";
 import OwnPanel from "../../Components/OwnPanel";
 import Spinner from "../../Components/Spinner";
 
 import { initCap, underscoreToBlank } from "../../utils";
 
 import {
-  loadFacets,
   setMetadata,
   loadFiles,
   updateFacetSelection,
+  setFlavours,
 } from "./actions";
 
 import TimeRangeSelector from "./TimeRangeSelector";
 import FilesPanel from "./FilesPanel";
 import DataBrowserCommand from "./DataBrowserCommand";
-import FacetDropdown from "./FacetDropdown";
-
-const ViewTypes = {
-  RESULT_CENTERED: "RESULT_CENTERED",
-  FACET_CENTERED: "FACET_CENTERED",
-};
+import FacetDropdown from "./MetaFacet";
+import { ViewTypes, DEFAULT_FLAVOUR, INTAKE_MAXIMUM } from "./constants";
+import { FacetPanel } from "./FacetPanel";
+import { prepareSearchParams } from "./utils";
 
 class Databrowser extends React.Component {
   constructor(props) {
     super(props);
     this.clickFacet = this.clickFacet.bind(this);
     this.renderFacetBadges = this.renderFacetBadges.bind(this);
-    this.state = { viewPort: ViewTypes.RESULT_CENTERED };
+    const firstViewPort =
+      localStorage.FrevaDatabrowserViewPort ?? ViewTypes.RESULT_CENTERED;
+    localStorage.FrevaDatabrowserViewPort = firstViewPort;
+    this.state = {
+      viewPort: firstViewPort,
+      additionalFacetsVisible: false,
+    };
   }
 
   /**
@@ -53,7 +64,7 @@ class Databrowser extends React.Component {
    * Also load the metadata.js script
    */
   componentDidMount() {
-    this.props.dispatch(loadFacets(this.props.location));
+    this.props.dispatch(setFlavours());
     this.props.dispatch(loadFiles(this.props.location));
     this.props.dispatch(updateFacetSelection(this.props.location.query));
     const script = document.createElement("script");
@@ -80,7 +91,6 @@ class Databrowser extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (prevProps.location.search !== this.props.location.search) {
-      this.props.dispatch(loadFacets(this.props.location));
       this.props.dispatch(loadFiles(this.props.location));
       this.props.dispatch(updateFacetSelection(this.props.location.query));
     }
@@ -94,13 +104,14 @@ class Databrowser extends React.Component {
       // delete
       const { [category]: toRemove, ...queryObject } =
         this.props.location.query;
-      const query = queryString.stringify(queryObject);
+      const query = queryString.stringify({ ...queryObject, start: 0 });
       this.props.router.push(currentLocation + "?" + query);
       return;
     }
     const query = queryString.stringify({
       ...this.props.location.query,
       [category]: value,
+      start: 0,
     });
     if (query) {
       this.props.router.push(currentLocation + "?" + query);
@@ -109,64 +120,69 @@ class Databrowser extends React.Component {
     }
   }
 
-  // dropFacet(category) {
-  //   const currentLocation = this.props.location.pathname;
-  //   const { [category]: toRemove, ...queryObject } = this.props.location.query;
-  //   const query = queryString.stringify(queryObject);
-  //   this.props.router.push(currentLocation + "?" + query);
-  // }
+  clickFlavour(value = DEFAULT_FLAVOUR) {
+    const currentLocation = this.props.location.pathname;
+    const query = queryString.stringify({
+      ...this.props.location.query,
+      flavour: value,
+    });
+    if (query) {
+      this.props.router.push(currentLocation + "?" + query);
+    } else {
+      this.props.router.push(currentLocation);
+    }
+  }
 
   /**
    * Loop all facets and render the panels
    */
   renderFacetPanels() {
-    const { facets, selectedFacets, metadata } = this.props.databrowser;
-    // const { dispatch } = this.props;
+    const { facets, primaryFacets, selectedFacets, facetMapping, metadata } =
+      this.props.databrowser;
 
-    return Object.keys(facets).map((key) => {
+    return primaryFacets.map((key) => {
       const value = facets[key];
-      let panelHeader;
-      const isFacetSelected = !!selectedFacets[key];
-      if (isFacetSelected) {
-        panelHeader = (
-          <span>
-            {initCap(underscoreToBlank(key))}:{" "}
-            <strong>{selectedFacets[key]}</strong>
-          </span>
-        );
-      } else if (value.length === 2) {
-        panelHeader = (
-          <span>
-            {initCap(underscoreToBlank(key))}: <strong>{value[0]}</strong>
-          </span>
-        );
-      } else {
-        const numberOfValues = value.length / 2;
-        panelHeader = (
-          <span className="d-flex justify-content-between">
-            <span>{initCap(underscoreToBlank(key))}</span>
-            <Badge bg="secondary d-flex align-items-center">
-              {numberOfValues}
-            </Badge>
-          </span>
-        );
-      }
+      if (!value) return undefined;
       return (
-        <OwnPanel
-          header={panelHeader}
+        <FacetPanel
+          value={value}
           key={key}
-          removeFacet={isFacetSelected ? () => this.clickFacet(key) : null}
-        >
-          <AccordionItemBody
-            eventKey={key}
-            value={value}
-            isFacetCentered={this.state.viewPort === ViewTypes.FACET_CENTERED}
-            facetClick={this.clickFacet}
-            metadata={metadata[key] ? metadata[key] : null}
-          />
-        </OwnPanel>
+          keyVar={key}
+          metadata={metadata}
+          selectedFacets={selectedFacets}
+          facetMapping={facetMapping}
+          clickFacet={this.clickFacet}
+          isFacetCentered={this.state.viewPort === ViewTypes.FACET_CENTERED}
+        />
       );
     });
+  }
+
+  renderAdditionalFacets() {
+    const { facets, primaryFacets, selectedFacets, facetMapping, metadata } =
+      this.props.databrowser;
+    const primaryFacetsSet = new Set(primaryFacets);
+
+    return Object.keys(facetMapping)
+      .filter((x) => {
+        return !primaryFacetsSet.has(x);
+      })
+      .map((key) => {
+        const value = facets[key];
+        if (!value) return undefined;
+        return (
+          <FacetPanel
+            value={value}
+            key={key}
+            keyVar={key}
+            metadata={metadata}
+            selectedFacets={selectedFacets}
+            facetMapping={facetMapping}
+            clickFacet={this.clickFacet}
+            isFacetCentered={this.state.viewPort === ViewTypes.FACET_CENTERED}
+          />
+        );
+      });
   }
 
   dropTimeSelection() {
@@ -185,24 +201,30 @@ class Databrowser extends React.Component {
     }
   }
 
+  createIntakeLink() {
+    return (
+      "/api/databrowser/intake_catalogue/" +
+      prepareSearchParams(this.props.location, "translate=false")
+    );
+  }
+
   renderTimeSelectionPanel() {
-    const key = "time_range";
     const { dateSelector, minDate, maxDate } = this.props.databrowser;
     const isDateSelected = !!minDate;
     const title = isDateSelected ? (
       <span>
-        Time Range: &nbsp;
+        Time : &nbsp;
         <span className="fw-bold">
           {dateSelector}: {minDate} to {maxDate}
         </span>
       </span>
     ) : (
-      <span>Time Range</span>
+      <span>Time</span>
     );
     return (
       <OwnPanel
         header={title}
-        key={key}
+        key="time_range"
         removeFacet={isDateSelected ? () => this.dropTimeSelection() : null}
       >
         <TimeRangeSelector />
@@ -245,8 +267,8 @@ class Databrowser extends React.Component {
             }}
             key={"selected-" + x + this.props.databrowser.selectedFacets[x]}
           >
-            {initCap(underscoreToBlank(x))}:{" "}
-            {this.props.databrowser.selectedFacets[x]}
+            {initCap(underscoreToBlank(this.props.databrowser.facetMapping[x]))}
+            : {this.props.databrowser.selectedFacets[x]}
             <FaTimes className="ms-2 fs-6" />
           </Button>
         );
@@ -292,7 +314,9 @@ class Databrowser extends React.Component {
     }
 
     const facetPanels = this.renderFacetPanels();
+    const additionalFacetPanels = this.renderAdditionalFacets();
     const isFacetCentered = this.state.viewPort === ViewTypes.FACET_CENTERED;
+    const flavour = this.props.location.query.flavour;
     return (
       <Container>
         <Row>
@@ -303,7 +327,52 @@ class Databrowser extends React.Component {
                 <Spinner outerClassName="d-inline fs-6 align-bottom" />
               )}
             </h2>
-            <div>
+            <div className="d-flex justify-content-between mb-2">
+              <Form.Select
+                aria-label="Default select example"
+                className="me-1"
+                value={flavour}
+                onChange={(x) => {
+                  this.clickFlavour(x.target.value);
+                }}
+              >
+                {this.props.databrowser.flavours.map((x) => {
+                  return <option key={x}>{x}</option>;
+                })}
+              </Form.Select>
+              {this.props.databrowser.numFiles > INTAKE_MAXIMUM ? (
+                <OverlayTrigger
+                  overlay={
+                    <Tooltip>
+                      Please narrow down your search to a maximum of 100,000
+                      results in order to enable Intake exports
+                    </Tooltip>
+                  }
+                >
+                  <span>
+                    <Button
+                      className="me-1"
+                      variant="outline-secondary"
+                      disabled
+                    >
+                      <span className="text-nowrap d-flex align-items-center">
+                        <FaFileExport className="fs-5 me-2" /> Intake catalogue
+                      </span>
+                    </Button>
+                  </span>
+                </OverlayTrigger>
+              ) : (
+                <a
+                  className="btn btn-outline-secondary export-intake me-1 text-decoration-none text-secondary"
+                  href={this.createIntakeLink()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <span className="text-nowrap d-flex align-items-center">
+                    <FaFileExport className="fs-5 me-2" /> Intake catalogue
+                  </span>
+                </a>
+              )}
               <OverlayTrigger
                 overlay={<Tooltip>Change view with facets in focus</Tooltip>}
               >
@@ -312,7 +381,13 @@ class Databrowser extends React.Component {
                   variant="outline-secondary"
                   active={isFacetCentered}
                   onClick={() =>
-                    this.setState({ viewPort: ViewTypes.FACET_CENTERED })
+                    this.setState(
+                      { viewPort: ViewTypes.FACET_CENTERED },
+                      () => {
+                        localStorage.FrevaDatabrowserViewPort =
+                          this.state.viewPort;
+                      }
+                    )
                   }
                 >
                   <FaAlignJustify />
@@ -325,7 +400,13 @@ class Databrowser extends React.Component {
                   variant="outline-secondary"
                   active={!isFacetCentered}
                   onClick={() =>
-                    this.setState({ viewPort: ViewTypes.RESULT_CENTERED })
+                    this.setState(
+                      { viewPort: ViewTypes.RESULT_CENTERED },
+                      () => {
+                        localStorage.FrevaDatabrowserViewPort =
+                          this.state.viewPort;
+                      }
+                    )
                   }
                 >
                   <FaList />
@@ -342,6 +423,35 @@ class Databrowser extends React.Component {
 
             {facetPanels}
             {this.renderTimeSelectionPanel()}
+            <Button
+              className="w-100 mb-3 shadow-sm p-3"
+              variant="secondary"
+              onClick={() =>
+                this.setState({
+                  additionalFacetsVisible: !this.state.additionalFacetsVisible,
+                })
+              }
+              aria-expanded={this.state.additionalFacetsVisible}
+            >
+              {this.state.additionalFacetsVisible ? (
+                <div className="d-flex justify-content-between">
+                  <span>Hide additional facets</span>
+                  <span className="d-flex align-items-center">
+                    <FaMinusSquare className="fs-5" />
+                  </span>
+                </div>
+              ) : (
+                <div className="d-flex justify-content-between">
+                  <span>Show additional facets</span>
+                  <span className="d-flex align-items-center">
+                    <FaPlusSquare className="fs-5" />
+                  </span>
+                </div>
+              )}
+            </Button>
+            <Collapse in={this.state.additionalFacetsVisible}>
+              <div>{additionalFacetPanels}</div>
+            </Collapse>
           </Col>
           <Col md={isFacetCentered ? 12 : 8}>
             <DataBrowserCommand className={isFacetCentered ? "mb-3" : ""} />
@@ -358,10 +468,13 @@ Databrowser.propTypes = {
   databrowser: PropTypes.shape({
     facets: PropTypes.object,
     files: PropTypes.array,
+    flavours: PropTypes.array,
     fileLoading: PropTypes.bool,
     facetLoading: PropTypes.bool,
+    facetMapping: PropTypes.object,
     numFiles: PropTypes.number,
     selectedFacets: PropTypes.object,
+    primaryFacets: PropTypes.array,
     metadata: PropTypes.object,
     dateSelector: PropTypes.string,
     minDate: PropTypes.string,

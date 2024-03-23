@@ -2,24 +2,26 @@
 {% load dialogtags %}
 {% load settingstags %}
 
-<!-- Beware that this is not part of the dialog! -->
-<div class="alert alert-success " role="alert" id='alert_send_success' style='display:none'>
-    <div class="d-flex justify-content-between">
-        <span id="span_send_success"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-</div> <!-- alert success -->
+<div class="col-12">
+  <!-- Beware that this is not part of the dialog! -->
+  <div class="alert alert-success " role="alert" id='alert_send_success' style='display:none'>
+      <div class="d-flex justify-content-between">
+          <span id="span_send_success"></span>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+  </div> <!-- alert success -->
 
-<!-- Beware that this is not part of the dialog! -->
-<div class="alert alert-danger" role="alert" id='alert_send_failed' style='display:none'>
-    <div class="d-flex justify-content-between">
-        <span id="span_send_failed"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-</div> <!-- alert failed -->
+  <!-- Beware that this is not part of the dialog! -->
+  <div class="alert alert-danger" role="alert" id='alert_send_failed' style='display:none'>
+      <div class="d-flex justify-content-between">
+          <span id="span_send_failed"></span>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+  </div> <!-- alert failed -->
+</div>
 
 <!-- Modal Sendmail Dialog-->
-<div class="modal fade" id="sendmail_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div class="modal fade" id="sendmail_modal" tabindex="-1" role="dialog" aria-labelledby="Share results via mail" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -28,27 +30,25 @@
             </div>
             <div class="modal-body" id="browsefield">
                 <div class="form-group">
-                    <p class="help-block">Select user to mail to</p>
+                    <p class="help-block mb-2">Select user to mail to</p>
                     <input type="hidden" id="myurl" name="myurl" value='{{url}}'>
                     {% mailfield is_guest %}
-                    <p class="help-block">Message:</p>
+                    <p class="help-block my-2">Message</p>
                     <textarea class='form-control' id="user_text" name="user_text" rows=3></textarea>
                 </div>
             </div>
             <div class="modal-footer">
-                <div class='col-md-5'>
+                <div>
                     <label>
-                        <input type="checkbox" id='copy4me' name='copy4me' data-bs-toggle='tooltip' title='Receive a copy via email' checked>Send me a copy</input>
+                        <input class="me-1" type="checkbox" id='copy4me' name='copy4me' data-bs-toggle='tooltip' title='Receive a copy via email' checked>Send me a copy</input>
                     </label>
-                </div> <!-- col-md-4 -->
-                <div class='col-md-5'>
                     <label>
-                        <input type="checkbox" id='one4all' name='one4all' data-bs-toggle='tooltip' title='When checked one single mail will addressed to all recepients. Otherwise each recepient will receive her own mail.' checked>One mail to all</input>
+                        <input class="me-1" type="checkbox" id='one4all' name='one4all' data-bs-toggle='tooltip' title='When checked one single mail will addressed to all recepients. Otherwise each recepient will receive her own mail.' checked>One mail to all</input>
                     </label>
-                </div> <!-- col-md-4 -->
-                <div class='col-md-2'>
+                </div>
+                <div>
                     <button type="button" class="btn btn-primary" name="sendBtn" id="sendBtn">Send</button>
-                </div> <!-- col-md-2 -->
+                </div>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->

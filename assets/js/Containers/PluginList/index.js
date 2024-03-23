@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { browserHistory } from "react-router";
 import { connect } from "react-redux";
+import { FaTimes } from "react-icons/fa";
 import {
   Row,
   Col,
@@ -186,7 +187,10 @@ class PluginList extends React.Component {
       children = <div className="text-danger">{error}</div>;
     }
 
-    if (!pluginsLoaded && !this.props.pluginList.errorMessage) {
+    if (
+      (!pluginsLoaded && !this.props.pluginList.errorMessage) ||
+      !currentUser
+    ) {
       return <Spinner />;
     }
     if (this.props.pluginList.errorMessage) {
@@ -204,7 +208,7 @@ class PluginList extends React.Component {
 
     return (
       <Container>
-        <Row>
+        <Row className="mb-3">
           <Col md={6}>
             <h2>Plugins</h2>
           </Col>
@@ -227,14 +231,14 @@ class PluginList extends React.Component {
         </Row>
 
         <Row>
-          <Col md={8} className="mt-3">
+          <Col md={8}>
             {Object.keys(categories).map((key) => {
               return this.renderPluginBlock(filteredPlugins, key);
             })}
           </Col>
 
           <Col md={4}>
-            <InputGroup className="mt-3">
+            <InputGroup className="mb-2 pb-2">
               <FormControl
                 type="text"
                 value={searchFilter}
@@ -243,8 +247,23 @@ class PluginList extends React.Component {
               />
             </InputGroup>
 
-            <div className="mt-2">
-              <FormLabel>Categories:</FormLabel>
+            <div className="mb-2 pb-2 border-bottom">
+              <FormLabel className="d-flex justify-content-between">
+                Categories
+                {categoriesFilter.length > 0 && (
+                  <span>
+                    <Button
+                      className="p-0 link-danger d-flex align-items-center"
+                      variant="link"
+                      onClick={() =>
+                        this.props.dispatch(updateCategoryFilter(null))
+                      }
+                    >
+                      <FaTimes />
+                    </Button>
+                  </span>
+                )}
+              </FormLabel>
               <div>
                 {Object.keys(categories).map((key) => {
                   return this.renderCategoryCheckbox(
@@ -255,17 +274,40 @@ class PluginList extends React.Component {
                 })}
               </div>
             </div>
-            <div className="mt-2">
-              <FormLabel>Tags:</FormLabel>
+            <div>
+              <FormLabel className="d-flex justify-content-between">
+                Tags
+                {tagsFilter.length > 0 && (
+                  <span>
+                    <Button
+                      className="p-0 link-danger d-flex align-items-center"
+                      variant="link"
+                      onClick={() => this.props.dispatch(updateTagFilter(null))}
+                    >
+                      <FaTimes />
+                    </Button>
+                  </span>
+                )}
+              </FormLabel>
               <div className="d-flex flex-wrap justify-content-between">
                 {tags.map((tag) => {
+                  const variant = _.includes(tagsFilter, tag)
+                    ? "success"
+                    : "secondary";
+                  const disabled = !filteredPlugins.some((x) => {
+                    return _.includes(x[1].tags, tag);
+                  });
                   return (
                     <Button
-                      className="badge mb-2 me-2"
-                      variant={
-                        _.includes(tagsFilter, tag) ? "success" : "secondary"
+                      className={
+                        "badge mb-2 me-2 " +
+                        (variant === "success" && disabled
+                          ? "btn-success-muted"
+                          : "")
                       }
+                      variant={variant}
                       key={tag}
+                      disabled={disabled && variant !== "success"}
                       onClick={() => dispatch(updateTagFilter(tag))}
                     >
                       {tag}

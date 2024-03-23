@@ -10,8 +10,8 @@ ARG CONDA_ENV_DIR
 ARG FREVA_WEB_DIR
 
 RUN set -e && \
-  groupadd -r -g 200855 freva && \
-  adduser --uid 1000 --gid 200855 --gecos "Freva user" \
+  groupadd -r -g 1000 freva && \
+  adduser --uid 1000 --gid 1000 --gecos "Freva user" \
   --shell /bin/bash --disabled-password freva --home ${FREVA_WEB_DIR} &&\
   mkdir -p ${CONDA_ENV_DIR} && chown -R freva:freva $CONDA_ENV_DIR
 WORKDIR ${FREVA_WEB_DIR}

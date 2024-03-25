@@ -1,17 +1,19 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 import os
 
 import evaluation_system.api.plugin_manager as pm
-from evaluation_system.model.user import User
+from django.conf import settings
 from evaluation_system.misc import config
-from django_evaluation.ldaptools import get_ldap_object
+from evaluation_system.model.user import User
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from base.exceptions import UserNotFoundError
 from base.LdapUser import LdapUser
+from django_evaluation.ldaptools import get_ldap_object
 from plugins.utils import get_plugin_or_404, plugin_metadata_as_dict
+
 from .serializers import PluginSerializer
-from django.conf import settings
 
 
 class PluginsList(APIView):

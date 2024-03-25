@@ -1,17 +1,17 @@
 import logging
 
-from base.models import UIMessages
-
+import django.contrib.auth as auth
+from django.conf import settings
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
-import django.contrib.auth as auth
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.views.decorators.debug import sensitive_variables, sensitive_post_parameters
-from django_evaluation.monitor import _restart
-from django.conf import settings
 from django.urls import reverse
-from evaluation_system.misc import config
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.debug import sensitive_post_parameters, sensitive_variables
+from evaluation_system.misc import config
+
+from base.models import UIMessages
+from django_evaluation.monitor import _restart
 
 
 @sensitive_variables("passwd")
@@ -113,6 +113,7 @@ def contact(request):
     """
     if request.method == "POST":
         from templated_email import send_templated_mail
+
         from django_evaluation.ldaptools import get_ldap_object
 
         user_info = get_ldap_object()

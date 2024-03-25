@@ -1,10 +1,13 @@
 import os
+from configparser import ConfigParser as Config
+from configparser import ExtendedInterpolation
+
+from evaluation_system.misc import config
 from evaluation_system.model.db import UserDB
 from evaluation_system.model.user import User
+
 from base.exceptions import UserNotFoundError
 from django_evaluation.ldaptools import get_ldap_object
-from configparser import ConfigParser as Config, ExtendedInterpolation
-from evaluation_system.misc import config
 
 
 class LdapUser(User):

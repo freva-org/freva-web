@@ -1,16 +1,18 @@
 from __future__ import annotations
-from abc import ABCMeta, abstractmethod
+
+import grp
 import importlib
+import pwd
 import time
+from abc import ABCMeta, abstractmethod
 from typing import Iterator
+
+import ldap
+from django.core.cache import cache, caches
+from django.core.exceptions import ImproperlyConfigured
 
 from django_evaluation import settings
 from django_evaluation.utils import background
-from django.core.cache import cache, caches
-from django.core.exceptions import ImproperlyConfigured
-import ldap
-import grp
-import pwd
 
 """
 FIXME: 28.03.2022

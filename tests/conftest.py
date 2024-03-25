@@ -1,12 +1,13 @@
-from configparser import ConfigParser, ExtendedInterpolation
 import os
-from pathlib import Path
-import pytest
-import mock
 import random
 import string
 import sys
+from configparser import ConfigParser, ExtendedInterpolation
+from pathlib import Path
 from tempfile import NamedTemporaryFile
+
+import mock
+import pytest
 
 
 def get_config():
@@ -36,7 +37,7 @@ def get_config():
     return test_cfg
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def eval_pubkey():
     with NamedTemporaryFile(suffix=".crt") as tf:
         with Path(tf.name).open("w") as f:
@@ -44,7 +45,7 @@ def eval_pubkey():
         yield tf.name
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def eval_config(eval_pubkey):
     config = get_config()
     path_prefix = Path(sys.exec_prefix) / "bin"

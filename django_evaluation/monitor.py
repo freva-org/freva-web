@@ -2,12 +2,13 @@
 This is an example code for restarting after code changes from
 http://code.google.com/p/modwsgi/wiki/ReloadingSourceCode#Restarting_Daemon_Processes
 """
-import os
-import sys
-import signal
-import threading
+
 import atexit
+import os
 import queue
+import signal
+import sys
+import threading
 
 _interval = 1.0
 _times = {}

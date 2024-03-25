@@ -53,10 +53,16 @@ run: runfrontend runserver
 lint: setup-node
 	npm run lint-format
 	npm run lint
-	black -t py310 --check .
+	isort -c --profile black -t py312 .
 
 tests: setup-node
 	npm run build-production
 	npm run build
 	rm -rf node_modules
 	pytest -vv $(PWD) tests/
+
+release:
+	pip install git-python requests packaging tomli
+	curl -H 'Cache-Control: no-cache' -Ls -o bump.py https://raw.githubusercontent.com/FREVA-CLINT/freva-deployment/versions/release.py
+	python3 bump.py tag django_evaluation -b version
+	rm bump.py

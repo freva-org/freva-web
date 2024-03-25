@@ -1,9 +1,10 @@
-from django import template
-from django_evaluation.ldaptools import get_ldap_object
-from django.utils.safestring import mark_safe
-from django_evaluation import settings
-
 import json
+
+from django import template
+from django.utils.safestring import mark_safe
+
+from django_evaluation import settings
+from django_evaluation.ldaptools import get_ldap_object
 
 register = template.Library()
 

@@ -1,4 +1,6 @@
-from django.urls import re_path as url, include
+from django.urls import include
+from django.urls import re_path as url
+
 import plugins.views
 
 urlpatterns = [

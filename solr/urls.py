@@ -8,6 +8,7 @@ urlconf for the solr application
 import os
 
 from django.urls import re_path as url
+
 import solr.views
 
 urlpatterns = [

@@ -1,7 +1,7 @@
+import urllib.parse
+
 from django import template
 from django.utils.safestring import mark_safe
-
-import urllib.parse
 
 register = template.Library()
 

@@ -53,7 +53,7 @@ run: runfrontend runserver
 lint: setup-node
 	npm run lint-format
 	npm run lint
-	black -t py310 --check .
+	isort -c --profile black -t py312 .
 
 tests: setup-node
 	npm run build-production

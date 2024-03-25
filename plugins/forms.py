@@ -1,14 +1,16 @@
-from django import forms
+from pathlib import Path
+
 import django.contrib.auth as auth
+import evaluation_system.api.parameters as parameters
+from django import forms
+from django.conf import settings
 from django.core import exceptions
 from django.forms.widgets import Input, TextInput
 from django.template import loader
-import evaluation_system.api.parameters as parameters
 from evaluation_system.api import plugin_manager as pm
-from pathlib import Path
-from plugins.utils import ssh_call
 from evaluation_system.misc.utils import PrintableList
-from django.conf import settings
+
+from plugins.utils import ssh_call
 
 
 class PluginNotFoundError(Exception):

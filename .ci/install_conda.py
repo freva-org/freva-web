@@ -2,12 +2,11 @@
 
 import argparse
 import logging
-from pathlib import Path
 import shlex
-from subprocess import CalledProcessError, PIPE, run
 import urllib.request
+from pathlib import Path
+from subprocess import PIPE, CalledProcessError, run
 from tempfile import TemporaryDirectory
-
 
 MINICONDA_URL = "https://repo.anaconda.com/miniconda/Miniconda3-latest"
 

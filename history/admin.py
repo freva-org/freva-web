@@ -1,7 +1,8 @@
 from django.contrib import admin
-from history.models import History, Configuration
 from django.contrib.auth.models import User
 from django.utils.html import format_html
+
+from history.models import Configuration, History
 
 
 class HistoryAmdin(admin.ModelAdmin):

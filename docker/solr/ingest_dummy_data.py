@@ -3,9 +3,8 @@
 import logging
 from pathlib import Path
 
-from evaluation_system.model.solr_core import SolrCore
 from evaluation_system.misc import config, logger
-
+from evaluation_system.model.solr_core import SolrCore
 
 if __name__ == "__main__":
     logger.setLevel(logging.INFO)

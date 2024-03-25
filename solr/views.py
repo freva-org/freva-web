@@ -6,15 +6,14 @@ Created on 14.11.2013
 views for the solr application
 """
 
+import logging
 from typing import Union
 
-import logging
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from django.conf import settings
-from django.http import QueryDict
 import requests
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse, QueryDict
+from django.shortcuts import render
 
 
 @login_required()

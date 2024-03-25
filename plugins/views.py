@@ -1,37 +1,31 @@
 """ Views for the plugins application """
 
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
-from django.conf import settings
-from django.views.decorators.debug import (
-    sensitive_variables,
-    sensitive_post_parameters,
-)
+import json
+import logging
+import os
+import urllib
 from pathlib import Path
 
 import evaluation_system.api.plugin_manager as pm
-
-from evaluation_system.model.user import User
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import redirect, render
+from django.views.decorators.debug import sensitive_post_parameters, sensitive_variables
 from evaluation_system.misc import config
-from django_evaluation.settings.local import HOME_DIRS_AVAILABLE
+from evaluation_system.model.user import User
+
 from base.exceptions import UserNotFoundError
 from base.LdapUser import LdapUser
-
+from django_evaluation.settings.local import HOME_DIRS_AVAILABLE
+from history.models import Configuration, History
+from plugins.forms import PluginForm, PluginWeb
 from plugins.utils import (
     get_plugin_or_404,
+    get_scheduler_hosts,
     is_path_relative_to,
     ssh_call,
-    get_scheduler_hosts,
 )
-from plugins.forms import PluginForm, PluginWeb
-from history.models import History, Configuration
-
-import logging
-import urllib
-import os
-import json
 
 
 @login_required()

@@ -1,6 +1,7 @@
 """Collection of utility functions."""
 
 from __future__ import annotations
+
 import threading
 from typing import Any, Callable
 

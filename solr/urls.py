@@ -7,11 +7,12 @@ urlconf for the solr application
 """
 import os
 
-from django.urls import re_path as url
-from django.urls import path
 from django.conf import settings
-from .views import databrowser
+from django.urls import path
+from django.urls import re_path as url
+
 from .proxyviews import DataBrowserProxy
+from .views import databrowser
 
 urlpatterns = [
     url(r"^databrowser/$", databrowser, name="data_browser"),

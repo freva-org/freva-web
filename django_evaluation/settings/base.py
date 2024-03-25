@@ -3,15 +3,16 @@ This is your project's main settings file that can be committed to your
 repo. If you need to override a setting locally, use local.py
 """
 
-import os
 import logging
+import os
 from pathlib import Path
+
+import django.utils
 
 # Normally you should not import ANYTHING from Django directly
 # into your settings, but ImproperlyConfigured is an exception.
 from django.core.exceptions import ImproperlyConfigured
 from django.urls import reverse_lazy
-import django.utils
 
 
 def get_env_setting(setting):

@@ -1,13 +1,13 @@
 import logging
 
-from rest_framework.decorators import api_view
-from django.contrib.auth.decorators import login_required
-from django.utils.safestring import mark_safe
-from django.http import JsonResponse
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.utils.safestring import mark_safe
 from paramiko import AuthenticationException
+from rest_framework.decorators import api_view
 
-from plugins.utils import ssh_call, get_scheduler_hosts
+from plugins.utils import get_scheduler_hosts, ssh_call
 
 
 @api_view(["POST"])

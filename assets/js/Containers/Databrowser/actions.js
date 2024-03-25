@@ -1,12 +1,11 @@
 import fetch from "isomorphic-fetch";
 
-import queryString from "query-string";
-
 import { getCookie } from "../../utils";
 
 import * as globalStateConstants from "../App/constants";
 
 import * as constants from "./constants";
+import { prepareSearchParams } from "./utils";
 
 export const updateFacetSelection = (queryObject) => (dispatch) => {
   dispatch({
@@ -20,9 +19,33 @@ export const setMetadata = (metadata) => ({
   metadata,
 });
 
-export const loadFacets = (location) => (dispatch) => {
-  dispatch({ type: constants.SET_FACET_LOADING });
-  return fetchResults(dispatch, location, "facet=*", constants.LOAD_FACETS);
+export const setFlavours = () => (dispatch) => {
+  return fetch("/api/databrowser/overview", {
+    credentials: "same-origin",
+    headers: {
+      "X-CSRFToken": getCookie("csrftoken"),
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+  })
+    .then((response) => {
+      if (response.status >= 400) {
+        throw new Error(response.statusText);
+      }
+      return response.json();
+    })
+    .then((json) => {
+      return dispatch({
+        type: constants.SET_FLAVOURS,
+        payload: json,
+      });
+    })
+    .catch(() => {
+      return dispatch({
+        type: globalStateConstants.SET_ERROR,
+        payload: "Internal Error: Could not load flavours",
+      });
+    });
 };
 
 export const loadFiles = (location) => (dispatch) => {
@@ -30,37 +53,14 @@ export const loadFiles = (location) => (dispatch) => {
   return fetchResults(
     dispatch,
     location,
-    "start=0&rows=100",
+    `max-results=${constants.BATCH_SIZE}&translate=false`,
     constants.LOAD_FILES
   );
 };
 
 function fetchResults(dispatch, location, additionalParams, actionType) {
-  // const { selectedFacets, dateSelector, minDate, maxDate } = getState().databrowserReducer;
-  let params = "";
-  if (location) {
-    const queryObject = location.query;
-    const {
-      dateSelector: ignore1,
-      minDate: ignore2,
-      maxDate: ignore3,
-      ...facets
-    } = location.query;
-
-    params = queryString.stringify(facets);
-
-    if (params) {
-      params = "&" + params;
-    }
-
-    const isDateSelected = !!queryObject.minDate;
-    if (isDateSelected) {
-      params += `&time_select=${queryObject.dateSelector}&time=${queryObject.minDate} TO ${queryObject.maxDate}`;
-    }
-  }
-
-  const url = `/solr/solr-search/?${additionalParams}${params}`;
-
+  const searchParams = prepareSearchParams(location, additionalParams);
+  const url = `/api/databrowser/extended_search/${searchParams}`;
   return fetch(url, {
     credentials: "same-origin",
     headers: {
@@ -78,7 +78,11 @@ function fetchResults(dispatch, location, additionalParams, actionType) {
     .then((json) => {
       return dispatch({
         type: actionType,
-        payload: json,
+        payload: {
+          ...json,
+          start: location.query.start ?? 0,
+          flavour: location.query.flavour ?? constants.DEFAULT_FLAVOUR,
+        },
       });
     })
     .catch(() => {

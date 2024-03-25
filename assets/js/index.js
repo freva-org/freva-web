@@ -23,7 +23,7 @@ ReactDOM.render(
       <Route path="/" component={App}>
         <Route path="plugins/" component={PluginList} />
         <Route path="history/result-browser/" component={Resultbrowser} />
-        <Route path="solr/data-browser/*" component={Databrowser} />
+        <Route path="databrowser/*" component={Databrowser} />
         <Route path="plugins/:pluginName/detail/" component={PluginDetail} />
       </Route>
     </Router>

@@ -25,7 +25,7 @@ urlpatterns = [
     url(r"^admin/", admin.site.urls),
     url(r"^plugins/", include(("plugins.urls", "plugins"), namespace="plugins")),
     url(r"^history/", include(("history.urls", "history"), namespace="history")),
-    url(r"^solr/", include(("solr.urls", "solr"), namespace="solr")),
+    url(r"", include(("solr.urls", "solr"), namespace="solr")),
     url(r"", include(("base.urls", "base"), namespace="base")),
     url(
         r"^favicon\.svg$",

@@ -15,8 +15,8 @@ framework.
 """
 
 import os
-import sys
 import site
+import sys
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__) + "../../")
 
@@ -48,6 +48,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "django_evaluation.settings")
 # file. This includes Django's development server, if the WSGI_APPLICATION
 # setting points here.
 from django.core.wsgi import get_wsgi_application
+
 from django_evaluation.ldaptools import get_ldap_object
 
 LdapCls = get_ldap_object()

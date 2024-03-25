@@ -1,18 +1,17 @@
+import re
+
 from django import template
-from django.utils.safestring import mark_safe
+from django.template.loader import render_to_string
 from django.utils.encoding import force_str
 from django.utils.html import conditional_escape
-from django.template.loader import render_to_string
-from base.LdapUser import LdapUser
-from base.exceptions import UserNotFoundError
-from django_evaluation import settings
-
-from history.utils import FileDict
-from history.models import HistoryTag
-
+from django.utils.safestring import mark_safe
 from evaluation_system.misc.exceptions import PluginManagerException
 
-import re
+from base.exceptions import UserNotFoundError
+from base.LdapUser import LdapUser
+from django_evaluation import settings
+from history.models import HistoryTag
+from history.utils import FileDict
 
 register = template.Library()
 

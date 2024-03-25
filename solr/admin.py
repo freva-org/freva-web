@@ -1,4 +1,5 @@
 from django.contrib import admin
+
 from solr.models import UserCrawl
 
 

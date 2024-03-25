@@ -6,16 +6,15 @@ Created on 14.11.2013
 views for the solr application
 """
 
+import json
+import logging
 from typing import Union
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
-
 
 import freva
 from django.conf import settings
-import json
-import logging
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from django.shortcuts import render
 
 
 @login_required()

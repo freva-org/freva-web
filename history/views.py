@@ -3,39 +3,32 @@ import logging
 import os
 from pathlib import Path
 
-from django.shortcuts import render
-from django.http import HttpResponse
-from django.core.exceptions import PermissionDenied, ObjectDoesNotExist
-from django.contrib.auth.decorators import login_required
-from django.views.decorators.debug import sensitive_post_parameters
-from django.contrib.flatpages.models import FlatPage
-from django.utils.html import escape
-from datatableview import columns
-from datatableview import Datatable
-from datatableview.views import DatatableView
-from django.utils.html import escape
-
-
 import evaluation_system.api.plugin_manager as pm
-from evaluation_system.model.db import UserDB
-from evaluation_system.api.workload_manager import get_job_class
-from evaluation_system.model.user import User
-from evaluation_system.misc.exceptions import PluginManagerException
-from evaluation_system.misc import config as eval_config
-from evaluation_system.model.history.models import History, ResultTag
-from base.LdapUser import LdapUser
-from base.exceptions import UserNotFoundError
-from django_evaluation import settings
-from plugins.utils import ssh_call, get_scheduler_hosts
-
-from history.utils import FileDict, sendmail_to_follower
-
-from django.shortcuts import get_object_or_404
+from datatableview import Datatable, columns
+from datatableview.views import DatatableView
+from django.contrib.auth.decorators import login_required
+from django.contrib.flatpages.models import FlatPage
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.db.models import Q
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
+from django.utils.html import escape
+from django.views.decorators.debug import sensitive_post_parameters
+from evaluation_system.api.workload_manager import get_job_class
+from evaluation_system.misc import config as eval_config
+from evaluation_system.misc.exceptions import PluginManagerException
+from evaluation_system.model.db import UserDB
+from evaluation_system.model.history.models import History, ResultTag
+from evaluation_system.model.user import User
 
+from base.exceptions import UserNotFoundError
+from base.LdapUser import LdapUser
+from django_evaluation import settings
 from history.models import HistoryTag
 from history.templatetags.resulttags import mask_uid
+from history.utils import FileDict, sendmail_to_follower
+from plugins.utils import get_scheduler_hosts, ssh_call
 
 
 class HistoryDatatable(Datatable):

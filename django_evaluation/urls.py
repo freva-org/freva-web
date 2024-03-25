@@ -1,19 +1,21 @@
 """ Default urlconf for django_evaluation """
 
 from django.conf import settings
-from django.urls import include, re_path as url
 from django.conf.urls import static
-from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib import admin
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.urls import include
+from django.urls import re_path as url
 from django.views.generic import RedirectView
+
 from base.views_api import AuthenticatedUser
+from history.views_api import ResultFacets, ResultFiles
 from plugins.views_api import (
-    PluginsList,
     ExportPlugin,
     PluginDetail,
+    PluginsList,
     SendMailToDeveloper,
 )
-from history.views_api import ResultFacets, ResultFiles
 from solr.views_api import ncdump
 
 admin.autodiscover()

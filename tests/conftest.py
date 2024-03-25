@@ -1,12 +1,13 @@
-from configparser import ConfigParser, ExtendedInterpolation
 import os
-from pathlib import Path
-import pytest
-import mock
 import random
 import string
 import sys
+from configparser import ConfigParser, ExtendedInterpolation
+from pathlib import Path
 from tempfile import NamedTemporaryFile
+
+import mock
+import pytest
 
 
 def get_config():

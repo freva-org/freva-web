@@ -1,5 +1,5 @@
 import shlex
-from subprocess import run, PIPE
+from subprocess import PIPE, run
 
 
 def test_chek(eval_config):

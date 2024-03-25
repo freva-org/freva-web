@@ -1,11 +1,12 @@
 import base64
-import evaluation_system.api.plugin_manager as pm
-from evaluation_system.misc import config
-from django.views.decorators.debug import sensitive_variables
-from django.http import Http404
-from django.conf import settings
-import paramiko
 import logging
+
+import evaluation_system.api.plugin_manager as pm
+import paramiko
+from django.conf import settings
+from django.http import Http404
+from django.views.decorators.debug import sensitive_variables
+from evaluation_system.misc import config
 
 
 def get_scheduler_hosts(user):

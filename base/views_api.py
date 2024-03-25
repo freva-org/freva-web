@@ -1,8 +1,9 @@
-from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from base.LdapUser import LdapUser
 from base.exceptions import UserNotFoundError
+from base.LdapUser import LdapUser
+
 from .serializers import UserSerializer
 
 

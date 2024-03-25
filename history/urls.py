@@ -1,9 +1,9 @@
-from django.urls import re_path as url
 from django.contrib.auth.decorators import login_required
+from django.urls import re_path as url
 from django.views.decorators.cache import never_cache
+
 from history import views
 from plugins.views_api import ShareResultsByMail
-
 
 urlpatterns = [
     url(

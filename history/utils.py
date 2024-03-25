@@ -1,9 +1,9 @@
 import os
 
-from evaluation_system.misc import utils
+from evaluation_system.misc import config, utils
 from evaluation_system.model.history.models import History, HistoryTag
+
 from django_evaluation import settings
-from evaluation_system.misc import config
 from django_evaluation.settings.local import SERVER_EMAIL
 
 
@@ -151,6 +151,7 @@ def sendmail_to_follower(request, history_id, subject, message):
     :param message: the mesaage
     """
     from django.urls import reverse
+
     from django_evaluation.ldaptools import get_ldap_object
 
     follower = HistoryTag.objects.filter(history_id_id=history_id).filter(

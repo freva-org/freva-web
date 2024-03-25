@@ -1,18 +1,17 @@
-import tempfile
-import shutil
 import os
+import shutil
+import tempfile
 
-from evaluation_system.api.plugin import PluginAbstract
 from evaluation_system.api.parameters import (
-    ParameterDictionary,
-    Integer,
-    Float,
-    String,
     Directory,
+    Float,
+    Integer,
+    ParameterDictionary,
+    String,
 )
-
-from evaluation_system.model.user import User
+from evaluation_system.api.plugin import PluginAbstract
 from evaluation_system.model.db import UserDB
+from evaluation_system.model.user import User
 
 
 class DummyPlugin(PluginAbstract):

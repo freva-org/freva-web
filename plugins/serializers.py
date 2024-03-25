@@ -1,5 +1,5 @@
-from rest_framework import serializers
 from django.contrib.flatpages.models import FlatPage
+from rest_framework import serializers
 
 
 class PluginSerializer(serializers.Serializer):

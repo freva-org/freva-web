@@ -20,7 +20,7 @@ jobs:
         with:
           activate-environment: freva-web
           environment-file: conda-env.yml
-          python-version: "3.11"
+          python-version: "3.12"
           auto-activate-base: false
       - name: Run checks in python
         run: make tests

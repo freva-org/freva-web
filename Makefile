@@ -10,7 +10,7 @@ dummy-data:
 	python3 docker/solr/ingest_dummy_data.py
 
 lint:
-	black -t py310 --check .
+	isort -c --profile black -t py312 .
 
 tests:
 	rm -rf node_modules

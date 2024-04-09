@@ -24,7 +24,9 @@ RUN  set -e && \
      npm install && npm run build-production &&\
      rm -rf node_modules &&\
      echo "export PATH=${PATH}" >> ${FREVA_WEB_DIR}/.bashrc &&\
+     mkdir -p ${FREVA_WEB_DIR}/static &&\
      chown -R freva:freva ${FREVA_WEB_DIR}
-USER freva
+ENTRYPOINT ["/bin/sh", "entrypoint.sh"]
+VOLUME ${FREVA_WEB_DIR}/static
 EXPOSE 8000
 CMD ./init_django.sh

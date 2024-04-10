@@ -1,4 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 
-chown -R freva:freva ${FREVA_WEB_DIR}/static
-exec runuser -u freva "$@"
+chown -R freva:freva /opt/freva_web/static
+if [ "$@" ];then
+  runuser -u freva -- $@
+else
+  runuser -u freva -- /opt/freva_web/init_django.sh
+fi

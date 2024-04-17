@@ -41,7 +41,9 @@ export default function Pagination(props) {
           {Math.min(totalFiles, activePage * batchSize).toLocaleString("en-US")}
         </span>
         {" of "}
-        <span className="fw-bold">{totalFiles}</span>{" "}
+        <span className="fw-bold">
+          {totalFiles.toLocaleString("en-US")}
+        </span>{" "}
       </span>
       <Button
         className="p-0 d-flex align-items-center"

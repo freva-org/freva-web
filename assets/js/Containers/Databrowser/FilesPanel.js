@@ -92,7 +92,7 @@ function FilesPanelImpl(props) {
           <Pagination
             items={Math.ceil(props.databrowser.numFiles / BATCH_SIZE)}
             active={Math.floor(props.databrowser.start / BATCH_SIZE) + 1}
-            totalFiles={numFiles.toLocaleString("en-US")}
+            totalFiles={numFiles}
             batchSize={BATCH_SIZE}
             handleSubmit={setPageOffset}
           />

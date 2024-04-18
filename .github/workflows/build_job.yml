@@ -79,7 +79,9 @@ jobs:
         run: python3 -m pip install git-python packaging requests tomli
 
       - name: Get the release script
-        run: curl -H 'Cache-Control: no-cache' -Ls -o bump.py https://raw.githubusercontent.com/FREVA-CLINT/freva-deployment/versions/release.py
+        run: >
+          curl -H 'Cache-Control: no-cache' -Ls -o bump.py
+          https://raw.githubusercontent.com/FREVA-CLINT/freva-deployment/versions/release.py
 
       - name: Get tag
         id: repository

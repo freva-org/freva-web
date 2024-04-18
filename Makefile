@@ -64,5 +64,5 @@ tests: setup-node
 release:
 	pip install git-python requests packaging tomli
 	curl -H 'Cache-Control: no-cache' -Ls -o bump.py https://raw.githubusercontent.com/FREVA-CLINT/freva-deployment/versions/release.py
-	python3 bump.py tag django_evaluation -b versions -v
+	python3 bump.py tag django_evaluation -v
 	rm bump.py

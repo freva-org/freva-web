@@ -1,6 +1,7 @@
 *.pyc
 *.db
 *.log
+bump.py
 virt
 static_root/img/favicon.svg
 freva_web.conf

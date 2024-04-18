@@ -1,6 +1,12 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [v2405.0.0]
+
+### Fixed
+- Fixed databrowser bug causing a NaN in the `found results`-number
+
+
 ## [v2403.0.0]
 
 ### Added

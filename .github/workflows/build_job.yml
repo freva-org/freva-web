@@ -81,7 +81,7 @@ jobs:
       - name: Get the release script
         run: >
           curl -H 'Cache-Control: no-cache' -Ls -o bump.py
-          https://raw.githubusercontent.com/FREVA-CLINT/freva-deployment/versions/release.py
+          https://raw.githubusercontent.com/FREVA-CLINT/freva-deployment/main/release.py
 
       - name: Get tag
         id: repository
@@ -90,7 +90,7 @@ jobs:
           echo "tag=$(cat package.json|jq -r .version)" >> $GITHUB_OUTPUT
 
       - name: Do the release job
-        run: python3 bump.py deploy django_evaluation -b versions -v
+        run: python3 bump.py deploy web  -v
         env:
           GITHUB_TOKEN: ${{secrets.ACCESS_TOKEN}}
           REPO_VERSION: ${{ steps.repository.outputs.tag }}

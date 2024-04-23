@@ -7,10 +7,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
-from django.views.decorators.debug import (
-    sensitive_post_parameters,
-    sensitive_variables,
-)
+from django.views.decorators.debug import sensitive_post_parameters, sensitive_variables
 from evaluation_system.misc import config
 
 from base.models import UIMessages

@@ -58,7 +58,7 @@ web_config_path = Path(
 def _get_conf_key(cfg, key, alternative, is_file=True):
     """Check config of freva_web config."""
     if not is_file:
-        return cfg.get(key, alternative)
+        return cfg.get(key) or alternative
     value = Path(cfg.get(key, alternative))
     if value.exists():
         return value
@@ -131,8 +131,7 @@ _set_favicon(MAIN_COLOR, Path(PROJECT_ROOT))
 BORDER_COLOR = _get_conf_key(web_config, "border_color", "#6c2e1f", False)
 HOVER_COLOR = _get_conf_key(web_config, "hover_color", "#d0513a", False)
 HOMEPAGE_TEXT = web_config.get(
-    "homepage_text",
-    (
+    "homepage_text") or (
         "Lorem ipsum dolor sit amet"
         ", consectetur adipiscing elit"
         ", sed do eiusmod tempor incididunt ut"
@@ -144,27 +143,24 @@ HOMEPAGE_TEXT = web_config.get(
         "nulla pariatur. Excepteur sint occaecat cupidatat"
         "non proident, sunt in culpa qui officia deserunt"
         "mollit anim id est laborum."
-    ),
 )
 IMPRINT = web_config.get(
-    "imprint",
-    [
+    "imprint") or [
         "ANAIS - RegIKlim",
         "German Climate Computing Center (DKRZ)",
         "Bundesstr. 45a",
         "20146 Hamburg",
         "Germany",
-    ],
-)
-HOMEPAGE_HEADING = web_config.get("homepage_heading", "Lorem ipsum dolor.")
-ABOUT_US_TEXT = web_config.get("about_us_text", "Hello world, this is freva.")
-CONTACTS = web_config.get("contacts", ["freva@dkrz.de"])
+]
+HOMEPAGE_HEADING = web_config.get("homepage_heading") or  "Lorem ipsum dolor."
+ABOUT_US_TEXT = web_config.get("about_us_text") or  "Hello world, this is freva.")
+CONTACTS = web_config.get("contacts") or  ["freva@dkrz.de"]
 if isinstance(CONTACTS, str):
     CONTACTS = [c for c in CONTACTS.split(",") if c.strip()]
 ##########
 # Here you can customize the footer and texts on the startpage
 ##########
-INSTITUTION_NAME = web_config.get("insitution_name", "Freva")
+INSTITUTION_NAME = web_config.get("insitution_name") or "Freva"
 ##################################################
 ##################################################
 # SETTING FOR LDAP
@@ -383,7 +379,7 @@ _MENU_ENTRIES = [
     ["Result-Browser", "history:result_browser", "result_browser_menu"],
 ]
 
-for title, url, html_id in web_config.get("MENU_ENTRIES", _MENU_ENTRIES):
+for title, url, html_id in web_config.get("menu_entries", []) or  _MENU_ENTRIES:
     if url.startswith("/"):
         MENU_ENTRIES.append({"name": title, "url": url, "html_id": html_id})
     else:

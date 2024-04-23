@@ -1,3 +1,37 @@
+"""This is the 2nd configuration file for the web app.
+
+Since the web app is meant to be run in a container most of its config
+is passed by environment variables. Here is a list of variables that are
+evaluated:
+
+EVALUATION_SYSTEM_CONFIG_FILE : str
+FREVA_WEB_CONFIG_FILE : str
+DEV_MODE : 0|1
+PROJECT_ROOT : str
+AUTH_LDAP_SERVER_URI : str
+AUTH_LDAP_START_TLS : 0|1
+ALLOWED_GROUP : str
+LDAP_USER_BASE : str
+LDAP_GROUP_BASE : str
+LDAP_FIRSTNAME_FIELD : str
+LDAP_LASTNAME_FIELD : str
+LDAP_EMAIL_FIELD : str
+LDAP_GROUP_CLASS : str
+LDAP_GROUP_TYPE : str
+LDAP_USER_DN : str
+LDAP_USER_PW : str
+LDAP_MODEL : str
+SCHEDULER_HOST : str
+REDIS_HOST : str
+REDIS_PORT : str
+SERVER_EMAIL : str
+EMAIL_HOST : str
+EMAIL_PORT : str
+ALLOWED_HOSTS : str
+CSRF_TRUSTED_ORIGINS : str
+FREVA_BIN: str
+"""
+
 import os
 import shutil
 import sys
@@ -7,13 +41,22 @@ import ldap
 import requests
 import toml
 from django.urls import reverse_lazy
-from django_auth_ldap.config import LDAPSearch, NestedGroupOfNamesType, PosixGroupType
+from django_auth_ldap.config import (
+    LDAPSearch,
+    NestedGroupOfNamesType,
+    PosixGroupType,
+)
 from evaluation_system.misc import config
 
 from base.exceptions import UnknownLDAPGroupTypeError
 
 freva_share_path = Path(os.environ["EVALUATION_SYSTEM_CONFIG_FILE"]).parent
-web_config_path = freva_share_path / "web" / "freva_web_conf.toml"
+web_config_path = Path(
+    os.envrion.get(
+        "FREVA_WEB_CONFIG_FILE",
+        freva_share_path / "web" / "freva_web_conf.toml",
+    )
+)
 
 
 def _get_conf_key(config, key, alternative, is_file=True):
@@ -70,13 +113,12 @@ def _set_favicon(html_color: str, project_root: Path) -> None:
 
 
 try:
-    with open(web_config_path) as f:
-        web_config = toml.load(f)
+    web_config = toml.loads(web_config_path.read_text())
 except FileNotFoundError:
     web_config = {}
-# Is this a development instance? Set this to True on development/master
-# instances and False on stage/prod.
-DEV = bool(int(os.environ.get("DEV_MODE", 0)))
+# SECURITY WARNING: don't run with debug turned on in production!
+# Set this to 0 on all server instances and True only for development.
+DEV = DEBUG = TEMPLATE_DEBUG = bool(int(os.environ.get("DEV_MODE", 0)))
 PROJECT_ROOT = os.environ.get("PROJECT_ROOT", None) or str(
     Path(__file__).absolute().parents[2]
 )
@@ -84,14 +126,16 @@ STATIC_URL = "/static/"
 if not DEV:
     STATIC_ROOT = str(Path(PROJECT_ROOT) / "static")
 
-INSTITUTION_LOGO = _get_logo(web_config.get("INSTITUTION_LOGO", ""), PROJECT_ROOT)
+INSTITUTION_LOGO = _get_logo(
+    web_config.get("institution_logo", ""), PROJECT_ROOT
+)
 FREVA_LOGO = f"{STATIC_URL}img/by_freva_transparent.png"
-MAIN_COLOR = _get_conf_key(web_config, "MAIN_COLOR", "Tomato", False)
+MAIN_COLOR = _get_conf_key(web_config, "main_color", "Tomato", False)
 _set_favicon(MAIN_COLOR, Path(PROJECT_ROOT))
-BORDER_COLOR = _get_conf_key(web_config, "BORDER_COLOR", "#6c2e1f", False)
-HOVER_COLOR = _get_conf_key(web_config, "HOVER_COLOR", "#d0513a", False)
+BORDER_COLOR = _get_conf_key(web_config, "border_color", "#6c2e1f", False)
+HOVER_COLOR = _get_conf_key(web_config, "hover_color", "#d0513a", False)
 HOMEPAGE_TEXT = web_config.get(
-    "HOMEPAGE_TEXT",
+    "homepage_text",
     (
         "Lorem ipsum dolor sit amet"
         ", consectetur adipiscing elit"
@@ -107,7 +151,7 @@ HOMEPAGE_TEXT = web_config.get(
     ),
 )
 IMPRINT = web_config.get(
-    "IMPRINT",
+    "imprint",
     [
         "ANAIS - RegIKlim",
         "German Climate Computing Center (DKRZ)",
@@ -116,15 +160,15 @@ IMPRINT = web_config.get(
         "Germany",
     ],
 )
-HOMEPAGE_HEADING = web_config.get("HOMEPAGE_HEADING", "Lorem ipsum dolor.")
-ABOUT_US_TEXT = web_config.get("ABOUT_US_TEXT", "Hello world, this is freva.")
-CONTACTS = web_config.get("CONTACTS", ["freva@dkrz.de"])
+HOMEPAGE_HEADING = web_config.get("homepage_heading", "Lorem ipsum dolor.")
+ABOUT_US_TEXT = web_config.get("about_us_text", "Hello world, this is freva.")
+CONTACTS = web_config.get("contacts", ["freva@dkrz.de"])
 if isinstance(CONTACTS, str):
     CONTACTS = [c for c in CONTACTS.split(",") if c.strip()]
 ##########
 # Here you can customize the footer and texts on the startpage
 ##########
-INSTITUTION_NAME = web_config.get("INSTITUTION_NAME", "Freva")
+INSTITUTION_NAME = web_config.get("insitution_name", "Freva")
 ##################################################
 ##################################################
 # SETTING FOR LDAP
@@ -140,12 +184,14 @@ INSTITUTION_NAME = web_config.get("INSTITUTION_NAME", "Freva")
 ##################################################
 ##################################################
 # The server for LDAP configuration
-AUTH_LDAP_SERVER_URI = web_config.get("AUTH_LDAP_SERVER_URI", "ldap://idm-dmz.dkrz.de")
-AUTH_LDAP_START_TLS = web_config.get("AUTH_LDAP_START_TLS", False)
+AUTH_LDAP_SERVER_URI = os.environ.get(
+    "AUTH_LDAP_SERVER_URI", "ldap://idm-dmz.dkrz.de"
+)
+AUTH_LDAP_START_TLS = bool(int(os.environ.get("AUTH_LDAP_START_TLS", "0")))
 # The directory with SSL certificates
 CA_CERT_DIR = str(web_config_path.parent)
 # the only allowd group
-ALLOWED_GROUP = web_config.get("ALLOWED_GROUP", "") or "*"
+ALLOWED_GROUP = os.environ.get("ALLOWED_GROUP", "") or "*"
 # Require a ca certificate
 AUTH_LDAP_GLOBAL_OPTIONS = {
     ldap.OPT_X_TLS_REQUIRE_CERT: ldap.OPT_X_TLS_DEMAND,  # TPYE OF CERTIFICATION
@@ -153,23 +199,29 @@ AUTH_LDAP_GLOBAL_OPTIONS = {
 }
 # this is not used by django directly, but we use it for
 # python-ldap access, as well.
-LDAP_USER_BASE = web_config.get("LDAP_USER_BASE", "cn=users,cn=accounts,dc=dkrz,dc=de")
-LDAP_GROUP_BASE = web_config.get(
+LDAP_USER_BASE = os.environ.get(
+    "LDAP_USER_BASE", "cn=users,cn=accounts,dc=dkrz,dc=de"
+)
+LDAP_GROUP_BASE = os.environ.get(
     "LDAP_GROUP_BASE", "cn=groups,cn=accounts,dc=dkrz,dc=de"
 )
 
-AUTH_LDAP_USER_SEARCH = LDAPSearch(LDAP_USER_BASE, ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
+AUTH_LDAP_USER_SEARCH = LDAPSearch(
+    LDAP_USER_BASE, ldap.SCOPE_SUBTREE, "(uid=%(user)s)"
+)
 # keep the authenticated user for group search
 AUTH_LDAP_BIND_AS_AUTHENTICATING_USER = True
 if ALLOWED_GROUP != "*":
     # ALLOWED_GROUP_MEMBER user only
     AUTH_LDAP_REQUIRE_GROUP = f"cn={ALLOWED_GROUP},{LDAP_GROUP_BASE}"
 
-LDAP_FIRSTNAME_FIELD = web_config.get("LDAP_FIRSTNAME_FIELD", "givenname")
-LDAP_LASTNAME_FIELD = web_config.get("LDAP_LASTNAME_FIELD", "sn")
-LDAP_EMAIL_FIELD = web_config.get("LDAP_EMAIL_FIELD", "mail")
-LDAP_GROUP_CLASS = f'(objectClass={web_config.get("LDAP_GROUP_CLASS", "groupOfNames")})'
-LDAP_GROUP_TYPE = web_config.get(
+LDAP_FIRSTNAME_FIELD = os.environ.get("LDAP_FIRSTNAME_FIELD", "givenname")
+LDAP_LASTNAME_FIELD = os.environ.get("LDAP_LASTNAME_FIELD", "sn")
+LDAP_EMAIL_FIELD = os.environ.get("LDAP_EMAIL_FIELD", "mail")
+LDAP_GROUP_CLASS = (
+    f'(objectClass={os.environ.get("LDAP_GROUP_CLASS", "groupOfNames")})'
+)
+LDAP_GROUP_TYPE = os.environ.get(
     "LDAP_GROUP_TYPE", "nested"
 )  # accepted values: nested, posix
 
@@ -200,16 +252,18 @@ AUTH_LDAP_BIND_DN = LDAP_USER_DN
 AUTH_LDAP_BIND_PASSWORD = LDAP_USER_PW
 
 LDAP_GROUP_FILTER = f"(cn={ALLOWED_GROUP})"
-LDAP_MODEL = f'django_evaluation.ldaptools.{web_config.get("LDAP_MODEL", "MiklipUserInformation")}'
+LDAP_MODEL = f'django_evaluation.ldaptools.{os.environ.get("LDAP_MODEL", "MiklipUserInformation")}'
 ##################################################
 ##################################################
 # END SETTING FOR LDAP
 ##################################################
 ##################################################
 # the host to start the scheduler
-SCHEDULER_HOSTS = web_config.get("SCHEDULER_HOST", ["mistral.dkrz.de"])
-if isinstance(SCHEDULER_HOSTS, str):
-    SCHEDULER_HOSTS = [SCHEDULER_HOSTS]
+SCHEDULER_HOSTS = [
+    h.strip()
+    for h in os.environ.get("SCHEDULER_HOST", "levante.dkrz.de").split(",")
+    if h.strip()
+]
 # temporary directory for tailed scheduler files
 TAIL_TMP_DIR = "/tmp/tail/"
 # Additional locations of static files
@@ -249,22 +303,22 @@ AUTHENTICATION_BACKENDS = (
     "django_auth_ldap.backend.LDAPBackend",
 )
 
-REDIS_HOST = web_config.get("REDIS_HOST", "127.0.0.1")
-REDIS_PORT = web_config.get("REDIS_PORT", 6379)
+REDIS_HOST = os.environ.get("REDIS_HOST", "127.0.0.1")
+REDIS_PORT = os.environ.get("REDIS_PORT", 6379)
 
 DATA_BROWSER_HOST = config.get("databrowser.host", "http://localhost:7777")
 
-SERVER_EMAIL = web_config.get("SERVER_EMAIL", "freva@dkrz.de")
+SERVER_EMAIL = os.environ.get("SERVER_EMAIL", "freva@dkrz.de")
 DEFAULT_FROM_EMAIL = SERVER_EMAIL
 
-EMAIL_HOST = web_config.get("EMAIL_HOST", "mailhost.dkrz.de")
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "mailhost.dkrz.de")
 
 email_secrets = _read_secret()
 EMAIL_HOST_USER = email_secrets.get("username")
 EMAIL_HOST_PASSWORD = email_secrets.get("password")
 
 EMAIL_USE_TLS = True
-EMAIL_PORT = web_config.get("EMAIL_PORT", 25)
+EMAIL_PORT = os.environ.get("EMAIL_PORT", 25)
 
 CACHES = {
     "default": {
@@ -273,20 +327,24 @@ CACHES = {
     },
 }
 
-HOME_DIRS_AVAILABLE = web_config.get("HOME_DIRS_AVAILABLE", False)
+HOME_DIRS_AVAILABLE = False
 
-# SECURITY WARNING: don't run with debug turned on in production!
-# Debugging displays nice error messages, but leaks memory. Set this to False
-# on all server instances and True only for development.
-DEBUG = TEMPLATE_DEBUG = web_config.get("DEBUG", True)
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = web_config.get("ALLOWED_HOSTS", ["localhost", "127.0.0.1"])
-if isinstance(ALLOWED_HOSTS, str):
-    ALLOWED_HOSTS = [ALLOWED_HOSTS]
+ALLOWED_HOSTS = [
+    h.strip()
+    for h in os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1")
+    if h.strip()
+]
 
 # Provide a full list of all valid hosts (including the http(s):// prefix) which are expected
-CSRF_TRUSTED_ORIGINS = web_config.get("CSRF_TRUSTED_ORIGINS", ["http://localhost"])
+CSRF_TRUSTED_ORIGINS = [
+    h.strip()
+    for h in os.environment.get(
+        "CSRF_TRUSTED_ORIGINS", "http://localhost"
+    ).slitp(",")
+    if h.strip()
+]
 
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
@@ -296,10 +354,10 @@ VENV_PYTHON_DIR = "/usr/bin/python3"
 # Path to miklip-logo
 MIKLIP_LOGO = STATIC_URL + "img/miklip-logo.png"
 LOAD_MODULE = " "
-FREVA_BIN = web_config.get("FREVA_BIN", os.path.join(sys.exec_prefix, "bin"))
+FREVA_BIN = os.environ.get("FREVA_BIN", os.path.join(sys.exec_prefix, "bin"))
 NCDUMP_BINARY = os.path.join(FREVA_BIN, "metadata-inspector") + " --html"
 # result to show at guest tour
-GUEST_TOUR_RESULT = int(web_config.get("GUEST_TOUR_RESULT", 105))
+GUEST_TOUR_RESULT = 105
 SHELL_IN_A_BOX = "/shell/"
 WEBPACK_LOADER = {
     "DEFAULT": {
@@ -323,10 +381,10 @@ MENU_ENTRIES = []
 # to a template inside django. If something like this is needed, put a slash as a
 # prefix to your relative url (the second value in each of the lists), e.g. "/impressum"
 _MENU_ENTRIES = [
-    ["Plugins", "plugins:home", "plugin_menu"],
     ["Data-Browser", "solr:data_browser", "browser_menu"],
-    ["Result-Browser", "history:result_browser", "result_browser_menu"],
+    ["Plugins", "plugins:home", "plugin_menu"],
     ["History", "history:history", "history_menu"],
+    ["Result-Browser", "history:result_browser", "result_browser_menu"],
 ]
 
 for title, url, html_id in web_config.get("MENU_ENTRIES", _MENU_ENTRIES):

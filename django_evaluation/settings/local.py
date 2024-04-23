@@ -41,25 +41,29 @@ import ldap
 import requests
 import toml
 from django.urls import reverse_lazy
-from django_auth_ldap.config import LDAPSearch, NestedGroupOfNamesType, PosixGroupType
+from django_auth_ldap.config import (
+    LDAPSearch,
+    NestedGroupOfNamesType,
+    PosixGroupType,
+)
 from evaluation_system.misc import config
 
 from base.exceptions import UnknownLDAPGroupTypeError
 
 freva_share_path = Path(os.environ["EVALUATION_SYSTEM_CONFIG_FILE"]).parent
 web_config_path = Path(
-    os.envrion.get(
+    os.environ.get(
         "FREVA_WEB_CONFIG_FILE",
         freva_share_path / "web" / "freva_web_conf.toml",
     )
 )
 
 
-def _get_conf_key(config, key, alternative, is_file=True):
+def _get_conf_key(cfg, key, alternative, is_file=True):
     """Check config of freva_web config."""
     if not is_file:
-        return config.get(key, alternative)
-    value = Path(config.get(key, alternative))
+        return cfg.get(key, alternative)
+    value = Path(cfg.get(key, alternative))
     if value.exists():
         return value
     return Path(alternative)
@@ -84,9 +88,9 @@ def _get_logo(logo_file, project_root):
 def _read_secret(port: int = 5002, key: str = "email") -> dict[str, str]:
     """Read the key-value pair secrets from vault server."""
     sha = config._get_public_key(config.get("project_name"))
-    url = f"http://{config.get('db.host')}:{port}/vault/{key}/{sha}"
+    uri = f"http://{config.get('db.host')}:{port}/vault/{key}/{sha}"
     try:
-        req = requests.get(url).json()
+        req = requests.get(uri).json()
     except requests.exceptions.ConnectionError:
         req = {}
     return req
@@ -336,9 +340,9 @@ ALLOWED_HOSTS = [
 # Provide a full list of all valid hosts (including the http(s):// prefix) which are expected
 CSRF_TRUSTED_ORIGINS = [
     h.strip()
-    for h in os.environment.get(
-        "CSRF_TRUSTED_ORIGINS", "http://localhost"
-    ).slitp(",")
+    for h in os.environ.get("CSRF_TRUSTED_ORIGINS", "http://localhost").split(
+        ","
+    )
     if h.strip()
 ]
 

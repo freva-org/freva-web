@@ -122,9 +122,7 @@ STATIC_URL = "/static/"
 if not DEV:
     STATIC_ROOT = str(Path(PROJECT_ROOT) / "static")
 
-INSTITUTION_LOGO = _get_logo(
-    web_config.get("institution_logo", ""), PROJECT_ROOT
-)
+INSTITUTION_LOGO = _get_logo(web_config.get("institution_logo", ""), PROJECT_ROOT)
 FREVA_LOGO = f"{STATIC_URL}img/by_freva_transparent.png"
 MAIN_COLOR = _get_conf_key(web_config, "main_color", "Tomato", False)
 _set_favicon(MAIN_COLOR, Path(PROJECT_ROOT))
@@ -151,9 +149,7 @@ IMPRINT = web_config.get("imprint") or [
     "Germany",
 ]
 HOMEPAGE_HEADING = web_config.get("homepage_heading") or "Lorem ipsum dolor."
-ABOUT_US_TEXT = (
-    web_config.get("about_us_text") or "Hello world, this is freva."
-)
+ABOUT_US_TEXT = web_config.get("about_us_text") or "Hello world, this is freva."
 CONTACTS = web_config.get("contacts") or ["freva@dkrz.de"]
 if isinstance(CONTACTS, str):
     CONTACTS = [c for c in CONTACTS.split(",") if c.strip()]
@@ -176,9 +172,7 @@ INSTITUTION_NAME = web_config.get("insitution_name") or "Freva"
 ##################################################
 ##################################################
 # The server for LDAP configuration
-AUTH_LDAP_SERVER_URI = os.environ.get(
-    "AUTH_LDAP_SERVER_URI", "ldap://idm-dmz.dkrz.de"
-)
+AUTH_LDAP_SERVER_URI = os.environ.get("AUTH_LDAP_SERVER_URI", "ldap://idm-dmz.dkrz.de")
 AUTH_LDAP_START_TLS = bool(int(os.environ.get("AUTH_LDAP_START_TLS", "0")))
 # The directory with SSL certificates
 CA_CERT_DIR = str(web_config_path.parent)
@@ -191,16 +185,12 @@ AUTH_LDAP_GLOBAL_OPTIONS = {
 }
 # this is not used by django directly, but we use it for
 # python-ldap access, as well.
-LDAP_USER_BASE = os.environ.get(
-    "LDAP_USER_BASE", "cn=users,cn=accounts,dc=dkrz,dc=de"
-)
+LDAP_USER_BASE = os.environ.get("LDAP_USER_BASE", "cn=users,cn=accounts,dc=dkrz,dc=de")
 LDAP_GROUP_BASE = os.environ.get(
     "LDAP_GROUP_BASE", "cn=groups,cn=accounts,dc=dkrz,dc=de"
 )
 
-AUTH_LDAP_USER_SEARCH = LDAPSearch(
-    LDAP_USER_BASE, ldap.SCOPE_SUBTREE, "(uid=%(user)s)"
-)
+AUTH_LDAP_USER_SEARCH = LDAPSearch(LDAP_USER_BASE, ldap.SCOPE_SUBTREE, "(uid=%(user)s)")
 # keep the authenticated user for group search
 AUTH_LDAP_BIND_AS_AUTHENTICATING_USER = True
 if ALLOWED_GROUP != "*":
@@ -210,9 +200,7 @@ if ALLOWED_GROUP != "*":
 LDAP_FIRSTNAME_FIELD = os.environ.get("LDAP_FIRSTNAME_FIELD", "givenname")
 LDAP_LASTNAME_FIELD = os.environ.get("LDAP_LASTNAME_FIELD", "sn")
 LDAP_EMAIL_FIELD = os.environ.get("LDAP_EMAIL_FIELD", "mail")
-LDAP_GROUP_CLASS = (
-    f'(objectClass={os.environ.get("LDAP_GROUP_CLASS", "groupOfNames")})'
-)
+LDAP_GROUP_CLASS = f'(objectClass={os.environ.get("LDAP_GROUP_CLASS", "groupOfNames")})'
 LDAP_GROUP_TYPE = os.environ.get(
     "LDAP_GROUP_TYPE", "nested"
 )  # accepted values: nested, posix
@@ -325,16 +313,14 @@ HOME_DIRS_AVAILABLE = False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = [
     h.strip()
-    for h in os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1")
+    for h in os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
     if h.strip()
 ]
 
 # Provide a full list of all valid hosts (including the http(s):// prefix) which are expected
 CSRF_TRUSTED_ORIGINS = [
     h.strip()
-    for h in os.environ.get("CSRF_TRUSTED_ORIGINS", "http://localhost").split(
-        ","
-    )
+    for h in os.environ.get("CSRF_TRUSTED_ORIGINS", "http://localhost").split(",")
     if h.strip()
 ]
 

@@ -41,11 +41,7 @@ import ldap
 import requests
 import toml
 from django.urls import reverse_lazy
-from django_auth_ldap.config import (
-    LDAPSearch,
-    NestedGroupOfNamesType,
-    PosixGroupType,
-)
+from django_auth_ldap.config import LDAPSearch, NestedGroupOfNamesType, PosixGroupType
 from evaluation_system.misc import config
 
 from base.exceptions import UnknownLDAPGroupTypeError

@@ -6,6 +6,9 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Fixed databrowser bug causing a NaN in the `found results`-number
 
+### Changed
+- Infrastructure like LDAP servers, cache server etc are passed via env
+  variables.
 
 ## [v2403.0.0]
 

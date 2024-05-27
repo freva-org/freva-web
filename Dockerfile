@@ -19,7 +19,6 @@ RUN  set -e && \
      mamba env create -y -p ${CONDA_ENV_DIR} -f conda-env.yml &&\
      mamba clean -afy &&\
      npm install && npm run build-production &&\
-     rm -rf node_modules &&\
-     echo "export PATH=${PATH}" >> ${FREVA_WEB_DIR}/.bashrc &&\
+     rm -rf node_modules
 EXPOSE 8000
 CMD ./init_django.sh

@@ -239,7 +239,6 @@ SECRET_KEY = os.environ.get(
     "SECRET_KEY", "hj1bkzobng0ck@0&%t509*1ki$#)i5y+i0)&=7zv@amu8pm5*t"
 )
 
-INTERNAL_IPS = "127.0.0.1"
 
 # filter for user numbers
 USERNAME_FILTER = "[a-z]\d{6,6}"

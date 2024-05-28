@@ -217,7 +217,7 @@ FILE_UPLOAD_PERMISSIONS = 0o664
 # The WSGI Application to use for runserver
 WSGI_APPLICATION = "django_evaluation.wsgi.application"
 
-INTERNAL_IPS = "127.0.0.1"
+INTERNAL_IPS = ["127.0.0.1"]
 
 SYSTEM_EMAIL_PREFIX = "[django_evaluation]"
 

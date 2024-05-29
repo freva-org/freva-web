@@ -217,7 +217,7 @@ FILE_UPLOAD_PERMISSIONS = 0o664
 # The WSGI Application to use for runserver
 WSGI_APPLICATION = "django_evaluation.wsgi.application"
 
-INTERNAL_IPS = "127.0.0.1"
+INTERNAL_IPS = ["127.0.0.1"]
 
 SYSTEM_EMAIL_PREFIX = "[django_evaluation]"
 
@@ -239,7 +239,6 @@ SECRET_KEY = os.environ.get(
     "SECRET_KEY", "hj1bkzobng0ck@0&%t509*1ki$#)i5y+i0)&=7zv@amu8pm5*t"
 )
 
-INTERNAL_IPS = "127.0.0.1"
 
 # filter for user numbers
 USERNAME_FILTER = "[a-z]\d{6,6}"

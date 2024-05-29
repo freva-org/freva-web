@@ -10,10 +10,7 @@ ARG CONDA_ENV_DIR
 ARG FREVA_WEB_DIR
 
 RUN set -e && \
-  groupadd -r -g 1000 freva && \
-  adduser --uid 1000 --gid 1000 --gecos "Freva user" \
-  --shell /bin/bash --disabled-password freva --home ${FREVA_WEB_DIR} &&\
-  mkdir -p ${CONDA_ENV_DIR} && chown -R freva:freva $CONDA_ENV_DIR
+  mkdir -p ${CONDA_ENV_DIR}
 WORKDIR ${FREVA_WEB_DIR}
 COPY . .
 ENV PATH=$CONDA_ENV_DIR/bin:$PATH\
@@ -22,9 +19,6 @@ RUN  set -e && \
      mamba env create -y -p ${CONDA_ENV_DIR} -f conda-env.yml &&\
      mamba clean -afy &&\
      npm install && npm run build-production &&\
-     rm -rf node_modules &&\
-     echo "export PATH=${PATH}" >> ${FREVA_WEB_DIR}/.bashrc &&\
-     chown -R freva:freva ${FREVA_WEB_DIR}
-USER freva
+     rm -rf node_modules
 EXPOSE 8000
 CMD ./init_django.sh

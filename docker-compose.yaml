@@ -12,43 +12,83 @@ services:
     volumes:
       - ./docker/config/mysql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql:ro
     depends_on:
-      - redis
       - solr
-      - databrowser
   solr:
+    networks:
+      - freva-rest
     image: solr:latest
     environment:
       CORE: files
     ports:
-      - "8983:8983"
+      - "8983:8984"
     volumes:
       - ./docker/config/solr/managed-schema.xml:/opt/solr/managed-schema.xml:ro
       - ./docker/config/solr/create_cores.sh:/docker-entrypoint-initdb.d/create_cores.sh:ro
       - ./docker/config/solr/synonyms.txt:/opt/solr/synonyms.txt:ro
+    hostname: solr
   redis:
+    networks:
+      - freva-rest
     image: redis:latest
     ports:
       - "6379:6379"
+    environment:
+      REDIS_USERNAME: redis
+      REDIS_PASSWORD: secret
+      REDIS_LOGLEVEL: debug
+      REDIS_SSL_CERTFILE: /certs/client-cert.pem
+      REDIS_SSL_KEYFILE: /certs/client-key.pem
+    hostname: redis
+    volumes:
+      - ./docker/config/redis/redis-cmd.sh:/usr/local/bin/redis-cmd
+      - ./docker/config/certs:/certs
+    command: /usr/local/bin/redis-cmd
+  keycloak:
+    networks:
+      - freva-rest
+    image: quay.io/keycloak/keycloak
+    environment:
+      KEYCLOAK_ADMIN: keycloak
+      KEYCLOAK_ADMIN_PASSWORD: secret
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+      JAVA_OPTS_APPEND: "-Djava.net.preferIPv4Stack=true"
+    hostname: keycloak
+    volumes:
+      - ./docker/config/certs:/certs
+      - ./docker/config/keycloak/import:/opt/keycloak/data/import:z
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+    command: |
+      start-dev
+      --hostname-strict=false
+      --import-realm
+      -Dkeycloak.migration.strategy=OVERWRITE_EXISTING
+  ldap:
+    image: osixia/openldap:latest
+    environment:
+      LDAP_ORGANISATION: "My Organization"
+      LDAP_DOMAIN: "example.com"
+      LDAP_ADMIN_PASSWORD: "admin_password"
+      LDAP_ADMIN_USERNAME: "admin"
+    ports:
+      - "389:389"
+      - "636:636"
+    command: --copy-service
+    hostname: ldap
+    networks:
+      - freva-rest
+    volumes:
+      - ./docker/config/keycloak/users.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/users.ldif
   mongodb:
     image: mongo:latest
+    networks:
+      - freva-rest
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongo
       MONGO_INITDB_ROOT_PASSWORD: secret
       MONGO_INITDB_DATABASE: search_stats
     ports:
       - "27017:27017"
-  databrowser:
-    image: ghcr.io/freva-clint/databrowserapi:latest
-    ports:
-      - 7777:8080
-    volumes:
-      - ./docker/databrowser_api_config.toml:/opt/databrowser/api_config.toml:ro
-    environment:
-      MONGO_HOST: mongodb:27017
-      MONGO_PASSWORD: secret
-      MONGO_DB: search_stats
-      MONGO_USER: mongo
-      SOLR_HOST: solr:8983
-    depends_on:
-      - solr
-    command: ["sh", "-c", "sleep 3 && /opt/app/python/bin/python3 -m databrowser.cli --debug --dev"]
+    hostname: mongodb

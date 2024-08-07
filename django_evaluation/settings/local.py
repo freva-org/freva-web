@@ -122,7 +122,9 @@ STATIC_URL = "/static/"
 if not DEV:
     STATIC_ROOT = str(Path(PROJECT_ROOT) / "static")
 
-INSTITUTION_LOGO = _get_logo(web_config.get("institution_logo", ""), PROJECT_ROOT)
+INSTITUTION_LOGO = _get_logo(
+    web_config.get("institution_logo", ""), PROJECT_ROOT
+)
 FREVA_LOGO = f"{STATIC_URL}img/by_freva_transparent.png"
 MAIN_COLOR = _get_conf_key(web_config, "main_color", "Tomato", False)
 _set_favicon(MAIN_COLOR, Path(PROJECT_ROOT))
@@ -149,7 +151,9 @@ IMPRINT = web_config.get("imprint") or [
     "Germany",
 ]
 HOMEPAGE_HEADING = web_config.get("homepage_heading") or "Lorem ipsum dolor."
-ABOUT_US_TEXT = web_config.get("about_us_text") or "Hello world, this is freva."
+ABOUT_US_TEXT = (
+    web_config.get("about_us_text") or "Hello world, this is freva."
+)
 CONTACTS = web_config.get("contacts") or ["freva@dkrz.de"]
 if isinstance(CONTACTS, str):
     CONTACTS = [c for c in CONTACTS.split(",") if c.strip()]
@@ -205,12 +209,39 @@ AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",
     "django_evaluation.auth.OIDCPasswordBackend",
 )
-# AUTH_USER_MODEL = "base.WebUser"
-
+### Caching stuff
 REDIS_HOST = os.environ.get("REDIS_HOST", "127.0.0.1")
 REDIS_PORT = os.environ.get("REDIS_PORT", 6379)
+REDIS_USER = os.environ.get("REDIS_USER")
+REDIS_PASSWD = os.environ.get("REDIS_PASSWD")
+REDIS_SSL_CERTFILE = os.environ.get("REDIS_SSL_CERTFILE")
+REDIS_SSL_KEYFILE = os.environ.get("REDIS_SSL_KEYFILE")
 
-DATA_BROWSER_HOST = config.get("databrowser.host", "http://localhost:7777")
+redis_options = {}
+if REDIS_SSL_CERTFILE:
+    schema = "rediss"
+    redis_options["ssl_certfile"] = REDIS_SSL_CERTFILE
+    redis_options["ssl_ca_certs"] = REDIS_SSL_CERTFILE
+else:
+    schema = "redis"
+
+if REDIS_SSL_KEYFILE:
+    redis_options["ssl_keyfile"] = REDIS_SSL_KEYFILE
+
+if REDIS_USER:
+    redis_options["username"] = REDIS_USER
+if REDIS_PASSWD:
+    redis_options["password"] = REDIS_PASSWD
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": f"{schema}://{REDIS_HOST}:{REDIS_PORT}/9",
+        "OPTIONS": redis_options,
+    },
+}
+
+DATA_BROWSER_HOST = os.environ.get("FREVA_REST_URL", "http://localhost:7777")
 
 SERVER_EMAIL = os.environ.get("SERVER_EMAIL", "freva@dkrz.de")
 DEFAULT_FROM_EMAIL = SERVER_EMAIL
@@ -223,13 +254,6 @@ EMAIL_HOST_PASSWORD = email_secrets.get("password")
 
 EMAIL_USE_TLS = True
 EMAIL_PORT = os.environ.get("EMAIL_PORT", 25)
-
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}",
-    },
-}
 
 HOME_DIRS_AVAILABLE = False
 
@@ -244,7 +268,9 @@ ALLOWED_HOSTS = [
 # Provide a full list of all valid hosts (including the http(s):// prefix) which are expected
 CSRF_TRUSTED_ORIGINS = [
     h.strip()
-    for h in os.environ.get("CSRF_TRUSTED_ORIGINS", "http://localhost").split(",")
+    for h in os.environ.get("CSRF_TRUSTED_ORIGINS", "http://localhost").split(
+        ","
+    )
     if h.strip()
 ]
 

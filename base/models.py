@@ -1,7 +1,8 @@
 from datetime import datetime
+from typing import Optional
 
-from django.contrib.auth.models import User
 from django.db import models
+from django.contrib.auth.models import User
 
 
 def isGuest(self):

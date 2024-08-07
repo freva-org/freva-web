@@ -16,7 +16,7 @@ from evaluation_system.misc import config
 from evaluation_system.model.user import User
 
 from base.exceptions import UserNotFoundError
-from base.LdapUser import LdapUser
+from base.Users import OpenIdUser
 from django_evaluation.settings.local import HOME_DIRS_AVAILABLE
 from history.models import Configuration, History
 from plugins.forms import PluginForm, PluginWeb
@@ -67,7 +67,7 @@ def search_similar_results(request, plugin_name=None, history_id=None):
         hist_objects = History.objects.filter(uid=request.user).filter(tool=plugin_name)
     else:
         try:
-            user = LdapUser(request.user.username)
+            user = OpenIdUser(request.user.username)
         except UserNotFoundError:
             user = User()
         if history_id is not None:
@@ -109,7 +109,7 @@ def setup(request, plugin_name, row_id=None):
 
     if user_can_submit:
         try:
-            user = LdapUser(request.user.username)
+            user = OpenIdUser(request.user.username)
         except UserNotFoundError:
             user = User()
     else:
@@ -259,7 +259,7 @@ def setup(request, plugin_name, row_id=None):
 @login_required()
 def dirlist(request):
     try:
-        user = LdapUser(request.user.username)
+        user = OpenIdUser(request.user.username)
         home_dir = user.getUserHome()
         scratch_dir = user.getUserScratch()
     except UserNotFoundError as e:
@@ -313,7 +313,7 @@ def dirlist(request):
 @login_required()
 def list_dir(request):
     try:
-        user = LdapUser(request.user.username)
+        user = OpenIdUser(request.user.username)
         home_dir = user.getUserHome()
         scratch_dir = user.getUserScratch()
     except UserNotFoundError:

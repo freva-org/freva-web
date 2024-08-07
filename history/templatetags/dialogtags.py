@@ -4,7 +4,6 @@ from django import template
 from django.utils.safestring import mark_safe
 
 from django_evaluation import settings
-from django_evaluation.ldaptools import get_ldap_object
 
 register = template.Library()
 
@@ -32,10 +31,10 @@ def caption_dialog(current, default, history_object, user):
 @register.inclusion_tag("history/templatetags/mailfield.html")
 def mailfield(is_guest):
     info = []
-    user_info = get_ldap_object()
+    # user_info = get_ldap_object()
 
-    if not is_guest:
-        info = user_info.get_all_users()
+    # if not is_guest:
+    #    info = user_info.get_all_users()
 
     data = []
 

@@ -114,17 +114,8 @@ def contact(request):
     if request.method == "POST":
         from templated_email import send_templated_mail
 
-        from django_evaluation.ldaptools import get_ldap_object
-
-        user_info = get_ldap_object()
-        myinfo = user_info.get_user_info(str(request.user))
-        try:
-            myemail = myinfo[3]
-            username = request.user.get_full_name()
-        # TODO: Exception too broad!
-        except:
-            myemail = settings.SERVER_EMAIL
-            username = "guest"
+        myemail = settings.SERVER_EMAIL
+        username = "freva-system"
         mail_text = request.POST.get("text")
         send_templated_mail(
             template_name="mail_to_admins",

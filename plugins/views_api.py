@@ -9,8 +9,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from base.exceptions import UserNotFoundError
-from base.LdapUser import LdapUser
-from django_evaluation.ldaptools import get_ldap_object
+from base.Users import OpenIdUser
 from plugins.utils import get_plugin_or_404, plugin_metadata_as_dict
 
 from .serializers import PluginSerializer
@@ -33,7 +32,7 @@ class PluginDetail(APIView):
         pm.reload_plugins(request.user.username)
         user = None
         try:
-            user = LdapUser(request.user.username)
+            user = OpenIdUser(request.user.username)
         except UserNotFoundError:
             user = User()
         plugin = get_plugin_or_404(plugin_name, user=user)
@@ -97,7 +96,7 @@ class SendMailToDeveloper(APIView):
         if url:
             text = text + "\nThis email has been send from this url: " + url
         try:
-            user = LdapUser(request.user.username)
+            user = OpenIdUser(request.user.username)
         except UserNotFoundError:
             user = User()
 
@@ -140,7 +139,7 @@ class ShareResultsByMail(APIView):
             status = "Normally, the selected recipients would get an email containing a link to this result,"
             status += "but this feature is turned off for guest users."
             return Response(status)
-
+        return Response("Sending emails is disabled until further notice. Sorry!")
         from templated_email import send_templated_mail
 
         text = request.data.get("text", None)

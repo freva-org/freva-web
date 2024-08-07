@@ -23,7 +23,7 @@ from evaluation_system.model.history.models import History, ResultTag
 from evaluation_system.model.user import User
 
 from base.exceptions import UserNotFoundError
-from base.LdapUser import LdapUser
+from base.Users import OpenIdUser
 from django_evaluation import settings
 from history.models import HistoryTag
 from history.templatetags.resulttags import mask_uid
@@ -282,7 +282,7 @@ def follow_result(request, history_id):
         History.Flag.public,
         History.Flag.guest,
     ]:
-        user = LdapUser(str(request.user))
+        user = OpenIdUser(str(request.user))
         pm.follow_history_tag(history_object.id, user, "Web page: follow")
         retstr = "Unfollow"
 
@@ -302,7 +302,7 @@ def unfollow_result(request, history_id):
 
     history_object = get_object_or_404(History, id=history_id)
     try:
-        user = LdapUser(str(request.user))
+        user = OpenIdUser(str(request.user))
         pm.unfollow_history_tag(history_object.id, user)
         retstr = "Follow"
         success = True
@@ -332,7 +332,7 @@ def results(request, id, show_output_only=False):
     history_object = get_object_or_404(History, id=id)
     is_plugin_available = True
     try:
-        user = LdapUser(request.user.username)
+        user = OpenIdUser(request.user.username)
         plugin = pm.get_plugin_instance(history_object.tool, user=user)
         developer = plugin.tool_developer
     except (UserNotFoundError, PluginManagerException, AttributeError):

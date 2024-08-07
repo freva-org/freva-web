@@ -5,12 +5,21 @@ from django.contrib.auth.models import Permission, User
 from .models import UIMessages
 
 admin.site.register(UIMessages)
-admin.site.unregister(User)
+try:
+    admin.site.unregister(User)
+except admin.sites.NotRegistered:
+    pass
 
 
 class CustomUserAdmin(UserAdmin):
     save_on_top = True
-    list_display = ("username", "email", "is_staff", "date_joined", "last_login")
+    list_display = (
+        "username",
+        "email",
+        "is_staff",
+        "date_joined",
+        "last_login",
+    )
     date_hierachy = "date_joined"
     ordering = ["-date_joined"]
 

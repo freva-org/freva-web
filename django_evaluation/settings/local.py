@@ -31,7 +31,6 @@ import toml
 from django.urls import reverse_lazy
 from evaluation_system.misc import config
 
-
 logger_format = logging.Formatter(
     "%(name)s - %(asctime)s - %(levelname)s: %(message)s",
     datefmt="%Y-%m-%dT%H:%M:%S",

@@ -1,10 +1,10 @@
 import os
 from configparser import ConfigParser as Config
 from configparser import ExtendedInterpolation
-from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.auth import get_user_model
-from evaluation_system.misc import config
 
+from django.contrib.auth import get_user_model
+from django.core.exceptions import ObjectDoesNotExist
+from evaluation_system.misc import config
 from evaluation_system.model.db import UserDB
 from evaluation_system.model.user import User
 
@@ -23,7 +23,7 @@ class OpenIdUser(User):
         self._dir_type = config.get(config.DIRECTORY_STRUCTURE_TYPE)
 
         self._username = username
-        self._uid = 0
+        self._uid = "web"
         self._email = _user.email
         self._home_directory = "NA"
         self._userconfig = Config(interpolation=ExtendedInterpolation())
@@ -54,4 +54,6 @@ class OpenIdUser(User):
         return self._email
 
     def __str__(self):
-        return f"User: {self._username} Mail: {self._email} Home: {self._home_directory}"
+        return (
+            f"User: {self._username} Mail: {self._email} Home: {self._home_directory}"
+        )

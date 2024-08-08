@@ -15,7 +15,7 @@ services:
       - solr
   solr:
     networks:
-      - freva-rest
+      - freva-web
     image: solr:latest
     environment:
       CORE: files
@@ -28,7 +28,7 @@ services:
     hostname: solr
   redis:
     networks:
-      - freva-rest
+      - freva-web
     image: redis:latest
     ports:
       - "6379:6379"
@@ -45,7 +45,7 @@ services:
     command: /usr/local/bin/redis-cmd
   keycloak:
     networks:
-      - freva-rest
+      - freva-web
     image: quay.io/keycloak/keycloak
     environment:
       KEYCLOAK_ADMIN: keycloak
@@ -78,13 +78,13 @@ services:
     command: --copy-service
     hostname: ldap
     networks:
-      - freva-rest
+      - freva-web
     volumes:
       - ./docker/config/keycloak/users.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/users.ldif
   mongodb:
     image: mongo:latest
     networks:
-      - freva-rest
+      - freva-web
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongo
       MONGO_INITDB_ROOT_PASSWORD: secret
@@ -92,3 +92,7 @@ services:
     ports:
       - "27017:27017"
     hostname: mongodb
+
+networks:
+  freva-web:
+    driver: bridge

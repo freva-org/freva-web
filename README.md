@@ -12,6 +12,12 @@ To start development with freva clone the repository and its sub-modules:
 git clone --recursive git@github.com:FREVA-CLINT/freva-web.git
 ```
 
+And create a pair of self-signed keys. These keys will be used by various
+services.
+
+```console
+python docker/config/dev-utils.py gen-certs
+```
 
 ## Installation of the required packages and infrastructure
 
@@ -38,15 +44,25 @@ mariadb service. This services can be deployed using
 [`docker-compose`](https://docs.docker.com/compose/install/).
 
 ```console
-docker-compose up -d
+docker compose up -d
 ```
 
 When finished, tear down the environment with
 
 ```console
-docker-compose down
+docker compose down
 ```
 
+
+You can also use podman (`python -m pip install podman-compose`):
+
+```console
+pomand-compose up -d
+```
+
+```console
+podman-compose down
+```
 ### Running tests
 
 There are some rudimentary tests that check the integration of `django` and the
@@ -59,15 +75,26 @@ conda activate freva-web
 python -m pytest -vv tests
 ```
 
+
+
 ## Using GNU `make`:
+Currently the web app needs multiple components to run. These are:
+
+- A java script front end via node.js
+- The freva restAPI.
+- The django web backend.
+
+Future development aims at replacing the django backend by the freva restAPI.
+Until this this is done the two components have to be deployed together.
+
 We have created a Makefile that sets up a development version of the web. You
 can use:
 
-- To *setup* / *initialise* the nodejs and django servers use:
+- To *setup* / *initialise* the nodejs, freva restAPI and django servers use:
     ```console
     make setup
     ```
-- To *run* node and django servers use:
+- To *run* node, freva restAPI and django servers use:
     ```console
     make run
     ```

@@ -7,7 +7,10 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
-from django.views.decorators.debug import sensitive_post_parameters, sensitive_variables
+from django.views.decorators.debug import (
+    sensitive_post_parameters,
+    sensitive_variables,
+)
 from evaluation_system.misc import config
 
 from base.models import UIMessages
@@ -28,7 +31,9 @@ def home(request):
             username = request.POST.get("user", "")
             passwd = request.POST.get("password", "")
             if username:
-                user_object = auth.authenticate(username=username, password=passwd)
+                user_object = auth.authenticate(
+                    username=username, password=passwd
+                )
                 if user_object:
                     auth.login(request, user_object)
                     guest_login = user_object.isGuest()
@@ -48,7 +53,7 @@ def home(request):
                 next_page = forward
 
             login_failed = True
-            logging.error(str(e))
+            logging.exception(str(e))
 
     return render(
         request,
@@ -103,7 +108,9 @@ def shell_in_a_box(request):
     else:
         shell_url = "/shell/"
 
-    return render(request, "base/shell-in-a-box.html", {"shell_url": shell_url})
+    return render(
+        request, "base/shell-in-a-box.html", {"shell_url": shell_url}
+    )
 
 
 @login_required()

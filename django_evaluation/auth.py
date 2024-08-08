@@ -48,7 +48,9 @@ class OIDCPasswordBackend(BaseBackend):
             "username": username,
             "password": password,
         }
-        response = requests.post(token_url, headers=headers, data=data, timeout=3)
+        response = requests.post(
+            token_url, headers=headers, data=data, timeout=3
+        )
         uid_field = os.getenv("TOKEN_UID", "preferred_username")
         email_field = os.getenv("TOKEN_EMAIL", "email")
         home_field = os.getenv("TOKEN_HOME", "home")
@@ -62,8 +64,8 @@ class OIDCPasswordBackend(BaseBackend):
             user, _ = user_model.objects.get_or_create(
                 username=user_info[uid_field],
                 email=user_info.get(email_field),
-                first_name=user_info.get(first_name_field),
-                last_name=user_info.get(last_name_field),
+                # first_name=user_info.get(first_name_field),
+                # last_name=user_info.get(last_name_field),
             )
             return user
         return None

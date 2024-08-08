@@ -13,8 +13,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: 'true'
-      - name: Set up services
-        run: docker-compose up -d --remove-orphans
       - name: Create conda env
         # https://github.com/marketplace/actions/setup-micromamba
         uses: mamba-org/setup-micromamba@v1
@@ -24,6 +22,11 @@ jobs:
           cache-environment: false
           cache-downloads: false
           init-shell: bash
+      - name: Set up services
+        run: docker compose up -d --remove-orphans
+      - name: Generate self signed certs
+        run: >
+          micromamba run -n freva-web python docker/config/dev-utils.py gen-certs
       - name: Lint js code and python
         run: micromamba run -n freva-web make lint
       - name: Run build checks for js and python smoke tests

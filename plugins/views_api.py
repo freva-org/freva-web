@@ -139,7 +139,6 @@ class ShareResultsByMail(APIView):
             status = "Normally, the selected recipients would get an email containing a link to this result,"
             status += "but this feature is turned off for guest users."
             return Response(status)
-        return Response("Sending emails is disabled until further notice. Sorry!")
         from templated_email import send_templated_mail
 
         text = request.data.get("text", None)

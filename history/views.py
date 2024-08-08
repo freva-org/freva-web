@@ -185,7 +185,7 @@ class HistoryTable(DatatableView):
     def get_queryset(self):
         user = self.kwargs.get("uid", self.request.user)
 
-        if not (user and self.request.user.has_perm("history.results_view_others")):
+        if not (user and self.request.user.isGuest()):
             user = self.request.user
 
         objects = History.objects.order_by("-id").filter(uid=user)
@@ -349,13 +349,13 @@ def results(request, id, show_output_only=False):
 
         elif not history_object.uid == request.user:
             if not (
-                request.user.has_perm("history.results_view_others")
+                request.user.isGuest()
                 and flag
                 in [History.Flag.public, History.Flag.shared, History.Flag.guest]
             ):
                 raise PermissionDenied
     if not request.user.is_authenticated:
-        request.user.isGuest = True
+        request.user._guest = True
 
     try:
         documentation = FlatPage.objects.get(title__iexact=history_object.tool)

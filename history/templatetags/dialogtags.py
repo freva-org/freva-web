@@ -1,6 +1,7 @@
 import json
 
 from django import template
+from django.contrib.auth import get_user_model
 from django.utils.safestring import mark_safe
 
 from django_evaluation import settings
@@ -30,16 +31,16 @@ def caption_dialog(current, default, history_object, user):
 
 @register.inclusion_tag("history/templatetags/mailfield.html")
 def mailfield(is_guest):
-    info = []
-    # user_info = get_ldap_object()
-
-    # if not is_guest:
-    #    info = user_info.get_all_users()
-
+    """Extract the email information from users that have been logged in."""
     data = []
-
-    for user in info:
-        id = user[0]
-        data.append({"id": id, "text": "%s, %s (%s)" % (user[1], user[2], user[0])})
-
+    if not is_guest:
+        data = [
+            {
+                "id": u.username,
+                "text": f"{u.first_name}, {u.last_name} ({u.email})",
+            }
+            for u in get_user_model()
+            .objects.exclude(email__exact="")
+            .exclude(email__isnull=True)
+        ]
     return {"user_data": mark_safe(json.dumps(data)), "is_guest": is_guest}

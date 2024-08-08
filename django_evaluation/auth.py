@@ -3,10 +3,10 @@
 import os
 from typing import Any, Optional
 
+import jwt
 import requests
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import BaseBackend
-import jwt
 
 
 class OIDCPasswordBackend(BaseBackend):
@@ -53,7 +53,6 @@ class OIDCPasswordBackend(BaseBackend):
         )
         uid_field = os.getenv("TOKEN_UID", "preferred_username")
         email_field = os.getenv("TOKEN_EMAIL", "email")
-        home_field = os.getenv("TOKEN_HOME", "home")
         first_name_field = os.getenv("TOKEN_FIRST_NAME", "given_name")
         last_name_field = os.getenv("TOKEN_LAST_NAME", "family_name")
         if response.status_code == 200:
@@ -64,8 +63,8 @@ class OIDCPasswordBackend(BaseBackend):
             user, _ = user_model.objects.get_or_create(
                 username=user_info[uid_field],
                 email=user_info.get(email_field),
-                # first_name=user_info.get(first_name_field),
-                # last_name=user_info.get(last_name_field),
+                first_name=user_info.get(first_name_field),
+                last_name=user_info.get(last_name_field),
             )
             return user
         return None

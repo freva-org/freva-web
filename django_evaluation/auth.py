@@ -3,7 +3,6 @@
 import os
 from typing import Any, Optional
 
-import jwt
 import requests
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import BaseBackend
@@ -42,30 +41,29 @@ class OIDCPasswordBackend(BaseBackend):
         """
         api_url = os.getenv("FREVA_REST_URL", "http://localhost:7777")
         token_url = f"{api_url.rstrip('/')}/api/auth/v2/token"
+        userinfo_url = f"{api_url.rstrip('/')}/api/auth/v2/userinfo"
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         data = {
             "grant_type": "password",
             "username": username,
             "password": password,
         }
-        response = requests.post(
-            token_url, headers=headers, data=data, timeout=3
-        )
-        uid_field = os.getenv("TOKEN_UID", "preferred_username")
-        email_field = os.getenv("TOKEN_EMAIL", "email")
-        first_name_field = os.getenv("TOKEN_FIRST_NAME", "given_name")
-        last_name_field = os.getenv("TOKEN_LAST_NAME", "family_name")
+        response = requests.post(token_url, headers=headers, data=data, timeout=3)
         if response.status_code == 200:
             token = response.json().get("access_token", "")
             headers = {"Authorization": f"Bearer {token}"}
-            user_info = jwt.decode(token, options={"verify_signature": False})
-            user_model = get_user_model()
-            user, _ = user_model.objects.get_or_create(
-                username=user_info[uid_field],
-                email=user_info.get(email_field),
-                first_name=user_info.get(first_name_field),
-                last_name=user_info.get(last_name_field),
-            )
+            res = requests.get(userinfo_url, headers=headers, timeout=3)
+            if res.status_code == 200:
+                user_info = res.json()
+                user_model = get_user_model()
+                user, _ = user_model.objects.get_or_create(
+                    username=user_info["username"]
+                )
+                # Upate the user info:
+                user.email = user_info["email"]
+                user.last_name = user_info["last_name"]
+                user.first_name = user_info["first_name"]
+                user.save()
             return user
         return None
 

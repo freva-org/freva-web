@@ -2,6 +2,7 @@ import os
 
 import evaluation_system.api.plugin_manager as pm
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from evaluation_system.misc import config
 from evaluation_system.model.user import User
 from rest_framework.permissions import IsAuthenticated
@@ -159,10 +160,10 @@ class ShareResultsByMail(APIView):
         recipient_names = request.POST["rec"].split(",")
 
         email_adresses = []
-        ldap_object = get_ldap_object()
         for uid in recipient_names:
-            recipient_info = ldap_object.get_user_info(uid)
-            email_adresses.append(recipient_info[3])
+            user = get_user_model().objects.get(username=uid)
+            if user.email:
+                email_adresses.append(user.email)
 
         if copy4me == "on":
             email_adresses.append(my_email)

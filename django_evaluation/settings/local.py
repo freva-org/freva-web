@@ -121,9 +121,7 @@ STATIC_URL = "/static/"
 if not DEV:
     STATIC_ROOT = str(Path(PROJECT_ROOT) / "static")
 
-INSTITUTION_LOGO = _get_logo(
-    web_config.get("institution_logo", ""), PROJECT_ROOT
-)
+INSTITUTION_LOGO = _get_logo(web_config.get("institution_logo", ""), PROJECT_ROOT)
 FREVA_LOGO = f"{STATIC_URL}img/by_freva_transparent.png"
 MAIN_COLOR = _get_conf_key(web_config, "main_color", "Tomato", False)
 _set_favicon(MAIN_COLOR, Path(PROJECT_ROOT))
@@ -150,9 +148,7 @@ IMPRINT = web_config.get("imprint") or [
     "Germany",
 ]
 HOMEPAGE_HEADING = web_config.get("homepage_heading") or "Lorem ipsum dolor."
-ABOUT_US_TEXT = (
-    web_config.get("about_us_text") or "Hello world, this is freva."
-)
+ABOUT_US_TEXT = web_config.get("about_us_text") or "Hello world, this is freva."
 CONTACTS = web_config.get("contacts") or ["freva@dkrz.de"]
 if isinstance(CONTACTS, str):
     CONTACTS = [c for c in CONTACTS.split(",") if c.strip()]
@@ -248,11 +244,11 @@ DEFAULT_FROM_EMAIL = SERVER_EMAIL
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "mailhost.dkrz.de")
 
 email_secrets = _read_secret()
-EMAIL_HOST_USER = email_secrets.get("username")
-EMAIL_HOST_PASSWORD = email_secrets.get("password")
+EMAIL_HOST_USER = email_secrets.get("username") or "k204230"
+EMAIL_HOST_PASSWORD = email_secrets.get("password") or "Schw4r!zk0pff"
 
 EMAIL_USE_TLS = True
-EMAIL_PORT = os.environ.get("EMAIL_PORT", 25)
+EMAIL_PORT = os.environ.get("EMAIL_PORT", 587)
 
 HOME_DIRS_AVAILABLE = False
 
@@ -267,9 +263,7 @@ ALLOWED_HOSTS = [
 # Provide a full list of all valid hosts (including the http(s):// prefix) which are expected
 CSRF_TRUSTED_ORIGINS = [
     h.strip()
-    for h in os.environ.get("CSRF_TRUSTED_ORIGINS", "http://localhost").split(
-        ","
-    )
+    for h in os.environ.get("CSRF_TRUSTED_ORIGINS", "http://localhost").split(",")
     if h.strip()
 ]
 

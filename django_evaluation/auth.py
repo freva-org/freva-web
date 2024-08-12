@@ -7,6 +7,8 @@ import requests
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import BaseBackend
 
+from django_evaluation.utils import sync_mail_users
+
 
 class OIDCPasswordBackend(BaseBackend):
     """
@@ -67,6 +69,7 @@ class OIDCPasswordBackend(BaseBackend):
                 user.last_name = user_info["last_name"]
                 user.first_name = user_info["first_name"]
                 user.save()
+                sync_mail_users(oneshot=True)
                 return user
         return None
 

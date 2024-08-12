@@ -4,6 +4,8 @@ import os
 from pathlib import Path
 
 import evaluation_system.api.plugin_manager as pm
+from base.exceptions import UserNotFoundError
+from base.Users import OpenIdUser
 from datatableview import Datatable, columns
 from datatableview.views import DatatableView
 from django.contrib.auth.decorators import login_required
@@ -15,20 +17,18 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse
 from django.utils.html import escape
 from django.views.decorators.debug import sensitive_post_parameters
+from django_evaluation import settings
 from evaluation_system.api.workload_manager import get_job_class
 from evaluation_system.misc import config as eval_config
 from evaluation_system.misc.exceptions import PluginManagerException
 from evaluation_system.model.db import UserDB
 from evaluation_system.model.history.models import History, ResultTag
 from evaluation_system.model.user import User
+from plugins.utils import get_scheduler_hosts, ssh_call
 
-from base.exceptions import UserNotFoundError
-from base.Users import OpenIdUser
-from django_evaluation import settings
 from history.models import HistoryTag
 from history.templatetags.resulttags import mask_uid
 from history.utils import FileDict, sendmail_to_follower
-from plugins.utils import get_scheduler_hosts, ssh_call
 
 
 class HistoryDatatable(Datatable):
@@ -183,11 +183,7 @@ class HistoryTable(DatatableView):
     template_name = "history/history_list.html"
 
     def get_queryset(self):
-        user = self.kwargs.get("uid", self.request.user)
-
-        if not (user and self.request.user.isGuest()):
-            user = self.request.user
-
+        user = self.kwargs.get("uid") or self.request.user
         objects = History.objects.order_by("-id").filter(uid=user)
 
         status = int(self.request.GET.get("status", -1))
@@ -349,7 +345,7 @@ def results(request, id, show_output_only=False):
 
         elif not history_object.uid == request.user:
             if not (
-                request.user.isGuest()
+                request.user.username.lower() != "guest"
                 and flag
                 in [History.Flag.public, History.Flag.shared, History.Flag.guest]
             ):

@@ -7,25 +7,22 @@ import urllib
 from pathlib import Path
 
 import evaluation_system.api.plugin_manager as pm
+from base.exceptions import UserNotFoundError
+from base.Users import OpenIdUser
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
-from django.views.decorators.debug import sensitive_post_parameters, sensitive_variables
+from django.views.decorators.debug import (sensitive_post_parameters,
+                                           sensitive_variables)
+from django_evaluation.settings.local import HOME_DIRS_AVAILABLE
 from evaluation_system.misc import config
 from evaluation_system.model.user import User
-
-from base.exceptions import UserNotFoundError
-from base.Users import OpenIdUser
-from django_evaluation.settings.local import HOME_DIRS_AVAILABLE
 from history.models import Configuration, History
+
 from plugins.forms import PluginForm, PluginWeb
-from plugins.utils import (
-    get_plugin_or_404,
-    get_scheduler_hosts,
-    is_path_relative_to,
-    ssh_call,
-)
+from plugins.utils import (get_plugin_or_404, get_scheduler_hosts,
+                           is_path_relative_to, ssh_call)
 
 
 @login_required()
@@ -105,7 +102,7 @@ def search_similar_results(request, plugin_name=None, history_id=None):
 def setup(request, plugin_name, row_id=None):
     pm.reload_plugins(request.user.username)
 
-    user_can_submit = request.user.isGuest() is False
+    user_can_submit = request.user.username.lower() != "guest"
 
     if user_can_submit:
         try:

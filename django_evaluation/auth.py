@@ -43,6 +43,10 @@ class OIDCPasswordBackend(BaseBackend):
         token_url = f"{api_url.rstrip('/')}/api/auth/v2/token"
         userinfo_url = f"{api_url.rstrip('/')}/api/auth/v2/userinfo"
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
+        user_model = get_user_model()
+        if username.lower() == "guest":
+            user, _ = user_model.objects.get_or_create(username="Guest")
+            return user
         data = {
             "grant_type": "password",
             "username": username,
@@ -55,7 +59,6 @@ class OIDCPasswordBackend(BaseBackend):
             res = requests.get(userinfo_url, headers=headers, timeout=3)
             if res.status_code == 200:
                 user_info = res.json()
-                user_model = get_user_model()
                 user, _ = user_model.objects.get_or_create(
                     username=user_info["username"]
                 )
@@ -64,7 +67,7 @@ class OIDCPasswordBackend(BaseBackend):
                 user.last_name = user_info["last_name"]
                 user.first_name = user_info["first_name"]
                 user.save()
-            return user
+                return user
         return None
 
     def get_user(self, user_id: int) -> Optional[Any]:

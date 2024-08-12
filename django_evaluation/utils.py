@@ -1,9 +1,9 @@
 """Collection of utility functions."""
 
 from __future__ import annotations
-import logging
 
 import json
+import logging
 import threading
 import time
 from typing import Any, Callable

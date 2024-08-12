@@ -63,6 +63,20 @@ pomand-compose up -d
 ```console
 podman-compose down
 ```
+
+By default the compose command will evaluate environment variables defined in
+the `.evn` file. If you want to override these variables, for example to disable
+using self signed certificates you can create another environment file and
+pass the `--env-file` variable. The following setup would disable certificates:
+
+```console
+cat .env.dev
+REDIS_USER=redis
+REDIS_PASSWD=secret
+
+docker compose --env-file .env.dev up -d
+```
+
 ### Running tests
 
 There are some rudimentary tests that check the integration of `django` and the
@@ -106,6 +120,12 @@ can use:
     ```console
     make stop
     ```
+
+
+> ``📝`` If you have created a custom environment file when starting the docker
+> containers you can export the path the env custom environment file by
+> using the `ENV_FILE` environment variable: `ENV_FILE=.env.dev make run`
+
 
 The django and npm development servers will write output into `runserver.log` and
 `npm.log`. You can observe the output of the processes using `tail -f` or something

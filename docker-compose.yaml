@@ -33,11 +33,11 @@ services:
     ports:
       - "6379:6379"
     environment:
-      REDIS_USERNAME: redis
-      REDIS_PASSWORD: secret
+      REDIS_USERNAME: ${REDIS_USER}
+      REDIS_PASSWORD: ${REDIS_PASSWD}
       REDIS_LOGLEVEL: debug
-      REDIS_SSL_CERTFILE: /certs/client-cert.pem
-      REDIS_SSL_KEYFILE: /certs/client-key.pem
+      REDIS_SSL_CERTFILE: ${REDIS_CONTAINER_CERTFILE}
+      REDIS_SSL_KEYFILE: ${REDIS_CONTAINER_KEYFILE}
     hostname: redis
     volumes:
       - ./docker/config/redis/redis-cmd.sh:/usr/local/bin/redis-cmd

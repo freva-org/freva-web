@@ -1,5 +1,5 @@
-import logging
 import json
+import logging
 
 from django import template
 from django.contrib.auth import get_user_model

@@ -51,7 +51,7 @@ runrest:
 	echo $$JSON_STRING|base64 > .data-portal-cluster-config.json
 	$$(which python) -m data_portal_worker -c .data-portal-cluster-config.json > rest.log 2>&1 &
 	python docker/config/dev-utils.py oidc http://localhost:8080/realms/freva/.well-known/openid-configuration
-	$$(which python) -m freva_rest.cli -p 7777 --cert-dir ./docker/config/certs --debug >> rest.log 2>&1 &
+	$$(which python) -m freva_rest.cli -p 7777 --cert-dir ./docker/config/certs --debug --dev >> rest.log 2>&1 &
 	@echo "To watch the freva-rest logs, run 'tail -f rest.log'"
 
 runfrontend:

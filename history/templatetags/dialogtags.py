@@ -1,3 +1,4 @@
+import logging
 import json
 
 from django import template
@@ -35,7 +36,13 @@ def mailfield(is_guest):
     """Extract the email information from users that have been logged in."""
     data = mark_safe(json.dumps([]))
     if not is_guest:
-        data = cache.get("user_email_info") or mark_safe(
+        try:
+            data = cache.get("user_email_info")
+        except Exception as error:
+            data = None
+            logger = logging.getLogger("freva-web")
+            logger.error("Could not add user email info to cache: %s", error)
+        data = data or mark_safe(
             json.dumps(
                 [
                     {

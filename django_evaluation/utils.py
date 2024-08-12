@@ -1,6 +1,7 @@
 """Collection of utility functions."""
 
 from __future__ import annotations
+import logging
 
 import json
 import threading
@@ -43,9 +44,15 @@ def sync_mail_users(refresh_itervall: int = 3600, oneshot: bool = False) -> None
                 email__isnull=True
             )
         ]
-        cache.set(
-            "user_email_info", mark_safe(json.dumps(user_info)), refresh_itervall + 10
-        )
+        try:
+            cache.set(
+                "user_email_info",
+                mark_safe(json.dumps(user_info)),
+                refresh_itervall + 10,
+            )
+        except Exception as error:
+            logger = logging.getLogger("freva-web")
+            logger.error("Could not add user email info to cache: %s", error)
         if oneshot is True:
             break
         time.sleep(refresh_itervall)

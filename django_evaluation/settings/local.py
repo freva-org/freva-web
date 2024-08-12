@@ -244,8 +244,8 @@ DEFAULT_FROM_EMAIL = SERVER_EMAIL
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "mailhost.dkrz.de")
 
 email_secrets = _read_secret()
-EMAIL_HOST_USER = email_secrets.get("username") or "k204230"
-EMAIL_HOST_PASSWORD = email_secrets.get("password") or "Schw4r!zk0pff"
+EMAIL_HOST_USER = email_secrets.get("username")
+EMAIL_HOST_PASSWORD = email_secrets.get("password")
 
 EMAIL_USE_TLS = True
 EMAIL_PORT = os.environ.get("EMAIL_PORT", 587)

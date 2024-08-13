@@ -123,8 +123,9 @@ can use:
 
 
 > ``📝`` If you have created a custom environment file when starting the docker
-> containers you can export the path the env custom environment file by
-> using the `ENV_FILE` environment variable: `ENV_FILE=.env.dev make run`
+> containers you can export the path the custom environment file by
+> using the `DOCKER_ENV_FILE` environment variable:
+> `DOCKER_ENV_FILE=.env.dev make run`
 
 
 The django and npm development servers will write output into `runserver.log` and

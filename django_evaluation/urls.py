@@ -8,6 +8,7 @@ from django.urls import include
 from django.urls import re_path as url
 from django.views.generic import RedirectView
 
+import django_evaluation.views
 from base.views_api import AuthenticatedUser
 from history.views_api import ResultFacets, ResultFiles
 from plugins.views_api import (
@@ -17,8 +18,6 @@ from plugins.views_api import (
     SendMailToDeveloper,
 )
 from solr.views_api import ncdump
-
-import django_evaluation.views
 
 admin.autodiscover()
 

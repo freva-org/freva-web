@@ -4,9 +4,8 @@ export EVALUATION_SYSTEM_CONFIG_FILE := $(PWD)/docker/local-eval-system.conf
 export EVALUATION_SYSTEM_DRS_CONFIG_FILE := $(PWD)/docker/drs_config.toml
 export DJANGO_SUPERUSER_PASSWORD := secret
 export DEV_MODE := 1
-export ENV_FILE ?= .env
-export RE
-include $(ENV_FILE)
+export DOCKER_ENV_FILE ?= .env
+include $(DOCKER_ENV_FILE)
 export
 
 .PHONY: all run runserver runfrontend stopserver stopfrontend stop setup
@@ -27,7 +26,7 @@ setup-django:
 setup-rest:
 	TEMP_DIR=$$(mktemp -d) && \
 	git clone https://github.com/FREVA-CLINT/freva-nextgen.git $$TEMP_DIR &&\
-	$$(which python) -m pip install $$TEMP_DIR/freva-rest $$TEMP_DIR/freva-data-portal-worker &&\
+	python -m pip install $$TEMP_DIR/freva-rest $$TEMP_DIR/freva-data-portal-worker &&\
 	rm -rf $$TEMP_DIR
 
 setup-node:
@@ -41,16 +40,14 @@ runserver:
 
 runrest:
 	@echo "Starting up freva-rest api"
-	@echo $(ENV_FILE)
-	@echo $(REDIS_SSL_CERTFILE)
 	python docker/config/dev-utils.py redis-config .data-portal-cluster-config.json \
 		--user $(REDIS_USER) \
 		--passwd $(REDIS_PASSWD) \
 		--cert-file $(REDIS_SSL_CERTFILE) \
 		--key-file $(REDIS_SSL_KEYFILE)
-	$$(which python) -m data_portal_worker -c .data-portal-cluster-config.json > rest.log 2>&1 &
+	python -m data_portal_worker -c .data-portal-cluster-config.json > rest.log 2>&1 &
 	python docker/config/dev-utils.py oidc http://localhost:8080/realms/freva/.well-known/openid-configuration
-	$$(which python) -m freva_rest.cli -p 7777 --tls-key $(REDIS_SSL_KEYFILE) --tls-cert $(REDIS_SSL_CERTFILE) --debug --dev >> rest.log 2>&1 &
+	python -m freva_rest.cli -p 7777 --tls-key $(REDIS_SSL_KEYFILE) --tls-cert $(REDIS_SSL_CERTFILE) --debug --dev >> rest.log 2>&1 &
 	@echo "To watch the freva-rest logs, run 'tail -f rest.log'"
 
 runfrontend:

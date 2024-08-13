@@ -1,5 +1,6 @@
 import os
 
+from django.contrib.auth import get_user_model
 from evaluation_system.misc import config, utils
 from evaluation_system.model.history.models import History, HistoryTag
 
@@ -152,19 +153,13 @@ def sendmail_to_follower(request, history_id, subject, message):
     """
     from django.urls import reverse
 
-    from django_evaluation.ldaptools import get_ldap_object
-
     follower = HistoryTag.objects.filter(history_id_id=history_id).filter(
         type=HistoryTag.tagType.follow
     )
 
     follower = follower.order_by("uid")
 
-    addresses = []
-
-    user_info = get_ldap_object()
-
-    prev_uid = None
+    uid_seen = []
 
     url = request.build_absolute_uri(
         reverse("history:unfollow", kwargs={"history_id": history_id})
@@ -176,17 +171,9 @@ def sendmail_to_follower(request, history_id, subject, message):
     to_email = []
     for user in follower:
         uid = str(user.uid)
-
-        if uid != prev_uid and user.uid != request.user:
-            info = user_info.get_user_info(uid)
-            if (
-                info
-            ):  # Users which follow the result but are no valid users anymore can't get get notified
-                addresses.append(info[3])
-        prev_uid = uid
-
-        for addr in addresses:
-            to_email.append(addr)
+        if uid not in uid_seen and user.uid != request.user and user.email:
+            to_email.append(user.email)
+        uid_seen.append(uid)
 
     from templated_email import send_templated_mail
 

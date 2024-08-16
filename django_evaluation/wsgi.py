@@ -17,6 +17,7 @@ framework.
 import os
 import site
 import sys
+import time
 
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__) + "../../")
 
@@ -49,8 +50,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "django_evaluation.settings")
 # setting points here.
 from django.core.wsgi import get_wsgi_application
 
-from django_evaluation.ldaptools import get_ldap_object
+from django_evaluation.utils import sync_mail_users
 
-LdapCls = get_ldap_object()
-LdapCls.run_ldap_cacheing_daemon()
+sync_mail_users(oneshot=False)
 application = get_wsgi_application()

@@ -8,7 +8,7 @@ from django.utils.safestring import mark_safe
 from evaluation_system.misc.exceptions import PluginManagerException
 
 from base.exceptions import UserNotFoundError
-from base.LdapUser import LdapUser
+from base.Users import OpenIdUser
 from django_evaluation import settings
 from history.models import HistoryTag
 from history.utils import FileDict
@@ -187,7 +187,7 @@ def mail_to_developer(tool_name, username, url):
     from evaluation_system.api import plugin_manager as pm
 
     try:
-        user = LdapUser(username)
+        user = OpenIdUser(username)
         tool = pm.get_plugin_instance(tool_name, user)
         developer = tool.tool_developer
     except (UserNotFoundError, PluginManagerException, AttributeError):

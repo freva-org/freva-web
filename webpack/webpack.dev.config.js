@@ -7,7 +7,7 @@ const mode = "development";
 const isDevServer = !!(process.env.npm_lifecycle_event === "dev");
 
 const SERVER_HOST = "127.0.0.1";
-const SERVER_PORT = 8080;
+const SERVER_PORT = 8086;
 
 const entry = isDevServer
   ? [`webpack-dev-server/client`, "./assets/js/index"]
@@ -25,6 +25,7 @@ if (isDevServer) {
     allowedHosts: "all",
     hot: true,
     historyApiFallback: true,
+    port: SERVER_PORT,
     client: {
       logging: "verbose",
       webSocketURL: `ws://${SERVER_HOST}:${SERVER_PORT}/ws`,

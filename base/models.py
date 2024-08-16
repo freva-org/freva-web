@@ -1,10 +1,13 @@
 from datetime import datetime
+from typing import Optional
 
 from django.contrib.auth.models import User
 from django.db import models
 
 
 def isGuest(self):
+    if hasattr(self, "_guest"):
+        return self._guest
     groups = self.groups.filter(name="Guest")
     return len(groups) > 0
 

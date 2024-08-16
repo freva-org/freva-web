@@ -8,19 +8,7 @@ EVALUATION_SYSTEM_CONFIG_FILE : str
 FREVA_WEB_CONFIG_FILE : str
 DEV_MODE : 0|1
 PROJECT_ROOT : str
-AUTH_LDAP_SERVER_URI : str
-AUTH_LDAP_START_TLS : 0|1
-ALLOWED_GROUP : str
-LDAP_USER_BASE : str
-LDAP_GROUP_BASE : str
-LDAP_FIRSTNAME_FIELD : str
-LDAP_LASTNAME_FIELD : str
-LDAP_EMAIL_FIELD : str
-LDAP_GROUP_CLASS : str
-LDAP_GROUP_TYPE : str
-LDAP_USER_DN : str
-LDAP_USER_PW : str
-LDAP_MODEL : str
+FREVA_REST_URL : str
 SCHEDULER_HOST : str
 REDIS_HOST : str
 REDIS_PORT : str
@@ -38,14 +26,10 @@ import shutil
 import sys
 from pathlib import Path
 
-import ldap
 import requests
 import toml
 from django.urls import reverse_lazy
-from django_auth_ldap.config import LDAPSearch, NestedGroupOfNamesType, PosixGroupType
 from evaluation_system.misc import config
-
-from base.exceptions import UnknownLDAPGroupTypeError
 
 logger_format = logging.Formatter(
     "%(name)s - %(asctime)s - %(levelname)s: %(message)s",
@@ -137,9 +121,7 @@ STATIC_URL = "/static/"
 if not DEV:
     STATIC_ROOT = str(Path(PROJECT_ROOT) / "static")
 
-INSTITUTION_LOGO = _get_logo(
-    web_config.get("institution_logo", ""), PROJECT_ROOT
-)
+INSTITUTION_LOGO = _get_logo(web_config.get("institution_logo", ""), PROJECT_ROOT)
 FREVA_LOGO = f"{STATIC_URL}img/by_freva_transparent.png"
 MAIN_COLOR = _get_conf_key(web_config, "main_color", "Tomato", False)
 _set_favicon(MAIN_COLOR, Path(PROJECT_ROOT))
@@ -166,9 +148,7 @@ IMPRINT = web_config.get("imprint") or [
     "Germany",
 ]
 HOMEPAGE_HEADING = web_config.get("homepage_heading") or "Lorem ipsum dolor."
-ABOUT_US_TEXT = (
-    web_config.get("about_us_text") or "Hello world, this is freva."
-)
+ABOUT_US_TEXT = web_config.get("about_us_text") or "Hello world, this is freva."
 CONTACTS = web_config.get("contacts") or ["freva@dkrz.de"]
 if isinstance(CONTACTS, str):
     CONTACTS = [c for c in CONTACTS.split(",") if c.strip()]
@@ -177,100 +157,16 @@ if isinstance(CONTACTS, str):
 ##########
 INSTITUTION_NAME = web_config.get("insitution_name") or "Freva"
 ##################################################
-##################################################
-# SETTING FOR LDAP
-# http://pythonhosted.org//django-auth-ldap/
-#
-# Freva is using LDAP on two different occasions:
-# - As an authentication service: For this we use the built-in
-#   Django-Functionalities. All LDAP-Properties below starting with
-#   `AUTH_LDAP`` belong to this.
-# - As a lookup for available users, e.g. for notify them about events
-#   or share results. This is implemented in ldaptools.py and all
-#   properties starting with `LDAP_` belong to this.
-##################################################
-##################################################
-# The server for LDAP configuration
-AUTH_LDAP_SERVER_URI = os.environ.get(
-    "AUTH_LDAP_SERVER_URI", "ldap://idm-dmz.dkrz.de"
-)
-AUTH_LDAP_START_TLS = bool(int(os.environ.get("AUTH_LDAP_START_TLS", "0")))
-# The directory with SSL certificates
-CA_CERT_DIR = str(web_config_path.parent)
-# the only allowd group
-ALLOWED_GROUP = os.environ.get("ALLOWED_GROUP", "") or "*"
-# Require a ca certificate
-AUTH_LDAP_GLOBAL_OPTIONS = {
-    ldap.OPT_X_TLS_REQUIRE_CERT: ldap.OPT_X_TLS_DEMAND,  # TPYE OF CERTIFICATION
-    ldap.OPT_X_TLS_CACERTDIR: CA_CERT_DIR,  # PATH OF CERTIFICATION
-}
-# this is not used by django directly, but we use it for
-# python-ldap access, as well.
-LDAP_USER_BASE = os.environ.get(
-    "LDAP_USER_BASE", "cn=users,cn=accounts,dc=dkrz,dc=de"
-)
-LDAP_GROUP_BASE = os.environ.get(
-    "LDAP_GROUP_BASE", "cn=groups,cn=accounts,dc=dkrz,dc=de"
-)
-
-AUTH_LDAP_USER_SEARCH = LDAPSearch(
-    LDAP_USER_BASE, ldap.SCOPE_SUBTREE, "(uid=%(user)s)"
-)
-# keep the authenticated user for group search
-AUTH_LDAP_BIND_AS_AUTHENTICATING_USER = True
-if ALLOWED_GROUP != "*":
-    # ALLOWED_GROUP_MEMBER user only
-    AUTH_LDAP_REQUIRE_GROUP = f"cn={ALLOWED_GROUP},{LDAP_GROUP_BASE}"
-
-LDAP_FIRSTNAME_FIELD = os.environ.get("LDAP_FIRSTNAME_FIELD", "givenname")
-LDAP_LASTNAME_FIELD = os.environ.get("LDAP_LASTNAME_FIELD", "sn")
-LDAP_EMAIL_FIELD = os.environ.get("LDAP_EMAIL_FIELD", "mail")
-LDAP_GROUP_CLASS = (
-    f'(objectClass={os.environ.get("LDAP_GROUP_CLASS", "groupOfNames")})'
-)
-LDAP_GROUP_TYPE = os.environ.get(
-    "LDAP_GROUP_TYPE", "nested"
-)  # accepted values: nested, posix
-
-if LDAP_GROUP_TYPE == "nested":
-    AUTH_LDAP_GROUP_TYPE = NestedGroupOfNamesType()
-elif LDAP_GROUP_TYPE == "posix":
-    AUTH_LDAP_GROUP_TYPE = PosixGroupType()
-else:
-    raise UnknownLDAPGroupTypeError()
-
-AUTH_LDAP_USER_ATTR_MAP = {
-    "email": LDAP_EMAIL_FIELD,
-    "last_name": LDAP_LASTNAME_FIELD,
-    "first_name": LDAP_FIRSTNAME_FIELD,
-}
-
-AUTH_LDAP_GROUP_SEARCH = LDAPSearch(
-    LDAP_GROUP_BASE, ldap.SCOPE_SUBTREE, LDAP_GROUP_CLASS
-)
-
-AUTH_LDAP_MIRROR_GROUPS = True
-# agent user for LDAP
-LDAP_USER_DN = os.environ.get("LDAP_USER_DN", "")
-
-LDAP_USER_PW = os.environ.get("LDAP_USER_PW", "")
-
-AUTH_LDAP_BIND_DN = LDAP_USER_DN
-AUTH_LDAP_BIND_PASSWORD = LDAP_USER_PW
-
-LDAP_GROUP_FILTER = f"(cn={ALLOWED_GROUP})"
-LDAP_MODEL = f'django_evaluation.ldaptools.{os.environ.get("LDAP_MODEL", "MiklipUserInformation")}'
-##################################################
-##################################################
-# END SETTING FOR LDAP
-##################################################
-##################################################
 # the host to start the scheduler
 SCHEDULER_HOSTS = [
     h.strip()
     for h in os.environ.get("SCHEDULER_HOST", "levante.dkrz.de").split(",")
     if h.strip()
 ]
+
+# The url of the freva-rest api
+FREVA_REST_URL = os.getenv("FREVA_REST_URL", "http://localhost:7777")
+
 # temporary directory for tailed scheduler files
 TAIL_TMP_DIR = "/tmp/tail/"
 # Additional locations of static files
@@ -304,35 +200,58 @@ DATABASES = {
         "OPTIONS": {"charset": "utf8mb4"},
     },
 }
-# register the LDAP authentication backend
 AUTHENTICATION_BACKENDS = (
     "django.contrib.auth.backends.ModelBackend",
-    "django_auth_ldap.backend.LDAPBackend",
+    "django_evaluation.auth.OIDCPasswordBackend",
 )
-
+### Caching stuff
 REDIS_HOST = os.environ.get("REDIS_HOST", "127.0.0.1")
 REDIS_PORT = os.environ.get("REDIS_PORT", 6379)
+REDIS_USER = os.environ.get("REDIS_USER")
+REDIS_PASSWD = os.environ.get("REDIS_PASSWD")
+REDIS_SSL_CERTFILE = os.environ.get("REDIS_SSL_CERTFILE")
+REDIS_SSL_KEYFILE = os.environ.get("REDIS_SSL_KEYFILE")
 
-DATA_BROWSER_HOST = config.get("databrowser.host", "http://localhost:7777")
+redis_options = {}
+if REDIS_SSL_CERTFILE:
+    schema = "rediss"
+    redis_options["ssl_certfile"] = REDIS_SSL_CERTFILE
+    redis_options["ssl_ca_certs"] = REDIS_SSL_CERTFILE
+else:
+    schema = "redis"
+
+if REDIS_SSL_KEYFILE:
+    redis_options["ssl_keyfile"] = REDIS_SSL_KEYFILE
+
+if REDIS_USER:
+    redis_options["username"] = REDIS_USER
+if REDIS_PASSWD:
+    redis_options["password"] = REDIS_PASSWD
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": f"{schema}://{REDIS_HOST}:{REDIS_PORT}/9",
+        "OPTIONS": redis_options,
+    },
+}
+
+DATA_BROWSER_HOST = os.environ.get("FREVA_REST_URL", "http://localhost:7777")
 
 SERVER_EMAIL = os.environ.get("SERVER_EMAIL", "freva@dkrz.de")
 DEFAULT_FROM_EMAIL = SERVER_EMAIL
 
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "mailhost.dkrz.de")
 
-email_secrets = _read_secret()
-EMAIL_HOST_USER = email_secrets.get("username")
-EMAIL_HOST_PASSWORD = email_secrets.get("password")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "25"))
+if EMAIL_PORT == 25:
+    EMAIL_HOST_USER = ""
+    EMAIL_HOST_PASSWORD = ""
+else:
+    email_secrets = _read_secret()
+    EMAIL_HOST_USER = email_secrets.get("username")
+    EMAIL_HOST_PASSWORD = email_secrets.get("password")
 
-EMAIL_USE_TLS = True
-EMAIL_PORT = os.environ.get("EMAIL_PORT", 25)
-
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}",
-    },
-}
 
 HOME_DIRS_AVAILABLE = False
 
@@ -347,9 +266,7 @@ ALLOWED_HOSTS = [
 # Provide a full list of all valid hosts (including the http(s):// prefix) which are expected
 CSRF_TRUSTED_ORIGINS = [
     h.strip()
-    for h in os.environ.get("CSRF_TRUSTED_ORIGINS", "http://localhost").split(
-        ","
-    )
+    for h in os.environ.get("CSRF_TRUSTED_ORIGINS", "http://localhost").split(",")
     if h.strip()
 ]
 

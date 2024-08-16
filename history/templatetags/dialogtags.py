@@ -1,10 +1,12 @@
 import json
+import logging
 
 from django import template
+from django.contrib.auth import get_user_model
+from django.core.cache import cache
 from django.utils.safestring import mark_safe
 
 from django_evaluation import settings
-from django_evaluation.ldaptools import get_ldap_object
 
 register = template.Library()
 
@@ -31,16 +33,26 @@ def caption_dialog(current, default, history_object, user):
 
 @register.inclusion_tag("history/templatetags/mailfield.html")
 def mailfield(is_guest):
-    info = []
-    user_info = get_ldap_object()
-
+    """Extract the email information from users that have been logged in."""
+    data = mark_safe(json.dumps([]))
     if not is_guest:
-        info = user_info.get_all_users()
-
-    data = []
-
-    for user in info:
-        id = user[0]
-        data.append({"id": id, "text": "%s, %s (%s)" % (user[1], user[2], user[0])})
-
-    return {"user_data": mark_safe(json.dumps(data)), "is_guest": is_guest}
+        try:
+            data = cache.get("user_email_info")
+        except Exception as error:
+            data = None
+            logger = logging.getLogger("freva-web")
+            logger.error("Could not add user email info to cache: %s", error)
+        data = data or mark_safe(
+            json.dumps(
+                [
+                    {
+                        "id": u.username,
+                        "text": f"{u.first_name}, {u.last_name} ({u.email})",
+                    }
+                    for u in get_user_model()
+                    .objects.exclude(email__exact="")
+                    .exclude(email__isnull=True)
+                ]
+            )
+        )
+    return {"user_data": data, "is_guest": is_guest}

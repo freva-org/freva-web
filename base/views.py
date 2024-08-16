@@ -28,7 +28,9 @@ def home(request):
             username = request.POST.get("user", "")
             passwd = request.POST.get("password", "")
             if username:
-                user_object = auth.authenticate(username=username, password=passwd)
+                user_object = auth.authenticate(
+                    username=username, password=passwd
+                )
                 if user_object:
                     auth.login(request, user_object)
                     guest_login = user_object.isGuest()
@@ -48,7 +50,7 @@ def home(request):
                 next_page = forward
 
             login_failed = True
-            logging.error(str(e))
+            logging.exception(str(e))
 
     return render(
         request,
@@ -103,7 +105,9 @@ def shell_in_a_box(request):
     else:
         shell_url = "/shell/"
 
-    return render(request, "base/shell-in-a-box.html", {"shell_url": shell_url})
+    return render(
+        request, "base/shell-in-a-box.html", {"shell_url": shell_url}
+    )
 
 
 @login_required()
@@ -114,17 +118,8 @@ def contact(request):
     if request.method == "POST":
         from templated_email import send_templated_mail
 
-        from django_evaluation.ldaptools import get_ldap_object
-
-        user_info = get_ldap_object()
-        myinfo = user_info.get_user_info(str(request.user))
-        try:
-            myemail = myinfo[3]
-            username = request.user.get_full_name()
-        # TODO: Exception too broad!
-        except:
-            myemail = settings.SERVER_EMAIL
-            username = "guest"
+        myemail = settings.SERVER_EMAIL
+        username = "freva-system"
         mail_text = request.POST.get("text")
         send_templated_mail(
             template_name="mail_to_admins",

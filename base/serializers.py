@@ -10,18 +10,26 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ("id", "username", "email", "first_name", "isGuest", "home", "scratch")
+        fields = (
+            "id",
+            "username",
+            "email",
+            "first_name",
+            "isGuest",
+            "home",
+            "scratch",
+        )
 
     def get_home(self, instance):
         if instance.username.lower() == "guest" or not HOME_DIRS_AVAILABLE:
             return None
-        ldap_user = self.context.get("user")
-        if ldap_user:
-            return ldap_user.getUserHome()
+        _user = self.context.get("user")
+        if _user:
+            return _user.getUserHome()
         return None
 
     def get_scratch(self, instance):
-        ldap_user = self.context.get("user")
-        if ldap_user:
-            return ldap_user.getUserScratch()
+        _user = self.context.get("user")
+        if _user:
+            return _user.getUserScratch()
         return None

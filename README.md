@@ -12,6 +12,12 @@ To start development with freva clone the repository and its sub-modules:
 git clone --recursive git@github.com:FREVA-CLINT/freva-web.git
 ```
 
+And create a pair of self-signed keys. These keys will be used by various
+services.
+
+```console
+python docker/config/dev-utils.py gen-certs
+```
 
 ## Installation of the required packages and infrastructure
 
@@ -38,13 +44,37 @@ mariadb service. This services can be deployed using
 [`docker-compose`](https://docs.docker.com/compose/install/).
 
 ```console
-docker-compose up -d
+docker compose up -d
 ```
 
 When finished, tear down the environment with
 
 ```console
-docker-compose down
+docker compose down
+```
+
+
+You can also use podman (`python -m pip install podman-compose`):
+
+```console
+pomand-compose up -d
+```
+
+```console
+podman-compose down
+```
+
+By default the compose command will evaluate environment variables defined in
+the `.evn` file. If you want to override these variables, for example to disable
+using self signed certificates you can create another environment file and
+pass the `--env-file` variable. The following setup would disable certificates:
+
+```console
+cat .env.dev
+REDIS_USER=redis
+REDIS_PASSWD=secret
+
+docker compose --env-file .env.dev up -d
 ```
 
 ### Running tests
@@ -59,15 +89,26 @@ conda activate freva-web
 python -m pytest -vv tests
 ```
 
+
+
 ## Using GNU `make`:
+Currently the web app needs multiple components to run. These are:
+
+- A java script front end via node.js
+- The freva restAPI.
+- The django web backend.
+
+Future development aims at replacing the django backend by the freva restAPI.
+Until this this is done the two components have to be deployed together.
+
 We have created a Makefile that sets up a development version of the web. You
 can use:
 
-- To *setup* / *initialise* the nodejs and django servers use:
+- To *setup* / *initialise* the nodejs, freva restAPI and django servers use:
     ```console
     make setup
     ```
-- To *run* node and django servers use:
+- To *run* node, freva restAPI and django servers use:
     ```console
     make run
     ```
@@ -79,6 +120,13 @@ can use:
     ```console
     make stop
     ```
+
+
+> ``📝`` If you have created a custom environment file when starting the docker
+> containers you can export the path the custom environment file by
+> using the `DOCKER_ENV_FILE` environment variable:
+> `DOCKER_ENV_FILE=.env.dev make run`
+
 
 The django and npm development servers will write output into `runserver.log` and
 `npm.log`. You can observe the output of the processes using `tail -f` or something

@@ -47,6 +47,7 @@ dependencies:
     - hurry.filesize
   - pygtail
   - pylint
+  - pyjwt
   - pytest
   - pytest-cov
   - pytest-env

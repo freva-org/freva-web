@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from base.exceptions import UserNotFoundError
-from base.LdapUser import LdapUser
+from base.Users import OpenIdUser
 
 from .serializers import UserSerializer
 
@@ -13,7 +13,7 @@ class AuthenticatedUser(APIView):
     def get(self, request):
         if request.user.is_authenticated:
             try:
-                user = LdapUser(request.user.username)
+                user = OpenIdUser(request.user.username)
             except UserNotFoundError:
                 user = None
             return Response(

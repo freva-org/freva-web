@@ -84,8 +84,14 @@ def _read_secret(port: int = 5002, key: str = "email") -> dict[str, str]:
     sha = config._get_public_key(config.get("project_name"))
     uri = f"http://{config.get('db.host')}:{port}/vault/{key}/{sha}"
     try:
-        req = requests.get(uri).json()
-    except requests.exceptions.ConnectionError:
+        res = requests.get(uri, timeout=5)
+        res.raise_for_status()
+        req = res.json()
+    except (
+        requests.exceptions.ConnectionError,
+        requests.exceptions.HTTPError,
+    ) as error:
+        logger.warning("Could not read secrets from vault: %s", error)
         req = {}
     return req
 

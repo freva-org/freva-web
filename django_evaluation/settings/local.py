@@ -306,6 +306,12 @@ RESULT_BROWSER_FACETS = [
     "variable",
 ]
 MENU_ENTRIES = []
+CHAT_BOT_URL = "http://vader5-icpub.lvt.dkrz.de:8502"
+
+if os.getenv("CHAT_BOT", "0").isdigit():
+    ACTIVATE_CHAT_BOT = bool(int(os.getenv("CHAT_BOT", "0")))
+else:
+    ACTIVATE_CHAT_BOT = False
 
 # Sometimes it is desired to put a link into the navbar which does not correspond
 # to a template inside django. If something like this is needed, put a slash as a
@@ -324,3 +330,12 @@ for title, url, html_id in web_config.get("menu_entries", []) or _MENU_ENTRIES:
         MENU_ENTRIES.append(
             {"name": title, "url": reverse_lazy(url), "html_id": html_id}
         )
+
+if ACTIVATE_CHAT_BOT:
+    MENU_ENTRIES.append(
+        {
+            "name": "Freva Bot",
+            "url": reverse_lazy("bot:chatbot"),
+            "html_id": "chatbot_menu",
+        }
+    )

@@ -23,7 +23,7 @@ ReactDOM.render(
     <Router history={browserHistory}>
       <Route path="/" component={App}>
         <Route path="plugins/" component={PluginList} />
-        <Route path="chat/" component={FrevaGTP} />
+        <Route path="chatbot/" component={FrevaGTP} />
         <Route path="history/result-browser/" component={Resultbrowser} />
         <Route path="databrowser/*" component={Databrowser} />
         <Route path="plugins/:pluginName/detail/" component={PluginDetail} />

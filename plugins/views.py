@@ -161,7 +161,7 @@ def setup(request, plugin_name, row_id=None):
             # Get modules and files to source
             config.reloadConfiguration()
             eval_str = f"EVALUATION_SYSTEM_CONFIG_FILE={config.CONFIG_FILE}"
-            sexe_path = f"PATH={settings.FREVA_BIN}:$PATH"
+            exe_path = f"PATH={settings.FREVA_BIN}:$PATH"
 
             if "EVALUATION_SYSTEM_PLUGINS_%s" % request.user in os.environ:
                 plugin_str = os.environ["EVALUATION_SYSTEM_PLUGINS_%s" % request.user]

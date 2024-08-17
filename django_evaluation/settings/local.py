@@ -241,17 +241,11 @@ DATA_BROWSER_HOST = os.environ.get("FREVA_REST_URL", "http://localhost:7777")
 SERVER_EMAIL = os.environ.get("SERVER_EMAIL", "freva@dkrz.de")
 DEFAULT_FROM_EMAIL = SERVER_EMAIL
 
-EMAIL_HOST = os.environ.get("EMAIL_HOST", "mailhost.dkrz.de")
-
-EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "25"))
-if EMAIL_PORT == 25:
-    EMAIL_HOST_USER = ""
-    EMAIL_HOST_PASSWORD = ""
-else:
-    email_secrets = _read_secret()
-    EMAIL_HOST_USER = email_secrets.get("username")
-    EMAIL_HOST_PASSWORD = email_secrets.get("password")
-
+EMAIL_HOST = "smtp.sendgrid.net"
+EMAIL_PORT = "587"
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "apikey"
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
 HOME_DIRS_AVAILABLE = False
 

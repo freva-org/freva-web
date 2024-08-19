@@ -79,17 +79,6 @@ def _get_logo(logo_file, project_root):
     return f"/static/img/{logo_file.name}"
 
 
-def _read_secret(port: int = 5002, key: str = "email") -> dict[str, str]:
-    """Read the key-value pair secrets from vault server."""
-    sha = config._get_public_key(config.get("project_name"))
-    uri = f"http://{config.get('db.host')}:{port}/vault/{key}/{sha}"
-    try:
-        req = requests.get(uri).json()
-    except requests.exceptions.ConnectionError:
-        req = {}
-    return req
-
-
 def _set_favicon(html_color: str, project_root: Path) -> None:
     img_folder = Path(project_root) / "static" / "img"
     tmpl_folder = Path(project_root) / "static_root" / "img"

@@ -1,6 +1,13 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [v2408.0.0]
+
+### Changed
+- Use sendgrid to send emails.
+- Use freva-rest API to manage authentication.
+
+
 ## [v2405.0.0]
 
 ### Fixed

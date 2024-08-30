@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Container } from 'react-bootstrap';
+import JSONStream from 'JSONStream';
 
 import Spinner from "../../Components/Spinner";
 
@@ -62,46 +63,49 @@ const ChatBot = () => {
     if (image !== "") setConversation(prevConversation => [...prevConversation, {type: 'image', content: image}])
   }, [image])
 
-  async function requestBot() {
+  const fetchData = async () => {
+    const response = await fetch('/api/chatbot/streamresponse?' + new URLSearchParams({
+      input: encodeURIComponent(question),
+      auth_key: process.env.BOT_AUTH_KEY,
+    }).toString());
 
-    setAnswerLoading(true);
+    const reader = response.body.getReader();
+    const jsonStream = JSONStream.parse();
 
-    try {
-      const response = await fetch('/api/chatbot/streamresponse?' + new URLSearchParams({
-        input: encodeURIComponent(question),
-        auth_key: process.env.BOT_AUTH_KEY,
-      }).toString());
+    let botAnswer = "";
+    let botCode = "";
 
-      const decoder = new TextDecoder('utf-8');
-      let botAnswer = "";
-      let botCode = "";
-      let botImage = "";
+    jsonStream.on("data", (value) => {
 
-      for await ( const chunk of response.body) {
-        (decoder.decode(chunk)).split(/}{/).filter(function(e) { 
-          if (!e.startsWith("{") && !e.endsWith("}")) {
-            const variantString = JSON.parse(`{${e}}`);
-            console.log('####', variantString);
-
-            // the bot mixes code and answer text
-            // if an answer starts to prompt code, display the previous answer (if not empty) and the start code box
-            if (variantString.variant === 'Code' || variantString.variant === 'CodeOutput') {
-
-              // collect code snippets
-              botCode = botCode + variantString.content[0];
-            } else if (variantString.variant === 'Image') {
-              botImage = botImage + variantString.content;
-            } else {
-              botAnswer = botAnswer + variantString.content;
-            }
-          }
-        });
+      if (value.variant === 'Image') {
+        setImage(value.content);
+      } else if (value.variant === "Code" || value.variant === 'CodeOutput') {
+        botCode = botCode + value.content[0];
+      } else if (value.variant !== 'ServerHint' && value.variant !== 'StreamEnd'){
+        botAnswer = botAnswer + value.content;
       }
+    });
 
-      if (botCode !== "") setCode(botCode); botCode = "";
-      if (botImage !== "") setImage(botImage); botImage = "";
-      if (botAnswer !== "") setAnswer(botAnswer); botAnswer = "";
+    const pump = async () => {
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        // eslint-disable-next-line no-await-in-loop
+        const { done, value } = await reader.read();
+        if (done) break;
+        jsonStream.write(value);
+      }
+      setCode(botCode);
+      setAnswer(botAnswer);
+      jsonStream.end();
+    };
 
+    await pump();
+  };
+
+  async function requestBot() {
+    setAnswerLoading(true);
+    try {
+      await fetchData();
     } catch(error) {
       setAnswer('Failed to fetch streamresponse');
       console.log(error);

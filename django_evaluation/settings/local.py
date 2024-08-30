@@ -334,7 +334,7 @@ for title, url, html_id in web_config.get("menu_entries", []) or _MENU_ENTRIES:
 if ACTIVATE_CHAT_BOT:
     MENU_ENTRIES.append(
         {
-            "name": "Freva Bot",
+            "name": "FrevaGPT",
             "url": reverse_lazy("bot:chatbot"),
             "html_id": "chatbot_menu",
         }

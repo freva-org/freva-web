@@ -113,10 +113,6 @@ const ChatBot = () => {
     setAnswerLoading(false);
   }
 
-  function handleInputChange(event) {
-    setQuestion(event.target.value);
-  }
-
   function handleBotRequest(){
     const newQuestion = {type: 'question', content: question};
     setConversation(prevConversation => [...prevConversation, newQuestion]);
@@ -125,6 +121,16 @@ const ChatBot = () => {
     requestBot();
   }
 
+  function handleInputChange(event) {
+    setQuestion(event.target.value);
+  }
+
+  function handleKeyDown(event) {
+    if (event.key === "Enter") {
+      handleBotRequest();
+    }
+  }
+  
   return (
     <Container>
       <div style={ChatBotStyle.botContainer}>
@@ -142,7 +148,7 @@ const ChatBot = () => {
         {answerLoading ? (<Spinner/>) : null}
 
         <div>
-          <input style={ChatBotStyle.questionInput} value={question} onChange={handleInputChange} placeholder="Ask a question"/>
+          <input style={ChatBotStyle.questionInput} value={question} onChange={handleInputChange} onKeyDown={handleKeyDown} placeholder="Ask a question"/>
           <button style={ChatBotStyle.questionButton} onClick={handleBotRequest} disabled={answerLoading}>Send</button>
         </div>
       </div>

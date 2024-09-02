@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container } from 'react-bootstrap';
+import { Container, Row, Col, FormControl, InputGroup, ListGroupItem } from 'react-bootstrap';
 import JSONStream from 'JSONStream';
 
 import Spinner from "../../Components/Spinner";
@@ -14,42 +14,6 @@ const ChatBot = () => {
   const [conversation, setConversation] = useState([]);
   const [answerLoading, setAnswerLoading] = useState(false);
 
-  const ChatBotStyle = {
-    botContainer: {
-      display: "flex",
-      flexDirection: "column",
-    },
-    questionInput: {
-      width: "90%",
-      borderRadius: "10px",
-      border: ".1em solid lightgrey",
-      padding: "10px",
-      boxShadow: "0 .125rem .25rem rgba(0,0,0,.075)",
-    },
-    questionButton: {
-      width: "8%",
-      padding: "10px",
-      borderRadius: "10px",
-      marginLeft: "20px",
-      boxShadow: "0 .125rem .25rem rgba(0,0,0,.075)",
-    },
-    question: {
-      backgroundColor: "#aaa",
-      borderRadius: "10px",
-      padding: "10px",
-      boxShadow: "0 .125rem .25rem rgba(0,0,0,.075)",
-      listStyle: "none",
-      margin: "10px 0px 10px 100px",
-    },
-    answer: {
-      backgroundColor: "#ccc",
-      borderRadius: "10px",
-      padding: "10px",
-      boxShadow: "0 .125rem .25rem rgba(0,0,0,.075)",
-      listStyle: "none",
-      margin: "10px 100px 10px 0px",
-    },
-  }
 
   useEffect(() => {
     if (answer !== "") setConversation(prevConversation => [...prevConversation, {type: 'answer', content: answer}])
@@ -108,7 +72,6 @@ const ChatBot = () => {
       await fetchData();
     } catch(error) {
       setAnswer('Failed to fetch streamresponse');
-      console.log(error);
     }
     setAnswerLoading(false);
   }
@@ -133,25 +96,42 @@ const ChatBot = () => {
   
   return (
     <Container>
-      <div style={ChatBotStyle.botContainer}>
-        <ul>
+      <Row className="mt-3">
+        <Col>
           {conversation.map((element, index) => {
             if (element.type === 'code') {
-              return <CodeBlock key={index} code={element.content}/>
+              return (<Col md={{span:10, offset: 0}} key={index}><CodeBlock code={element.content}/></Col>);
             } else if (element.type === 'image') {
               return <img key={index} src={`data:image/jpeg;base64,${element.content}`} />
-            } else {
-              return <li style={ChatBotStyle[element.type]} key={index}>{element.content}</li>}
+            } else {      
+              return (
+                <Col md={element.type === 'answer' ? {span: 10, offset: 0} : {span: 10, offset: 2}} key={index}>
+                  <ListGroupItem 
+                    className={element.type === 'answer' ? "shadow-sm card-body border-0 border-bottom mb-3 bg-light"
+                                                          : "shadow-sm card-body border-0 border-bottom mb-3 bg-info"}
+                    key={index}>
+                      {element.content}
+                  </ListGroupItem>
+                </Col>
+              );         
             }
+          }
           )}
-        </ul>
-        {answerLoading ? (<Spinner/>) : null}
+        </Col>
 
-        <div>
-          <input style={ChatBotStyle.questionInput} value={question} onChange={handleInputChange} onKeyDown={handleKeyDown} placeholder="Ask a question"/>
-          <button style={ChatBotStyle.questionButton} onClick={handleBotRequest} disabled={answerLoading}>Send</button>
-        </div>
-      </div>
+        
+        {answerLoading ? (<Row className="mb-3"><Col md={1}><Spinner/></Col></Row>) : null}
+      </Row>
+      <Row>
+        <Col md={11}>
+          <InputGroup className="mb-2 pb-2">
+            <FormControl type="text" value={question} onChange={handleInputChange} onKeyDown={handleKeyDown} placeholder="Ask a question"/>
+          </InputGroup>
+        </Col>
+        <Col md={1}>
+          <button onClick={handleBotRequest} disabled={answerLoading} className="btn btn-secondary w-100">Send</button>
+        </Col>
+      </Row>
     </Container>
   );
 };

@@ -1,25 +1,7 @@
 import React from 'react';
+import { Card } from 'react-bootstrap';
 
 import PropTypes from "prop-types";
-
-const CodeBlockStyle = {
-    block: {
-        backgroundColor: "#444",
-        borderRadius: "5px",
-        borderTop: "20px solid #666",
-        padding: "5px 5px 5px 15px",
-        color: "lightgray",
-        fontWeight: "bold",
-        fontFamily: "Consolas",
-        marginBottom: "10px"
-    },
-    blockLanguage: {
-        backgroundColor: "lightgrey",
-    },
-    codeLine: {
-        margin: "0px",
-    }
-}
 
 function formatCode(codeString) {
     const seperatedCode = codeString.split("\\n");
@@ -28,8 +10,16 @@ function formatCode(codeString) {
 
 function CodeBlock(props) {
     return(
-        <div style={CodeBlockStyle.block}>
-            {formatCode(props.code).map((element, index) => {return <p style={CodeBlockStyle.codeLine} key={index}>{element}</p>})}
+        <div className="mb-3 ">
+            <Card bg="dark" text="white" border="light">
+                <Card.Header>Code</Card.Header>
+                <Card.Body>
+                    {formatCode(props.code).map((element, index) => {
+                        return (<span key={index}>{element}<br></br></span>);
+                        }
+                    )}
+                </Card.Body>
+            </Card>
         </div>
     );
 }

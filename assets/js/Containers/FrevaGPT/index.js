@@ -13,6 +13,7 @@ const ChatBot = () => {
   const [image, setImage] = useState("");
   const [conversation, setConversation] = useState([]);
   const [answerLoading, setAnswerLoading] = useState(false);
+  const [thread, setThread] = useState("");
 
 
   useEffect(() => {
@@ -28,9 +29,11 @@ const ChatBot = () => {
   }, [image])
 
   const fetchData = async () => {
+    console.log('###', thread);
     const response = await fetch('/api/chatbot/streamresponse?' + new URLSearchParams({
       input: encodeURIComponent(question),
       auth_key: process.env.BOT_AUTH_KEY,
+      thread_id: thread,
     }).toString());
 
     const reader = response.body.getReader();
@@ -47,6 +50,9 @@ const ChatBot = () => {
         botCode = botCode + value.content[0];
       } else if (value.variant !== 'ServerHint' && value.variant !== 'StreamEnd'){
         botAnswer = botAnswer + value.content;
+      } else if (value.variant === 'ServerHint') {
+        // TODO test for warning or of thread_id is even included in an object
+        if (thread === "") setThread(JSON.parse(value.content).thread_id);
       }
     });
 

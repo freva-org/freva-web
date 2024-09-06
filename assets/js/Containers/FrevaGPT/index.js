@@ -42,6 +42,7 @@ const ChatBot = () => {
     let botCode = "";
 
     jsonStream.on("data", (value) => {
+      console.log(value);
       if (value.variant === 'Image') {
         setImage(value.content);
       } else if (value.variant === "Code" || value.variant === 'CodeOutput') {

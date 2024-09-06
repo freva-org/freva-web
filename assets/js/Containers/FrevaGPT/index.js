@@ -1,8 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, FormControl, InputGroup, Card } from 'react-bootstrap';
+import { 
+  Container,
+  Row,
+  Col,
+  FormControl,
+  InputGroup,
+  Card } from 'react-bootstrap';
+
 import JSONStream from 'JSONStream';
 
 import Spinner from "../../Components/Spinner";
+import OwnPanel from "../../Components/OwnPanel";
 
 import CodeBlock from "./CodeBlock";
 
@@ -101,40 +109,58 @@ const ChatBot = () => {
   
   return (
     <Container>
-      <Row className="mt-3">
-        <Col>
-          {conversation.map((element, index) => {
-            if (element.type === 'code') {
-              return (<Col md={{span:10, offset: 0}} key={index}><CodeBlock code={element.content}/></Col>);
-            } else if (element.type === 'image') {
-              return <img key={index} src={`data:image/jpeg;base64,${element.content}`} />
-            } else {      
-              return (
-                <Col md={element.type === 'answer' ? {span: 10, offset: 0} : {span: 10, offset: 2}} key={index}>
-                  <Card 
-                    className={element.type === 'answer' ? "shadow-sm card-body border-0 border-bottom mb-3 bg-light"
-                                                          : "shadow-sm card-body border-0 border-bottom mb-3 bg-info"}
-                    key={index}>
-                      {element.content}
-                  </Card>
-                </Col>
-              );         
-            }
-          }
-          )}
-        </Col>
-
-        
-        {answerLoading ? (<Row className="mb-3"><Col md={1}><Spinner/></Col></Row>) : null}
-      </Row>
       <Row>
-        <Col md={11}>
-          <InputGroup className="mb-2 pb-2">
-            <FormControl type="text" value={question} onChange={handleInputChange} onKeyDown={handleKeyDown} placeholder="Ask a question"/>
-          </InputGroup>
+        <div className="d-flex justify-content-between">
+          <h2>FrevaGPT</h2>
+        </div>
+        <Col md={4}>
+          <OwnPanel header="Today" key="today" removeFacet="" >
+            <p>Hi</p>
+            <p>What is wind</p>
+          </OwnPanel>
+          <OwnPanel header="Yesterday" key="yesterday" removeFacet="" >
+          
+          </OwnPanel>
+          <OwnPanel header="Last 7 days" key="l7d" removeFacet="" >
+          
+          </OwnPanel>
         </Col>
-        <Col md={1}>
-          <button onClick={handleBotRequest} disabled={answerLoading} className="btn btn-secondary w-100">Send</button>
+        <Col md={8}>
+          <Col>
+            {conversation.map((element, index) => {
+              if (element.type === 'code') {
+                return (<Col md={{span:10, offset: 0}} key={index}><CodeBlock code={element.content}/></Col>);
+              } else if (element.type === 'image') {
+                return <img key={index} src={`data:image/jpeg;base64,${element.content}`} />
+              } else {      
+                return (
+                  <Col md={element.type === 'answer' ? {span: 10, offset: 0} : {span: 10, offset: 2}} key={index}>
+                    <Card 
+                      className={element.type === 'answer' ? "shadow-sm card-body border-0 border-bottom mb-3 bg-light"
+                                                            : "shadow-sm card-body border-0 border-bottom mb-3 bg-info"}
+                      key={index}>
+                        {element.content}
+                    </Card>
+                  </Col>
+                );         
+              }
+            }
+            )}
+          </Col>
+
+          {answerLoading ? (<Row className="mb-3"><Col md={1}><Spinner/></Col></Row>) : null}
+
+          <Row>
+            <Col md={11}>
+              <InputGroup className="mb-2 pb-2">
+                <FormControl type="text" value={question} onChange={handleInputChange} onKeyDown={handleKeyDown} placeholder="Ask a question"/>
+              </InputGroup>
+            </Col>
+            <Col md={1}>
+              <button onClick={handleBotRequest} disabled={answerLoading} className="btn btn-secondary w-100">Send</button>
+            </Col>
+          </Row>
+          
         </Col>
       </Row>
     </Container>

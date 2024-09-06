@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, FormControl, InputGroup, ListGroupItem } from 'react-bootstrap';
+import { Container, Row, Col, FormControl, InputGroup, Card } from 'react-bootstrap';
 import JSONStream from 'JSONStream';
 
 import Spinner from "../../Components/Spinner";
@@ -29,7 +29,6 @@ const ChatBot = () => {
   }, [image])
 
   const fetchData = async () => {
-    console.log('###', thread);
     const response = await fetch('/api/chatbot/streamresponse?' + new URLSearchParams({
       input: encodeURIComponent(question),
       auth_key: process.env.BOT_AUTH_KEY,
@@ -43,7 +42,6 @@ const ChatBot = () => {
     let botCode = "";
 
     jsonStream.on("data", (value) => {
-
       if (value.variant === 'Image') {
         setImage(value.content);
       } else if (value.variant === "Code" || value.variant === 'CodeOutput') {
@@ -51,7 +49,7 @@ const ChatBot = () => {
       } else if (value.variant !== 'ServerHint' && value.variant !== 'StreamEnd'){
         botAnswer = botAnswer + value.content;
       } else if (value.variant === 'ServerHint') {
-        // TODO test for warning or of thread_id is even included in an object
+        // TODO test for key: warning or of thread_id is even included in an object
         if (thread === "") setThread(JSON.parse(value.content).thread_id);
       }
     });
@@ -77,6 +75,7 @@ const ChatBot = () => {
     try {
       await fetchData();
     } catch(error) {
+      console.log(error);
       setAnswer('Failed to fetch streamresponse');
     }
     setAnswerLoading(false);
@@ -112,12 +111,12 @@ const ChatBot = () => {
             } else {      
               return (
                 <Col md={element.type === 'answer' ? {span: 10, offset: 0} : {span: 10, offset: 2}} key={index}>
-                  <ListGroupItem 
+                  <Card 
                     className={element.type === 'answer' ? "shadow-sm card-body border-0 border-bottom mb-3 bg-light"
                                                           : "shadow-sm card-body border-0 border-bottom mb-3 bg-info"}
                     key={index}>
                       {element.content}
-                  </ListGroupItem>
+                  </Card>
                 </Col>
               );         
             }

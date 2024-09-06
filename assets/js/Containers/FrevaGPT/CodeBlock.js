@@ -10,8 +10,8 @@ function formatCode(codeString) {
 
 function CodeBlock(props) {
     return(
-        <div className="mb-3 ">
-            <Card bg="dark" text="white" border="light">
+        <div className="mb-3">
+            <Card text="white" className="shadow-sm border-0 border-bottom mb-3 bg-secondary">
                 <Card.Header>Code</Card.Header>
                 <Card.Body>
                     {formatCode(props.code).map((element, index) => {

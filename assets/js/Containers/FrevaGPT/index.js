@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, FormControl, InputGroup, Card } from 'react-bootstrap';
 import JSONStream from 'JSONStream';
+import { browserHistory } from "react-router";
 
 import Spinner from "../../Components/Spinner";
 
@@ -51,7 +52,13 @@ const ChatBot = () => {
         botAnswer = botAnswer + value.content;
       } else if (value.variant === 'ServerHint') {
         // TODO test for key: warning or of thread_id is even included in an object
-        if (thread === "") setThread(JSON.parse(value.content).thread_id);
+        if (thread === "") {
+          setThread(JSON.parse(value.content).thread_id);
+          browserHistory.push({
+            pathname: '/chatbot',
+            search: `?thread_id=${JSON.parse(value.content).thread_id}`
+          });
+        }
       }
     });
 

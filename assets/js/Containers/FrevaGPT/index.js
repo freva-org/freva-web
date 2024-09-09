@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Container, Row, Col, FormControl, InputGroup, Card } from 'react-bootstrap';
 import JSONStream from 'JSONStream';
 import { browserHistory } from "react-router";
@@ -14,7 +14,7 @@ const ChatBot = () => {
   const [image, setImage] = useState("");
   const [conversation, setConversation] = useState([]);
   const [answerLoading, setAnswerLoading] = useState(false);
-  const [thread, setThread] = useState("");
+  const thread = useRef("");
 
 
   useEffect(() => {
@@ -33,7 +33,7 @@ const ChatBot = () => {
     const response = await fetch('/api/chatbot/streamresponse?' + new URLSearchParams({
       input: encodeURIComponent(question),
       auth_key: process.env.BOT_AUTH_KEY,
-      thread_id: thread,
+      thread_id: thread.current,
     }).toString());
 
     const reader = response.body.getReader();
@@ -46,17 +46,18 @@ const ChatBot = () => {
       console.log(value);
       if (value.variant === 'Image') {
         setImage(value.content);
-      } else if (value.variant === "Code" || value.variant === 'CodeOutput') {
+      } else if (value.variant === "Code") {
+        // TODO handle CodeOutput
         botCode = botCode + value.content[0];
       } else if (value.variant !== 'ServerHint' && value.variant !== 'StreamEnd'){
         botAnswer = botAnswer + value.content;
       } else if (value.variant === 'ServerHint') {
         // TODO test for key: warning or of thread_id is even included in an object
-        if (thread === "") {
-          setThread(JSON.parse(value.content).thread_id);
+        if (thread.current === "") {
+          thread.current = JSON.parse(value.content).thread_id;
           browserHistory.push({
             pathname: '/chatbot',
-            search: `?thread_id=${JSON.parse(value.content).thread_id}`
+            search: `?thread_id=${thread.current}`
           });
         }
       }

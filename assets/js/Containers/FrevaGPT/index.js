@@ -4,9 +4,9 @@ import JSONStream from 'JSONStream';
 import { browserHistory } from "react-router";
 
 import Spinner from "../../Components/Spinner";
-import OwnPanel from "../../Components/OwnPanel";
 
 import CodeBlock from "./CodeBlock";
+import SidePanel from "./SidePanel"; 
 
 const ChatBot = () => {
   const [question, setQuestion] = useState("");
@@ -57,8 +57,8 @@ const ChatBot = () => {
         if (thread.current === "") {
           thread.current = JSON.parse(value.content).thread_id;
           browserHistory.push({
-            pathname: '/chatbot',
-            search: `?thread_id=${thread.current}`
+            pathname: '/chatbot/',
+            search: `?thread_id=${thread.current}&get_thread=false`,
           });
         }
       }
@@ -115,18 +115,11 @@ const ChatBot = () => {
         <div className="d-flex justify-content-between">
           <h2>FrevaGPT</h2>
         </div>
+
         <Col md={4}>
-          <OwnPanel header="Today" key="today" removeFacet="" >
-            <p>Hi</p>
-            <p>What is wind</p>
-          </OwnPanel>
-          <OwnPanel header="Yesterday" key="yesterday" removeFacet="" >
-          
-          </OwnPanel>
-          <OwnPanel header="Last 7 days" key="l7d" removeFacet="" >
-          
-          </OwnPanel>
+          <SidePanel/>
         </Col>
+
         <Col md={8}>
           <Col>
             {conversation.map((element, index) => {
@@ -153,12 +146,13 @@ const ChatBot = () => {
           {answerLoading ? (<Row className="mb-3"><Col md={1}><Spinner/></Col></Row>) : null}
 
           <Row>
-            <Col md={11}>
+            <Col md={10}>
               <InputGroup className="mb-2 pb-2">
                 <FormControl type="text" value={question} onChange={handleInputChange} onKeyDown={handleKeyDown} placeholder="Ask a question"/>
               </InputGroup>
             </Col>
-            <Col md={1}>
+
+            <Col md={2}>
               <button onClick={handleBotRequest} disabled={answerLoading} className="btn btn-secondary w-100">Send</button>
             </Col>
           </Row>

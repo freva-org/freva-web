@@ -16,6 +16,7 @@ const ChatBot = () => {
   const [conversation, setConversation] = useState([]);
   const [answerLoading, setAnswerLoading] = useState(false);
   const thread = useRef("");
+  const endpoint = useRef("streamresponse");
 
 
   useEffect(() => {
@@ -30,8 +31,20 @@ const ChatBot = () => {
     if (image !== "") setConversation(prevConversation => [...prevConversation, {type: 'image', content: image}])
   }, [image])
 
+  useEffect(() => {
+    // when starting a new conversation there is no thread_id set on mount
+    // when jumping to an old conversion a thread_id is given
+    const givenQueryParams = browserHistory.getCurrentLocation().query;
+
+    if ("thread_id" in givenQueryParams && givenQueryParams["thread_id"] !== "") {
+      thread.current = givenQueryParams["thread_id"];
+      endpoint.current = "getthread";
+      requestBot();
+    }
+  }, [])
+
   const fetchData = async () => {
-    const response = await fetch('/api/chatbot/streamresponse?' + new URLSearchParams({
+    const response = await fetch(`/api/chatbot/${endpoint.current}?` + new URLSearchParams({
       input: encodeURIComponent(question),
       auth_key: process.env.BOT_AUTH_KEY,
       thread_id: thread.current,
@@ -58,7 +71,7 @@ const ChatBot = () => {
           thread.current = JSON.parse(value.content).thread_id;
           browserHistory.push({
             pathname: '/chatbot/',
-            search: `?thread_id=${thread.current}&get_thread=false`,
+            search: `?thread_id=${thread.current}`,
           });
         }
       }

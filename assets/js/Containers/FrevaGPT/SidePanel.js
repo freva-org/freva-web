@@ -11,7 +11,7 @@ function SidePanel() {
     function changeToThread(thread) {
         browserHistory.push({
             pathname: '/chatbot/',
-            search: `?thread_id=${thread}&get_thread=true`
+            search: `?thread_id=${thread}`
         });
     }
 

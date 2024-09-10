@@ -10,40 +10,25 @@ import SidePanel from "./SidePanel";
 
 const ChatBot = () => {
   const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState("");
-  const [code, setCode] = useState("");
-  const [image, setImage] = useState("");
   const [conversation, setConversation] = useState([]);
   const [answerLoading, setAnswerLoading] = useState(false);
   const thread = useRef("");
   const endpoint = useRef("streamresponse");
 
-
-  useEffect(() => {
-    if (answer !== "") setConversation(prevConversation => [...prevConversation, {type: 'answer', content: answer}])
-  }, [answer]);
-
-  useEffect(() => {
-    if (code !== "") setConversation(prevConversation => [...prevConversation, {type: 'code', content: code}])
-  }, [code])
-
-  useEffect(() => {
-    if (image !== "") setConversation(prevConversation => [...prevConversation, {type: 'image', content: image}])
-  }, [image])
-
   useEffect(() => {
     // when starting a new conversation there is no thread_id set on mount
-    // when jumping to an old conversion a thread_id is given
+    // when jumping to an old conversion a thread_id is given (needed for loading old conversation)
     const givenQueryParams = browserHistory.getCurrentLocation().query;
 
-    if ("thread_id" in givenQueryParams && givenQueryParams["thread_id"] !== "") {
-      thread.current = givenQueryParams["thread_id"];
+    if ("thread_id" in givenQueryParams && givenQueryParams.thread_id !== "") {
+      thread.current = givenQueryParams.thread_id;
       endpoint.current = "getthread";
       requestBot();
     }
   }, [])
 
   const fetchData = async () => {
+    // response of a new bot request is streamed
     const response = await fetch(`/api/chatbot/${endpoint.current}?` + new URLSearchParams({
       input: encodeURIComponent(question),
       auth_key: process.env.BOT_AUTH_KEY,
@@ -53,30 +38,56 @@ const ChatBot = () => {
     const reader = response.body.getReader();
     const jsonStream = JSONStream.parse();
 
-    let botAnswer = "";
-    let botCode = "";
+    const answerObject = {variant: "", content: ""};
 
-    jsonStream.on("data", (value) => {
-      console.log(value);
-      if (value.variant === 'Image') {
-        setImage(value.content);
-      } else if (value.variant === "Code") {
-        // TODO handle CodeOutput
-        botCode = botCode + value.content[0];
-      } else if (value.variant !== 'ServerHint' && value.variant !== 'StreamEnd'){
-        botAnswer = botAnswer + value.content;
-      } else if (value.variant === 'ServerHint') {
-        // TODO test for key: warning or of thread_id is even included in an object
-        if (thread.current === "") {
-          thread.current = JSON.parse(value.content).thread_id;
-          browserHistory.push({
-            pathname: '/chatbot/',
-            search: `?thread_id=${thread.current}`,
-          });
+    if (endpoint.current === "streamresponse") {
+      jsonStream.on("data", (value) => {
+        // temporal debug logging
+        console.log(value);
+        
+        // set thread id
+        if (value.variant === "ServerHint") {
+          // TODO test for key: warning or of thread_id is even included in an object
+          if (thread.current === "") {
+            thread.current = JSON.parse(value.content).thread_id;
+            browserHistory.push({
+              pathname: '/chatbot/',
+              search: `?thread_id=${thread.current}`,
+            });
+          }
         }
-      }
-    });
+  
+        // if variant not given set new variant
+        if (answerObject.variant === "") answerObject.variant = value.variant;
 
+        // if variant given and different from current variant, save answerObject and create new one
+        if (answerObject.variant !== value.variant) {
+          // saveObject to conversation
+
+          // reset answerObject if stream is not finished
+          if (value.variant !== "StreamEnd") {
+            answerObject.variant = value.variant;
+            answerObject.content = "";
+          }
+        }
+
+        // write response to answerObject
+        if (value.variant === "Code") {
+          if (answerObject.content === "") answerObject.content = [""];
+          answerObject.content[0] = answerObject.content[0] + value.content[0];
+          console.log('####', answerObject);
+        } else {
+          answerObject.content = answerObject.content + value.content;
+        }
+      });
+    } else if (endpoint.current === "getthread") {
+      jsonStream.on("data", (value) => {
+        // old threads are streamed as one package (an array containing all conversation parts)
+        console.log(value);
+        setConversation(value);
+      })
+    }
+    
     const pump = async () => {
       // eslint-disable-next-line no-constant-condition
       while (true) {
@@ -85,8 +96,7 @@ const ChatBot = () => {
         if (done) break;
         jsonStream.write(value);
       }
-      setCode(botCode);
-      setAnswer(botAnswer);
+      setConversation(prevConversation => [...prevConversation, answerObject]);
       jsonStream.end();
     };
 
@@ -99,27 +109,29 @@ const ChatBot = () => {
       await fetchData();
     } catch(error) {
       console.log(error);
-      setAnswer('Failed to fetch streamresponse');
+      // indicate error
     }
     setAnswerLoading(false);
   }
 
   function handleBotRequest(){
-    const newQuestion = {type: 'question', content: question};
-    setConversation(prevConversation => [...prevConversation, newQuestion]);
-    setQuestion("");
+    if (question !== "") {
+      const newQuestion = {variant: 'User', content: question};
+      setConversation(prevConversation => [...prevConversation, newQuestion]);
+      setQuestion("");
 
-    requestBot();
-  }
-
-  function handleInputChange(event) {
-    setQuestion(event.target.value);
+      requestBot();
+    }
   }
 
   function handleKeyDown(event) {
     if (event.key === "Enter") {
       handleBotRequest();
     }
+  }
+
+  function handleInputChange(event) {
+    setQuestion(event.target.value);
   }
   
   return (
@@ -136,21 +148,27 @@ const ChatBot = () => {
         <Col md={8}>
           <Col>
             {conversation.map((element, index) => {
-              if (element.type === 'code') {
-                return (<Col md={{span:10, offset: 0}} key={index}><CodeBlock code={element.content}/></Col>);
-              } else if (element.type === 'image') {
-                return <img key={index} src={`data:image/jpeg;base64,${element.content}`} />
-              } else {      
-                return (
-                  <Col md={element.type === 'answer' ? {span: 10, offset: 0} : {span: 10, offset: 2}} key={index}>
-                    <Card 
-                      className={element.type === 'answer' ? "shadow-sm card-body border-0 border-bottom mb-3 bg-light"
-                                                            : "shadow-sm card-body border-0 border-bottom mb-3 bg-info"}
-                      key={index}>
-                        {element.content}
-                    </Card>
-                  </Col>
-                );         
+              if (element.variant !== "ServerHint" && element.variant !== "StreamEnd") {
+                switch(element.variant){
+                  case "Image":
+                    return <img key={index} src={`data:image/jpeg;base64,${element.content}`} />
+
+                  case "Code":
+                  case "CodeOutput":
+                    return (<Col md={{span:10, offset: 0}} key={index}><CodeBlock title={element.variant} code={element.content}/></Col>);
+
+                  default:
+                    return (
+                      <Col md={element.variant !== 'User' ? {span: 10, offset: 0} : {span: 10, offset: 2}} key={index}>
+                        <Card 
+                          className={element.variant !== 'User' ? "shadow-sm card-body border-0 border-bottom mb-3 bg-light"
+                                                                : "shadow-sm card-body border-0 border-bottom mb-3 bg-info"}
+                          key={index}>
+                            {decodeURI(element.content)}
+                        </Card>
+                      </Col>
+                    );  
+                }
               }
             }
             )}

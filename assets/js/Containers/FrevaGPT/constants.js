@@ -7,4 +7,8 @@ export const recentRequests = [
         title: "plot sine curve",
         thread: "VRW6JtrX7XvkJ07FEky9HAs24ZgVH7dq"
     },
+    {
+        title: "what is wind",
+        thread: "jsv56xRwPO53XRRPTBD65iYIxf18MOvH",
+    }
 ];

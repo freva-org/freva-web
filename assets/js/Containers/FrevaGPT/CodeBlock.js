@@ -4,7 +4,7 @@ import { Accordion } from 'react-bootstrap';
 import PropTypes from "prop-types";
 
 function formatCode(codeString) {
-    const seperatedCode = codeString.split("\\n");
+    const seperatedCode = codeString[0].split("\\n");
     return seperatedCode;
 }
 
@@ -13,7 +13,7 @@ function CodeBlock(props) {
         <div className="mb-3">
             <Accordion defaultActiveKey="0">
                 <Accordion.Item eventKey="0">
-                <Accordion.Header>Code</Accordion.Header>
+                <Accordion.Header>{props.title}</Accordion.Header>
                     <Accordion.Body>
                         {formatCode(props.code).map((element, index) => {
                             return (<span key={index}>{element}<br></br></span>);
@@ -27,7 +27,8 @@ function CodeBlock(props) {
 }
 
 CodeBlock.propTypes = {
-    code: PropTypes.string,
+    code: PropTypes.array,
+    title: PropTypes.string,
 }
 
 export default CodeBlock;

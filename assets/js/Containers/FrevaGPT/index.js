@@ -6,14 +6,29 @@ import { browserHistory } from "react-router";
 import Spinner from "../../Components/Spinner";
 
 import CodeBlock from "./CodeBlock";
-import SidePanel from "./SidePanel"; 
+import SidePanel from "./SidePanel";
 
 const ChatBot = () => {
   const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState("");
+  const [code, setCode] = useState("");
+  const [image, setImage] = useState("");
   const [conversation, setConversation] = useState([]);
   const [answerLoading, setAnswerLoading] = useState(false);
   const thread = useRef("");
   const endpoint = useRef("streamresponse");
+
+  useEffect(() => {
+    if (answer !== "") setConversation(prevConversation => [...prevConversation, {variant: 'Assistant', content: answer}])
+  }, [answer]);
+
+  useEffect(() => {
+    if (code !== "") setConversation(prevConversation => [...prevConversation, {variant: 'Code', content: [code]}])
+  }, [code])
+
+  useEffect(() => {
+    if (image !== "") setConversation(prevConversation => [...prevConversation, {variant: 'Image', content: image}])
+  }, [image])
 
   useEffect(() => {
     // when starting a new conversation there is no thread_id set on mount
@@ -38,15 +53,22 @@ const ChatBot = () => {
     const reader = response.body.getReader();
     const jsonStream = JSONStream.parse();
 
-    const answerObject = {variant: "", content: ""};
+    let botAnswer = "";
+    let botCode = "";
 
     if (endpoint.current === "streamresponse") {
       jsonStream.on("data", (value) => {
         // temporal debug logging
-        console.log(value);
-        
-        // set thread id
-        if (value.variant === "ServerHint") {
+        // console.log(value);
+
+        if (value.variant === 'Image') {
+          setImage(value.content);
+        } else if (value.variant === "Code") {
+          // TODO handle CodeOutput
+          botCode = botCode + value.content[0];
+        } else if (value.variant !== 'ServerHint' && value.variant !== 'StreamEnd'){
+          botAnswer = botAnswer + value.content;
+        } else if (value.variant === 'ServerHint') {
           // TODO test for key: warning or of thread_id is even included in an object
           if (thread.current === "") {
             thread.current = JSON.parse(value.content).thread_id;
@@ -56,29 +78,7 @@ const ChatBot = () => {
             });
           }
         }
-  
-        // if variant not given set new variant
-        if (answerObject.variant === "") answerObject.variant = value.variant;
 
-        // if variant given and different from current variant, save answerObject and create new one
-        if (answerObject.variant !== value.variant) {
-          // saveObject to conversation
-
-          // reset answerObject if stream is not finished
-          if (value.variant !== "StreamEnd") {
-            answerObject.variant = value.variant;
-            answerObject.content = "";
-          }
-        }
-
-        // write response to answerObject
-        if (value.variant === "Code") {
-          if (answerObject.content === "") answerObject.content = [""];
-          answerObject.content[0] = answerObject.content[0] + value.content[0];
-          console.log('####', answerObject);
-        } else {
-          answerObject.content = answerObject.content + value.content;
-        }
       });
     } else if (endpoint.current === "getthread") {
       jsonStream.on("data", (value) => {
@@ -96,7 +96,9 @@ const ChatBot = () => {
         if (done) break;
         jsonStream.write(value);
       }
-      setConversation(prevConversation => [...prevConversation, answerObject]);
+      setCode(botCode);
+      setAnswer(botAnswer);
+
       jsonStream.end();
     };
 
@@ -110,6 +112,7 @@ const ChatBot = () => {
     } catch(error) {
       console.log(error);
       // indicate error
+      setConversation(prevConversation => [...prevConversation, { variant: "Error", content: "An error occured, please try again!"}])
     }
     setAnswerLoading(false);
   }
@@ -151,7 +154,11 @@ const ChatBot = () => {
               if (element.variant !== "ServerHint" && element.variant !== "StreamEnd") {
                 switch(element.variant){
                   case "Image":
-                    return <img key={index} src={`data:image/jpeg;base64,${element.content}`} />
+                    return (
+                      <Col key={index} md={{span: 10, offset: 0}}>
+                        <img className="w-100" src={`data:image/jpeg;base64,${element.content}`} />
+                      </Col>
+                    );
 
                   case "Code":
                   case "CodeOutput":

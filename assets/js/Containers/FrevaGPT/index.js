@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Container, Row, Col, FormControl, InputGroup, Card } from 'react-bootstrap';
-import JSONStream from 'JSONStream';
+// import JSONStream from 'JSONStream';
 import { browserHistory } from "react-router";
 
 import Spinner from "../../Components/Spinner";
@@ -51,58 +51,67 @@ const ChatBot = () => {
     }).toString());
 
     const reader = response.body.getReader();
-    const jsonStream = JSONStream.parse();
+    const decoder = new TextDecoder('utf-8');
+    // let unresolvedChunk = "";
 
     let botAnswer = "";
     let botCode = "";
 
-    if (endpoint.current === "streamresponse") {
-      jsonStream.on("data", (value) => {
-        // temporal debug logging
-        // console.log(value);
-
-        if (value.variant === 'Image') {
-          setImage(value.content);
-        } else if (value.variant === "Code") {
-          // TODO handle CodeOutput
-          botCode = botCode + value.content[0];
-        } else if (value.variant !== 'ServerHint' && value.variant !== 'StreamEnd'){
-          botAnswer = botAnswer + value.content;
-        } else if (value.variant === 'ServerHint') {
-          // TODO test for key: warning or of thread_id is even included in an object
-          if (thread.current === "") {
-            thread.current = JSON.parse(value.content).thread_id;
-            browserHistory.push({
-              pathname: '/chatbot/',
-              search: `?thread_id=${thread.current}`,
-            });
-          }
-        }
-
-      });
-    } else if (endpoint.current === "getthread") {
-      jsonStream.on("data", (value) => {
-        // old threads are streamed as one package (an array containing all conversation parts)
-        console.log(value);
-        setConversation(value);
-      })
-    }
+    // } else if (endpoint.current === "getthread") {
+    //   jsonStream.on("data", (value) => {
+    //     // old threads are streamed as one package (an array containing all conversation parts)
+    //     console.log(value);
+    //     setConversation(value);
+    //   })
+    // }
     
-    const pump = async () => {
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        // eslint-disable-next-line no-await-in-loop
-        const { done, value } = await reader.read();
-        if (done) break;
-        jsonStream.write(value);
+    let buffer = "";
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      // eslint-disable-next-line no-await-in-loop
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const decodedValues = decoder.decode(value);
+      buffer = buffer + decodedValues;
+
+      let foundSomething = true;
+
+      while (foundSomething) {
+        foundSomething = false;
+        for (let bufferIndex = 0; bufferIndex < buffer.length; bufferIndex ++) {
+          if (buffer[bufferIndex] !== "}") continue;
+          const subBuffer = buffer.slice(0, bufferIndex + 1);
+          try {
+            const jsonBuffer = JSON.parse(subBuffer);
+            buffer = buffer.slice(bufferIndex + 1);
+
+            switch(jsonBuffer.variant) {
+              case "Assistant":
+                botAnswer = botAnswer + jsonBuffer.content;
+                break;
+              case "Code":
+                botCode = botCode + jsonBuffer.content[0];
+                break;
+              case "Image":
+                setImage(jsonBuffer.content);
+                break;
+              default:
+                botAnswer = botAnswer + jsonBuffer.content;
+            }
+
+            foundSomething = true;
+            break;
+          } catch(err) {
+            // don't do anything
+          }  
+        }
       }
-      setCode(botCode);
-      setAnswer(botAnswer);
-
-      jsonStream.end();
-    };
-
-    await pump();
+    }
+    setCode(botCode);
+    setAnswer(botAnswer);
+    
   };
 
   async function requestBot() {

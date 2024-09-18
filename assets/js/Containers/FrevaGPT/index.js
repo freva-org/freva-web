@@ -2,11 +2,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Container, Row, Col, FormControl, InputGroup, Card } from 'react-bootstrap';
 import { browserHistory } from "react-router";
 import { isEmpty } from 'lodash';
+import Markdown from 'react-markdown';
+
 
 import Spinner from "../../Components/Spinner";
 
 import CodeBlock from "./CodeBlock";
 import SidePanel from "./SidePanel";
+
+import helper from './actions';
+
 
 const ChatBot = () => {
   const [question, setQuestion] = useState("");
@@ -212,7 +217,7 @@ const ChatBot = () => {
                     return (
                       <Col md={{span: 10, offset: 0}} key={index}>
                         <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light" key={index}>
-                            {element.content}
+                          <Markdown>{helper.replaceLinebreaks(element.content)}</Markdown>
                         </Card>
                       </Col>
                     );  

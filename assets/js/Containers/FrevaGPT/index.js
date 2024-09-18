@@ -177,6 +177,13 @@ const ChatBot = () => {
   function handleInputChange(event) {
     setQuestion(event.target.value);
   }
+
+  async function handleStop() {
+    await fetch(`/api/chatbot/stop?` + new URLSearchParams({
+      auth_key: process.env.BOT_AUTH_KEY,
+      thread_id: thread.current,
+    }).toString());
+  }
   
   return (
     <Container>
@@ -247,7 +254,10 @@ const ChatBot = () => {
             </Col>
 
             <Col md={2}>
-              <button onClick={handleBotRequest} disabled={answerLoading} className="btn btn-secondary w-100">Send</button>
+              {!answerLoading 
+                ? (<button onClick={handleBotRequest} className="btn btn-secondary w-100">Send</button>) 
+                : (<button onClick={handleStop} className="btn btn-danger w-100">Stop</button>) 
+              }              
             </Col>
           </Row>
           

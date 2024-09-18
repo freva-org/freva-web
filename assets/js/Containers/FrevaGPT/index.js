@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Container, Row, Col, FormControl, InputGroup, Card } from 'react-bootstrap';
-// import JSONStream from 'JSONStream';
 import { browserHistory } from "react-router";
+import { isEmpty } from 'lodash';
 
 import Spinner from "../../Components/Spinner";
 
@@ -10,25 +10,15 @@ import SidePanel from "./SidePanel";
 
 const ChatBot = () => {
   const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState("");
-  const [code, setCode] = useState("");
-  const [image, setImage] = useState("");
+  const [answer, setAnswer] = useState({});
   const [conversation, setConversation] = useState([]);
   const [answerLoading, setAnswerLoading] = useState(false);
+
   const thread = useRef("");
-  const endpoint = useRef("streamresponse");
 
   useEffect(() => {
-    if (answer !== "") setConversation(prevConversation => [...prevConversation, {variant: 'Assistant', content: answer}])
+    if (!isEmpty(answer)) setConversation(prevConversation => [...prevConversation, answer]);
   }, [answer]);
-
-  useEffect(() => {
-    if (code !== "") setConversation(prevConversation => [...prevConversation, {variant: 'Code', content: [code]}])
-  }, [code])
-
-  useEffect(() => {
-    if (image !== "") setConversation(prevConversation => [...prevConversation, {variant: 'Image', content: image}])
-  }, [image])
 
   useEffect(() => {
     // when starting a new conversation there is no thread_id set on mount
@@ -37,14 +27,46 @@ const ChatBot = () => {
 
     if ("thread_id" in givenQueryParams && givenQueryParams.thread_id !== "") {
       thread.current = givenQueryParams.thread_id;
-      endpoint.current = "getthread";
-      requestBot();
+      getOldThread();
     }
   }, [])
 
-  const fetchData = async () => {
+  const getOldThread = async () => {
+
     // response of a new bot request is streamed
-    const response = await fetch(`/api/chatbot/${endpoint.current}?` + new URLSearchParams({
+    const response = await fetch(`/api/chatbot/getthread?` + new URLSearchParams({
+      auth_key: process.env.BOT_AUTH_KEY,
+      thread_id: thread.current,
+    }).toString());
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    
+    let buffer = "";
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      // eslint-disable-next-line no-await-in-loop
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      const decodedValues = decoder.decode(value);
+      buffer = buffer + decodedValues;
+
+      try {
+        const threadContent = JSON.parse(buffer);
+        setConversation(threadContent);
+      } catch(err) {
+        // do something
+        console.log(err);
+      }
+    }
+  }
+
+  const fetchData = async () => {
+
+    // response of a new bot request is streamed
+    const response = await fetch(`/api/chatbot/streamresponse?` + new URLSearchParams({
       input: encodeURIComponent(question),
       auth_key: process.env.BOT_AUTH_KEY,
       thread_id: thread.current,
@@ -52,20 +74,9 @@ const ChatBot = () => {
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder('utf-8');
-    // let unresolvedChunk = "";
-
-    let botAnswer = "";
-    let botCode = "";
-
-    // } else if (endpoint.current === "getthread") {
-    //   jsonStream.on("data", (value) => {
-    //     // old threads are streamed as one package (an array containing all conversation parts)
-    //     console.log(value);
-    //     setConversation(value);
-    //   })
-    // }
     
     let buffer = "";
+    let varObj = {};
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
@@ -80,27 +91,46 @@ const ChatBot = () => {
 
       while (foundSomething) {
         foundSomething = false;
+
         for (let bufferIndex = 0; bufferIndex < buffer.length; bufferIndex ++) {
+
           if (buffer[bufferIndex] !== "}") continue;
           const subBuffer = buffer.slice(0, bufferIndex + 1);
+
           try {
             const jsonBuffer = JSON.parse(subBuffer);
-            buffer = buffer.slice(bufferIndex + 1);
+            buffer = buffer.slice(bufferIndex + 1); // shorten string by already evaluated string        
 
-            switch(jsonBuffer.variant) {
-              case "Assistant":
-                botAnswer = botAnswer + jsonBuffer.content;
-                break;
-              case "Code":
-                botCode = botCode + jsonBuffer.content[0];
-                break;
-              case "Image":
-                setImage(jsonBuffer.content);
-                break;
-              default:
-                botAnswer = botAnswer + jsonBuffer.content;
+            // object is not empty so compare variants
+            if (Object.keys(varObj).length !== 0) {
+              // if object has not same variant, add answer to conversation and override object
+              if (varObj.variant !== jsonBuffer.variant) {
+                setAnswer(varObj);
+                varObj = jsonBuffer;
+              } else {
+                // if object has same variant, add content
+                // eslint-disable-next-line no-lonely-if
+                if (varObj.variant === "Code" || varObj.variant === "CodeOutput") varObj.content[0] = varObj.content[0] + jsonBuffer.content[0];
+                else varObj.content = varObj.content + jsonBuffer.content;
+              }
+            } else {
+              // object is empty so add content
+              varObj = jsonBuffer;
+
+              // set thread id
+              if (thread.current === "" && varObj.variant === "ServerHint") {
+                try {
+                  thread.current = JSON.parse(varObj.content).thread_id;
+                  browserHistory.push({
+                    pathname: '/chatbot/',
+                    search: `?thread_id=${thread.current}`,
+                  });
+                } catch(err) {
+                  // handle warning
+                }
+              }
             }
-
+            
             foundSomething = true;
             break;
           } catch(err) {
@@ -109,9 +139,6 @@ const ChatBot = () => {
         }
       }
     }
-    setCode(botCode);
-    setAnswer(botAnswer);
-    
   };
 
   async function requestBot() {
@@ -173,14 +200,19 @@ const ChatBot = () => {
                   case "CodeOutput":
                     return (<Col md={{span:10, offset: 0}} key={index}><CodeBlock title={element.variant} code={element.content}/></Col>);
 
+                  case "User":
+                    return (
+                      <Col md={{span: 10, offset: 2}} key={index}>
+                        <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-info" key={index}>
+                            {decodeURI(element.content)}
+                        </Card>
+                      </Col>
+                    );
                   default:
                     return (
-                      <Col md={element.variant !== 'User' ? {span: 10, offset: 0} : {span: 10, offset: 2}} key={index}>
-                        <Card 
-                          className={element.variant !== 'User' ? "shadow-sm card-body border-0 border-bottom mb-3 bg-light"
-                                                                : "shadow-sm card-body border-0 border-bottom mb-3 bg-info"}
-                          key={index}>
-                            {decodeURI(element.content)}
+                      <Col md={{span: 10, offset: 0}} key={index}>
+                        <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light" key={index}>
+                            {element.content}
                         </Card>
                       </Col>
                     );  

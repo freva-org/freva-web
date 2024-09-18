@@ -213,6 +213,16 @@ const ChatBot = () => {
                         </Card>
                       </Col>
                     );
+                  case "ServerError":
+                  case "OpenAIError":
+                  case "CodeError":
+                    return(
+                      <Col md={{span: 10, offset: 0}} key={index}>
+                        <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-danger" key={index}>
+                          <Markdown>{helper.replaceLinebreaks(element.content)}</Markdown>
+                        </Card>
+                      </Col>
+                    );
                   default:
                     return (
                       <Col md={{span: 10, offset: 0}} key={index}>

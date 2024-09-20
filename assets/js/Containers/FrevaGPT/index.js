@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Container, Row, Col, FormControl, InputGroup, Card } from 'react-bootstrap';
+import { Container, Row, Col, FormControl, InputGroup, Card, Button } from 'react-bootstrap';
 import { browserHistory } from "react-router";
 import { isEmpty } from 'lodash';
 import Markdown from 'react-markdown';
@@ -164,6 +164,16 @@ const ChatBot = () => {
       thread_id: thread.current,
     }).toString());
   }
+
+  function startNewChat() {
+    setConversation([]);
+    thread.current = "";
+    browserHistory.push({
+      pathname: '/chatbot/',
+      search: "",
+    });
+    window.scrollTo(0, 0)
+  }
   
   return (
     <Container>
@@ -230,14 +240,16 @@ const ChatBot = () => {
             <Col md={10}>
               <InputGroup className="mb-2 pb-2">
                 <FormControl type="text" value={question} onChange={handleInputChange} onKeyDown={handleKeyDown} placeholder="Ask a question"/>
+                {answerLoading 
+                  ? (<Button variant="outline-danger" id="button-addon2" onClick={handleStop}>&#9632;</Button>)
+                  : null
+                }
+                
               </InputGroup>
             </Col>
 
             <Col md={2}>
-              {!answerLoading 
-                ? (<button onClick={handleBotRequest} className="btn btn-secondary w-100">Send</button>) 
-                : (<button onClick={handleStop} className="btn btn-danger w-100">Stop</button>) 
-              }              
+              <button className="btn btn-info w-100" onClick={startNewChat}>New Chat</button>
             </Col>
           </Row>
           

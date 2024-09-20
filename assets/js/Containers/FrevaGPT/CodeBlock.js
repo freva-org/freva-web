@@ -3,15 +3,10 @@ import { Accordion } from 'react-bootstrap';
 
 import PropTypes from "prop-types";
 
-function formatCode(codeString) {
-    // remove everyting before json codeblock
-    let newString = codeString[0].slice(codeString[0].indexOf(":") + 2);
-    newString = newString.slice(0, -2);
+import Highlight from 'react-highlight'
+import 'highlight.js/styles/atom-one-light.css';
 
-    const codeSnippets = newString.split("\\n");
-
-    return codeSnippets;
-}
+import botHelper from './actions';
 
 function CodeBlock(props) {
     return(
@@ -20,10 +15,7 @@ function CodeBlock(props) {
                 <Accordion.Item eventKey="0">
                 <Accordion.Header>{props.title}</Accordion.Header>
                     <Accordion.Body>
-                        {formatCode(props.code).map((element, index) => {
-                            return (<span key={index}>{element}<br></br></span>);
-                            }
-                        )}
+                        <Highlight>{botHelper.formatCode(props.title, props.code[0])}</Highlight>
                     </Accordion.Body>
                 </Accordion.Item>
             </Accordion>

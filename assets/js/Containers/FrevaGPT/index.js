@@ -53,6 +53,7 @@ const ChatBot = () => {
     // response of a new bot request is streamed
     const response = await fetch(`/api/chatbot/streamresponse?` + new URLSearchParams({
       input: question,
+      // evaluate usage of signal to be able to abort request
       auth_key: process.env.BOT_AUTH_KEY,
       thread_id: thread.current,
     }).toString());
@@ -159,10 +160,16 @@ const ChatBot = () => {
   }
 
   async function handleStop() {
-    await fetch(`/api/chatbot/stop?` + new URLSearchParams({
+    const response = await fetch(`/api/chatbot/stop?` + new URLSearchParams({
       auth_key: process.env.BOT_AUTH_KEY,
       thread_id: thread.current,
     }).toString());
+
+    if (response.status === "200") {
+      // evaluate usage of signal to be able to abort request
+      setAnswerLoading(false);
+      setConversation(prevConversation => [...prevConversation, {variant: "UserStop", content: "Request stopped manually"}]);
+    }
   }
 
   function startNewChat() {
@@ -219,6 +226,7 @@ const ChatBot = () => {
                   case "OpenAIError":
                   case "CodeError":
                   case "FrontendError":
+                  case "UserStop":
                     return(
                       <Col md={{span: 10, offset: 0}} key={index}>
                         <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-danger" key={index}>
@@ -249,7 +257,7 @@ const ChatBot = () => {
                 <FormControl type="text" value={question} onChange={handleInputChange} onKeyDown={handleKeyDown} placeholder="Ask a question" disabled={answerLoading}/>
                 {answerLoading 
                   ? (<Button variant="outline-danger" id="button-addon2" onClick={handleStop}>&#9632;</Button>)
-                  : null
+                  : (<Button variant="outline-danger" id="button-addon2" onClick={handleStop}>&#9632;</Button>)
                 }
                 
               </InputGroup>

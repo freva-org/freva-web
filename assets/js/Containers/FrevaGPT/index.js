@@ -133,7 +133,7 @@ const ChatBot = () => {
     } catch(error) {
       console.log(error);
       // indicate error
-      setConversation(prevConversation => [...prevConversation, { variant: "Error", content: "An error occured, please try again!"}])
+      setConversation(prevConversation => [...prevConversation, { variant: "FrontendError", content: "An error occured during rendering!"}])
     }
     setAnswerLoading(false);
   }
@@ -151,6 +151,7 @@ const ChatBot = () => {
   function handleKeyDown(event) {
     if (event.key === "Enter") {
       handleBotRequest();
+      console.log('#### triggert');
     }
   }
 
@@ -218,10 +219,11 @@ const ChatBot = () => {
                   case "ServerError":
                   case "OpenAIError":
                   case "CodeError":
+                  case "FrontendError":
                     return(
                       <Col md={{span: 10, offset: 0}} key={index}>
                         <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-danger" key={index}>
-                          <p>{element.variant}</p>
+                          <span className="fw-bold">{element.variant}</span>
                           <Markdown>{helper.replaceLinebreaks(element.content)}</Markdown>
                         </Card>
                       </Col>

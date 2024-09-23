@@ -52,7 +52,7 @@ const ChatBot = () => {
 
     // response of a new bot request is streamed
     const response = await fetch(`/api/chatbot/streamresponse?` + new URLSearchParams({
-      input: encodeURIComponent(question),
+      input: question,
       auth_key: process.env.BOT_AUTH_KEY,
       thread_id: thread.current,
     }).toString());
@@ -151,7 +151,6 @@ const ChatBot = () => {
   function handleKeyDown(event) {
     if (event.key === "Enter") {
       handleBotRequest();
-      console.log('#### triggert');
     }
   }
 
@@ -212,7 +211,7 @@ const ChatBot = () => {
                     return (
                       <Col md={{span: 10, offset: 2}} key={index}>
                         <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-info" key={index}>
-                            {decodeURI(element.content)}
+                            {element.content}
                         </Card>
                       </Col>
                     );

@@ -55,6 +55,7 @@ const ChatBot = () => {
       input: encodeURIComponent(question),
       auth_key: process.env.BOT_AUTH_KEY,
       thread_id: thread.current,
+      freva_config: "/work/ch1187/clint/freva-dev/freva/evaluation_system.conf",
     }).toString());
 
     const reader = response.body.getReader();

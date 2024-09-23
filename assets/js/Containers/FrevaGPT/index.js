@@ -200,7 +200,12 @@ const ChatBot = () => {
 
                   case "Code":
                   case "CodeOutput":
-                    return (<Col md={{span:10, offset: 0}} key={index}><CodeBlock title={element.variant} code={element.content}/></Col>);
+                    if (isEmpty(element.content[0])) return null;
+                    else return(
+                      <Col md={{span:10, offset: 0}} key={index}>
+                        <CodeBlock title={element.variant} code={element.content}/>
+                      </Col>
+                    );
 
                   case "User":
                     return (

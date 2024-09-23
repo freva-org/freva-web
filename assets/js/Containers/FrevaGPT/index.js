@@ -246,7 +246,7 @@ const ChatBot = () => {
           <Row>
             <Col md={10}>
               <InputGroup className="mb-2 pb-2">
-                <FormControl type="text" value={question} onChange={handleInputChange} onKeyDown={handleKeyDown} placeholder="Ask a question"/>
+                <FormControl type="text" value={question} onChange={handleInputChange} onKeyDown={handleKeyDown} placeholder="Ask a question" disabled={answerLoading}/>
                 {answerLoading 
                   ? (<Button variant="outline-danger" id="button-addon2" onClick={handleStop}>&#9632;</Button>)
                   : null

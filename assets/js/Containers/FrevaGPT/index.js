@@ -4,7 +4,6 @@ import { browserHistory } from "react-router";
 import { isEmpty } from 'lodash';
 import Markdown from 'react-markdown';
 
-
 import Spinner from "../../Components/Spinner";
 
 import CodeBlock from "./CodeBlock";
@@ -12,12 +11,11 @@ import SidePanel from "./SidePanel";
 
 import helper from './actions';
 
-
 const ChatBot = () => {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState({});
   const [conversation, setConversation] = useState([]);
-  const [answerLoading, setAnswerLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const thread = useRef("");
 
@@ -128,15 +126,16 @@ const ChatBot = () => {
   };
 
   async function requestBot() {
-    setAnswerLoading(true);
+    setLoading(true);
+    // setAnswerLoading(true);
     try {
       await fetchData();
     } catch(error) {
       console.log(error);
-      // indicate error
       setConversation(prevConversation => [...prevConversation, { variant: "FrontendError", content: "An error occured during rendering!"}])
     }
-    setAnswerLoading(false);
+    // setAnswerLoading(false);
+    setLoading(false);
   }
 
   function handleBotRequest(){
@@ -167,7 +166,8 @@ const ChatBot = () => {
 
     if (response.status === "200") {
       // evaluate usage of signal to be able to abort request
-      setAnswerLoading(false);
+      // setAnswerLoading(false);
+      setLoading(false);
       setConversation(prevConversation => [...prevConversation, {variant: "UserStop", content: "Request stopped manually"}]);
     }
   }
@@ -249,13 +249,13 @@ const ChatBot = () => {
             )}
           </Col>
 
-          {answerLoading ? (<Row className="mb-3"><Col md={1}><Spinner/></Col></Row>) : null}
+          {loading ? (<Row className="mb-3"><Col md={1}><Spinner/></Col></Row>) : null}
 
           <Row>
             <Col md={10}>
               <InputGroup className="mb-2 pb-2">
-                <FormControl type="text" value={question} onChange={handleInputChange} onKeyDown={handleKeyDown} placeholder="Ask a question" disabled={answerLoading}/>
-                {answerLoading 
+                <FormControl type="text" value={question} onChange={handleInputChange} onKeyDown={handleKeyDown} placeholder="Ask a question" disabled={loading}/>
+                {loading 
                   ? (<Button variant="outline-danger" id="button-addon2" onClick={handleStop}>&#9632;</Button>)
                   : (<Button variant="outline-danger" id="button-addon2" onClick={handleStop}>&#9632;</Button>)
                 }

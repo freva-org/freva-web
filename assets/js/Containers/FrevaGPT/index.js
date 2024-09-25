@@ -18,6 +18,7 @@ const ChatBot = () => {
   const [loading, setLoading] = useState(false);
 
   const thread = useRef("");
+  const abortController = useRef();
 
   useEffect(() => {
     if (!isEmpty(answer)) setConversation(prevConversation => [...prevConversation, answer]);
@@ -48,13 +49,16 @@ const ChatBot = () => {
 
   const fetchData = async () => {
 
+    abortController.current = new AbortController();
+    const signal = abortController.signal;
+
     // response of a new bot request is streamed
     const response = await fetch(`/api/chatbot/streamresponse?` + new URLSearchParams({
       input: question,
-      // evaluate usage of signal to be able to abort request
       auth_key: process.env.BOT_AUTH_KEY,
       thread_id: thread.current,
-    }).toString());
+    }).toString(),
+    signal);
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder('utf-8');
@@ -127,14 +131,12 @@ const ChatBot = () => {
 
   async function requestBot() {
     setLoading(true);
-    // setAnswerLoading(true);
     try {
       await fetchData();
     } catch(error) {
       console.log(error);
       setConversation(prevConversation => [...prevConversation, { variant: "FrontendError", content: "An error occured during rendering!"}])
     }
-    // setAnswerLoading(false);
     setLoading(false);
   }
 
@@ -159,17 +161,20 @@ const ChatBot = () => {
   }
 
   async function handleStop() {
-    const response = await fetch(`/api/chatbot/stop?` + new URLSearchParams({
-      auth_key: process.env.BOT_AUTH_KEY,
-      thread_id: thread.current,
-    }).toString());
 
-    if (response.status === "200") {
-      // evaluate usage of signal to be able to abort request
-      // setAnswerLoading(false);
-      setLoading(false);
-      setConversation(prevConversation => [...prevConversation, {variant: "UserStop", content: "Request stopped manually"}]);
+    // stop of thread only possible if a thread id is given
+    if (thread.current) {
+      await fetch(`/api/chatbot/stop?` + new URLSearchParams({
+        auth_key: process.env.BOT_AUTH_KEY,
+        thread_id: thread.current,
+      }).toString());
     }
+
+    // abort fetch request anyway (especially if no thread is given)
+    if (abortController.current) abortController.current.abort();
+      
+    setLoading(false);
+    setConversation(prevConversation => [...prevConversation, {variant: "UserStop", content: "Request stopped manually"}]);
   }
 
   function startNewChat() {

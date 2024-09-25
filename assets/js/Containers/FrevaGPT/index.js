@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Container, Row, Col, FormControl, InputGroup, Card } from 'react-bootstrap';
+import { Container, Row, Col, FormControl, InputGroup, Card, Button } from 'react-bootstrap';
 import { browserHistory } from "react-router";
 import { isEmpty } from 'lodash';
 import Markdown from 'react-markdown';
-
 
 import Spinner from "../../Components/Spinner";
 
@@ -12,14 +11,14 @@ import SidePanel from "./SidePanel";
 
 import helper from './actions';
 
-
 const ChatBot = () => {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState({});
   const [conversation, setConversation] = useState([]);
-  const [answerLoading, setAnswerLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const thread = useRef("");
+  const abortController = useRef();
 
   useEffect(() => {
     if (!isEmpty(answer)) setConversation(prevConversation => [...prevConversation, answer]);
@@ -50,13 +49,17 @@ const ChatBot = () => {
 
   const fetchData = async () => {
 
+    abortController.current = new AbortController();
+    const signal = abortController.signal;
+
     // response of a new bot request is streamed
     const response = await fetch(`/api/chatbot/streamresponse?` + new URLSearchParams({
-      input: encodeURIComponent(question),
+      input: question,
       auth_key: process.env.BOT_AUTH_KEY,
       thread_id: thread.current,
       freva_config: "/work/ch1187/clint/freva-dev/freva/evaluation_system.conf",
-    }).toString());
+    }).toString(),
+    signal);
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder('utf-8');
@@ -128,15 +131,14 @@ const ChatBot = () => {
   };
 
   async function requestBot() {
-    setAnswerLoading(true);
+    setLoading(true);
     try {
       await fetchData();
     } catch(error) {
       console.log(error);
-      // indicate error
-      setConversation(prevConversation => [...prevConversation, { variant: "Error", content: "An error occured, please try again!"}])
+      setConversation(prevConversation => [...prevConversation, { variant: "FrontendError", content: "An error occured during rendering!"}])
     }
-    setAnswerLoading(false);
+    setLoading(false);
   }
 
   function handleBotRequest(){
@@ -160,10 +162,30 @@ const ChatBot = () => {
   }
 
   async function handleStop() {
-    await fetch(`/api/chatbot/stop?` + new URLSearchParams({
-      auth_key: process.env.BOT_AUTH_KEY,
-      thread_id: thread.current,
-    }).toString());
+
+    // stop of thread only possible if a thread id is given
+    if (thread.current) {
+      await fetch(`/api/chatbot/stop?` + new URLSearchParams({
+        auth_key: process.env.BOT_AUTH_KEY,
+        thread_id: thread.current,
+      }).toString());
+    }
+
+    // abort fetch request anyway (especially if no thread is given)
+    if (abortController.current) abortController.current.abort();
+      
+    setLoading(false);
+    setConversation(prevConversation => [...prevConversation, {variant: "UserStop", content: "Request stopped manually"}]);
+  }
+
+  function startNewChat() {
+    setConversation([]);
+    thread.current = "";
+    browserHistory.push({
+      pathname: '/chatbot/',
+      search: "",
+    });
+    window.scrollTo(0, 0)
   }
   
   return (
@@ -191,22 +213,30 @@ const ChatBot = () => {
 
                   case "Code":
                   case "CodeOutput":
-                    return (<Col md={{span:10, offset: 0}} key={index}><CodeBlock title={element.variant} code={element.content}/></Col>);
+                    if (isEmpty(element.content[0])) return null;
+                    else return(
+                      <Col md={{span:10, offset: 0}} key={index}>
+                        <CodeBlock title={element.variant} code={element.content}/>
+                      </Col>
+                    );
 
                   case "User":
                     return (
                       <Col md={{span: 10, offset: 2}} key={index}>
                         <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-info" key={index}>
-                            {decodeURI(element.content)}
+                            {element.content}
                         </Card>
                       </Col>
                     );
                   case "ServerError":
                   case "OpenAIError":
                   case "CodeError":
+                  case "FrontendError":
+                  case "UserStop":
                     return(
                       <Col md={{span: 10, offset: 0}} key={index}>
                         <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-danger" key={index}>
+                          <span className="fw-bold">{element.variant}</span>
                           <Markdown>{helper.replaceLinebreaks(element.content)}</Markdown>
                         </Card>
                       </Col>
@@ -225,20 +255,22 @@ const ChatBot = () => {
             )}
           </Col>
 
-          {answerLoading ? (<Row className="mb-3"><Col md={1}><Spinner/></Col></Row>) : null}
+          {loading ? (<Row className="mb-3"><Col md={1}><Spinner/></Col></Row>) : null}
 
           <Row>
             <Col md={10}>
               <InputGroup className="mb-2 pb-2">
-                <FormControl type="text" value={question} onChange={handleInputChange} onKeyDown={handleKeyDown} placeholder="Ask a question"/>
+                <FormControl type="text" value={question} onChange={handleInputChange} onKeyDown={handleKeyDown} placeholder="Ask a question" disabled={loading}/>
+                {loading 
+                  ? (<Button variant="outline-danger" id="button-addon2" onClick={handleStop}>&#9632;</Button>)
+                  : null
+                }
+                
               </InputGroup>
             </Col>
 
             <Col md={2}>
-              {!answerLoading 
-                ? (<button onClick={handleBotRequest} className="btn btn-secondary w-100">Send</button>) 
-                : (<button onClick={handleStop} className="btn btn-danger w-100">Stop</button>) 
-              }              
+              <button className="btn btn-info w-100" onClick={startNewChat}>New Chat</button>
             </Col>
           </Row>
           

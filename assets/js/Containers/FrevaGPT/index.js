@@ -262,7 +262,7 @@ const ChatBot = () => {
                 <FormControl type="text" value={question} onChange={handleInputChange} onKeyDown={handleKeyDown} placeholder="Ask a question" disabled={loading}/>
                 {loading 
                   ? (<Button variant="outline-danger" id="button-addon2" onClick={handleStop}>&#9632;</Button>)
-                  : (<Button variant="outline-danger" id="button-addon2" onClick={handleStop}>&#9632;</Button>)
+                  : null
                 }
                 
               </InputGroup>

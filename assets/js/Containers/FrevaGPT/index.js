@@ -45,7 +45,6 @@ const ChatBot = () => {
     // response of a new bot request is streamed
     const response = await fetch(`/api/chatbot/getthread?` + helper.objectToQueryString(queryObject));
     const variantArray = await response.json();
-    console.log(variantArray);
     setConversation(variantArray);
   }
 

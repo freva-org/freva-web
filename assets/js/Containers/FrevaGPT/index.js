@@ -37,13 +37,15 @@ const ChatBot = () => {
 
   const getOldThread = async () => {
 
-    // response of a new bot request is streamed
-    const response = await fetch(`/api/chatbot/getthread?` + new URLSearchParams({
+    const queryObject = {
       auth_key: process.env.BOT_AUTH_KEY,
       thread_id: thread.current,
-    }).toString());
+    }
 
+    // response of a new bot request is streamed
+    const response = await fetch(`/api/chatbot/getthread?` + helper.objectToQueryString(queryObject));
     const variantArray = await response.json();
+    console.log(variantArray);
     setConversation(variantArray);
   }
 
@@ -52,14 +54,15 @@ const ChatBot = () => {
     abortController.current = new AbortController();
     const signal = abortController.signal;
 
-    // response of a new bot request is streamed
-    const response = await fetch(`/api/chatbot/streamresponse?` + new URLSearchParams({
+    const queryObject = {
       input: question,
       auth_key: process.env.BOT_AUTH_KEY,
       thread_id: thread.current,
       freva_config: "/work/ch1187/clint/freva-dev/freva/evaluation_system.conf",
-    }).toString(),
-    signal);
+    };
+
+    // response of a new bot request is streamed
+    const response = await fetch(`/api/chatbot/streamresponse?` + helper.objectToQueryString(queryObject), signal);
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder('utf-8');

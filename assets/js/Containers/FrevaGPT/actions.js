@@ -23,7 +23,14 @@ function formatCode(mode, data) {
     return codeSnippets;
 }
 
+const objectToQueryString = (obj) => {
+    return Object.entries(obj)
+      .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+      .join('&');
+  };
+
 export default {
     replaceLinebreaks,
     formatCode,
+    objectToQueryString,
 };

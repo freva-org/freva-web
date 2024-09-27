@@ -1,33 +1,37 @@
+import * as constants from './constants';
 
-function replaceLinebreaks(data) {
-    const formattedData = data.split("\\n").join("\n")
-    return formattedData;
+export function setThread(thread_id) {
+
+    return {
+        type: "SET_THREAD",
+        payload: thread_id,
+    };
 }
 
-function formatCode(mode, data) {
+export async function getOldThread(thread_id) {
+    const response = await fetch(`/api/chatbot/getthread?` + new URLSearchParams({
+        auth_key: process.env.BOT_AUTH_KEY,
+        thread_id: thread_id,
+        }).toString());
+      
+    const variantArray = await response.json();
 
-    // replace first linebreak in code got from old thread
-    if (data.startsWith("\\n")) data = data.replace("\\n", "");
-
-    let codeSnippets;
-    let rawCode;
-
-    try {
-        if (mode === "Code") rawCode = JSON.parse(data).code;
-        else if (mode === "CodeOutput") rawCode = data;
-        codeSnippets = rawCode.split("\\n");
-    } catch(err) {
-        // do something
+    return {
+        type: "SET_CONVERSATION",
+        payload: variantArray,
     }
-
-    return codeSnippets;
 }
 
-const ADD_ELEMENT = () => (dispatch) => {
-
+export function setConversation(conversation) {
+    return {
+        type: "SET_CONVERSATION",
+        payload: conversation,
+    };
 }
 
-export default {
-    replaceLinebreaks,
-    formatCode,
-};
+export const addElement = (element) => (dispatch) => {
+    dispatch({
+        type: constants.ADD_ELEMENT,
+        payload: element,
+    })
+}

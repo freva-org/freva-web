@@ -1,22 +1,19 @@
 import * as constants from './constants';
 
-const botInitialState = {
+const frevaGPTInitialState = {
     conversation: [],
     loading: false,
-    thread: ""
+    thread: "",
 };
 
-export const botReducer = (state = botInitialState, action) => {
+export const frevaGPTReducer = (state = frevaGPTInitialState, action) => {
     switch(action.type) {
-        case constants.ADD_ELEMENT:
-            return [
-                ...state.conversation,
-                action
-            ];
         case constants.SET_CONVERSATION:
-            return ??;
+            return {...state, conversation: action.payload };
         case constants.SET_THREAD:
-            return state.thread = action;
+            return {...state, thread: action.payload };
+        case constants.ADD_ELEMENT:
+            return {...state, conversation: [...state.conversation, action.payload]};
         default:
             return state;
     }

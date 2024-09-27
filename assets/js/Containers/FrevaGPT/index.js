@@ -1,7 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Container, Row, Col, FormControl, InputGroup, Card, Button } from 'react-bootstrap';
-import { browserHistory } from "react-router";
-import { isEmpty } from 'lodash';
+import React from 'react';
+import PropTypes from "prop-types";
+import { connect } from 'react-redux';
+
+import { 
+  Container,
+  Row,
+  Col,
+  FormControl,
+  InputGroup,
+  Card,
+  Button } from 'react-bootstrap';
+
+import { browserHistory } from 'react-router';
+import { isEmpty, has } from 'lodash';
+
 import Markdown from 'react-markdown';
 
 import Spinner from "../../Components/Spinner";
@@ -9,57 +21,80 @@ import Spinner from "../../Components/Spinner";
 import CodeBlock from "./CodeBlock";
 import SidePanel from "./SidePanel";
 
-import helper from './actions';
+import { replaceLinebreaks } from './utils';
 
-const ChatBot = () => {
-  const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState({});
-  const [conversation, setConversation] = useState([]);
-  const [loading, setLoading] = useState(false);
+import {
+  getOldThread,
+  setThread,
+  setConversation,
+  addElement,
+} from './actions';
 
-  const thread = useRef("");
-  const abortController = useRef();
+class FrevaGPT extends React.Component {
 
-  useEffect(() => {
-    if (!isEmpty(answer)) setConversation(prevConversation => [...prevConversation, answer]);
-  }, [answer]);
+  // const abortController = useRef();
+  // abortController.current = new AbortController();
+  // const signal = abortController.signal;
 
-  useEffect(() => {
-    // when starting a new conversation there is no thread_id set on mount
-    // when jumping to an old conversion a thread_id is given (needed for loading old conversation)
-    const givenQueryParams = browserHistory.getCurrentLocation().query;
+  constructor(props) {
+    super(props);
+    this.handleUserInput = this.handleUserInput.bind(this);
+    this.handleKeyDown = this.handleKeyDown.bind(this);
+    this.createNewChat = this.createNewChat.bind(this);
 
-    if ("thread_id" in givenQueryParams && givenQueryParams.thread_id !== "") {
-      thread.current = givenQueryParams.thread_id;
-      getOldThread();
-    }
-  }, [])
-
-  const getOldThread = async () => {
-
-    // response of a new bot request is streamed
-    const response = await fetch(`/api/chatbot/getthread?` + new URLSearchParams({
-      auth_key: process.env.BOT_AUTH_KEY,
-      thread_id: thread.current,
-    }).toString());
-
-    const variantArray = await response.json();
-    setConversation(variantArray);
+    this.state = {
+      conversation: [],
+      loading: false,
+      thread: "",
+      userInput: {},
+    };
   }
 
-  const fetchData = async () => {
+  componentDidMount() {
 
-    abortController.current = new AbortController();
-    const signal = abortController.signal;
+    // if thread giving on mounting the component, set thread within store
+    const givenQueryParams = browserHistory.getCurrentLocation().query;
+    if (has(givenQueryParams, "thread_id") && !isEmpty(givenQueryParams.thread_id)) {
+      this.props.dispatch(setThread(givenQueryParams.thread_id));
 
+      // request content of old thread if threa_id is given
+      this.setState({ loading: true });
+      this.props.dispatch(getOldThread(this.state.thread));
+      this.setState({ loading: false });
+    }
+  }
+
+  createNewChat() {
+
+    this.props.dispatch(setConversation([]));
+    this.props.dispatch(setThread(""));
+    browserHistory.push({
+      pathname: '/chatbot/',
+      search: "",
+    });
+    window.scrollTo(0, 0)
+  }
+
+  handleUserInput(e) {
+    this.setState({ userInput: {variant: "User", content: e.target.value }});
+  }
+
+  handleKeyDown(e) {
+    if (e.key === "Enter") {
+      this.props.dispatch(addElement(this.state.userInput));
+      this.setState({ userInput: {} });
+      // RequestBot
+    }
+  }
+
+  async fetchData() {
     // response of a new bot request is streamed
     const response = await fetch(`/api/chatbot/streamresponse?` + new URLSearchParams({
-      input: question,
+      input: this.state.userInput,
       auth_key: process.env.BOT_AUTH_KEY,
-      thread_id: thread.current,
+      thread_id: this.state.thread,
       freva_config: "/work/ch1187/clint/freva-dev/freva/evaluation_system.conf",
-    }).toString(),
-    signal);
+    }).toString()); // add signal for abortController
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder('utf-8');
@@ -94,7 +129,7 @@ const ChatBot = () => {
             if (Object.keys(varObj).length !== 0) {
               // if object has not same variant, add answer to conversation and override object
               if (varObj.variant !== jsonBuffer.variant) {
-                setAnswer(varObj);
+                this.props.dispatch(addElement(varObj));
                 varObj = jsonBuffer;
               } else {
                 // if object has same variant, add content
@@ -107,12 +142,12 @@ const ChatBot = () => {
               varObj = jsonBuffer;
 
               // set thread id
-              if (thread.current === "" && varObj.variant === "ServerHint") {
+              if (this.state.thread === "" && varObj.variant === "ServerHint") {
                 try {
-                  thread.current = JSON.parse(varObj.content).thread_id;
+                  this.setState({thread: JSON.parse(varObj.content).thread_id});
                   browserHistory.push({
                     pathname: '/chatbot/',
-                    search: `?thread_id=${thread.current}`,
+                    search: `?thread_id=${this.state.thread}`,
                   });
                 } catch(err) {
                   // handle warning
@@ -128,156 +163,137 @@ const ChatBot = () => {
         }
       }
     }
-  };
 
-  async function requestBot() {
-    setLoading(true);
-    try {
-      await fetchData();
-    } catch(error) {
-      console.log(error);
-      setConversation(prevConversation => [...prevConversation, { variant: "FrontendError", content: "An error occured during rendering!"}])
-    }
-    setLoading(false);
   }
 
-  function handleBotRequest(){
-    if (question !== "") {
-      const newQuestion = {variant: 'User', content: question};
-      setConversation(prevConversation => [...prevConversation, newQuestion]);
-      setQuestion("");
-
-      requestBot();
-    }
-  }
-
-  function handleKeyDown(event) {
-    if (event.key === "Enter") {
-      handleBotRequest();
-    }
-  }
-
-  function handleInputChange(event) {
-    setQuestion(event.target.value);
-  }
-
-  async function handleStop() {
-
+  async handleStop() {
     // stop of thread only possible if a thread id is given
-    if (thread.current) {
+    if (this.state.thread) {
       await fetch(`/api/chatbot/stop?` + new URLSearchParams({
         auth_key: process.env.BOT_AUTH_KEY,
-        thread_id: thread.current,
+        thread_id: this.state.thread,
       }).toString());
     }
 
     // abort fetch request anyway (especially if no thread is given)
-    if (abortController.current) abortController.current.abort();
+    // if (abortController.current) abortController.current.abort();
       
-    setLoading(false);
-    setConversation(prevConversation => [...prevConversation, {variant: "UserStop", content: "Request stopped manually"}]);
+    this.setState({loading: false });
+    this.props.dispatch(addElement({variant: "UserStop", content: "Request stopped manually"}))
   }
 
-  function startNewChat() {
-    setConversation([]);
-    thread.current = "";
-    browserHistory.push({
-      pathname: '/chatbot/',
-      search: "",
-    });
-    window.scrollTo(0, 0)
-  }
+  render() {
+    return (
+      <Container>
+        <Row>
+          <div className="d-flex justify-content-between">
+            <h2>FrevaGPT</h2>
+          </div>
   
-  return (
-    <Container>
-      <Row>
-        <div className="d-flex justify-content-between">
-          <h2>FrevaGPT</h2>
-        </div>
-
-        <Col md={4}>
-          <SidePanel/>
-        </Col>
-
-        <Col md={8}>
-          <Col>
-            {conversation.map((element, index) => {
-              if (element.variant !== "ServerHint" && element.variant !== "StreamEnd") {
-                switch(element.variant){
-                  case "Image":
-                    return (
-                      <Col key={index} md={{span: 10, offset: 0}}>
-                        <img className="w-100" src={`data:image/jpeg;base64,${element.content}`} />
-                      </Col>
-                    );
-
-                  case "Code":
-                  case "CodeOutput":
-                    if (isEmpty(element.content[0])) return null;
-                    else return(
-                      <Col md={{span:10, offset: 0}} key={index}>
-                        <CodeBlock title={element.variant} code={element.content}/>
-                      </Col>
-                    );
-
-                  case "User":
-                    return (
-                      <Col md={{span: 10, offset: 2}} key={index}>
-                        <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-info" key={index}>
-                            {element.content}
-                        </Card>
-                      </Col>
-                    );
-                  case "ServerError":
-                  case "OpenAIError":
-                  case "CodeError":
-                  case "FrontendError":
-                  case "UserStop":
-                    return(
-                      <Col md={{span: 10, offset: 0}} key={index}>
-                        <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-danger" key={index}>
-                          <span className="fw-bold">{element.variant}</span>
-                          <Markdown>{helper.replaceLinebreaks(element.content)}</Markdown>
-                        </Card>
-                      </Col>
-                    );
-                  default:
-                    return (
-                      <Col md={{span: 10, offset: 0}} key={index}>
-                        <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light" key={index}>
-                          <Markdown>{helper.replaceLinebreaks(element.content)}</Markdown>
-                        </Card>
-                      </Col>
-                    );  
+          <Col md={4}>
+            <SidePanel/>
+          </Col>
+  
+          <Col md={8}>
+            <Col>
+              {this.state.conversation.map((element, index) => {
+                if (element.variant !== "ServerHint" && element.variant !== "StreamEnd") {
+                  switch(element.variant){
+                    case "Image":
+                      return (
+                        <Col key={index} md={{span: 10, offset: 0}}>
+                          <img className="w-100" src={`data:image/jpeg;base64,${element.content}`} />
+                        </Col>
+                      );
+  
+                    case "Code":
+                    case "CodeOutput":
+                      if (isEmpty(element.content[0])) return null;
+                      else return(
+                        <Col md={{span:10, offset: 0}} key={index}>
+                          <CodeBlock title={element.variant} code={element.content}/>
+                        </Col>
+                      );
+  
+                    case "User":
+                      return (
+                        <Col md={{span: 10, offset: 2}} key={index}>
+                          <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-info" key={index}>
+                              {element.content}
+                          </Card>
+                        </Col>
+                      );
+                    case "ServerError":
+                    case "OpenAIError":
+                    case "CodeError":
+                    case "FrontendError":
+                    case "UserStop":
+                      return(
+                        <Col md={{span: 10, offset: 0}} key={index}>
+                          <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-danger" key={index}>
+                            <span className="fw-bold">{element.variant}</span>
+                            <Markdown>{replaceLinebreaks(element.content)}</Markdown>
+                          </Card>
+                        </Col>
+                      );
+                    default:
+                      return (
+                        <Col md={{span: 10, offset: 0}} key={index}>
+                          <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light" key={index}>
+                            <Markdown>{replaceLinebreaks(element.content)}</Markdown>
+                          </Card>
+                        </Col>
+                      );  
+                  }
                 }
               }
-            }
-            )}
+              )}
+            </Col>
+  
+            {this.state.loading ? (<Row className="mb-3"><Col md={1}><Spinner/></Col></Row>) : null}
+  
+            <Row>
+              <Col md={10}>
+                <InputGroup className="mb-2 pb-2">
+                  <FormControl type="text" onChange={this.handleUserInput} onKeyDown={this.handleKeyDown} placeholder="Ask a question"/>
+                  {this.state.loading 
+                    ? (<Button variant="outline-danger" id="button-addon2" onClick={this.handleStop}>&#9632;</Button>)
+                    : null
+                  }
+                  
+                </InputGroup>
+              </Col>
+  
+              <Col md={2}>
+                <button className="btn btn-info w-100" onClick={this.createNewChat}>New Chat</button>
+              </Col>
+            </Row>
+            
           </Col>
+        </Row>
+      </Container>
+    );
+  }
+  
+  // async function requestBot() {
+  //   setLoading();
+  //   // setLoading(true);
+  //   try {
+  //     await fetchData();
+  //   } catch(error) {
+  //     console.log(error);
+  //     setConversation(prevConversation => [...prevConversation, { variant: "FrontendError", content: "An error occured during rendering!"}])
+  //   }
+  //   setLoading(false);
+  // }
+}
 
-          {loading ? (<Row className="mb-3"><Col md={1}><Spinner/></Col></Row>) : null}
+FrevaGPT.propTypes = {
+  dispatch: PropTypes.func.isRequired,
+}
 
-          <Row>
-            <Col md={10}>
-              <InputGroup className="mb-2 pb-2">
-                <FormControl type="text" value={question} onChange={handleInputChange} onKeyDown={handleKeyDown} placeholder="Ask a question" disabled={loading}/>
-                {loading 
-                  ? (<Button variant="outline-danger" id="button-addon2" onClick={handleStop}>&#9632;</Button>)
-                  : null
-                }
-                
-              </InputGroup>
-            </Col>
+const mapStateToProps = (state) => ({
+  frevaGPT: state.frevaGPTReducer.frevaGPT,
+})
 
-            <Col md={2}>
-              <button className="btn btn-info w-100" onClick={startNewChat}>New Chat</button>
-            </Col>
-          </Row>
-          
-        </Col>
-      </Row>
-    </Container>
-  );
-};
-
-export default ChatBot;
+export default connect(mapStateToProps)(FrevaGPT);

@@ -6,7 +6,7 @@ import PropTypes from "prop-types";
 import Highlight from 'react-highlight'
 import 'highlight.js/styles/atom-one-light.css';
 
-import botHelper from './actions';
+import { formatCode } from './utils';
 
 function CodeBlock(props) {
     return(
@@ -15,7 +15,7 @@ function CodeBlock(props) {
                 <Accordion.Item eventKey="0">
                 <Accordion.Header>{props.title}</Accordion.Header>
                     <Accordion.Body>
-                        <Highlight>{botHelper.formatCode(props.title, props.code[0])}</Highlight>
+                        <Highlight>{formatCode(props.title, props.code[0])}</Highlight>
                     </Accordion.Body>
                 </Accordion.Item>
             </Accordion>

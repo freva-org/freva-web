@@ -23,6 +23,10 @@ function formatCode(mode, data) {
     return codeSnippets;
 }
 
+const ADD_ELEMENT = () => (dispatch) => {
+
+}
+
 export default {
     replaceLinebreaks,
     formatCode,

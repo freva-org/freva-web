@@ -101,7 +101,7 @@ class FrevaGPT extends React.Component {
     };
 
     // response of a new bot request is streamed
-    const response = await fetch(`/api/chatbot/streamresponse?` + helper.objectToQueryString(queryObject)); //, signal);
+    const response = await fetch(`/api/chatbot/streamresponse?` + objectToQueryString(queryObject)); //, signal);
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder('utf-8');

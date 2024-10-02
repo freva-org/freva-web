@@ -31,4 +31,18 @@ export const botRequests = {
             thread: "2YNjKiekgLAGKHL5WrHa9JXe3Gknfxax",
         }
     ],
+    freva: [
+        {
+            title: "Use the freva databrowser to extract the number of datasets for the project cmip5 and the variable cli",
+            thread: "faWvwiqUGwC6cJq9OL4bSmWytkLxyYkQ"
+        },
+        {
+            title: "Which plugins are integrated into freva?",
+            thread: "66Rtx8qGrAHUza5DRjUBCkgblBGnE7yb"
+        },
+        {
+            title: "What is freva?",
+            thread: "Pp6xO7lLI4j9LGx34AIGcPGbgxLFq5jE"
+        }
+    ]
 };

@@ -24,7 +24,6 @@ import SidePanel from "./SidePanel";
 import { replaceLinebreaks } from './utils';
 
 import {
-  getOldThread,
   setThread,
   setConversation,
   addElement,
@@ -43,9 +42,7 @@ class FrevaGPT extends React.Component {
     this.createNewChat = this.createNewChat.bind(this);
 
     this.state = {
-      conversation: [],
       loading: false,
-      thread: "",
       userInput: {},
     };
   }
@@ -59,7 +56,7 @@ class FrevaGPT extends React.Component {
 
       // request content of old thread if threa_id is given
       this.setState({ loading: true });
-      this.props.dispatch(getOldThread(this.state.thread));
+      this.getOldThread(givenQueryParams.thread_id);
       this.setState({ loading: false });
     }
   }
@@ -79,21 +76,28 @@ class FrevaGPT extends React.Component {
     this.setState({ userInput: {variant: "User", content: e.target.value }});
   }
 
-  handleKeyDown(e) {
+  async handleKeyDown(e) {
     if (e.key === "Enter") {
       this.props.dispatch(addElement(this.state.userInput));
       this.setState({ userInput: {} });
-      // RequestBot
+
+      this.setState({ loading: true });
+      try {
+        await this.fetchData()
+      } catch(err) {
+        this.props.dispatch(addElement({ variant: "FrontendError", content: "An error occured during rendering!" }))
+      }
+      this.setState({ loading: false });
     }
   }
 
   async fetchData() {
     // response of a new bot request is streamed
     const response = await fetch(`/api/chatbot/streamresponse?` + new URLSearchParams({
-      input: this.state.userInput,
+      input: this.state.userInput.content,
       auth_key: process.env.BOT_AUTH_KEY,
-      thread_id: this.state.thread,
-      freva_config: "/work/ch1187/clint/freva-dev/freva/evaluation_system.conf",
+      thread_id: this.props.frevaGPT.thread,
+      freva_config: encodeURIComponent("/work/ch1187/clint/freva-dev/freva/evaluation_system.conf"),
     }).toString()); // add signal for abortController
 
     const reader = response.body.getReader();
@@ -142,12 +146,12 @@ class FrevaGPT extends React.Component {
               varObj = jsonBuffer;
 
               // set thread id
-              if (this.state.thread === "" && varObj.variant === "ServerHint") {
+              if (this.props.frevaGPT.thread === "" && varObj.variant === "ServerHint") {
                 try {
-                  this.setState({thread: JSON.parse(varObj.content).thread_id});
+                  this.props.dispatch(setThread(JSON.parse(varObj.content).thread_id));
                   browserHistory.push({
                     pathname: '/chatbot/',
-                    search: `?thread_id=${this.state.thread}`,
+                    search: `?thread_id=${this.props.frevaGPT.thread}`,
                   });
                 } catch(err) {
                   // handle warning
@@ -166,12 +170,22 @@ class FrevaGPT extends React.Component {
 
   }
 
+  async getOldThread(thread) {
+    const response = await fetch(`/api/chatbot/getthread?` + new URLSearchParams({
+      auth_key: process.env.BOT_AUTH_KEY,
+      thread_id: thread,
+      }).toString());
+    
+    const variantArray = await response.json();
+    this.props.dispatch(setConversation(variantArray));
+  }
+
   async handleStop() {
     // stop of thread only possible if a thread id is given
     if (this.state.thread) {
       await fetch(`/api/chatbot/stop?` + new URLSearchParams({
         auth_key: process.env.BOT_AUTH_KEY,
-        thread_id: this.state.thread,
+        thread_id: this.props.frevaGPT.thread,
       }).toString());
     }
 
@@ -183,6 +197,11 @@ class FrevaGPT extends React.Component {
   }
 
   render() {
+
+    const {
+      conversation,
+    } = this.props.frevaGPT;
+
     return (
       <Container>
         <Row>
@@ -196,7 +215,7 @@ class FrevaGPT extends React.Component {
   
           <Col md={8}>
             <Col>
-              {this.state.conversation.map((element, index) => {
+              {conversation.map((element, index) => {
                 if (element.variant !== "ServerHint" && element.variant !== "StreamEnd") {
                   switch(element.variant){
                     case "Image":
@@ -274,26 +293,18 @@ class FrevaGPT extends React.Component {
       </Container>
     );
   }
-  
-  // async function requestBot() {
-  //   setLoading();
-  //   // setLoading(true);
-  //   try {
-  //     await fetchData();
-  //   } catch(error) {
-  //     console.log(error);
-  //     setConversation(prevConversation => [...prevConversation, { variant: "FrontendError", content: "An error occured during rendering!"}])
-  //   }
-  //   setLoading(false);
-  // }
 }
 
 FrevaGPT.propTypes = {
+  frevaGPT: PropTypes.shape({
+    thread: PropTypes.string,
+    conversation: PropTypes.array,
+  }),
   dispatch: PropTypes.func.isRequired,
 }
 
 const mapStateToProps = (state) => ({
-  frevaGPT: state.frevaGPTReducer.frevaGPT,
+  frevaGPT: state.frevaGPTReducer,
 })
 
 export default connect(mapStateToProps)(FrevaGPT);

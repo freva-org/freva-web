@@ -2,7 +2,6 @@ import * as constants from './constants';
 
 const frevaGPTInitialState = {
     conversation: [],
-    loading: false,
     thread: "",
 };
 

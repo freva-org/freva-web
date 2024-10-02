@@ -1,10 +1,10 @@
 
-function replaceLinebreaks(data) {
+export function replaceLinebreaks(data) {
     const formattedData = data.split("\\n").join("\n")
     return formattedData;
 }
 
-function formatCode(mode, data) {
+export function formatCode(mode, data) {
 
     // replace first linebreak in code got from old thread
     if (data.startsWith("\\n")) data = data.replace("\\n", "");
@@ -22,8 +22,3 @@ function formatCode(mode, data) {
 
     return codeSnippets;
 }
-
-export default {
-    formatCode,
-    replaceLinebreaks,
-};

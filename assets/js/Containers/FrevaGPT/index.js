@@ -21,7 +21,7 @@ import Spinner from "../../Components/Spinner";
 import CodeBlock from "./CodeBlock";
 import SidePanel from "./SidePanel";
 
-import { replaceLinebreaks } from './utils';
+import { replaceLinebreaks, objectToQueryString } from './utils';
 
 import {
   setThread,
@@ -92,13 +92,16 @@ class FrevaGPT extends React.Component {
   }
 
   async fetchData() {
-    // response of a new bot request is streamed
-    const response = await fetch(`/api/chatbot/streamresponse?` + new URLSearchParams({
+
+    const queryObject = {
       input: this.state.userInput.content,
       auth_key: process.env.BOT_AUTH_KEY,
       thread_id: this.props.frevaGPT.thread,
-      freva_config: encodeURIComponent("/work/ch1187/clint/freva-dev/freva/evaluation_system.conf"),
-    }).toString()); // add signal for abortController
+      freva_config: "/work/ch1187/clint/freva-dev/freva/evaluation_system.conf",
+    };
+
+    // response of a new bot request is streamed
+    const response = await fetch(`/api/chatbot/streamresponse?` + helper.objectToQueryString(queryObject)); //, signal);
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder('utf-8');

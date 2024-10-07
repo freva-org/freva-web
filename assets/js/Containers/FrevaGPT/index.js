@@ -29,6 +29,8 @@ import {
   addElement,
 } from './actions';
 
+import 'bootstrap-icons/font/bootstrap-icons.css';
+
 class FrevaGPT extends React.Component {
 
   // const abortController = useRef();
@@ -40,6 +42,7 @@ class FrevaGPT extends React.Component {
     this.handleUserInput = this.handleUserInput.bind(this);
     this.handleKeyDown = this.handleKeyDown.bind(this);
     this.createNewChat = this.createNewChat.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
 
     this.state = {
       loading: false,
@@ -78,17 +81,21 @@ class FrevaGPT extends React.Component {
 
   async handleKeyDown(e) {
     if (e.key === "Enter") {
-      this.props.dispatch(addElement(this.state.userInput));
-      this.setState({ userInput: {} });
-
-      this.setState({ loading: true });
-      try {
-        await this.fetchData()
-      } catch(err) {
-        this.props.dispatch(addElement({ variant: "FrontendError", content: "An error occured during rendering!" }))
-      }
-      this.setState({ loading: false });
+      this.handleSubmit();
     }
+  }
+
+  async handleSubmit() {
+    this.props.dispatch(addElement(this.state.userInput));
+    this.setState({ userInput: {} });
+
+    this.setState({ loading: true });
+    try {
+      await this.fetchData()
+    } catch(err) {
+      this.props.dispatch(addElement({ variant: "FrontendError", content: "An error occured during rendering!" }))
+    }
+    this.setState({ loading: false });
   }
 
   async fetchData() {
@@ -279,8 +286,8 @@ class FrevaGPT extends React.Component {
                 <InputGroup className="mb-2 pb-2">
                   <FormControl type="text" onChange={this.handleUserInput} onKeyDown={this.handleKeyDown} placeholder="Ask a question"/>
                   {this.state.loading 
-                    ? (<Button variant="outline-danger" id="button-addon2" onClick={this.handleStop}>&#9632;</Button>)
-                    : null
+                    ? (<Button variant="outline-danger" onClick={this.handleStop}><i className="bi bi-stop-fill"></i></Button>)
+                    : (<Button variant="outline-success" onClick={this.handleSubmit}><i className="bi bi-play-fill"></i></Button>)
                   }
                   
                 </InputGroup>

@@ -46,7 +46,7 @@ class FrevaGPT extends React.Component {
 
     this.state = {
       loading: false,
-      userInput: {},
+      userInput: "",
     };
   }
 
@@ -76,7 +76,7 @@ class FrevaGPT extends React.Component {
   }
 
   handleUserInput(e) {
-    this.setState({ userInput: {variant: "User", content: e.target.value }});
+    this.setState({ userInput: e.target.value });
   }
 
   async handleKeyDown(e) {
@@ -86,8 +86,8 @@ class FrevaGPT extends React.Component {
   }
 
   async handleSubmit() {
-    this.props.dispatch(addElement(this.state.userInput));
-    this.setState({ userInput: {} });
+    this.props.dispatch(addElement({ variant: "User", content: this.state.userInput}));
+    this.setState({ userInput: "" });
 
     this.setState({ loading: true });
     try {
@@ -101,7 +101,7 @@ class FrevaGPT extends React.Component {
   async fetchData() {
 
     const queryObject = {
-      input: this.state.userInput.content,
+      input: this.state.userInput,
       auth_key: process.env.BOT_AUTH_KEY,
       thread_id: this.props.frevaGPT.thread,
       freva_config: "/work/ch1187/clint/freva-dev/freva/evaluation_system.conf",
@@ -284,7 +284,7 @@ class FrevaGPT extends React.Component {
             <Row>
               <Col md={10}>
                 <InputGroup className="mb-2 pb-2">
-                  <FormControl type="text" onChange={this.handleUserInput} onKeyDown={this.handleKeyDown} placeholder="Ask a question"/>
+                  <FormControl type="text" value={this.state.userInput} onChange={this.handleUserInput} onKeyDown={this.handleKeyDown} placeholder="Ask a question"/>
                   {this.state.loading 
                     ? (<Button variant="outline-danger" onClick={this.handleStop}><i className="bi bi-stop-fill"></i></Button>)
                     : (<Button variant="outline-success" onClick={this.handleSubmit}><i className="bi bi-play-fill"></i></Button>)

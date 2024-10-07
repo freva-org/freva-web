@@ -9,7 +9,8 @@ import {
   FormControl,
   InputGroup,
   Card,
-  Button } from 'react-bootstrap';
+  Button,
+  Form } from 'react-bootstrap';
 
 import { browserHistory } from 'react-router';
 import { isEmpty, has } from 'lodash';
@@ -47,6 +48,8 @@ class FrevaGPT extends React.Component {
     this.state = {
       loading: false,
       userInput: "",
+      botModelList: [],
+      botModel: "",
     };
   }
 
@@ -62,6 +65,16 @@ class FrevaGPT extends React.Component {
       this.getOldThread(givenQueryParams.thread_id);
       this.setState({ loading: false });
     }
+
+    const getBotModels = async () => {
+      const queryObject = {
+        auth_key: process.env.BOT_AUTH_KEY,
+      };
+      const response = await fetch(`/api/chatbot/availablechatbots?` + objectToQueryString(queryObject));
+      this.setState({ botModelList: await response.json()});
+    }
+
+    getBotModels();
   }
 
   createNewChat() {
@@ -104,6 +117,7 @@ class FrevaGPT extends React.Component {
       input: this.state.userInput,
       auth_key: process.env.BOT_AUTH_KEY,
       thread_id: this.props.frevaGPT.thread,
+      chatbot: this.state.botModel,
       freva_config: "/work/ch1187/clint/freva-dev/freva/evaluation_system.conf",
     };
 
@@ -220,6 +234,16 @@ class FrevaGPT extends React.Component {
           </div>
   
           <Col md={4}>
+            <Form.Select 
+              value={this.botModel}
+              onChange={(x) => { this.setState({ botModel: x.target.value }); }}
+              className="me-1 mb-3"
+              placeholder="Choose Chatbot"
+              hidden>
+              {this.state.botModelList.map((x) => {
+                  return <option key={x}>{x}</option>;
+              })}
+            </Form.Select>
             <SidePanel/>
           </Col>
   

@@ -41,12 +41,14 @@ class FrevaGPT extends React.Component {
     this.handleKeyDown = this.handleKeyDown.bind(this);
     this.createNewChat = this.createNewChat.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.toggleBotSelect = this.toggleBotSelect.bind(this);
 
     this.state = {
       loading: false,
       userInput: "",
       botModelList: [],
       botModel: "",
+      hideBotModelList: true,
     };
   }
 
@@ -217,13 +219,18 @@ class FrevaGPT extends React.Component {
     this.props.dispatch(addElement({variant: "UserStop", content: "Request stopped manually"}))
   }
 
+  toggleBotSelect() {
+    this.setState({ hideBotModelList: !this.state.hideBotModelList });
+    console.log("hi");
+  }
+
   render() {
 
     return (
       <Container>
         <Row>
           <div className="d-flex justify-content-between">
-            <h2>FrevaGPT</h2>
+            <h2 onClick={this.toggleBotSelect}>FrevaGPT</h2>
           </div>
   
           <Col md={4}>
@@ -232,7 +239,7 @@ class FrevaGPT extends React.Component {
               onChange={(x) => { this.setState({ botModel: x.target.value }); }}
               className="me-1 mb-3"
               placeholder="Choose Chatbot"
-              hidden>
+              hidden={this.state.hideBotModelList}>
               {this.state.botModelList.map((x) => {
                   return <option key={x}>{x}</option>;
               })}

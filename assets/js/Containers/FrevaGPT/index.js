@@ -8,21 +8,18 @@ import {
   Col,
   FormControl,
   InputGroup,
-  Card,
   Button,
   Form } from 'react-bootstrap';
 
 import { browserHistory } from 'react-router';
 import { isEmpty, has } from 'lodash';
 
-import Markdown from 'react-markdown';
-
 import Spinner from "../../Components/Spinner";
 
-import CodeBlock from "./CodeBlock";
+import ChatBlock from './ChatBlock';
 import SidePanel from "./SidePanel";
 
-import { replaceLinebreaks, objectToQueryString } from './utils';
+import { objectToQueryString } from './utils';
 
 import {
   setThread,
@@ -222,10 +219,6 @@ class FrevaGPT extends React.Component {
 
   render() {
 
-    const {
-      conversation,
-    } = this.props.frevaGPT;
-
     return (
       <Container>
         <Row>
@@ -248,61 +241,9 @@ class FrevaGPT extends React.Component {
           </Col>
   
           <Col md={8}>
-            <Col>
-              {conversation.map((element, index) => {
-                if (element.variant !== "ServerHint" && element.variant !== "StreamEnd") {
-                  switch(element.variant){
-                    case "Image":
-                      return (
-                        <Col key={index} md={{span: 10, offset: 0}}>
-                          <img className="w-100" src={`data:image/jpeg;base64,${element.content}`} />
-                        </Col>
-                      );
-  
-                    case "Code":
-                    case "CodeOutput":
-                      if (isEmpty(element.content[0])) return null;
-                      else return(
-                        <Col md={{span:10, offset: 0}} key={index}>
-                          <CodeBlock title={element.variant} code={element.content}/>
-                        </Col>
-                      );
-  
-                    case "User":
-                      return (
-                        <Col md={{span: 10, offset: 2}} key={index}>
-                          <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-info" key={index}>
-                              {element.content}
-                          </Card>
-                        </Col>
-                      );
-                    case "ServerError":
-                    case "OpenAIError":
-                    case "CodeError":
-                    case "FrontendError":
-                    case "UserStop":
-                      return(
-                        <Col md={{span: 10, offset: 0}} key={index}>
-                          <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-danger" key={index}>
-                            <span className="fw-bold">{element.variant}</span>
-                            <Markdown>{replaceLinebreaks(element.content)}</Markdown>
-                          </Card>
-                        </Col>
-                      );
-                    default:
-                      return (
-                        <Col md={{span: 10, offset: 0}} key={index}>
-                          <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light" key={index}>
-                            <Markdown>{replaceLinebreaks(element.content)}</Markdown>
-                          </Card>
-                        </Col>
-                      );  
-                  }
-                }
-              }
-              )}
-            </Col>
-  
+
+            <ChatBlock></ChatBlock>
+            
             {this.state.loading ? (<Row className="mb-3"><Col md={1}><Spinner/></Col></Row>) : null}
   
             <Row>
@@ -312,8 +253,7 @@ class FrevaGPT extends React.Component {
                   {this.state.loading 
                     ? (<Button variant="outline-danger" onClick={this.handleStop}><i className="bi bi-stop-fill"></i></Button>)
                     : (<Button variant="outline-success" onClick={this.handleSubmit}><i className="bi bi-play-fill"></i></Button>)
-                  }
-                  
+                  } 
                 </InputGroup>
               </Col>
   

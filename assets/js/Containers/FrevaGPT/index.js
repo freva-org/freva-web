@@ -42,6 +42,7 @@ class FrevaGPT extends React.Component {
     this.createNewChat = this.createNewChat.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.toggleBotSelect = this.toggleBotSelect.bind(this);
+    this.handleStop = this.handleStop.bind(this);
 
     this.state = {
       loading: false,
@@ -205,7 +206,7 @@ class FrevaGPT extends React.Component {
 
   async handleStop() {
     // stop of thread only possible if a thread id is given
-    if (this.state.thread) {
+    if (this.props.frevaGPT.thread) {
       await fetch(`/api/chatbot/stop?` + new URLSearchParams({
         auth_key: process.env.BOT_AUTH_KEY,
         thread_id: this.props.frevaGPT.thread,

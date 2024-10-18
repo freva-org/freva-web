@@ -107,6 +107,7 @@ class FrevaGPT extends React.Component {
       await this.fetchData()
     } catch(err) {
       this.props.dispatch(addElement({ variant: "FrontendError", content: "An error occured during rendering!" }))
+      console.error(err);
     }
     this.setState({ loading: false });
   }
@@ -186,7 +187,7 @@ class FrevaGPT extends React.Component {
             foundSomething = true;
             break;
           } catch(err) {
-            // don't do anything
+            console.error(err);
           }  
         }
       }

@@ -28,3 +28,8 @@ export const objectToQueryString = (obj) => {
       .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
       .join('&');
   };
+
+export const truncate = (value) => {
+    var trunc = value.substr(0, 32) + "\u2026";
+    return trunc;
+}

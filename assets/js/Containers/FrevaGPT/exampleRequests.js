@@ -17,20 +17,6 @@ export const botRequests = {
             thread: "VcQc3ZuWMDWFluLLQd2YzaNIqYoSxi6P"
         }
     ],
-    evaluation: [
-        {
-            title: "Make an annual mean temperature global map plot for the year 2023",
-            thread: "J8W0gvvDl7U1A7OkHQ8UhcUYa8810UhL",
-        },
-        {
-            title: "Make a zonal mean plot of precipitation for the average between 1961 and 1990 as well as 1991 and 2020",
-            thread: "yvgkWrPQlZPLztLTzvU3BE6v7yENvjIU",
-        },
-        {
-            title: "Find the year with the highest local wind speed, make a map plot of wind and mark the grid box with an X",
-            thread: "2YNjKiekgLAGKHL5WrHa9JXe3Gknfxax",
-        }
-    ],
     freva: [
         {
             title: "Use the freva databrowser to extract the number of datasets for the project cmip5 and the variable cli",
@@ -46,3 +32,10 @@ export const botRequests = {
         }
     ]
 };
+
+export const botSuggestions = [
+    "Make an annual mean temperature global map plot for the year 2023",
+    "Make a zonal mean plot of precipitation for the average between 1961 and 1990 as well as 1991 and 2020",
+    "Find the year with the highest local wind speed, make a map plot of wind and mark the grid box with an X",
+    "For the year the Neumayer started operations, make a polarstereographic map plot of Antarctica showing temperature anomalies (climatology 1961-1990) and mark the station with a big X"
+]

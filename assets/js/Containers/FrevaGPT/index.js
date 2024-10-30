@@ -19,13 +19,15 @@ import Spinner from "../../Components/Spinner";
 import ChatBlock from './ChatBlock';
 import SidePanel from "./SidePanel";
 
-import { objectToQueryString } from './utils';
+import { objectToQueryString, truncate } from './utils';
 
 import {
   setThread,
   setConversation,
   addElement,
 } from './actions';
+
+import { botSuggestions } from './exampleRequests';
 
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
@@ -50,6 +52,7 @@ class FrevaGPT extends React.Component {
       botModelList: [],
       botModel: "",
       hideBotModelList: true,
+      showSuggestions: true,
     };
   }
 
@@ -64,17 +67,18 @@ class FrevaGPT extends React.Component {
       this.setState({ loading: true });
       this.getOldThread(givenQueryParams.thread_id);
       this.setState({ loading: false });
+      this.setState({ showSuggestion: false });
     }
 
-    const getBotModels = async () => {
-      const queryObject = {
-        auth_key: process.env.BOT_AUTH_KEY,
-      };
-      const response = await fetch(`/api/chatbot/availablechatbots?` + objectToQueryString(queryObject));
-      this.setState({ botModelList: await response.json()});
-    }
+    // const getBotModels = async () => {
+    //   const queryObject = {
+    //     auth_key: process.env.BOT_AUTH_KEY,
+    //   };
+    //   const response = await fetch(`/api/chatbot/availablechatbots?` + objectToQueryString(queryObject));
+    //   this.setState({ botModelList: await response.json()});
+    // }
 
-    getBotModels();
+    // getBotModels();
   }
 
   createNewChat() {
@@ -85,6 +89,7 @@ class FrevaGPT extends React.Component {
       pathname: '/chatbot/',
       search: "",
     });
+    this.setState({ showSuggestions: true });
     window.scrollTo(0, 0)
   }
 
@@ -99,16 +104,18 @@ class FrevaGPT extends React.Component {
   }
 
   async handleSubmit() {
+    this.forceUpdate();
     this.props.dispatch(addElement({ variant: "User", content: this.state.userInput}));
+    this.setState({ showSuggestions: false });
     this.setState({ userInput: "" });
 
     this.setState({ loading: true });
-    try {
-      await this.fetchData()
-    } catch(err) {
-      this.props.dispatch(addElement({ variant: "FrontendError", content: "An error occured during rendering!" }))
-      console.error(err);
-    }
+    // try {
+    //   await this.fetchData()
+    // } catch(err) {
+    //   this.props.dispatch(addElement({ variant: "FrontendError", content: "An error occured during rendering!" }))
+    //   console.error(err);
+    // }
     this.setState({ loading: false });
   }
 
@@ -233,30 +240,54 @@ class FrevaGPT extends React.Component {
         <Row>
           <div className="d-flex justify-content-between">
             <h2 onClick={this.toggleBotSelect}>FrevaGPT</h2>
+
+            <div className="d-flex justify-content-between mb-2">
+              <Form.Select 
+                value={this.botModel}
+                onChange={(x) => { this.setState({ botModel: x.target.value }); }}
+                className="me-1"
+                placeholder="Model"
+                hidden={this.state.hideBotModelList}>
+                {this.state.botModelList.map((x) => {
+                    return <option key={x}>{x}</option>;
+                })}
+              </Form.Select>
+              <Button onClick={this.createNewChat} variant="info">NewChat</Button>
+              {/* <Button>Einklappen</Button> */}
+            </div>
           </div>
   
           <Col md={4}>
-            <Form.Select 
-              value={this.botModel}
-              onChange={(x) => { this.setState({ botModel: x.target.value }); }}
-              className="me-1 mb-3"
-              placeholder="Choose Chatbot"
-              hidden={this.state.hideBotModelList}>
-              {this.state.botModelList.map((x) => {
-                  return <option key={x}>{x}</option>;
-              })}
-            </Form.Select>
             <SidePanel/>
           </Col>
   
           <Col md={8}>
-
+            {this.state.showSuggestions ? (
+              <Row>
+                <Col md={12}>
+                  <div className="d-flex justify-content-evenly mb-2">
+                    {botSuggestions.map((element, index) => {return (
+                      <Button 
+                        key={index}
+                        className="w-25 m-2" 
+                        variant="outline-secondary" 
+                        onClick={(e) => {this.handleUserInput(e); this.handleSubmit();}}
+                        value={element}>
+                          {truncate(element)}
+                        </Button>
+                      )}
+                    )}
+                  </div>
+                </Col>
+              </Row>
+            ) : null }
+            
             <ChatBlock></ChatBlock>
             
             {this.state.loading ? (<Row className="mb-3"><Col md={1}><Spinner/></Col></Row>) : null}
   
             <Row>
-              <Col md={10}>
+              <Col md={12}>
                 <InputGroup className="mb-2 pb-2">
                   <FormControl type="text" value={this.state.userInput} onChange={this.handleUserInput} onKeyDown={this.handleKeyDown} placeholder="Ask a question"/>
                   {this.state.loading 
@@ -264,10 +295,6 @@ class FrevaGPT extends React.Component {
                     : (<Button variant="outline-success" onClick={this.handleSubmit}><i className="bi bi-play-fill"></i></Button>)
                   } 
                 </InputGroup>
-              </Col>
-  
-              <Col md={2}>
-                <button className="btn btn-info w-100" onClick={this.createNewChat}>New Chat</button>
               </Col>
             </Row>
             

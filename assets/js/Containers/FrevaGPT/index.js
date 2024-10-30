@@ -9,7 +9,8 @@ import {
   FormControl,
   InputGroup,
   Button,
-  Form } from 'react-bootstrap';
+  Form,
+  Alert } from 'react-bootstrap';
 
 import { browserHistory } from 'react-router';
 import { isEmpty, has } from 'lodash';
@@ -50,6 +51,7 @@ class FrevaGPT extends React.Component {
       botModelList: [],
       botModel: "",
       hideBotModelList: true,
+      botOkay: true,
     };
   }
 
@@ -66,6 +68,11 @@ class FrevaGPT extends React.Component {
       this.setState({ loading: false });
     }
 
+    const pingBot = async () => {
+      const response = await fetch('/api/chatbot/ping');
+      return response.status;
+    }
+
     const getBotModels = async () => {
       const queryObject = {
         auth_key: process.env.BOT_AUTH_KEY,
@@ -74,7 +81,11 @@ class FrevaGPT extends React.Component {
       this.setState({ botModelList: await response.json()});
     }
 
-    getBotModels();
+    if (pingBot() !== "200") {
+      this.setState({ botOkay: false });
+    } else {
+      getBotModels();
+    }
   }
 
   createNewChat() {
@@ -223,7 +234,6 @@ class FrevaGPT extends React.Component {
 
   toggleBotSelect() {
     this.setState({ hideBotModelList: !this.state.hideBotModelList });
-    console.log("hi");
   }
 
   render() {
@@ -234,8 +244,15 @@ class FrevaGPT extends React.Component {
           <div className="d-flex justify-content-between">
             <h2 onClick={this.toggleBotSelect}>FrevaGPT</h2>
           </div>
+
+          {this.state.botOkay ? 
+            null : 
+            (<Alert key="botError" variant="danger">
+              The bot is currently not available. Please retry later.
+            </Alert>)
+          }
   
-          <Col md={4}>
+          <Col hidden={!this.state.botOkay} md={4}>
             <Form.Select 
               value={this.botModel}
               onChange={(x) => { this.setState({ botModel: x.target.value }); }}
@@ -249,7 +266,7 @@ class FrevaGPT extends React.Component {
             <SidePanel/>
           </Col>
   
-          <Col md={8}>
+          <Col hidden={!this.state.botOkay} md={8}>
 
             <ChatBlock></ChatBlock>
             
@@ -258,7 +275,7 @@ class FrevaGPT extends React.Component {
             <Row>
               <Col md={10}>
                 <InputGroup className="mb-2 pb-2">
-                  <FormControl type="text" value={this.state.userInput} onChange={this.handleUserInput} onKeyDown={this.handleKeyDown} placeholder="Ask a question"/>
+                  <FormControl type="text" value={this.state.userInput} onChange={this.handleUserInput} onKeyDown={this.handleKeyDown} placeholder="Ask a question" disabled={!this.state.botOkay}/>
                   {this.state.loading 
                     ? (<Button variant="outline-danger" onClick={this.handleStop}><i className="bi bi-stop-fill"></i></Button>)
                     : (<Button variant="outline-success" onClick={this.handleSubmit}><i className="bi bi-play-fill"></i></Button>)

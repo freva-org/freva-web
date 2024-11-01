@@ -45,6 +45,7 @@ class FrevaGPT extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.toggleBotSelect = this.toggleBotSelect.bind(this);
     this.handleStop = this.handleStop.bind(this);
+    this.submitUserInput = this.submitUserInput.bind(this);
 
     this.state = {
       loading: false,
@@ -93,36 +94,39 @@ class FrevaGPT extends React.Component {
     window.scrollTo(0, 0)
   }
 
-  handleUserInput(e) {
-    this.setState({ userInput: e.target.value });
+  handleUserInput(e, callback) {
+    this.setState({ userInput: e.target.value }, callback);
   }
 
   async handleKeyDown(e) {
     if (e.key === "Enter") {
-      this.handleSubmit();
+      this.handleSubmit(e.target.value);
     }
   }
 
-  async handleSubmit() {
-    this.forceUpdate();
-    this.props.dispatch(addElement({ variant: "User", content: this.state.userInput}));
-    this.setState({ showSuggestions: false });
+  async submitUserInput() {
+    const userInput = this.state.userInput;
+    await this.handleSubmit(userInput);
     this.setState({ userInput: "" });
+  }
 
-    this.setState({ loading: true });
-    // try {
-    //   await this.fetchData()
-    // } catch(err) {
-    //   this.props.dispatch(addElement({ variant: "FrontendError", content: "An error occured during rendering!" }))
-    //   console.error(err);
-    // }
+  async handleSubmit(input) {
+    this.props.dispatch(addElement({ variant: "User", content: input}));
+    this.setState({ showSuggestions: false, userInput: "", loading: true });
+
+    try {
+      await this.fetchData(input)
+    } catch(err) {
+      this.props.dispatch(addElement({ variant: "FrontendError", content: "An error occured during rendering!" }))
+      console.error(err);
+    }
     this.setState({ loading: false });
   }
 
-  async fetchData() {
+  async fetchData(input) {
 
     const queryObject = {
-      input: this.state.userInput,
+      input: input,
       auth_key: process.env.BOT_AUTH_KEY,
       thread_id: this.props.frevaGPT.thread,
       chatbot: this.state.botModel,
@@ -253,7 +257,6 @@ class FrevaGPT extends React.Component {
                 })}
               </Form.Select>
               <Button onClick={this.createNewChat} variant="info">NewChat</Button>
-              {/* <Button>Einklappen</Button> */}
             </div>
           </div>
   
@@ -271,7 +274,7 @@ class FrevaGPT extends React.Component {
                         key={index}
                         className="w-25 m-2" 
                         variant="outline-secondary" 
-                        onClick={(e) => {this.handleUserInput(e); this.handleSubmit();}}
+                        onClick={() => this.handleSubmit(element)}
                         value={element}>
                           {truncate(element)}
                         </Button>
@@ -292,7 +295,7 @@ class FrevaGPT extends React.Component {
                   <FormControl type="text" value={this.state.userInput} onChange={this.handleUserInput} onKeyDown={this.handleKeyDown} placeholder="Ask a question"/>
                   {this.state.loading 
                     ? (<Button variant="outline-danger" onClick={this.handleStop}><i className="bi bi-stop-fill"></i></Button>)
-                    : (<Button variant="outline-success" onClick={this.handleSubmit}><i className="bi bi-play-fill"></i></Button>)
+                    : (<Button variant="outline-success" onClick={this.submitUserInput}><i className="bi bi-play-fill"></i></Button>)
                   } 
                 </InputGroup>
               </Col>

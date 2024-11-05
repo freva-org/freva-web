@@ -258,7 +258,7 @@ class FrevaGPT extends React.Component {
   renderBotContent() {
     return (
       <>
-        <Col hidden={!this.state.botOkay} md={4}>
+        <Col md={4}>
           <Form.Select 
             value={this.botModel}
             onChange={(x) => { this.setState({ botModel: x.target.value }); }}

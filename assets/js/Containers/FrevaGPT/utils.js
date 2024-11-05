@@ -30,6 +30,6 @@ export const objectToQueryString = (obj) => {
   };
 
 export const truncate = (value) => {
-    var trunc = value.substr(0, 32) + "\u2026";
+    const trunc = value.substring(0, 32) + "\u2026";
     return trunc;
 }

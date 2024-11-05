@@ -57,7 +57,7 @@ class FrevaGPT extends React.Component {
     };
   }
 
-  componentDidMount() {
+  async componentDidMount() {
 
     // if thread giving on mounting the component, set thread within store
     const givenQueryParams = browserHistory.getCurrentLocation().query;
@@ -66,20 +66,20 @@ class FrevaGPT extends React.Component {
 
       // request content of old thread if threa_id is given
       this.setState({ loading: true });
-      this.getOldThread(givenQueryParams.thread_id);
+      await this.getOldThread(givenQueryParams.thread_id);
       this.setState({ loading: false });
       this.setState({ showSuggestion: false });
     }
 
-    // const getBotModels = async () => {
-    //   const queryObject = {
-    //     auth_key: process.env.BOT_AUTH_KEY,
-    //   };
-    //   const response = await fetch(`/api/chatbot/availablechatbots?` + objectToQueryString(queryObject));
-    //   this.setState({ botModelList: await response.json()});
-    // }
+    const getBotModels = async () => {
+      const queryObject = {
+        auth_key: process.env.BOT_AUTH_KEY,
+      };
+      const response = await fetch(`/api/chatbot/availablechatbots?` + objectToQueryString(queryObject));
+      this.setState({ botModelList: await response.json()});
+    }
 
-    // getBotModels();
+    getBotModels();
   }
 
   createNewChat() {
@@ -94,8 +94,8 @@ class FrevaGPT extends React.Component {
     window.scrollTo(0, 0)
   }
 
-  handleUserInput(e, callback) {
-    this.setState({ userInput: e.target.value }, callback);
+  handleUserInput(e) {
+    this.setState({ userInput: e.target.value });
   }
 
   async handleKeyDown(e) {
@@ -248,7 +248,7 @@ class FrevaGPT extends React.Component {
             <div className="d-flex justify-content-between mb-2">
               <Form.Select 
                 value={this.botModel}
-                onChange={(x) => { this.setState({ botModel: x.target.value }); }}
+                onChange={(e) => { this.setState({ botModel: e.target.value }); }}
                 className="me-1"
                 placeholder="Model"
                 hidden={this.state.hideBotModelList}>

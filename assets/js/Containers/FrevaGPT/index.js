@@ -51,7 +51,7 @@ class FrevaGPT extends React.Component {
       botModelList: [],
       botModel: "",
       hideBotModelList: true,
-      botOkay: true,
+      botOkay: undefined,
     };
   }
 
@@ -68,9 +68,21 @@ class FrevaGPT extends React.Component {
       this.setState({ loading: false });
     }
 
-    const pingBot = async () => {
-      const response = await fetch('/api/chatbot/ping');
-      return response.status;
+    const successfulPing = async () => {
+      let pingSuccessful = false;
+
+      try {
+        await fetch('/api/chatbot/ping').then((res) => {
+          if (res.status === 200) pingSuccessful = true;
+          return null;
+        }).catch((err) => {
+          console.error("PingError: ", err);
+        });
+      } catch(err) {
+        console.error("PingError: ", err);
+      }
+
+      return pingSuccessful;
     }
 
     const getBotModels = async () => {
@@ -81,11 +93,11 @@ class FrevaGPT extends React.Component {
       this.setState({ botModelList: await response.json()});
     }
 
-    if (await pingBot() !== 200) {
-      this.setState({ botOkay: false });
-    } else {
+    if (await successfulPing()) {
+      this.setState({ botOkay: true });
       await getBotModels();
-    }
+    } else this.setState({ botOkay: false });
+
   }
 
   createNewChat() {
@@ -236,6 +248,57 @@ class FrevaGPT extends React.Component {
     this.setState({ hideBotModelList: !this.state.hideBotModelList });
   }
 
+  renderAlert() {
+    return (
+      <Alert key="botError" variant="danger">
+        The bot is currently not available. Please retry later.
+      </Alert>);
+  }
+
+  renderBotContent() {
+    return (
+      <>
+        <Col hidden={!this.state.botOkay} md={4}>
+          <Form.Select 
+            value={this.botModel}
+            onChange={(x) => { this.setState({ botModel: x.target.value }); }}
+            className="me-1 mb-3"
+            placeholder="Choose Chatbot"
+            hidden={this.state.hideBotModelList}>
+            {this.state.botModelList.map((x) => {
+                return <option key={x}>{x}</option>;
+            })}
+          </Form.Select>
+          <SidePanel/>
+        </Col>
+  
+        <Col hidden={!this.state.botOkay} md={8}>
+
+          <ChatBlock></ChatBlock>
+            
+          {this.state.loading ? (<Row className="mb-3"><Col md={1}><Spinner/></Col></Row>) : null}
+  
+          <Row>
+            <Col md={10}>
+              <InputGroup className="mb-2 pb-2">
+                <FormControl type="text" value={this.state.userInput} onChange={this.handleUserInput} onKeyDown={this.handleKeyDown} placeholder="Ask a question" disabled={!this.state.botOkay}/>
+                {this.state.loading 
+                  ? (<Button variant="outline-danger" onClick={this.handleStop}><i className="bi bi-stop-fill"></i></Button>)
+                  : (<Button variant="outline-success" onClick={this.handleSubmit}><i className="bi bi-play-fill"></i></Button>)
+                } 
+              </InputGroup>
+            </Col>
+
+            <Col md={2}>
+              <button className="btn btn-info w-100" onClick={this.createNewChat}>New Chat</button>
+            </Col>
+          </Row>
+            
+        </Col>
+      </>
+    );
+  }
+
   render() {
 
     return (
@@ -245,50 +308,9 @@ class FrevaGPT extends React.Component {
             <h2 onClick={this.toggleBotSelect}>FrevaGPT</h2>
           </div>
 
-          {this.state.botOkay ? 
-            null : 
-            (<Alert key="botError" variant="danger">
-              The bot is currently not available. Please retry later.
-            </Alert>)
-          }
+          {this.state.botOkay === undefined ?? (<Spinner></Spinner>)}
+          {this.state.botOkay ? this.renderBotContent() : this.renderAlert() }
   
-          <Col hidden={!this.state.botOkay} md={4}>
-            <Form.Select 
-              value={this.botModel}
-              onChange={(x) => { this.setState({ botModel: x.target.value }); }}
-              className="me-1 mb-3"
-              placeholder="Choose Chatbot"
-              hidden={this.state.hideBotModelList}>
-              {this.state.botModelList.map((x) => {
-                  return <option key={x}>{x}</option>;
-              })}
-            </Form.Select>
-            <SidePanel/>
-          </Col>
-  
-          <Col hidden={!this.state.botOkay} md={8}>
-
-            <ChatBlock></ChatBlock>
-            
-            {this.state.loading ? (<Row className="mb-3"><Col md={1}><Spinner/></Col></Row>) : null}
-  
-            <Row>
-              <Col md={10}>
-                <InputGroup className="mb-2 pb-2">
-                  <FormControl type="text" value={this.state.userInput} onChange={this.handleUserInput} onKeyDown={this.handleKeyDown} placeholder="Ask a question" disabled={!this.state.botOkay}/>
-                  {this.state.loading 
-                    ? (<Button variant="outline-danger" onClick={this.handleStop}><i className="bi bi-stop-fill"></i></Button>)
-                    : (<Button variant="outline-success" onClick={this.handleSubmit}><i className="bi bi-play-fill"></i></Button>)
-                  } 
-                </InputGroup>
-              </Col>
-  
-              <Col md={2}>
-                <button className="btn btn-info w-100" onClick={this.createNewChat}>New Chat</button>
-              </Col>
-            </Row>
-            
-          </Col>
         </Row>
       </Container>
     );

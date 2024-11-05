@@ -55,7 +55,7 @@ class FrevaGPT extends React.Component {
     };
   }
 
-  componentDidMount() {
+  async componentDidMount() {
 
     // if thread giving on mounting the component, set thread within store
     const givenQueryParams = browserHistory.getCurrentLocation().query;
@@ -81,10 +81,10 @@ class FrevaGPT extends React.Component {
       this.setState({ botModelList: await response.json()});
     }
 
-    if (pingBot() !== "200") {
+    if (await pingBot() !== 200) {
       this.setState({ botOkay: false });
     } else {
-      getBotModels();
+      await getBotModels();
     }
   }
 

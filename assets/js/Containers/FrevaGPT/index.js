@@ -9,7 +9,9 @@ import {
   FormControl,
   InputGroup,
   Button,
-  Form } from 'react-bootstrap';
+  Form,
+  Tooltip, 
+  OverlayTrigger } from 'react-bootstrap';
 
 import { browserHistory } from 'react-router';
 import { isEmpty, has } from 'lodash';
@@ -269,15 +271,19 @@ class FrevaGPT extends React.Component {
               <Row>
                 <Col md={12}>
                   <div className="d-flex justify-content-evenly mb-2">
-                    {botSuggestions.map((element, index) => {return (
-                      <Button 
-                        key={index}
-                        className="w-25 m-2" 
-                        variant="outline-secondary" 
-                        onClick={() => this.handleSubmit(element)}
-                        value={element}>
-                          {truncate(element)}
-                        </Button>
+                    {botSuggestions.map((element) => {return (
+                      <OverlayTrigger 
+                        key={element}
+                        overlay={<Tooltip>{element}</Tooltip>}
+                      >
+                        <Button
+                          className="w-25 m-2" 
+                          variant="outline-secondary" 
+                          onClick={() => this.handleSubmit(element)}
+                          >
+                            {truncate(element)}
+                          </Button>
+                      </OverlayTrigger>                        
                       )}
                     )}
                   </div>

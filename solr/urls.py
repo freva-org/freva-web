@@ -20,7 +20,7 @@ urlpatterns = [
 if int(os.environ.get("DEV_MODE", "0")) == 1:
     urlpatterns.append(
         path(
-            r"api/databrowser/<path:url>/",
+            r"api/freva-nextgen/databrowser/<path:url>/",
             DataBrowserProxy.as_view(),
             name="databrowser_proxy",
         )

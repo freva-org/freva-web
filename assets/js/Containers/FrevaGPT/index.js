@@ -81,7 +81,7 @@ class FrevaGPT extends React.Component {
       this.setState({ botModelList: await response.json()});
     }
 
-    getBotModels();
+    await getBotModels();
   }
 
   createNewChat() {
@@ -268,26 +268,24 @@ class FrevaGPT extends React.Component {
   
           <Col md={8}>
             {this.state.showSuggestions ? (
-              <Row>
-                <Col md={12}>
-                  <div className="d-flex justify-content-evenly mb-2">
-                    {botSuggestions.map((element) => {return (
-                      <OverlayTrigger 
-                        key={element}
-                        overlay={<Tooltip>{element}</Tooltip>}
-                      >
-                        <Button
-                          className="w-25 m-2" 
-                          variant="outline-secondary" 
-                          onClick={() => this.handleSubmit(element)}
-                          >
-                            {truncate(element)}
-                          </Button>
-                      </OverlayTrigger>                        
-                      )}
-                    )}
-                  </div>
-                </Col>
+              <Row className="mb-2 g-2">
+                {botSuggestions.map((element) => { return (
+                  <div key={element} className="col-md-3">
+                    <OverlayTrigger 
+                      key={element}
+                      overlay={<Tooltip>{element}</Tooltip>}
+                    >
+                      <Button
+                        className="h-100 w-100" 
+                        variant="outline-secondary" 
+                        onClick={() => this.handleSubmit(element)}
+                        >
+                          {truncate(element)}
+                        </Button>
+                    </OverlayTrigger>
+                </div>
+                )
+                })}
               </Row>
             ) : null }
             

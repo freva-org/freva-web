@@ -7,7 +7,7 @@ const cache = {};
  */
 
 const solr = new (function () {
-  this.url = "/api/freva-nextgen/databrowser/extended_search/freva/file/";
+  this.url = "/api/freva-nextgen/databrowser/extended-search/freva/file/";
 
   //maximum number of files that will be allowed to be selected
   //should be setup before displaying the find window

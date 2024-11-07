@@ -34,28 +34,28 @@ def search_overview(request):
 def extended_search(request, flavour, unique_key):
     return reverse_proxy(
         request,
-        f"{settings.DATA_BROWSER_HOST}/api/freva-nextgen/databrowser/extended_search/{flavour}/{unique_key}",
+        f"{settings.DATA_BROWSER_HOST}/api/freva-nextgen/databrowser/extended-search/{flavour}/{unique_key}",
     )
 
 
 def data_search(request, flavour, unique_key):
     return reverse_proxy(
         request,
-        f"{settings.DATA_BROWSER_HOST}/api/freva-nextgen/databrowser/data_search/{flavour}/{unique_key}",
+        f"{settings.DATA_BROWSER_HOST}/api/freva-nextgen/databrowser/data-search/{flavour}/{unique_key}",
     )
 
 
 def metadata_search(request, flavour, unique_key):
     return reverse_proxy(
         request,
-        f"{settings.DATA_BROWSER_HOST}/api/freva-nextgen/databrowser/metadata_search/{flavour}/{unique_key}",
+        f"{settings.DATA_BROWSER_HOST}/api/freva-nextgen/databrowser/metadata-search/{flavour}/{unique_key}",
     )
 
 
 def intake_catalogue(request, flavour, unique_key):
     return reverse_proxy(
         request,
-        f"{settings.DATA_BROWSER_HOST}/api/freva-nextgen/databrowser/intake_catalogue/{flavour}/{unique_key}",
+        f"{settings.DATA_BROWSER_HOST}/api/freva-nextgen/databrowser/intake-catalogue/{flavour}/{unique_key}",
     )
 
 

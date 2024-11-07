@@ -53,7 +53,7 @@
                       {%endif%}
                   };
                   const tmp_data2 = getActiveFacets('{{facet}}','{{group}}');
-                  let res = '/api/freva-nextgen/databrowser/metadata_search/freva/file?';
+                  let res = '/api/freva-nextgen/databrowser/metadata-search/freva/file?';
                   $.each(tmp_data, function(index, value){
                       res += index+'='+value+'&';
                   });

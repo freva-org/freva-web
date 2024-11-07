@@ -203,7 +203,7 @@ class Databrowser extends React.Component {
 
   createIntakeLink() {
     return (
-      "/api/databrowser/intake_catalogue/" +
+      "/api/freva-nextgen/databrowser/intake-catalogue/" +
       prepareSearchParams(this.props.location, "translate=false")
     );
   }

@@ -120,6 +120,7 @@ class FrevaGPT extends React.Component {
       await this.fetchData(input)
     } catch(err) {
       this.props.dispatch(addElement({ variant: "FrontendError", content: "An error occured during rendering!" }))
+      // eslint-disable-next-line no-console
       console.error(err);
     }
     this.setState({ loading: false });
@@ -128,7 +129,7 @@ class FrevaGPT extends React.Component {
   async fetchData(input) {
 
     const queryObject = {
-      input: input,
+      input,
       auth_key: process.env.BOT_AUTH_KEY,
       thread_id: this.props.frevaGPT.thread,
       chatbot: this.state.botModel,
@@ -200,6 +201,7 @@ class FrevaGPT extends React.Component {
             foundSomething = true;
             break;
           } catch(err) {
+            // eslint-disable-next-line no-console
             console.error(err);
           }  
         }
@@ -236,7 +238,6 @@ class FrevaGPT extends React.Component {
 
   toggleBotSelect() {
     this.setState({ hideBotModelList: !this.state.hideBotModelList });
-    console.log("hi");
   }
 
   render() {

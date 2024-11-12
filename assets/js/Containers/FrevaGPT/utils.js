@@ -6,15 +6,19 @@ export function replaceLinebreaks(data) {
 
 export function formatCode(mode, data) {
 
+    let shortData = data;
+
     // replace first linebreak in code got from old thread
-    if (data.startsWith("\\n")) data = data.replace("\\n", "");
+    if (data.startsWith("\\n")) {
+        shortData = data.replace("\\n", "");
+    }
 
     let codeSnippets;
     let rawCode;
 
     try {
-        if (mode === "Code") rawCode = JSON.parse(data).code;
-        else if (mode === "CodeOutput") rawCode = data;
+        if (mode === "Code") rawCode = JSON.parse(shortData).code;
+        else if (mode === "CodeOutput") rawCode = shortData;
         codeSnippets = rawCode.split("\\n");
     } catch(err) {
         // do something

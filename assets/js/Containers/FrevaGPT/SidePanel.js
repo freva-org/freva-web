@@ -22,9 +22,9 @@ function SidePanel() {
                     General requests
                 </div>
                 <div className="p-3 py-2 collapse show">
-                    {botRequests.general.map((element, index) => {
+                    {botRequests.general.map((element) => {
                         return(
-                            <div key={index}>
+                            <div key={element.thread}>
                                 <a className="text-wrap" href="" onClick={() => changeToThread(element.thread)}>
                                     {element.title}
                                 </a>
@@ -40,9 +40,9 @@ function SidePanel() {
                     Freva requests
                 </div>
                 <div className="p-3 py-2 collapse show">
-                    {botRequests.freva.map((element, index) => {
+                    {botRequests.freva.map((element) => {
                         return(
-                            <div key={index}>
+                            <div key={element.thread}>
                                 <a className="text-wrap" href="" onClick={() => changeToThread(element.thread)}>
                                     {element.title}
                                 </a>

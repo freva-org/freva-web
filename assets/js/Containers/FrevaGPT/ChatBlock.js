@@ -24,12 +24,12 @@ class ChatBlock extends React.Component {
 
         return(
             <Col>
-               {conversation.map((element, index) => {
+               {conversation.map((element) => {
                 if (element.variant !== "ServerHint" && element.variant !== "StreamEnd") {
                   switch(element.variant){
                     case "Image":
                       return (
-                        <Col key={index} md={{span: 10, offset: 0}}>
+                        <Col key={element.content} md={{span: 10, offset: 0}}>
                           <img className="w-100" src={`data:image/jpeg;base64,${element.content}`} />
                         </Col>
                       );
@@ -38,15 +38,15 @@ class ChatBlock extends React.Component {
                     case "CodeOutput":
                       if (isEmpty(element.content[0])) return null;
                       else return(
-                        <Col md={{span:10, offset: 0}} key={index}>
+                        <Col md={{span:10, offset: 0}} key={element.content}>
                           <CodeBlock title={element.variant} code={element.content}/>
                         </Col>
                       );
   
                     case "User":
                       return (
-                        <Col md={{span: 10, offset: 2}} key={index}>
-                          <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-info" key={index}>
+                        <Col md={{span: 10, offset: 2}} key={element.content}>
+                          <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-info">
                               {element.content}
                           </Card>
                         </Col>
@@ -57,8 +57,8 @@ class ChatBlock extends React.Component {
                     case "FrontendError":
                     case "UserStop":
                       return(
-                        <Col md={{span: 10, offset: 0}} key={index}>
-                          <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-danger" key={index}>
+                        <Col md={{span: 10, offset: 0}} key={element.content}>
+                          <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-danger">
                             <span className="fw-bold">{element.variant}</span>
                             <Markdown>{replaceLinebreaks(element.content)}</Markdown>
                           </Card>
@@ -66,8 +66,8 @@ class ChatBlock extends React.Component {
                       );
                     default:
                       return (
-                        <Col md={{span: 10, offset: 0}} key={index}>
-                          <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light" key={index}>
+                        <Col md={{span: 10, offset: 0}} key={element.content}>
+                          <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
                             <Markdown>{replaceLinebreaks(element.content)}</Markdown>
                           </Card>
                         </Col>

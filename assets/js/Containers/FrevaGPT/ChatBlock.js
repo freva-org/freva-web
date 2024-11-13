@@ -1,127 +1,129 @@
-import React from 'react';
+import React from "react";
 import PropTypes from "prop-types";
-import { connect } from 'react-redux';
+import { connect } from "react-redux";
 
-import { Col, Card } from 'react-bootstrap';
+import { Col, Card } from "react-bootstrap";
 
-import { isEmpty } from 'lodash';
+import { isEmpty } from "lodash";
 
-import Markdown from 'react-markdown';
+import Markdown from "react-markdown";
 
 import CodeBlock from "./CodeBlock";
 
-import { replaceLinebreaks } from './utils';
+import { replaceLinebreaks } from "./utils";
 
 class ChatBlock extends React.Component {
+  constructor(props) {
+    super(props);
 
-    constructor(props) {
-        super(props);
+    this.renderImage = this.renderImage.bind(this);
+    this.renderCode = this.renderCode.bind(this);
+    this.renderUser = this.renderUser.bind(this);
+    this.renderError = this.renderError.bind(this);
+    this.renderDefault = this.renderDefault.bind(this);
+  }
 
-        this.renderImage = this.renderImage.bind(this);
-        this.renderCode = this.renderCode.bind(this);
-        this.renderUser = this.renderUser.bind(this);
-        this.renderError = this.renderError.bind(this);
-        this.renderDefault = this.renderDefault.bind(this);
-    }
+  renderImage(element) {
+    return (
+      <Col key={element.content} md={{ span: 10, offset: 0 }}>
+        <img
+          className="w-100"
+          src={`data:image/jpeg;base64,${element.content}`}
+        />
+      </Col>
+    );
+  }
 
-    
-
-    renderImage(element) {
+  renderCode(element) {
+    if (isEmpty(element.content[0])) return null;
+    else
       return (
-        <Col key={element.content} md={{span: 10, offset: 0}}>
-          <img className="w-100" src={`data:image/jpeg;base64,${element.content}`} />
+        <Col md={{ span: 10, offset: 0 }} key={element.content}>
+          <CodeBlock title={element.variant} code={element.content} />
         </Col>
       );
+  }
+
+  renderUser(element) {
+    return (
+      <Col md={{ span: 10, offset: 2 }} key={element.content}>
+        <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-info">
+          {element.content}
+        </Card>
+      </Col>
+    );
+  }
+
+  renderError(element) {
+    return (
+      <Col md={{ span: 10, offset: 0 }} key={element.content}>
+        <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-danger">
+          <span className="fw-bold">{element.variant}</span>
+          <Markdown>{replaceLinebreaks(element.content)}</Markdown>
+        </Card>
+      </Col>
+    );
+  }
+
+  renderDefault(element) {
+    return (
+      <Col md={{ span: 10, offset: 0 }} key={element.content}>
+        <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
+          <Markdown>{replaceLinebreaks(element.content)}</Markdown>
+        </Card>
+      </Col>
+    );
+  }
+
+  renderChatComponents(element) {
+    switch (element.variant) {
+      case "ServerHint":
+      case "StreamEnd":
+        return null;
+      case "Image":
+        return this.renderImage(element);
+
+      case "Code":
+      case "CodeOutput":
+        return this.renderCode(element);
+
+      case "User":
+        return this.renderUser(element);
+
+      case "ServerError":
+      case "OpenAIError":
+      case "CodeError":
+      case "FrontendError":
+      case "UserStop":
+        return this.renderError(element);
+
+      default:
+        return this.renderDefault(element);
     }
+  }
 
-    renderCode(element) {
-      if (isEmpty(element.content[0])) return null;
-      else return(
-        <Col md={{span:10, offset: 0}} key={element.content}>
-          <CodeBlock title={element.variant} code={element.content}/>
-        </Col>
-      );
-    }
+  render() {
+    const { conversation } = this.props.chatBlock;
 
-    renderUser(element) {
-      return (
-        <Col md={{span: 10, offset: 2}} key={element.content}>
-          <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-info">
-              {element.content}
-          </Card>
-        </Col>
-      );
-    }
-
-    renderError(element) {
-      return(
-        <Col md={{span: 10, offset: 0}} key={element.content}>
-          <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-danger">
-            <span className="fw-bold">{element.variant}</span>
-            <Markdown>{replaceLinebreaks(element.content)}</Markdown>
-          </Card>
-        </Col>
-      );
-    }
-
-    renderDefault(element) {
-      return (
-        <Col md={{span: 10, offset: 0}} key={element.content}>
-          <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
-            <Markdown>{replaceLinebreaks(element.content)}</Markdown>
-          </Card>
-        </Col>
-      );  
-    }
-
-    renderChatComponents(element) {
-      switch(element.variant) {
-        case "ServerHint":
-        case "StreamEnd":
-          return null
-        case "Image":
-          return this.renderImage(element);
-
-        case "Code":
-        case "CodeOutput":
-          return  this.renderCode(element);
-
-        case "User":
-          return this.renderUser(element);
-
-        case "ServerError":
-        case "OpenAIError":
-        case "CodeError":
-        case "FrontendError":
-        case "UserStop":
-          return this.renderError(element);
-
-        default:
-          return this.renderDefault(element);
-      }
-    }
-
-    render() {
-
-        const { conversation } = this.props.chatBlock;
-
-        return(
-            <Col>
-               {conversation.map((element) => {return this.renderChatComponents(element)})}
-            </Col>
-        )
-    }
+    return (
+      <Col>
+        {conversation.map((element) => {
+          return this.renderChatComponents(element);
+        })}
+      </Col>
+    );
+  }
 }
 
 ChatBlock.propTypes = {
-    chatBlock: PropTypes.shape({
-        thread: PropTypes.string,
-        conversation: PropTypes.array,
-    }),
-}
+  chatBlock: PropTypes.shape({
+    thread: PropTypes.string,
+    conversation: PropTypes.array,
+  }),
+};
 
 const mapStateToProps = (state) => ({
-    chatBlock: state.frevaGPTReducer,
-  })
+  chatBlock: state.frevaGPTReducer,
+});
 
 export default connect(mapStateToProps)(ChatBlock);

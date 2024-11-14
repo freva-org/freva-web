@@ -12,7 +12,7 @@
     "lint": "eslint assets/js",
     "lint-format": "prettier -l assets/js",
     "dev": "webpack serve --config webpack.config.js",
-    "build": "webpack --watch --config webpack.config.js --progress --color --mode=development",
+    "build": "webpack --config webpack.config.js --progress --color --mode=development",
     "build-production": "webpack --config webpack.config.js --progress --color --mode=production"
   },
   "repository": {

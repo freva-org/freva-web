@@ -272,9 +272,9 @@ class FrevaGPT extends React.Component {
           <SidePanel/>
         </Col>
   
-        <Col hidden={!this.state.botOkay} md={8}>
+        <Col md={8}>
 
-          <ChatBlock></ChatBlock>
+          <ChatBlock/>
             
           {this.state.loading ? (<Row className="mb-3"><Col md={1}><Spinner/></Col></Row>) : null}
   
@@ -308,7 +308,7 @@ class FrevaGPT extends React.Component {
             <h2 onClick={this.toggleBotSelect}>FrevaGPT</h2>
           </div>
 
-          {this.state.botOkay === undefined ?? (<Spinner></Spinner>)}
+          {this.state.botOkay === undefined ?? (<Spinner/>)}
           {this.state.botOkay ? this.renderBotContent() : this.renderAlert() }
   
         </Row>

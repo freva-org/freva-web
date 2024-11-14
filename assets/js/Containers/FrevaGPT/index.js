@@ -1,36 +1,36 @@
-import React from 'react';
+import React from "react";
 import PropTypes from "prop-types";
-import { connect } from 'react-redux';
+import { connect } from "react-redux";
 
-import { 
+import {
   Container,
   Row,
   Col,
   FormControl,
   InputGroup,
   Button,
-  Form } from 'react-bootstrap';
+  Form,
+  Tooltip,
+  OverlayTrigger,
+} from "react-bootstrap";
 
-import { browserHistory } from 'react-router';
-import { isEmpty, has } from 'lodash';
+import { browserHistory } from "react-router";
+import { isEmpty, has } from "lodash";
 
 import Spinner from "../../Components/Spinner";
 
-import ChatBlock from './ChatBlock';
+import ChatBlock from "./ChatBlock";
 import SidePanel from "./SidePanel";
 
-import { objectToQueryString } from './utils';
+import { objectToQueryString, truncate } from "./utils";
 
-import {
-  setThread,
-  setConversation,
-  addElement,
-} from './actions';
+import { setThread, setConversation, addElement } from "./actions";
 
-import 'bootstrap-icons/font/bootstrap-icons.css';
+import { botSuggestions } from "./exampleRequests";
+
+import "bootstrap-icons/font/bootstrap-icons.css";
 
 class FrevaGPT extends React.Component {
-
   // const abortController = useRef();
   // abortController.current = new AbortController();
   // const signal = abortController.signal;
@@ -43,6 +43,7 @@ class FrevaGPT extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.toggleBotSelect = this.toggleBotSelect.bind(this);
     this.handleStop = this.handleStop.bind(this);
+    this.submitUserInput = this.submitUserInput.bind(this);
 
     this.state = {
       loading: false,
@@ -50,42 +51,48 @@ class FrevaGPT extends React.Component {
       botModelList: [],
       botModel: "",
       hideBotModelList: true,
+      showSuggestions: true,
     };
   }
 
-  componentDidMount() {
-
+  async componentDidMount() {
     // if thread giving on mounting the component, set thread within store
     const givenQueryParams = browserHistory.getCurrentLocation().query;
-    if (has(givenQueryParams, "thread_id") && !isEmpty(givenQueryParams.thread_id)) {
+    if (
+      has(givenQueryParams, "thread_id") &&
+      !isEmpty(givenQueryParams.thread_id)
+    ) {
       this.props.dispatch(setThread(givenQueryParams.thread_id));
 
       // request content of old thread if threa_id is given
       this.setState({ loading: true });
-      this.getOldThread(givenQueryParams.thread_id);
+      await this.getOldThread(givenQueryParams.thread_id);
       this.setState({ loading: false });
+      this.setState({ showSuggestion: false });
     }
 
     const getBotModels = async () => {
       const queryObject = {
         auth_key: process.env.BOT_AUTH_KEY,
       };
-      const response = await fetch(`/api/chatbot/availablechatbots?` + objectToQueryString(queryObject));
-      this.setState({ botModelList: await response.json()});
-    }
+      const response = await fetch(
+        `/api/chatbot/availablechatbots?` + objectToQueryString(queryObject)
+      );
+      this.setState({ botModelList: await response.json() });
+    };
 
-    getBotModels();
+    await getBotModels();
   }
 
   createNewChat() {
-
     this.props.dispatch(setConversation([]));
     this.props.dispatch(setThread(""));
     browserHistory.push({
-      pathname: '/chatbot/',
+      pathname: "/chatbot/",
       search: "",
     });
-    window.scrollTo(0, 0)
+    this.setState({ showSuggestions: true });
+    window.scrollTo(0, 0);
   }
 
   handleUserInput(e) {
@@ -94,28 +101,38 @@ class FrevaGPT extends React.Component {
 
   async handleKeyDown(e) {
     if (e.key === "Enter") {
-      this.handleSubmit();
+      this.handleSubmit(e.target.value);
     }
   }
 
-  async handleSubmit() {
-    this.props.dispatch(addElement({ variant: "User", content: this.state.userInput}));
+  async submitUserInput() {
+    const userInput = this.state.userInput;
+    await this.handleSubmit(userInput);
     this.setState({ userInput: "" });
+  }
 
-    this.setState({ loading: true });
+  async handleSubmit(input) {
+    this.props.dispatch(addElement({ variant: "User", content: input }));
+    this.setState({ showSuggestions: false, userInput: "", loading: true });
+
     try {
-      await this.fetchData()
-    } catch(err) {
-      this.props.dispatch(addElement({ variant: "FrontendError", content: "An error occured during rendering!" }))
+      await this.fetchData(input);
+    } catch (err) {
+      this.props.dispatch(
+        addElement({
+          variant: "FrontendError",
+          content: "An error occured during rendering!",
+        })
+      );
+      // eslint-disable-next-line no-console
       console.error(err);
     }
     this.setState({ loading: false });
   }
 
-  async fetchData() {
-
+  async fetchData(input) {
     const queryObject = {
-      input: this.state.userInput,
+      input,
       auth_key: process.env.BOT_AUTH_KEY,
       thread_id: this.props.frevaGPT.thread,
       chatbot: this.state.botModel,
@@ -123,11 +140,13 @@ class FrevaGPT extends React.Component {
     };
 
     // response of a new bot request is streamed
-    const response = await fetch(`/api/chatbot/streamresponse?` + objectToQueryString(queryObject)); //, signal);
+    const response = await fetch(
+      `/api/chatbot/streamresponse?` + objectToQueryString(queryObject)
+    ); //, signal);
 
     const reader = response.body.getReader();
-    const decoder = new TextDecoder('utf-8');
-    
+    const decoder = new TextDecoder("utf-8");
+
     let buffer = "";
     let varObj = {};
 
@@ -145,14 +164,13 @@ class FrevaGPT extends React.Component {
       while (foundSomething) {
         foundSomething = false;
 
-        for (let bufferIndex = 0; bufferIndex < buffer.length; bufferIndex ++) {
-
+        for (let bufferIndex = 0; bufferIndex < buffer.length; bufferIndex++) {
           if (buffer[bufferIndex] !== "}") continue;
           const subBuffer = buffer.slice(0, bufferIndex + 1);
 
           try {
             const jsonBuffer = JSON.parse(subBuffer);
-            buffer = buffer.slice(bufferIndex + 1); // shorten string by already evaluated string        
+            buffer = buffer.slice(bufferIndex + 1); // shorten string by already evaluated string
 
             // object is not empty so compare variants
             if (Object.keys(varObj).length !== 0) {
@@ -163,7 +181,11 @@ class FrevaGPT extends React.Component {
               } else {
                 // if object has same variant, add content
                 // eslint-disable-next-line no-lonely-if
-                if (varObj.variant === "Code" || varObj.variant === "CodeOutput") varObj.content[0] = varObj.content[0] + jsonBuffer.content[0];
+                if (
+                  varObj.variant === "Code" ||
+                  varObj.variant === "CodeOutput"
+                )
+                  varObj.content[0] = varObj.content[0] + jsonBuffer.content[0];
                 else varObj.content = varObj.content + jsonBuffer.content;
               }
             } else {
@@ -171,36 +193,44 @@ class FrevaGPT extends React.Component {
               varObj = jsonBuffer;
 
               // set thread id
-              if (this.props.frevaGPT.thread === "" && varObj.variant === "ServerHint") {
+              if (
+                this.props.frevaGPT.thread === "" &&
+                varObj.variant === "ServerHint"
+              ) {
                 try {
-                  this.props.dispatch(setThread(JSON.parse(varObj.content).thread_id));
+                  this.props.dispatch(
+                    setThread(JSON.parse(varObj.content).thread_id)
+                  );
                   browserHistory.push({
-                    pathname: '/chatbot/',
+                    pathname: "/chatbot/",
                     search: `?thread_id=${this.props.frevaGPT.thread}`,
                   });
-                } catch(err) {
+                } catch (err) {
                   // handle warning
                 }
               }
             }
-            
+
             foundSomething = true;
             break;
-          } catch(err) {
+          } catch (err) {
+            // eslint-disable-next-line no-console
             console.error(err);
-          }  
+          }
         }
       }
     }
-
   }
 
   async getOldThread(thread) {
-    const response = await fetch(`/api/chatbot/getthread?` + new URLSearchParams({
-      auth_key: process.env.BOT_AUTH_KEY,
-      thread_id: thread,
-      }).toString());
-    
+    const response = await fetch(
+      `/api/chatbot/getthread?` +
+        new URLSearchParams({
+          auth_key: process.env.BOT_AUTH_KEY,
+          thread_id: thread,
+        }).toString()
+    );
+
     const variantArray = await response.json();
     this.props.dispatch(setConversation(variantArray));
   }
@@ -208,69 +238,118 @@ class FrevaGPT extends React.Component {
   async handleStop() {
     // stop of thread only possible if a thread id is given
     if (this.props.frevaGPT.thread) {
-      await fetch(`/api/chatbot/stop?` + new URLSearchParams({
-        auth_key: process.env.BOT_AUTH_KEY,
-        thread_id: this.props.frevaGPT.thread,
-      }).toString());
+      await fetch(
+        `/api/chatbot/stop?` +
+          new URLSearchParams({
+            auth_key: process.env.BOT_AUTH_KEY,
+            thread_id: this.props.frevaGPT.thread,
+          }).toString()
+      );
     }
 
     // abort fetch request anyway (especially if no thread is given)
     // if (abortController.current) abortController.current.abort();
-      
-    this.setState({loading: false });
-    this.props.dispatch(addElement({variant: "UserStop", content: "Request stopped manually"}))
+
+    this.setState({ loading: false });
+    this.props.dispatch(
+      addElement({ variant: "UserStop", content: "Request stopped manually" })
+    );
   }
 
   toggleBotSelect() {
     this.setState({ hideBotModelList: !this.state.hideBotModelList });
-    console.log("hi");
   }
 
   render() {
-
     return (
       <Container>
         <Row>
           <div className="d-flex justify-content-between">
             <h2 onClick={this.toggleBotSelect}>FrevaGPT</h2>
-          </div>
-  
-          <Col md={4}>
-            <Form.Select 
-              value={this.botModel}
-              onChange={(x) => { this.setState({ botModel: x.target.value }); }}
-              className="me-1 mb-3"
-              placeholder="Choose Chatbot"
-              hidden={this.state.hideBotModelList}>
-              {this.state.botModelList.map((x) => {
+
+            <div className="d-flex justify-content-between mb-2">
+              <Form.Select
+                value={this.botModel}
+                onChange={(e) => {
+                  this.setState({ botModel: e.target.value });
+                }}
+                className="me-1"
+                placeholder="Model"
+                hidden={this.state.hideBotModelList}
+              >
+                {this.state.botModelList.map((x) => {
                   return <option key={x}>{x}</option>;
-              })}
-            </Form.Select>
-            <SidePanel/>
+                })}
+              </Form.Select>
+              <Button onClick={this.createNewChat} variant="info">
+                NewChat
+              </Button>
+            </div>
+          </div>
+
+          <Col md={4}>
+            <SidePanel />
           </Col>
-  
+
           <Col md={8}>
+            {this.state.showSuggestions ? (
+              <Row className="mb-2 g-2">
+                {botSuggestions.map((element) => {
+                  return (
+                    <div key={element} className="col-md-3">
+                      <OverlayTrigger
+                        key={element}
+                        overlay={<Tooltip>{element}</Tooltip>}
+                      >
+                        <Button
+                          className="h-100 w-100"
+                          variant="outline-secondary"
+                          onClick={() => this.handleSubmit(element)}
+                        >
+                          {truncate(element)}
+                        </Button>
+                      </OverlayTrigger>
+                    </div>
+                  );
+                })}
+              </Row>
+            ) : null}
 
             <ChatBlock></ChatBlock>
-            
-            {this.state.loading ? (<Row className="mb-3"><Col md={1}><Spinner/></Col></Row>) : null}
-  
+
+            {this.state.loading ? (
+              <Row className="mb-3">
+                <Col md={1}>
+                  <Spinner />
+                </Col>
+              </Row>
+            ) : null}
+
             <Row>
-              <Col md={10}>
+              <Col md={12}>
                 <InputGroup className="mb-2 pb-2">
-                  <FormControl type="text" value={this.state.userInput} onChange={this.handleUserInput} onKeyDown={this.handleKeyDown} placeholder="Ask a question"/>
-                  {this.state.loading 
-                    ? (<Button variant="outline-danger" onClick={this.handleStop}><i className="bi bi-stop-fill"></i></Button>)
-                    : (<Button variant="outline-success" onClick={this.handleSubmit}><i className="bi bi-play-fill"></i></Button>)
-                  } 
+                  <FormControl
+                    type="text"
+                    value={this.state.userInput}
+                    onChange={this.handleUserInput}
+                    onKeyDown={this.handleKeyDown}
+                    placeholder="Ask a question"
+                  />
+                  {this.state.loading ? (
+                    <Button variant="outline-danger" onClick={this.handleStop}>
+                      <i className="bi bi-stop-fill"></i>
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline-success"
+                      onClick={this.submitUserInput}
+                    >
+                      <i className="bi bi-play-fill"></i>
+                    </Button>
+                  )}
                 </InputGroup>
               </Col>
-  
-              <Col md={2}>
-                <button className="btn btn-info w-100" onClick={this.createNewChat}>New Chat</button>
-              </Col>
             </Row>
-            
           </Col>
         </Row>
       </Container>
@@ -284,10 +363,10 @@ FrevaGPT.propTypes = {
     conversation: PropTypes.array,
   }),
   dispatch: PropTypes.func.isRequired,
-}
+};
 
 const mapStateToProps = (state) => ({
   frevaGPT: state.frevaGPTReducer,
-})
+});
 
 export default connect(mapStateToProps)(FrevaGPT);

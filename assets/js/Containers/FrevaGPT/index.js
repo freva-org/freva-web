@@ -308,8 +308,7 @@ class FrevaGPT extends React.Component {
             <h2 onClick={this.toggleBotSelect}>FrevaGPT</h2>
           </div>
 
-          {this.state.botOkay === undefined ?? (<Spinner/>)}
-          {this.state.botOkay ? this.renderBotContent() : this.renderAlert() }
+          {this.state.botOkay === undefined ? (<Spinner/>) : (this.state.botOkay ? this.renderBotContent() : this.renderAlert())}
   
         </Row>
       </Container>

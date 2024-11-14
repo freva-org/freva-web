@@ -72,12 +72,8 @@ class FrevaGPT extends React.Component {
       let pingSuccessful = false;
 
       try {
-        await fetch('/api/chatbot/ping').then((res) => {
-          if (res.status === 200) pingSuccessful = true;
-          return null;
-        }).catch((err) => {
-          console.error("PingError: ", err);
-        });
+        const response = await fetch('/api/chatbot/ping');
+        if (response.status === 200) pingSuccessful = true;
       } catch(err) {
         console.error("PingError: ", err);
       }

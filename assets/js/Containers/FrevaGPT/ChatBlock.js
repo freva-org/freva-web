@@ -6,7 +6,8 @@ import { Col, Card } from "react-bootstrap";
 
 import { isEmpty } from "lodash";
 
-import Markdown from "react-markdown";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from 'remark-gfm';
 
 import CodeBlock from "./CodeBlock";
 
@@ -59,7 +60,7 @@ class ChatBlock extends React.Component {
       <Col md={{ span: 10, offset: 0 }} key={element.content}>
         <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-danger">
           <span className="fw-bold">{element.variant}</span>
-          <Markdown>{replaceLinebreaks(element.content)}</Markdown>
+          <ReactMarkdown>{replaceLinebreaks(element.content)}</ReactMarkdown>
         </Card>
       </Col>
     );
@@ -69,7 +70,7 @@ class ChatBlock extends React.Component {
     return (
       <Col md={{ span: 10, offset: 0 }} key={element.content}>
         <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
-          <Markdown>{replaceLinebreaks(element.content)}</Markdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{replaceLinebreaks(element.content)}</ReactMarkdown>
         </Card>
       </Col>
     );

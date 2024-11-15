@@ -67,9 +67,8 @@ class FrevaGPT extends React.Component {
       // request content of old thread if threa_id is given
       this.setState({ loading: true });
       await this.getOldThread(givenQueryParams.thread_id);
-      this.setState({ loading: false });
-      this.setState({ showSuggestion: false });
-    }
+      this.setState({ loading: false, showSuggestions: false });
+    } 
 
     const getBotModels = async () => {
       const queryObject = {

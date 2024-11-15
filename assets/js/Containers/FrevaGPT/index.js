@@ -68,7 +68,7 @@ class FrevaGPT extends React.Component {
       this.setState({ loading: true });
       await this.getOldThread(givenQueryParams.thread_id);
       this.setState({ loading: false, showSuggestions: false });
-    } 
+    }
 
     const getBotModels = async () => {
       const queryObject = {

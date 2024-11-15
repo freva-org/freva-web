@@ -73,6 +73,7 @@
     "redux": "^4.2.1",
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.4.1",
+    "remark-gfm": "^3.0.1",
     "stream-browserify": "^3.0.0"
   }
 }

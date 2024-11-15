@@ -52,7 +52,9 @@ jobs:
         with:
           context: .
           platforms: linux/amd64
-          build-args: VERSION=${{steps.repository.outputs.tag}}
+          build-args: |
+            VERSION=${{steps.repository.outputs.tag}}
+            EMAIL_HOST_PASSWORD=${{secrets.EMAIL_HOST_PASSWORD}}
           push: true
           tags: |
             ghcr.io/${{ steps.repository.outputs.repo }}:${{ steps.repository.outputs.tag }}

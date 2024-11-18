@@ -39,7 +39,7 @@ source .envrc
 ### Additional services running on docker
 
 The web ui will need a connection to a solr,
-[freva-databrowser](https://github.com/FREVA-CLINT/databrowserAPI/) and
+[freva-databrowser](https://github.com/FREVA-CLINT/freva-nextgen/) and
 mariadb service. This services can be deployed using
 [`docker-compose`](https://docs.docker.com/compose/install/).
 
@@ -195,8 +195,8 @@ LoadModule proxy_connect_module modules/mod_proxy_connect.so
 LoadModule proxy_http_module modules/mod_proxy_http.so
 <VirtualHost *:80>
      ProxyPass /static/ !
-     ProxyPass /api/databrowser/ http://freva-databrowser.example.com:7777/api/databrowser/
-     ProxyPassReverse /api/databrowser/ http://freva-databrowser.example.com:7777/api/databrowser/
+     ProxyPass /api/freva-nextgen/ http://freva-databrowser.example.com:7777/api/freva-nextgen/
+     ProxyPassReverse /api/freva-nextgen/ http://freva-databrowser.example.com:7777/api/freva-nextgen/
      ProxyPass / http://freva.example.com:8000/
      ProxyPassReverse / http://freva.example.com:8000/
      Alias /static /srv/static/

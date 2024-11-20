@@ -10,6 +10,7 @@ import {
   InputGroup,
   Button,
   Form,
+  Alert,
   Tooltip,
   OverlayTrigger,
 } from "react-bootstrap";
@@ -51,6 +52,7 @@ class FrevaGPT extends React.Component {
       botModelList: [],
       botModel: "",
       hideBotModelList: true,
+      botOkay: undefined,
       showSuggestions: true,
     };
   }
@@ -70,6 +72,19 @@ class FrevaGPT extends React.Component {
       this.setState({ loading: false, showSuggestions: false });
     }
 
+    const successfulPing = async () => {
+      let pingSuccessful = false;
+
+      try {
+        const response = await fetch("/api/chatbot/ping");
+        if (response.status === 200) pingSuccessful = true;
+      } catch (err) {
+        console.error("PingError: ", err);
+      }
+
+      return pingSuccessful;
+    };
+
     const getBotModels = async () => {
       const queryObject = {
         auth_key: process.env.BOT_AUTH_KEY,
@@ -80,7 +95,10 @@ class FrevaGPT extends React.Component {
       this.setState({ botModelList: await response.json() });
     };
 
-    await getBotModels();
+    if (await successfulPing()) {
+      this.setState({ botOkay: true });
+      await getBotModels();
+    } else this.setState({ botOkay: false });
   }
 
   createNewChat() {
@@ -259,6 +277,105 @@ class FrevaGPT extends React.Component {
     this.setState({ hideBotModelList: !this.state.hideBotModelList });
   }
 
+  renderAlert() {
+    return (
+      <Alert key="botError" variant="danger">
+        The bot is currently not available. Please retry later.
+      </Alert>
+    );
+  }
+
+  renderBotContent() {
+    return (
+      <>
+        <Col md={4}>
+          <SidePanel />
+        </Col>
+
+        <Col md={8}>
+          {this.state.showSuggestions ? (
+            <Row className="mb-2 g-2">
+              {botSuggestions.map((element) => {
+                return (
+                  <div key={element} className="col-md-3">
+                    <OverlayTrigger
+                      key={element}
+                      overlay={<Tooltip>{element}</Tooltip>}
+                    >
+                      <Button
+                        className="h-100 w-100"
+                        variant="outline-secondary"
+                        onClick={() => this.handleSubmit(element)}
+                      >
+                        {truncate(element)}
+                      </Button>
+                    </OverlayTrigger>
+                  </div>
+                );
+              })}
+            </Row>
+          ) : null}
+
+          <ChatBlock />
+
+          {this.state.loading ? (
+            <Row className="mb-3">
+              <Col md={1}>
+                <Spinner />
+              </Col>
+            </Row>
+          ) : null}
+
+          <Row>
+            <Col md={12}>
+              <InputGroup className="mb-2 pb-2">
+                <FormControl
+                  type="text"
+                  value={this.state.userInput}
+                  onChange={this.handleUserInput}
+                  onKeyDown={this.handleKeyDown}
+                  placeholder="Ask a question"
+                />
+                {this.state.loading ? (
+                  <Button variant="outline-danger" onClick={this.handleStop}>
+                    <i className="bi bi-stop-fill"></i>
+                  </Button>
+                ) : (
+                  <Button variant="outline-success" onClick={this.handleSubmit}>
+                    <i className="bi bi-play-fill"></i>
+                  </Button>
+                )}
+              </InputGroup>
+            </Col>
+          </Row>
+        </Col>
+      </>
+    );
+  }
+
+  renderBotHeader() {
+    return (
+      <div className="d-flex justify-content-between mb-2">
+        <Form.Select
+          value={this.botModel}
+          onChange={(e) => {
+            this.setState({ botModel: e.target.value });
+          }}
+          className="me-1"
+          placeholder="Model"
+          hidden={this.state.hideBotModelList}
+        >
+          {this.state.botModelList.map((x) => {
+            return <option key={x}>{x}</option>;
+          })}
+        </Form.Select>
+        <Button onClick={this.createNewChat} variant="info">
+          NewChat
+        </Button>
+      </div>
+    );
+  }
+
   render() {
     return (
       <Container>
@@ -266,90 +383,16 @@ class FrevaGPT extends React.Component {
           <div className="d-flex justify-content-between">
             <h2 onClick={this.toggleBotSelect}>FrevaGPT</h2>
 
-            <div className="d-flex justify-content-between mb-2">
-              <Form.Select
-                value={this.botModel}
-                onChange={(e) => {
-                  this.setState({ botModel: e.target.value });
-                }}
-                className="me-1"
-                placeholder="Model"
-                hidden={this.state.hideBotModelList}
-              >
-                {this.state.botModelList.map((x) => {
-                  return <option key={x}>{x}</option>;
-                })}
-              </Form.Select>
-              <Button onClick={this.createNewChat} variant="info">
-                NewChat
-              </Button>
-            </div>
+            {this.state.botOkay ? this.renderBotHeader() : null}
           </div>
 
-          <Col md={4}>
-            <SidePanel />
-          </Col>
-
-          <Col md={8}>
-            {this.state.showSuggestions ? (
-              <Row className="mb-2 g-2">
-                {botSuggestions.map((element) => {
-                  return (
-                    <div key={element} className="col-md-3">
-                      <OverlayTrigger
-                        key={element}
-                        overlay={<Tooltip>{element}</Tooltip>}
-                      >
-                        <Button
-                          className="h-100 w-100"
-                          variant="outline-secondary"
-                          onClick={() => this.handleSubmit(element)}
-                        >
-                          {truncate(element)}
-                        </Button>
-                      </OverlayTrigger>
-                    </div>
-                  );
-                })}
-              </Row>
-            ) : null}
-
-            <ChatBlock></ChatBlock>
-
-            {this.state.loading ? (
-              <Row className="mb-3">
-                <Col md={1}>
-                  <Spinner />
-                </Col>
-              </Row>
-            ) : null}
-
-            <Row>
-              <Col md={12}>
-                <InputGroup className="mb-2 pb-2">
-                  <FormControl
-                    type="text"
-                    value={this.state.userInput}
-                    onChange={this.handleUserInput}
-                    onKeyDown={this.handleKeyDown}
-                    placeholder="Ask a question"
-                  />
-                  {this.state.loading ? (
-                    <Button variant="outline-danger" onClick={this.handleStop}>
-                      <i className="bi bi-stop-fill"></i>
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="outline-success"
-                      onClick={this.submitUserInput}
-                    >
-                      <i className="bi bi-play-fill"></i>
-                    </Button>
-                  )}
-                </InputGroup>
-              </Col>
-            </Row>
-          </Col>
+          {this.state.botOkay === undefined ? (
+            <Spinner />
+          ) : this.state.botOkay ? (
+            this.renderBotContent()
+          ) : (
+            this.renderAlert()
+          )}
         </Row>
       </Container>
     );

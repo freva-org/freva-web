@@ -1,8 +1,9 @@
+FROM condaforge/mambaforge
 ARG CONDA_ENV_DIR=/opt/condaenv
 ARG FREVA_WEB_DIR=/opt/freva_web
+ARG EMAIL_HOST_PASSWORD=""
 ARG VERSION
 
-FROM condaforge/mambaforge
 LABEL org.opencontainers.image.authors="DRKZ-CLINT"
 LABEL org.opencontainers.image.source="https://github.com/FREVA-CLINT/freva-web"
 LABEL org.opencontainers.image.version="$VERSION"
@@ -14,7 +15,8 @@ RUN set -e && \
 WORKDIR ${FREVA_WEB_DIR}
 COPY . .
 ENV PATH=$CONDA_ENV_DIR/bin:$PATH\
-    DJANGO_SUPERUSER_EMAIL=freva@dkrz.de
+    DJANGO_SUPERUSER_EMAIL=freva@dkrz.de\
+    EMAIL_HOST_PASSWORD=$EMAIL_HOST_PASSWORD
 RUN  set -e && \
      mamba env create -y -p ${CONDA_ENV_DIR} -f conda-env.yml &&\
      mamba clean -afy &&\

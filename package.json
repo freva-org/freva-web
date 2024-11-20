@@ -1,6 +1,6 @@
 {
   "name": "evaluation_system_web",
-  "version": "2405.0.0",
+  "version": "2411.0.0",
   "description": "React-bits of the freva-web interface. The react-parts of the web interface include the plugin-selection, the data-browser and the result-browser",
   "main": "index.js",
   "engines": {
@@ -73,6 +73,7 @@
     "redux": "^4.2.1",
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.4.1",
+    "remark-gfm": "^3.0.1",
     "stream-browserify": "^3.0.0"
   }
 }

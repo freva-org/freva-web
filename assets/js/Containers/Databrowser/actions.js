@@ -20,7 +20,7 @@ export const setMetadata = (metadata) => ({
 });
 
 export const setFlavours = () => (dispatch) => {
-  return fetch("/api/databrowser/overview", {
+  return fetch("/api/freva-nextgen/databrowser/overview", {
     credentials: "same-origin",
     headers: {
       "X-CSRFToken": getCookie("csrftoken"),
@@ -60,7 +60,7 @@ export const loadFiles = (location) => (dispatch) => {
 
 function fetchResults(dispatch, location, additionalParams, actionType) {
   const searchParams = prepareSearchParams(location, additionalParams);
-  const url = `/api/databrowser/extended_search/${searchParams}`;
+  const url = `/api/freva-nextgen/databrowser/extended-search/${searchParams}`;
   return fetch(url, {
     credentials: "same-origin",
     headers: {

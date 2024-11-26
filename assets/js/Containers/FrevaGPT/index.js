@@ -171,6 +171,7 @@ class FrevaGPT extends React.Component {
     while (true) {
       // eslint-disable-next-line no-await-in-loop
       const { done, value } = await reader.read();
+      console.log('##', decoder.decode(value));
       if (done) break;
 
       const decodedValues = decoder.decode(value);

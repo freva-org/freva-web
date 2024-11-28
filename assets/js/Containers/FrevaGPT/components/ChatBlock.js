@@ -9,9 +9,9 @@ import { isEmpty } from "lodash";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-import CodeBlock from "./CodeBlock";
+import { replaceLinebreaks } from "../utils";
 
-import { replaceLinebreaks } from "./utils";
+import CodeBlock from "./CodeBlock";
 
 class ChatBlock extends React.Component {
   constructor(props) {

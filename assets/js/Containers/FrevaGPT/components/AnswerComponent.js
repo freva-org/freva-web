@@ -21,7 +21,7 @@ function AnswerComponent(props) {
     }
   }
 
-  return <div className="mb-3">{renderAnswer(props)}</div>;
+  return <Col>{renderAnswer(props)}</Col>;
 }
 
 AnswerComponent.propTypes = {

@@ -1,11 +1,11 @@
 from urllib.parse import urljoin
-from django.http import StreamingHttpResponse
-
-from django.conf import settings
-from djproxy.views import HttpProxy
-from django.views import View
 
 import requests
+from django.conf import settings
+from django.http import StreamingHttpResponse
+from django.views import View
+from djproxy.views import HttpProxy
+
 
 class ChatBotProxy(View):
     def get(self, request, *args, **kwargs):

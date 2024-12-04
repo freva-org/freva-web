@@ -337,14 +337,12 @@ class FrevaGPT extends React.Component {
             variant={this.state.dynamicVariant}
           />
 
-          {this.state.loading ? (
-            this.state.dynamicAnswer ? null : (
-              <Row className="mb-3">
-                <Col md={1}>
-                  <Spinner />
-                </Col>
-              </Row>
-            )
+          {this.state.loading && !this.state.dynamicAnswer ? (
+            <Row className="mb-3">
+              <Col md={1}>
+                <Spinner />
+              </Col>
+            </Row>
           ) : null}
 
           <Row>

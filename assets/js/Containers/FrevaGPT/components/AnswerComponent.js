@@ -6,7 +6,6 @@ import { Col, Card } from "react-bootstrap";
 import Markdown from "react-markdown";
 
 function AnswerComponent(props) {
-
   function renderAnswer(props) {
     switch (props.variant) {
       case "Assistant":
@@ -19,9 +18,7 @@ function AnswerComponent(props) {
         );
       case "Code":
       case "CodeBlock":
-        return(
-          null
-        )
+        return null;
       default:
         return null;
     }

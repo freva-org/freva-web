@@ -3,19 +3,25 @@ import PropTypes from "prop-types";
 
 import { Col, Card } from "react-bootstrap";
 
+import Markdown from "react-markdown";
+
 function AnswerComponent(props) {
+
   function renderAnswer(props) {
     switch (props.variant) {
       case "Assistant":
-      case "Code":
-      case "CodeBlock":
         return (
           <Col md={{ span: 10, offset: 0 }}>
             <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
-              {props.content}
+              <Markdown>{props.content}</Markdown>
             </Card>
           </Col>
         );
+      case "Code":
+      case "CodeBlock":
+        return(
+          null
+        )
       default:
         return null;
     }

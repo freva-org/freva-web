@@ -332,12 +332,10 @@ class FrevaGPT extends React.Component {
 
           <ChatBlock />
 
-          {this.state.dynamicAnswer ?? (
-            <AnswerComponent
-              content={this.state.dynamicAnswer}
-              variant={this.state.dynamicVariant}
-            />
-          )}
+          <AnswerComponent
+            content={this.state.dynamicAnswer}
+            variant={this.state.dynamicVariant}
+          />
 
           {this.state.loading ? (
             this.state.dynamicAnswer ? null : (

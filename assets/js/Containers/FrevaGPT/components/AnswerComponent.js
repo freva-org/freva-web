@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import { Col, Card } from "react-bootstrap";
+import { Col, Card, Spinner } from "react-bootstrap";
 
 import Markdown from "react-markdown";
 
@@ -18,7 +18,16 @@ function AnswerComponent(props) {
         );
       case "Code":
       case "CodeBlock":
-        return null;
+        return (
+          <Col md={{ offset: 0 }}>
+            <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
+              <span>
+                <Spinner size="sm" />
+                Analyzing code...
+              </span>
+            </Card>
+          </Col>
+        );
       default:
         return null;
     }

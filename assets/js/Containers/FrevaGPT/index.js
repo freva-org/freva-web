@@ -245,8 +245,9 @@ class FrevaGPT extends React.Component {
             foundSomething = true;
             break;
           } catch (err) {
+            // ServerHints and CodeBlocks include nested JSON Objects
             // eslint-disable-next-line no-console
-            console.error(err);
+            if (!subBuffer.includes("ServerHint") && !subBuffer.includes("Code")) console.error(err);            
           }
         }
       }

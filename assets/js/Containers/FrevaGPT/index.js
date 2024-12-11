@@ -22,7 +22,7 @@ import Spinner from "../../Components/Spinner";
 
 import ChatBlock from "./components/ChatBlock";
 import SidePanel from "./components/SidePanel";
-import AnswerComponent from "./components/AnswerComponent";
+import PendingAnswerComponent from "./components/PendingAnswerComponent";
 
 import { objectToQueryString, truncate } from "./utils";
 
@@ -337,7 +337,7 @@ class FrevaGPT extends React.Component {
 
           <ChatBlock />
 
-          <AnswerComponent
+          <PendingAnswerComponent
             content={this.state.dynamicAnswer}
             variant={this.state.dynamicVariant}
           />

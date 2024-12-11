@@ -8,7 +8,7 @@ import Markdown from "react-markdown";
 import Highlight from "react-highlight";
 import "highlight.js/styles/atom-one-light.css";
 
-function AnswerComponent(props) {
+function PendingAnswerComponent(props) {
   const [renderedCode, setRenderedCode] = useState("");
 
   useEffect(() => {
@@ -78,9 +78,9 @@ function AnswerComponent(props) {
   return renderAnswer(props);
 }
 
-AnswerComponent.propTypes = {
+PendingAnswerComponent.propTypes = {
   content: PropTypes.string,
   variant: PropTypes.string,
 };
 
-export default AnswerComponent;
+export default PendingAnswerComponent;

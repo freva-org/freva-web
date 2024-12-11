@@ -8,6 +8,8 @@ import Markdown from "react-markdown";
 import Highlight from "react-highlight";
 import "highlight.js/styles/atom-one-light.css";
 
+import * as constants from "../constants";
+
 function PendingAnswerComponent(props) {
   const [renderedCode, setRenderedCode] = useState("");
 
@@ -36,7 +38,7 @@ function PendingAnswerComponent(props) {
     switch (props.variant) {
       case "Assistant":
         return (
-          <Col md={{ span: 10, offset: 0 }}>
+          <Col md={constants.BOT_COLUMN_STYLE}>
             <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
               <Markdown>{props.content}</Markdown>
             </Card>
@@ -45,7 +47,7 @@ function PendingAnswerComponent(props) {
       case "Code":
       case "CodeBlock":
         return (
-          <Col md={{ span: 10, offset: 0 }}>
+          <Col md={constants.BOT_COLUMN_STYLE}>
             <div className="mb-3">
               <Accordion defaultActiveKey="0">
                 <Accordion.Item eventKey="0">

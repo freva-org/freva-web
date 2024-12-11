@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 
 import { Col, Card, Spinner, Accordion, Row } from "react-bootstrap";
@@ -9,6 +9,13 @@ import Highlight from "react-highlight";
 import "highlight.js/styles/atom-one-light.css";
 
 function AnswerComponent(props) {
+  const [renderedCode, setRenderedCode] = useState("");
+
+  useEffect(() => {
+    const parsedCode = renderCode(props.content);
+    if (parsedCode !== "") setRenderedCode(parsedCode);
+  }, [props.content]);
+
   function renderCode(rawCode) {
     let jsonCode = "";
     let codeSnippets = "";
@@ -44,7 +51,7 @@ function AnswerComponent(props) {
                 <Accordion.Item eventKey="0">
                   <Accordion.Header>{props.variant}</Accordion.Header>
                   <Accordion.Body>
-                    <Highlight>{renderCode(props.content)}</Highlight>
+                    <Highlight>{renderedCode}</Highlight>
                     <span>
                       <Spinner size="sm" />
                       <span className="m-2">Analyzing...</span>

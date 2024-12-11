@@ -45,7 +45,7 @@ function PendingAnswerComponent(props) {
       case "Code":
       case "CodeBlock":
         return (
-          <Col md={{span: 10, offset: 0}}>
+          <Col md={{ span: 10, offset: 0 }}>
             <div className="mb-3">
               <Accordion defaultActiveKey="0">
                 <Accordion.Item eventKey="0">

@@ -48,7 +48,10 @@ class ChatBlock extends React.Component {
   renderUser(element) {
     return (
       <Col md={{ span: 10, offset: 2 }} key={element.content}>
-        <Card className="shadow-sm card-body border-0 border-bottom mb-3" style={{backgroundColor: '#eee'}}>
+        <Card
+          className="shadow-sm card-body border-0 border-bottom mb-3"
+          style={{ backgroundColor: "#eee" }}
+        >
           {element.content}
         </Card>
       </Col>

@@ -9,10 +9,9 @@ import Highlight from "react-highlight";
 import "highlight.js/styles/atom-one-light.css";
 
 function AnswerComponent(props) {
-
   function renderCode(rawCode) {
     let jsonCode = "";
-    let codeSnippets = "";   
+    let codeSnippets = "";
 
     if (!rawCode.endsWith('"}')) jsonCode = rawCode + '"}';
     else jsonCode = rawCode;
@@ -20,7 +19,7 @@ function AnswerComponent(props) {
     try {
       const code = JSON.parse(jsonCode);
       codeSnippets = code.code;
-    } catch(err) {
+    } catch (err) {
       // console.error(err);
     }
     return codeSnippets;
@@ -47,7 +46,7 @@ function AnswerComponent(props) {
                   <Accordion.Body>
                     <Highlight>{renderCode(props.content)}</Highlight>
                     <span>
-                      <Spinner size="sm"/>
+                      <Spinner size="sm" />
                       <span className="m-2">Analyzing...</span>
                     </span>
                   </Accordion.Body>
@@ -60,7 +59,7 @@ function AnswerComponent(props) {
         return (
           <Row className="mb-3">
             <Col md={1}>
-              <Spinner/>
+              <Spinner />
             </Col>
           </Row>
         );

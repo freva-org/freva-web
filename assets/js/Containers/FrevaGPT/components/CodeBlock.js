@@ -15,7 +15,7 @@ function CodeBlock(props) {
         <Accordion.Item eventKey="0">
           <Accordion.Header>python</Accordion.Header>
           <Accordion.Body>
-            <Highlight>{formatCode(props.title, props.code[0])}</Highlight>
+            <Highlight className="python">{formatCode(props.title, props.code[0])}</Highlight>
           </Accordion.Body>
         </Accordion.Item>
       </Accordion>

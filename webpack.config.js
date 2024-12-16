@@ -12,33 +12,13 @@ if (["build", "dev"].includes(process.env.npm_lifecycle_event)) {
   config = merge(
     devConfig(),
     baseConfig(),
-    { node: { __dirname: true } },
-    {
-      plugins: [
-        new Dotenv(),
-        // Work around for Buffer is undefined:
-        // https://github.com/webpack/changelog-v5/issues/10
-        new webpack.ProvidePlugin({
-          process: "process/browser",
-        }),
-      ]
-    });
+    { node: { __dirname: true } });
 } else {
   // production
   config = merge(
     prodConfig(),
     baseConfig(),
-    { node: { __dirname: true } },
-    {
-      plugins: [
-        new Dotenv(),
-        // Work around for Buffer is undefined:
-        // https://github.com/webpack/changelog-v5/issues/10
-        new webpack.ProvidePlugin({
-          process: "process/browser",
-        }),
-      ]
-    });
+    { node: { __dirname: true } });
 }
 
 module.exports = config;

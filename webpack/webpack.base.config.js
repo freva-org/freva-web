@@ -22,14 +22,6 @@ module.exports = function getBaseConfig() {
     module: {
       rules: [
         {
-          test: /\.mjs$/,
-            include: /node_modules/,
-            type: 'javascript/auto',
-            resolve: {
-                fullySpecified: false
-            }
-        },
-        {
           test: /\.js?$/,
           exclude: /node_modules/,
           loader: "babel-loader",

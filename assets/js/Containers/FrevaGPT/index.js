@@ -20,13 +20,15 @@ import { isEmpty } from "lodash";
 
 import { FaStop, FaPlay } from "react-icons/fa";
 
+import queryString from 'query-string';
+
 import Spinner from "../../Components/Spinner";
 
 import ChatBlock from "./components/ChatBlock";
 import SidePanel from "./components/SidePanel";
 import PendingAnswerComponent from "./components/PendingAnswerComponent";
 
-import { objectToQueryString, truncate } from "./utils";
+import { truncate } from "./utils";
 
 import { setThread, setConversation, addElement } from "./actions";
 
@@ -164,7 +166,7 @@ class FrevaGPT extends React.Component {
 
     // response of a new bot request is streamed
     const response = await fetch(
-      `/api/chatbot/streamresponse?` + objectToQueryString(queryObject)
+      `/api/chatbot/streamresponse?` + queryString.stringify(queryObject)
     ); //, signal);
 
     const reader = response.body.getReader();
@@ -272,11 +274,10 @@ class FrevaGPT extends React.Component {
   }
 
   async getOldThread(thread) {
+
+    const queryObject = { "thread_id": thread };
     const response = await fetch(
-      `/api/chatbot/getthread?` +
-        new URLSearchParams({
-          thread_id: thread,
-        }).toString()
+      `/api/chatbot/getthread?` + queryString.stringify(queryObject)
     );
 
     const variantArray = await response.json();
@@ -285,12 +286,11 @@ class FrevaGPT extends React.Component {
 
   async handleStop() {
     // stop of thread only possible if a thread id is given
+
+    const queryObject = { thread_id: this.props.frevaGPT.thread }
     if (this.props.frevaGPT.thread) {
       await fetch(
-        `/api/chatbot/stop?` +
-          new URLSearchParams({
-            thread_id: this.props.frevaGPT.thread,
-          }).toString()
+        `/api/chatbot/stop?` + queryString.stringify(queryObject)
       );
     }
 

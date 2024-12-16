@@ -28,15 +28,6 @@ export function formatCode(mode, data) {
   return codeSnippets;
 }
 
-export const objectToQueryString = (obj) => {
-  return Object.entries(obj)
-    .map(
-      ([key, value]) =>
-        `${encodeURIComponent(key)}=${encodeURIComponent(value)}`
-    )
-    .join("&");
-};
-
 export const truncate = (value) => {
   const trunc = value.substring(0, 32) + "\u2026";
   return trunc;

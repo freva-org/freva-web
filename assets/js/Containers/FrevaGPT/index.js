@@ -20,7 +20,7 @@ import { isEmpty } from "lodash";
 
 import { FaStop, FaPlay } from "react-icons/fa";
 
-import queryString from 'query-string';
+import queryString from "query-string";
 
 import Spinner from "../../Components/Spinner";
 
@@ -93,9 +93,7 @@ class FrevaGPT extends React.Component {
     };
 
     const getBotModels = async () => {
-      const response = await fetch(
-        `/api/chatbot/availablechatbots?`
-      );
+      const response = await fetch(`/api/chatbot/availablechatbots?`);
       this.setState({ botModelList: await response.json() });
     };
 
@@ -274,8 +272,7 @@ class FrevaGPT extends React.Component {
   }
 
   async getOldThread(thread) {
-
-    const queryObject = { "thread_id": thread };
+    const queryObject = { thread_id: thread };
     const response = await fetch(
       `/api/chatbot/getthread?` + queryString.stringify(queryObject)
     );
@@ -287,11 +284,9 @@ class FrevaGPT extends React.Component {
   async handleStop() {
     // stop of thread only possible if a thread id is given
 
-    const queryObject = { thread_id: this.props.frevaGPT.thread }
+    const queryObject = { thread_id: this.props.frevaGPT.thread };
     if (this.props.frevaGPT.thread) {
-      await fetch(
-        `/api/chatbot/stop?` + queryString.stringify(queryObject)
-      );
+      await fetch(`/api/chatbot/stop?` + queryString.stringify(queryObject));
     }
 
     // abort fetch request anyway (especially if no thread is given)

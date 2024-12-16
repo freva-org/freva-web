@@ -14,15 +14,15 @@ function SidePanel() {
   }
 
   return (
-    <div>
+    <>
       <Card className="mb-3 shadow-sm">
-        <div className="btn btn-outline-secondary border-0 p-3 rounded-top text-start card-header shadow-sm button-div">
+        <Card.Header className="outline-secondary border-0 p-3 rounded-top text-start card-header shadow-sm">
           General requests
-        </div>
-        <div className="p-3 py-2 collapse show">
+        </Card.Header>
+        <Card.Body className="p-3 py-2">
           {botRequests.general.map((element) => {
             return (
-              <div key={element.thread}>
+              <div key={element.thread} className="mb-2">
                 <a
                   className="text-wrap"
                   href=""
@@ -33,17 +33,17 @@ function SidePanel() {
               </div>
             );
           })}
-        </div>
+        </Card.Body>
       </Card>
 
       <Card className="mb-3 shadow-sm">
-        <div className="btn btn-outline-secondary border-0 p-3 rounded-top text-start card-header shadow-sm button-div">
+        <Card.Header className="outline-secondary border-0 p-3 rounded-top text-start card-header shadow-sm">
           Freva requests
-        </div>
-        <div className="p-3 py-2 collapse show">
+        </Card.Header>
+        <Card.Body className="p-3 py-2">
           {botRequests.freva.map((element) => {
             return (
-              <div key={element.thread}>
+              <div key={element.thread} className="mb-2">
                 <a
                   className="text-wrap"
                   href=""
@@ -54,9 +54,9 @@ function SidePanel() {
               </div>
             );
           })}
-        </div>
+        </Card.Body>
       </Card>
-    </div>
+    </>
   );
 }
 

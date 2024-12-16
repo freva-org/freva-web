@@ -38,13 +38,15 @@ class ChatBlock extends React.Component {
   }
 
   renderCode(element) {
-    if (isEmpty(element.content[0])) return null;
-    else
+    if (isEmpty(element.content[0])) {
+      return null;
+    } else {
       return (
         <Col md={constants.BOT_COLUMN_STYLE} key={element.content}>
           <CodeBlock title={element.variant} code={element.content} />
         </Col>
       );
+    }
   }
 
   renderUser(element) {

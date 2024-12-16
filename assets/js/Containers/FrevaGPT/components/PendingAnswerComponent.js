@@ -15,15 +15,20 @@ function PendingAnswerComponent(props) {
 
   useEffect(() => {
     const parsedCode = renderCode(props.content);
-    if (parsedCode !== "") setRenderedCode(parsedCode);
+    if (parsedCode !== "") {
+      setRenderedCode(parsedCode);
+    }
   }, [props.content]);
 
   function renderCode(rawCode) {
     let jsonCode = "";
     let codeSnippets = "";
 
-    if (!rawCode.endsWith('"}')) jsonCode = rawCode + '"}';
-    else jsonCode = rawCode;
+    if (!rawCode.endsWith('"}')) {
+      jsonCode = rawCode + '"}';
+    } else {
+      jsonCode = rawCode;
+    }
 
     try {
       const code = JSON.parse(jsonCode);

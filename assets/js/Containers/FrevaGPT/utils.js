@@ -15,8 +15,11 @@ export function formatCode(mode, data) {
   let rawCode;
 
   try {
-    if (mode === "Code") rawCode = JSON.parse(shortData).code;
-    else if (mode === "CodeOutput") rawCode = shortData;
+    if (mode === "Code") {
+      rawCode = JSON.parse(shortData).code;
+    } else if (mode === "CodeOutput") {
+      rawCode = shortData;
+    }
     codeSnippets = rawCode.split("\\n");
   } catch (err) {
     // do something

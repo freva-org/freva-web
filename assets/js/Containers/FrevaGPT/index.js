@@ -80,7 +80,9 @@ class FrevaGPT extends React.Component {
 
       try {
         const response = await fetch("/api/chatbot/ping");
-        if (response.status === 200) pingSuccessful = true;
+        if (response.status === 200) {
+          pingSuccessful = true;
+        }
       } catch (err) {
         console.error("PingError: ", err);
       }
@@ -101,7 +103,9 @@ class FrevaGPT extends React.Component {
     if (await successfulPing()) {
       this.setState({ botOkay: true });
       await getBotModels();
-    } else this.setState({ botOkay: false });
+    } else {
+      this.setState({ botOkay: false });
+    }
   }
 
   createNewChat() {
@@ -174,7 +178,9 @@ class FrevaGPT extends React.Component {
     while (true) {
       // eslint-disable-next-line no-await-in-loop
       const { done, value } = await reader.read();
-      if (done) break;
+      if (done) {
+        break;
+      }
 
       const decodedValues = decoder.decode(value);
       buffer = buffer + decodedValues;
@@ -185,7 +191,9 @@ class FrevaGPT extends React.Component {
         foundSomething = false;
 
         for (let bufferIndex = 0; bufferIndex < buffer.length; bufferIndex++) {
-          if (buffer[bufferIndex] !== "}") continue;
+          if (buffer[bufferIndex] !== "}") {
+            continue;
+          }
           const subBuffer = buffer.slice(0, bufferIndex + 1);
 
           try {
@@ -250,8 +258,9 @@ class FrevaGPT extends React.Component {
             if (
               !subBuffer.includes("ServerHint") &&
               !subBuffer.includes("Code")
-            )
+            ) {
               console.error(err);
+            }
           }
         }
       }

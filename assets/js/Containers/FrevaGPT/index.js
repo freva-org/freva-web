@@ -84,7 +84,7 @@ class FrevaGPT extends React.Component {
           pingSuccessful = true;
         }
       } catch (err) {
-        console.error("PingError: ", err);
+        pingSuccessful = false;
       }
 
       return pingSuccessful;
@@ -259,7 +259,9 @@ class FrevaGPT extends React.Component {
               !subBuffer.includes("ServerHint") &&
               !subBuffer.includes("Code")
             ) {
-              console.error(err);
+              this.props.dispatch(
+                addElement({ variant: "FrontendError", content: "Incomplete message received." })
+              );
             }
           }
         }

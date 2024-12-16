@@ -16,7 +16,7 @@ import {
 } from "react-bootstrap";
 
 import { browserHistory } from "react-router";
-import { isEmpty, has } from "lodash";
+import { isEmpty } from "lodash";
 
 import Spinner from "../../Components/Spinner";
 
@@ -64,7 +64,7 @@ class FrevaGPT extends React.Component {
     // if thread giving on mounting the component, set thread within store
     const givenQueryParams = browserHistory.getCurrentLocation().query;
     if (
-      has(givenQueryParams, "thread_id") &&
+      Object.hasOwn(givenQueryParams, "thread_id") &&
       !isEmpty(givenQueryParams.thread_id)
     ) {
       this.props.dispatch(setThread(givenQueryParams.thread_id));
@@ -260,7 +260,10 @@ class FrevaGPT extends React.Component {
               !subBuffer.includes("Code")
             ) {
               this.props.dispatch(
-                addElement({ variant: "FrontendError", content: "Incomplete message received." })
+                addElement({
+                  variant: "FrontendError",
+                  content: "Incomplete message received.",
+                })
               );
             }
           }

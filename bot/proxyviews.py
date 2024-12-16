@@ -5,6 +5,7 @@ from django.conf import settings
 from django.http import StreamingHttpResponse
 from django.views import View
 
+
 class ChatBotProxy(View):
     def get(self, request, *args, **kwargs):
         path = request.path

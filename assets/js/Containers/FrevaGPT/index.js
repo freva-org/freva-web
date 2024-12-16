@@ -18,6 +18,8 @@ import {
 import { browserHistory } from "react-router";
 import { isEmpty } from "lodash";
 
+import { FaStop, FaPlay } from "react-icons/fa";
+
 import Spinner from "../../Components/Spinner";
 
 import ChatBlock from "./components/ChatBlock";
@@ -378,14 +380,14 @@ class FrevaGPT extends React.Component {
                 />
                 {this.state.loading ? (
                   <Button variant="outline-danger" onClick={this.handleStop}>
-                    <i className="bi bi-stop-fill"></i>
+                    <FaStop />
                   </Button>
                 ) : (
                   <Button
                     variant="outline-success"
                     onClick={this.submitUserInput}
                   >
-                    <i className="bi bi-play-fill"></i>
+                    <FaPlay />
                   </Button>
                 )}
               </InputGroup>

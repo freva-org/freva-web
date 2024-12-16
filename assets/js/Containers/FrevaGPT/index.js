@@ -91,11 +91,8 @@ class FrevaGPT extends React.Component {
     };
 
     const getBotModels = async () => {
-      const queryObject = {
-        auth_key: process.env.BOT_AUTH_KEY,
-      };
       const response = await fetch(
-        `/api/chatbot/availablechatbots?` + objectToQueryString(queryObject)
+        `/api/chatbot/availablechatbots?`
       );
       this.setState({ botModelList: await response.json() });
     };
@@ -161,10 +158,8 @@ class FrevaGPT extends React.Component {
   async fetchData(input) {
     const queryObject = {
       input,
-      auth_key: process.env.BOT_AUTH_KEY,
       thread_id: this.props.frevaGPT.thread,
       chatbot: this.state.botModel,
-      freva_config: "/work/ch1187/clint/freva-dev/freva/evaluation_system.conf",
     };
 
     // response of a new bot request is streamed
@@ -280,7 +275,6 @@ class FrevaGPT extends React.Component {
     const response = await fetch(
       `/api/chatbot/getthread?` +
         new URLSearchParams({
-          auth_key: process.env.BOT_AUTH_KEY,
           thread_id: thread,
         }).toString()
     );
@@ -295,7 +289,6 @@ class FrevaGPT extends React.Component {
       await fetch(
         `/api/chatbot/stop?` +
           new URLSearchParams({
-            auth_key: process.env.BOT_AUTH_KEY,
             thread_id: this.props.frevaGPT.thread,
           }).toString()
       );

@@ -175,7 +175,7 @@ class Databrowser extends React.Component {
         if (!value) {
           return undefined;
         }
-        
+
         return (
           <FacetPanel
             value={value}

@@ -124,14 +124,18 @@ class FrevaGPT extends React.Component {
   }
 
   async handleKeyDown(e) {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !isEmpty(e.target.value)) {
       this.handleSubmit(e.target.value);
     }
   }
 
   async submitUserInput() {
     const userInput = this.state.userInput;
-    await this.handleSubmit(userInput);
+
+    if (!isEmpty(userInput)) {
+      await this.handleSubmit(userInput);
+    }
+
     this.setState({ userInput: "" });
   }
 

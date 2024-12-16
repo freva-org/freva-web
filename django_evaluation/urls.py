@@ -8,7 +8,6 @@ from django.urls import include
 from django.urls import re_path as url
 from django.views.generic import RedirectView
 
-import django_evaluation.views
 from base.views_api import AuthenticatedUser
 from history.views_api import ResultFacets, ResultFiles
 from plugins.views_api import (
@@ -24,7 +23,6 @@ admin.autodiscover()
 urlpatterns = [
     url(r"^admin/doc/", include("django.contrib.admindocs.urls")),
     url(r"^admin/", admin.site.urls),
-    url(r"chat/", django_evaluation.views.chat, name="chat"),
     url(r"^plugins/", include(("plugins.urls", "plugins"), namespace="plugins")),
     url(r"^history/", include(("history.urls", "history"), namespace="history")),
     url(r"", include(("solr.urls", "solr"), namespace="solr")),

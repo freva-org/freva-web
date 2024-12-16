@@ -379,7 +379,10 @@ class FrevaGPT extends React.Component {
                     <i className="bi bi-stop-fill"></i>
                   </Button>
                 ) : (
-                  <Button variant="outline-success" onClick={this.handleSubmit}>
+                  <Button
+                    variant="outline-success"
+                    onClick={this.submitUserInput}
+                  >
                     <i className="bi bi-play-fill"></i>
                   </Button>
                 )}

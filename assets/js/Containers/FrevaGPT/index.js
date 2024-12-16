@@ -30,8 +30,6 @@ import { setThread, setConversation, addElement } from "./actions";
 
 import { botSuggestions } from "./exampleRequests";
 
-import "bootstrap-icons/font/bootstrap-icons.css";
-
 class FrevaGPT extends React.Component {
   // const abortController = useRef();
   // abortController.current = new AbortController();

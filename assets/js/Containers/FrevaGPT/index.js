@@ -367,13 +367,14 @@ class FrevaGPT extends React.Component {
                   placeholder="Ask a question"
                 />
                 {this.state.loading ? (
-                  <Button variant="outline-danger" onClick={this.handleStop}>
+                  <Button variant="outline-danger" onClick={this.handleStop} className="d-flex align-items-center">
                     <FaStop />
                   </Button>
                 ) : (
                   <Button
                     variant="outline-success"
                     onClick={this.submitUserInput}
+                    className="d-flex align-items-center"
                   >
                     <FaPlay />
                   </Button>

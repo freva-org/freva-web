@@ -94,7 +94,11 @@ class FrevaGPT extends React.Component {
 
     const getBotModels = async () => {
       const response = await fetch(`/api/chatbot/availablechatbots?`);
-      this.setState({ botModelList: await response.json() });
+      if (response.ok) {
+        this.setState({ botModelList: await response.json() });
+      } else {
+        this.setState({ botModelList: ["No model information available."] });
+      }
     };
 
     if (await successfulPing()) {
@@ -137,7 +141,6 @@ class FrevaGPT extends React.Component {
   }
 
   async handleSubmit(input) {
-
     this.props.dispatch(addElement({ variant: "User", content: input }));
     this.setState({ showSuggestions: false, userInput: "", loading: true });
 
@@ -368,7 +371,11 @@ class FrevaGPT extends React.Component {
                   placeholder="Ask a question"
                 />
                 {this.state.loading ? (
-                  <Button variant="outline-danger" onClick={this.handleStop} className="d-flex align-items-center">
+                  <Button
+                    variant="outline-danger"
+                    onClick={this.handleStop}
+                    className="d-flex align-items-center"
+                  >
                     <FaStop />
                   </Button>
                 ) : (

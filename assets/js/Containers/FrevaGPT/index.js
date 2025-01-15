@@ -171,107 +171,121 @@ class FrevaGPT extends React.Component {
       `/api/chatbot/streamresponse?` + queryString.stringify(queryObject)
     ); //, signal);
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder("utf-8");
+    if (response.ok) {
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
 
-    let buffer = "";
-    let varObj = {};
+      let buffer = "";
+      let varObj = {};
 
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      // eslint-disable-next-line no-await-in-loop
-      const { done, value } = await reader.read();
-      if (done) {
-        break;
-      }
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        // eslint-disable-next-line no-await-in-loop
+        const { done, value } = await reader.read();
+        if (done) {
+          break;
+        }
 
-      const decodedValues = decoder.decode(value);
-      buffer = buffer + decodedValues;
+        const decodedValues = decoder.decode(value);
+        buffer = buffer + decodedValues;
 
-      let foundSomething = true;
+        let foundSomething = true;
 
-      while (foundSomething) {
-        foundSomething = false;
+        while (foundSomething) {
+          foundSomething = false;
 
-        for (let bufferIndex = 0; bufferIndex < buffer.length; bufferIndex++) {
-          if (buffer[bufferIndex] !== "}") {
-            continue;
-          }
-          const subBuffer = buffer.slice(0, bufferIndex + 1);
-
-          try {
-            const jsonBuffer = JSON.parse(subBuffer);
-            buffer = buffer.slice(bufferIndex + 1); // shorten string by already evaluated string
-
-            // object is not empty so compare variants
-            if (Object.keys(varObj).length !== 0) {
-              // if object has not same variant, add answer to conversation and override object
-              if (varObj.variant !== jsonBuffer.variant) {
-                this.props.dispatch(addElement(varObj));
-                this.setState({ dynamicAnswer: "", dynamicVariant: "" });
-                varObj = jsonBuffer;
-              } else {
-                // if object has same variant, add content
-                // eslint-disable-next-line no-lonely-if
-                if (
-                  varObj.variant === "Code" ||
-                  varObj.variant === "CodeOutput"
-                ) {
-                  varObj.content[0] = varObj.content[0] + jsonBuffer.content[0];
-                  this.setState({
-                    dynamicAnswer: varObj.content[0],
-                    dynamicVariant: varObj.variant,
-                  });
-                } else {
-                  varObj.content = varObj.content + jsonBuffer.content;
-                  this.setState({
-                    dynamicAnswer: varObj.content,
-                    dynamicVariant: varObj.variant,
-                  });
-                }
-              }
-            } else {
-              // object is empty so add content
-              varObj = jsonBuffer;
-
-              // set thread id
-              if (
-                this.props.frevaGPT.thread === "" &&
-                varObj.variant === "ServerHint"
-              ) {
-                try {
-                  this.props.dispatch(
-                    setThread(JSON.parse(varObj.content).thread_id)
-                  );
-                  browserHistory.push({
-                    pathname: "/chatbot/",
-                    search: `?thread_id=${this.props.frevaGPT.thread}`,
-                  });
-                } catch (err) {
-                  // handle warning
-                }
-              }
+          for (
+            let bufferIndex = 0;
+            bufferIndex < buffer.length;
+            bufferIndex++
+          ) {
+            if (buffer[bufferIndex] !== "}") {
+              continue;
             }
+            const subBuffer = buffer.slice(0, bufferIndex + 1);
 
-            foundSomething = true;
-            break;
-          } catch (err) {
-            // ServerHints and CodeBlocks include nested JSON Objects
-            // eslint-disable-next-line no-console
-            if (
-              !subBuffer.includes("ServerHint") &&
-              !subBuffer.includes("Code")
-            ) {
-              this.props.dispatch(
-                addElement({
-                  variant: "FrontendError",
-                  content: "Incomplete message received.",
-                })
-              );
+            try {
+              const jsonBuffer = JSON.parse(subBuffer);
+              buffer = buffer.slice(bufferIndex + 1); // shorten string by already evaluated string
+
+              // object is not empty so compare variants
+              if (Object.keys(varObj).length !== 0) {
+                // if object has not same variant, add answer to conversation and override object
+                if (varObj.variant !== jsonBuffer.variant) {
+                  this.props.dispatch(addElement(varObj));
+                  this.setState({ dynamicAnswer: "", dynamicVariant: "" });
+                  varObj = jsonBuffer;
+                } else {
+                  // if object has same variant, add content
+                  // eslint-disable-next-line no-lonely-if
+                  if (
+                    varObj.variant === "Code" ||
+                    varObj.variant === "CodeOutput"
+                  ) {
+                    varObj.content[0] =
+                      varObj.content[0] + jsonBuffer.content[0];
+                    this.setState({
+                      dynamicAnswer: varObj.content[0],
+                      dynamicVariant: varObj.variant,
+                    });
+                  } else {
+                    varObj.content = varObj.content + jsonBuffer.content;
+                    this.setState({
+                      dynamicAnswer: varObj.content,
+                      dynamicVariant: varObj.variant,
+                    });
+                  }
+                }
+              } else {
+                // object is empty so add content
+                varObj = jsonBuffer;
+
+                // set thread id
+                if (
+                  this.props.frevaGPT.thread === "" &&
+                  varObj.variant === "ServerHint"
+                ) {
+                  try {
+                    this.props.dispatch(
+                      setThread(JSON.parse(varObj.content).thread_id)
+                    );
+                    browserHistory.push({
+                      pathname: "/chatbot/",
+                      search: `?thread_id=${this.props.frevaGPT.thread}`,
+                    });
+                  } catch (err) {
+                    // handle warning
+                  }
+                }
+              }
+
+              foundSomething = true;
+              break;
+            } catch (err) {
+              // ServerHints and CodeBlocks include nested JSON Objects
+              // eslint-disable-next-line no-console
+              if (
+                !subBuffer.includes("ServerHint") &&
+                !subBuffer.includes("Code")
+              ) {
+                this.props.dispatch(
+                  addElement({
+                    variant: "FrontendError",
+                    content: "Incomplete message received.",
+                  })
+                );
+              }
             }
           }
         }
       }
+    } else {
+      this.props.dispatch(
+        addElement({
+          variant: "ServerError",
+          content: response.statusText,
+        })
+      );
     }
   }
 

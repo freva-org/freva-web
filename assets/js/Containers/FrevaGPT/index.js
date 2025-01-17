@@ -40,6 +40,7 @@ class FrevaGPT extends React.Component {
   // const signal = abortController.signal;
 
   constructor(props) {
+
     super(props);
     this.handleUserInput = this.handleUserInput.bind(this);
     this.handleKeyDown = this.handleKeyDown.bind(this);
@@ -60,6 +61,8 @@ class FrevaGPT extends React.Component {
       dynamicAnswer: "",
       dynamicVariant: "",
     };
+
+    this.chatEndRef = React.createRef();
   }
 
   async componentDidMount() {
@@ -107,6 +110,10 @@ class FrevaGPT extends React.Component {
     } else {
       this.setState({ botOkay: false });
     }
+  }
+
+  componentDidUpdate() {
+   this.chatEndRef.current?.scrollIntoView(); 
   }
 
   createNewChat() {
@@ -329,80 +336,97 @@ class FrevaGPT extends React.Component {
   }
 
   renderBotContent() {
+
+    const windowHeight = document.documentElement.clientHeight*0.65; 
+    // better solution needed (need of fixed height for overflow-auto -> scrolling)
+    const chatWindow = {
+      height: windowHeight
+    }
+
     return (
       <>
         <Col md={4}>
           <SidePanel />
         </Col>
 
-        <Col md={8}>
-          {this.state.showSuggestions ? (
-            <Row className="mb-2 g-2">
-              {botSuggestions.map((element) => {
-                return (
-                  <div key={element} className="col-md-3">
-                    <OverlayTrigger
-                      key={element}
-                      overlay={<Tooltip>{element}</Tooltip>}
-                    >
-                      <Button
-                        className="h-100 w-100"
-                        variant="outline-secondary"
-                        onClick={() => this.handleSubmit(element)}
-                      >
-                        {truncate(element)}
-                      </Button>
-                    </OverlayTrigger>
-                  </div>
-                );
-              })}
-            </Row>
-          ) : null}
+        <Col md={8} 
+            className={ "d-flex flex-column "+(this.state.showSuggestions ? "justify-content-start" : "justify-content-between")} 
+            style={chatWindow}>
+          <Row className="overflow-auto">
+            <Col>
+              <ChatBlock />
 
-          <ChatBlock />
+              <PendingAnswerComponent
+                content={this.state.dynamicAnswer}
+                variant={this.state.dynamicVariant}
+              />
 
-          <PendingAnswerComponent
-            content={this.state.dynamicAnswer}
-            variant={this.state.dynamicVariant}
-          />
+              {this.state.loading && !this.state.dynamicAnswer ? (
+                <Row className="mb-3">
+                  <Col md={1}>
+                    <Spinner />
+                  </Col>
+                </Row>
+              ) : null}
 
-          {this.state.loading && !this.state.dynamicAnswer ? (
-            <Row className="mb-3">
-              <Col md={1}>
-                <Spinner />
-              </Col>
-            </Row>
-          ) : null}
+              <div ref={this.chatEndRef}></div>
+            </Col>
+          </Row>
 
           <Row>
-            <Col md={12}>
-              <InputGroup className="mb-2 pb-2">
-                <FormControl
-                  type="text"
-                  value={this.state.userInput}
-                  onChange={this.handleUserInput}
-                  onKeyDown={this.handleKeyDown}
-                  placeholder="Ask a question"
-                />
-                {this.state.loading ? (
-                  <Button
-                    variant="outline-danger"
-                    onClick={this.handleStop}
-                    className="d-flex align-items-center"
-                  >
-                    <FaStop />
-                  </Button>
-                ) : (
-                  <Button
-                    variant="outline-success"
-                    onClick={this.submitUserInput}
-                    className="d-flex align-items-center"
-                  >
-                    <FaPlay />
-                  </Button>
-                )}
-              </InputGroup>
-            </Col>
+            {this.state.showSuggestions ? (
+              <Row className="mb-2 g-2">
+                {botSuggestions.map((element) => {
+                  return (
+                    <div key={element} className="col-md-3">
+                      <OverlayTrigger
+                        key={element}
+                        overlay={<Tooltip>{element}</Tooltip>}
+                      >
+                        <Button
+                          className="h-100 w-100"
+                          variant="outline-secondary"
+                          onClick={() => this.handleSubmit(element)}
+                        >
+                          {truncate(element)}
+                        </Button>
+                      </OverlayTrigger>
+                    </div>
+                  );
+                })}
+              </Row>
+            ) : null}
+
+            <Row>
+              <Col md={12}>
+                <InputGroup className="mb-2 pb-2">
+                  <FormControl
+                    type="text"
+                    value={this.state.userInput}
+                    onChange={this.handleUserInput}
+                    onKeyDown={this.handleKeyDown}
+                    placeholder="Ask a question"
+                  />
+                  {this.state.loading ? (
+                    <Button
+                      variant="outline-danger"
+                      onClick={this.handleStop}
+                      className="d-flex align-items-center"
+                    >
+                      <FaStop />
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline-success"
+                      onClick={this.submitUserInput}
+                      className="d-flex align-items-center"
+                    >
+                      <FaPlay />
+                    </Button>
+                  )}
+                </InputGroup>
+              </Col>
+            </Row>
           </Row>
         </Col>
       </>

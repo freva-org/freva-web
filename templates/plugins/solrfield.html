@@ -49,7 +49,7 @@
                   const tmp_data = {
                       facets : '{{facet}}',
                       {%if editable %}
-                         {{facet}}: term+'*', // search term
+                         {{facet}}: term, // search term
                       {%endif%}
                   };
                   const tmp_data2 = getActiveFacets('{{facet}}','{{group}}');

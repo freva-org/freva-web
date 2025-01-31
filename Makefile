@@ -102,13 +102,16 @@ stopserver:
 	ps aux | grep '[f]reva_rest.cli' | awk '{print $$2}' | xargs -r kill
 	ps aux | grep '[d]ata_portal_worker' | awk '{print $$2}' | xargs -r kill
 	ps aux | grep '[m]anage.py runserver' | awk '{print $$2}' | xargs -r kill
-	ps aux | grep '[s]tac_fastapi.opensearch.app' | awk '{print $$2}' | xargs -r kill
-	ps aux | grep '[s]tac-browser.*npm' | awk '{print $$2}' | xargs -r kill
+	@if pgrep -f '[s]tac_fastapi.opensearch.app' > /dev/null; then \
+		ps aux | grep '[s]tac_fastapi.opensearch.app' | awk '{print $$2}' | head -n 1 | xargs kill; \
+		sleep 1; \
+	fi
+	pkill -f "stac-browser" || true
 	rm -fr .data-portal-cluster-config.json
 	echo "Stopped Django development server..." > runserver.log
 	echo "Stopped freva-rest development server..." > rest.log
 	echo "Stopped STAC service..." > stac.log
-	echo "Stopped STAC Browser..." >> stac.log
+	echo "Stopped STAC Browser..." >> stac-browser.log
 
 
 stopfrontend:

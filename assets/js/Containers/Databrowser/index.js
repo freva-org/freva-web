@@ -40,6 +40,7 @@ import { ViewTypes, DEFAULT_FLAVOUR, CATALOGUE_MAXIMUM } from "./constants";
 import { FacetPanel } from "./FacetPanel";
 import { prepareSearchParams } from "./utils";
 import CatalogExportDropdown from "./CatalogExportDropdown";
+import BBoxSelector from './BBoxSelector';
 
 class Databrowser extends React.Component {
   constructor(props) {
@@ -187,6 +188,49 @@ class Databrowser extends React.Component {
         );
       });
   }
+  dropBBoxSelection() {
+    const currentLocation = this.props.location.pathname;
+    const {
+      bboxSelector: ignore1,
+      minLon: ignore2,
+      maxLon: ignore3,
+      minLat: ignore4,
+      maxLat: ignore5,
+      ...queryObject
+    } = this.props.location.query;
+    const query = queryString.stringify(queryObject);
+    if (query) {
+      this.props.router.push(currentLocation + "?" + query);
+    } else {
+      this.props.router.push(currentLocation);
+    }
+  }
+
+  renderBBoxPanel() {
+    const { databrowser } = this.props;
+    const { minLon, maxLon, minLat, maxLat } = databrowser;    
+    const isBBoxSelected = !!(minLon || maxLon || minLat || maxLat);
+    const title = isBBoxSelected ? (
+      <span>
+        BBox: &nbsp;
+        <span className="fw-bold">
+          {minLon},{maxLon} by {minLat},{maxLat}
+        </span>
+      </span>
+    ) : (
+      <span>Bounding Box</span>
+    );
+    
+    return (
+      <OwnPanel
+        header={title}
+        key="bbox_range"
+        removeFacet={isBBoxSelected ? () => this.dropBBoxSelection() : null}
+      >
+        <BBoxSelector />
+      </OwnPanel>
+    );
+  }
 
   dropTimeSelection() {
     const currentLocation = this.props.location.pathname;
@@ -250,6 +294,21 @@ class Databrowser extends React.Component {
           <FaTimes className="ms-2 fs-6" />
         </Button>
       );
+    }
+    if (this.props.databrowser.minLon || this.props.databrowser.maxLon || 
+        this.props.databrowser.minLat || this.props.databrowser.maxLat) {
+      const bboxBadge = (
+        <Button
+          variant="secondary"
+          className="me-2 mb-2 badge d-flex align-items-center"
+          onClick={() => this.dropBBoxSelection()}
+          key={"bbox-selection"}
+        >
+          BBox ({this.props.databrowser.bboxSelector}): {this.props.databrowser.minLon},{this.props.databrowser.maxLon} by {this.props.databrowser.minLat},{this.props.databrowser.maxLat}
+          <FaTimes className="ms-2 fs-6" />
+        </Button>
+      );
+      values.push(bboxBadge);
     }
     values = [
       ...values,
@@ -396,6 +455,7 @@ class Databrowser extends React.Component {
 
             {facetPanels}
             {this.renderTimeSelectionPanel()}
+            {this.renderBBoxPanel()}
             <Button
               className="w-100 mb-3 shadow-sm p-3"
               variant="secondary"
@@ -452,6 +512,11 @@ Databrowser.propTypes = {
     dateSelector: PropTypes.string,
     minDate: PropTypes.string,
     maxDate: PropTypes.string,
+    minLon: PropTypes.string,
+    maxLon: PropTypes.string,
+    minLat: PropTypes.string,
+    maxLat: PropTypes.string,
+    bboxSelector: PropTypes.string,
   }),
   location: PropTypes.object.isRequired,
   router: PropTypes.object.isRequired,

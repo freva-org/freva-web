@@ -113,7 +113,6 @@ stopserver:
 	echo "Stopped STAC service..." > stac.log
 	echo "Stopped STAC Browser..." >> stac-browser.log
 
-
 stopfrontend:
 	pkill -f "npm run dev"
 	echo "Stopped npm development server..." > npm.log

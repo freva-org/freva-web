@@ -33,11 +33,18 @@ export const databrowserReducer = (state = databrowserInitialState, action) => {
         facetLoading: false,
       };
     case constants.UPDATE_FACET_SELECTION: {
-      const { 
-        minDate, maxDate, dateSelector,
-        minLon, maxLon, minLat, maxLat, bboxSelector,
-        start, flavour, 
-        ...queryObject 
+      const {
+        minDate,
+        maxDate,
+        dateSelector,
+        minLon,
+        maxLon,
+        minLat,
+        maxLat,
+        bboxSelector,
+        start,
+        flavour,
+        ...queryObject
       } = action.queryObject;
       let myMinDate = minDate;
       let myMaxDate = maxDate;

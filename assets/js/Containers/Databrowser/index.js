@@ -40,7 +40,7 @@ import { ViewTypes, DEFAULT_FLAVOUR, CATALOGUE_MAXIMUM } from "./constants";
 import { FacetPanel } from "./FacetPanel";
 import { prepareSearchParams } from "./utils";
 import CatalogExportDropdown from "./CatalogExportDropdown";
-import BBoxSelector from './BBoxSelector';
+import BBoxSelector from "./BBoxSelector";
 
 class Databrowser extends React.Component {
   constructor(props) {
@@ -96,7 +96,10 @@ class Databrowser extends React.Component {
 
   createCatalogLink(type, isDynamic = false) {
     const baseUrl = `/api/freva-nextgen/databrowser/${type}-catalogue/`;
-    const searchParams = prepareSearchParams(this.props.location, "translate=false");
+    const searchParams = prepareSearchParams(
+      this.props.location,
+      "translate=false"
+    );
     const dynamicParam = isDynamic ? "&stac_dynamic=true" : "";
     return `${baseUrl}${searchParams}${dynamicParam}`;
   }
@@ -107,7 +110,8 @@ class Databrowser extends React.Component {
     const previousValue = originalQueryObject[category];
     if (previousValue && (value === null || value === previousValue)) {
       // delete
-      const { [category]: toRemove, ...queryObject } = this.props.location.query;
+      const { [category]: toRemove, ...queryObject } =
+        this.props.location.query;
       const query = queryString.stringify({ ...queryObject, start: 0 });
       this.props.router.push(currentLocation + "?" + query);
       return;
@@ -208,7 +212,7 @@ class Databrowser extends React.Component {
 
   renderBBoxPanel() {
     const { databrowser } = this.props;
-    const { minLon, maxLon, minLat, maxLat } = databrowser;    
+    const { minLon, maxLon, minLat, maxLat } = databrowser;
     const isBBoxSelected = !!(minLon || maxLon || minLat || maxLat);
     const title = isBBoxSelected ? (
       <span>
@@ -220,7 +224,7 @@ class Databrowser extends React.Component {
     ) : (
       <span>Bounding Box</span>
     );
-    
+
     return (
       <OwnPanel
         header={title}
@@ -295,8 +299,12 @@ class Databrowser extends React.Component {
         </Button>
       );
     }
-    if (this.props.databrowser.minLon || this.props.databrowser.maxLon || 
-        this.props.databrowser.minLat || this.props.databrowser.maxLat) {
+    if (
+      this.props.databrowser.minLon ||
+      this.props.databrowser.maxLon ||
+      this.props.databrowser.minLat ||
+      this.props.databrowser.maxLat
+    ) {
       const bboxBadge = (
         <Button
           variant="secondary"
@@ -304,7 +312,9 @@ class Databrowser extends React.Component {
           onClick={() => this.dropBBoxSelection()}
           key={"bbox-selection"}
         >
-          BBox ({this.props.databrowser.bboxSelector}): {this.props.databrowser.minLon},{this.props.databrowser.maxLon} by {this.props.databrowser.minLat},{this.props.databrowser.maxLat}
+          BBox ({this.props.databrowser.bboxSelector}):{" "}
+          {this.props.databrowser.minLon},{this.props.databrowser.maxLon} by{" "}
+          {this.props.databrowser.minLat},{this.props.databrowser.maxLat}
           <FaTimes className="ms-2 fs-6" />
         </Button>
       );
@@ -372,7 +382,7 @@ class Databrowser extends React.Component {
     const additionalFacetPanels = this.renderAdditionalFacets();
     const isFacetCentered = this.state.viewPort === ViewTypes.FACET_CENTERED;
     const flavour = this.props.location.query.flavour;
-    
+
     return (
       <Container>
         <Row>
@@ -396,8 +406,8 @@ class Databrowser extends React.Component {
                   return <option key={x}>{x}</option>;
                 })}
               </Form.Select>
-              
-              <CatalogExportDropdown 
+
+              <CatalogExportDropdown
                 disabled={this.props.databrowser.numFiles > CATALOGUE_MAXIMUM}
                 createCatalogLink={this.createCatalogLink}
                 numFiles={this.props.databrowser.numFiles}

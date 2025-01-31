@@ -78,17 +78,35 @@ function BBoxSelector({ databrowser, router, location }) {
     return !isNaN(num) && num >= -90 && num <= 90;
   };
 
-  const minLonError = minLon && !isValidLongitude(minLon) ? "Invalid longitude (-180 to 180)" : "";
-  const maxLonError = maxLon && !isValidLongitude(maxLon) ? "Invalid longitude (-180 to 180)" : "";
-  const minLatError = minLat && !isValidLatitude(minLat) ? "Invalid latitude (-90 to 90)" : "";
-  const maxLatError = maxLat && !isValidLatitude(maxLat) ? "Invalid latitude (-90 to 90)" : "";
+  const minLonError =
+    minLon && !isValidLongitude(minLon)
+      ? "Invalid longitude (-180 to 180)"
+      : "";
+  const maxLonError =
+    maxLon && !isValidLongitude(maxLon)
+      ? "Invalid longitude (-180 to 180)"
+      : "";
+  const minLatError =
+    minLat && !isValidLatitude(minLat) ? "Invalid latitude (-90 to 90)" : "";
+  const maxLatError =
+    maxLat && !isValidLatitude(maxLat) ? "Invalid latitude (-90 to 90)" : "";
 
   let errorMessage = minLonError || maxLonError || minLatError || maxLatError;
 
-  if (!errorMessage && minLon && maxLon && parseFloat(minLon) > parseFloat(maxLon)) {
+  if (
+    !errorMessage &&
+    minLon &&
+    maxLon &&
+    parseFloat(minLon) > parseFloat(maxLon)
+  ) {
     errorMessage = "Max longitude must be greater than min longitude";
   }
-  if (!errorMessage && minLat && maxLat && parseFloat(minLat) > parseFloat(maxLat)) {
+  if (
+    !errorMessage &&
+    minLat &&
+    maxLat &&
+    parseFloat(minLat) > parseFloat(maxLat)
+  ) {
     errorMessage = "Max latitude must be greater than min latitude";
   }
 
@@ -114,81 +132,87 @@ function BBoxSelector({ databrowser, router, location }) {
 
   return (
     <div onKeyPress={onKeyPress.bind(this, errorMessage)}>
-    <InputGroup className="mb-4">
+      <InputGroup className="mb-4">
         <InputGroup.Text id="bbox-text">Operator</InputGroup.Text>
         <DropdownButton
-            className="selector-button"
-            variant="outline-secondary"
-            title={selector}
-            id="time-operator-dropdown"
+          className="selector-button"
+          variant="outline-secondary"
+          title={selector}
+          id="time-operator-dropdown"
         >
-        <Dropdown.Item onClick={() => setSelector(BBOX_RANGE_FLEXIBLE)} href="#">
+          <Dropdown.Item
+            onClick={() => setSelector(BBOX_RANGE_FLEXIBLE)}
+            href="#"
+          >
             <BsCircleSquare /> {BBOX_RANGE_FLEXIBLE}
-        </Dropdown.Item>
-        <Dropdown.Item onClick={() => setSelector(BBOX_RANGE_STRICT)} href="#">
+          </Dropdown.Item>
+          <Dropdown.Item
+            onClick={() => setSelector(BBOX_RANGE_STRICT)}
+            href="#"
+          >
             <BsRecordCircleFill /> {BBOX_RANGE_STRICT}
-        </Dropdown.Item>
-        <Dropdown.Item onClick={() => setSelector(BBOX_RANGE_FILE)} href="#">
+          </Dropdown.Item>
+          <Dropdown.Item onClick={() => setSelector(BBOX_RANGE_FILE)} href="#">
             <BsRecordCircle /> {BBOX_RANGE_FILE}
-        </Dropdown.Item>
+          </Dropdown.Item>
         </DropdownButton>
-    </InputGroup>
+      </InputGroup>
 
-    <div className="d-flex gap-3 mb-2">
+      <div className="d-flex gap-3 mb-2">
         <div className="flex-grow-1">
-        <InputGroup>
+          <InputGroup>
             <InputGroup.Text>West</InputGroup.Text>
             <Form.Control
-            value={minLon}
-            placeholder="e.g. -10"
-            onChange={(e) => setMinLon(e.target.value)}
-            isInvalid={!!minLonError}
+              value={minLon}
+              placeholder="e.g. -10"
+              onChange={(e) => setMinLon(e.target.value)}
+              isInvalid={!!minLonError}
             />
-        </InputGroup>
-        <div className="text-danger small">{minLonError}&nbsp;</div>
+          </InputGroup>
+          <div className="text-danger small">{minLonError}&nbsp;</div>
         </div>
         <div className="flex-grow-1">
-        <InputGroup>
+          <InputGroup>
             <InputGroup.Text>East</InputGroup.Text>
             <Form.Control
-            value={maxLon}
-            placeholder="e.g. 10"
-            onChange={(e) => setMaxLon(e.target.value)}
-            isInvalid={!!maxLonError}
+              value={maxLon}
+              placeholder="e.g. 10"
+              onChange={(e) => setMaxLon(e.target.value)}
+              isInvalid={!!maxLonError}
             />
-        </InputGroup>
-        <div className="text-danger small">{maxLonError}&nbsp;</div>
+          </InputGroup>
+          <div className="text-danger small">{maxLonError}&nbsp;</div>
         </div>
-    </div>
+      </div>
 
-    <div className="d-flex gap-3 mb-3">
+      <div className="d-flex gap-3 mb-3">
         <div className="flex-grow-1">
-        <InputGroup>
+          <InputGroup>
             <InputGroup.Text>South</InputGroup.Text>
             <Form.Control
-            value={minLat}
-            placeholder="e.g. -10"
-            onChange={(e) => setMinLat(e.target.value)}
-            isInvalid={!!minLatError}
+              value={minLat}
+              placeholder="e.g. -10"
+              onChange={(e) => setMinLat(e.target.value)}
+              isInvalid={!!minLatError}
             />
-        </InputGroup>
-        <div className="text-danger small">{minLatError}&nbsp;</div>
+          </InputGroup>
+          <div className="text-danger small">{minLatError}&nbsp;</div>
         </div>
         <div className="flex-grow-1">
-        <InputGroup>
+          <InputGroup>
             <InputGroup.Text>North</InputGroup.Text>
             <Form.Control
-            value={maxLat}
-            placeholder="e.g. 10"
-            onChange={(e) => setMaxLat(e.target.value)}
-            isInvalid={!!maxLatError}
+              value={maxLat}
+              placeholder="e.g. 10"
+              onChange={(e) => setMaxLat(e.target.value)}
+              isInvalid={!!maxLatError}
             />
-        </InputGroup>
-        <div className="text-danger small">{maxLatError}&nbsp;</div>
+          </InputGroup>
+          <div className="text-danger small">{maxLatError}&nbsp;</div>
         </div>
-    </div>
+      </div>
 
-    {applyButton}
+      {applyButton}
     </div>
   );
 }

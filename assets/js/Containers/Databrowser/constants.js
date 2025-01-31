@@ -19,7 +19,6 @@ export const TIME_RANGE_FLEXIBLE = "flexible";
 export const TIME_RANGE_STRICT = "strict";
 export const TIME_RANGE_FILE = "file";
 
-
 export const BBOX_RANGE_FILE = "file";
 export const BBOX_RANGE_FLEXIBLE = "flexible";
 export const BBOX_RANGE_STRICT = "strict";

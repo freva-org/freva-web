@@ -62,7 +62,9 @@ function DataBrowserCommandImpl(props) {
         ? `--flavour ${props.selectedFlavour} `
         : "") +
       (props.minDate ? `time=${props.minDate}to${props.maxDate} ` : "") +
-      (props.minLon ? `bbox=${props.minLon},${props.maxLon}by${props.minLat},${props.maxLat} ` : "") +
+      (props.minLon
+        ? `bbox=${props.minLon},${props.maxLon}by${props.minLat},${props.maxLat} `
+        : "") +
       Object.keys(selectedFacets)
         .map((key) => {
           const value = selectedFacets[key];
@@ -81,7 +83,7 @@ function DataBrowserCommandImpl(props) {
   function renderCLICommand() {
     const dateSelectorToCli = getCliTimeSelector();
     const bboxSelectorToCli = getCliBBoxSelector();
-    
+
     return (
       <pre className="mb-1" style={{ whiteSpace: "pre-wrap" }}>
         freva databrowser
@@ -131,7 +133,7 @@ function DataBrowserCommandImpl(props) {
 
   function getFullPythonCommand(dateSelectorToCli, bboxSelectorToCli) {
     let args = [];
-    
+
     if (props.selectedFlavour !== constants.DEFAULT_FLAVOUR) {
       args.push(`flavour="${props.selectedFlavour}"`);
     }
@@ -152,7 +154,9 @@ function DataBrowserCommandImpl(props) {
     }
 
     if (props.minLon) {
-      args.push(`bbox="${props.minLon},${props.maxLon} by ${props.minLat},${props.maxLat}"`);
+      args.push(
+        `bbox="${props.minLon},${props.maxLon} by ${props.minLat},${props.maxLat}"`
+      );
       if (bboxSelectorToCli) {
         args.push(`bbox_select="${bboxSelectorToCli}"`);
       }
@@ -171,8 +175,14 @@ function DataBrowserCommandImpl(props) {
 
   const dateSelectorToCli = getCliTimeSelector();
   const bboxSelectorToCli = getCliBBoxSelector();
-  const fullCLICommand = getFullCliCommand(dateSelectorToCli, bboxSelectorToCli);
-  const fullPythonCommand = getFullPythonCommand(dateSelectorToCli, bboxSelectorToCli);
+  const fullCLICommand = getFullCliCommand(
+    dateSelectorToCli,
+    bboxSelectorToCli
+  );
+  const fullPythonCommand = getFullPythonCommand(
+    dateSelectorToCli,
+    bboxSelectorToCli
+  );
 
   return (
     <React.Fragment>

@@ -8,13 +8,19 @@ export function prepareSearchParams(location, additionalParams = "") {
 
   if (location) {
     const queryObject = location.query;
-    const { 
-      dateSelector, minDate, maxDate,
-      bboxSelector, minLon, maxLon, minLat, maxLat,
-      flavour, 
-      ...facets 
+    const {
+      dateSelector,
+      minDate,
+      maxDate,
+      bboxSelector,
+      minLon,
+      maxLon,
+      minLat,
+      maxLat,
+      flavour,
+      ...facets
     } = queryObject;
-    
+
     flavourValue = flavour ?? flavourValue;
     params = queryString.stringify(facets);
 

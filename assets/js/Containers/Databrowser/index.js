@@ -12,22 +12,18 @@ import {
   Form,
   Collapse,
 } from "react-bootstrap";
-
 import {
   FaAlignJustify,
-  FaFileExport,
   FaList,
   FaMinusSquare,
   FaPlusSquare,
   FaTimes,
 } from "react-icons/fa";
-
 import queryString from "query-string";
 import { withRouter } from "react-router";
 
 import OwnPanel from "../../Components/OwnPanel";
 import Spinner from "../../Components/Spinner";
-
 import { initCap, underscoreToBlank } from "../../utils";
 
 import {
@@ -36,20 +32,21 @@ import {
   updateFacetSelection,
   setFlavours,
 } from "./actions";
-
 import TimeRangeSelector from "./TimeRangeSelector";
 import FilesPanel from "./FilesPanel";
 import DataBrowserCommand from "./DataBrowserCommand";
 import FacetDropdown from "./MetaFacet";
-import { ViewTypes, DEFAULT_FLAVOUR, INTAKE_MAXIMUM } from "./constants";
+import { ViewTypes, DEFAULT_FLAVOUR, CATALOGUE_MAXIMUM } from "./constants";
 import { FacetPanel } from "./FacetPanel";
 import { prepareSearchParams } from "./utils";
+import CatalogExportDropdown from "./CatalogExportDropdown";
 
 class Databrowser extends React.Component {
   constructor(props) {
     super(props);
     this.clickFacet = this.clickFacet.bind(this);
     this.renderFacetBadges = this.renderFacetBadges.bind(this);
+    this.createCatalogLink = this.createCatalogLink.bind(this);
     const firstViewPort =
       localStorage.FrevaDatabrowserViewPort ?? ViewTypes.RESULT_CENTERED;
     localStorage.FrevaDatabrowserViewPort = firstViewPort;
@@ -96,14 +93,20 @@ class Databrowser extends React.Component {
     }
   }
 
+  createCatalogLink(type, isDynamic = false) {
+    const baseUrl = `/api/freva-nextgen/databrowser/${type}-catalogue/`;
+    const searchParams = prepareSearchParams(this.props.location, "translate=false");
+    const dynamicParam = isDynamic ? "&stac_dynamic=true" : "";
+    return `${baseUrl}${searchParams}${dynamicParam}`;
+  }
+
   clickFacet(category, value = null) {
     const currentLocation = this.props.location.pathname;
     const originalQueryObject = this.props.location.query;
     const previousValue = originalQueryObject[category];
     if (previousValue && (value === null || value === previousValue)) {
       // delete
-      const { [category]: toRemove, ...queryObject } =
-        this.props.location.query;
+      const { [category]: toRemove, ...queryObject } = this.props.location.query;
       const query = queryString.stringify({ ...queryObject, start: 0 });
       this.props.router.push(currentLocation + "?" + query);
       return;
@@ -199,13 +202,6 @@ class Databrowser extends React.Component {
     } else {
       this.props.router.push(currentLocation);
     }
-  }
-
-  createIntakeLink() {
-    return (
-      "/api/freva-nextgen/databrowser/intake-catalogue/" +
-      prepareSearchParams(this.props.location, "translate=false")
-    );
   }
 
   renderTimeSelectionPanel() {
@@ -317,6 +313,7 @@ class Databrowser extends React.Component {
     const additionalFacetPanels = this.renderAdditionalFacets();
     const isFacetCentered = this.state.viewPort === ViewTypes.FACET_CENTERED;
     const flavour = this.props.location.query.flavour;
+    
     return (
       <Container>
         <Row>
@@ -340,39 +337,15 @@ class Databrowser extends React.Component {
                   return <option key={x}>{x}</option>;
                 })}
               </Form.Select>
-              {this.props.databrowser.numFiles > INTAKE_MAXIMUM ? (
-                <OverlayTrigger
-                  overlay={
-                    <Tooltip>
-                      Please narrow down your search to a maximum of 100,000
-                      results in order to enable Intake exports
-                    </Tooltip>
-                  }
-                >
-                  <span>
-                    <Button
-                      className="me-1"
-                      variant="outline-secondary"
-                      disabled
-                    >
-                      <span className="text-nowrap d-flex align-items-center">
-                        <FaFileExport className="fs-5 me-2" /> Intake catalogue
-                      </span>
-                    </Button>
-                  </span>
-                </OverlayTrigger>
-              ) : (
-                <a
-                  className="btn btn-outline-secondary export-intake me-1 text-decoration-none text-secondary"
-                  href={this.createIntakeLink()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <span className="text-nowrap d-flex align-items-center">
-                    <FaFileExport className="fs-5 me-2" /> Intake catalogue
-                  </span>
-                </a>
-              )}
+              
+              <CatalogExportDropdown 
+                disabled={this.props.databrowser.numFiles > CATALOGUE_MAXIMUM}
+                createCatalogLink={this.createCatalogLink}
+                numFiles={this.props.databrowser.numFiles}
+                maxFiles={CATALOGUE_MAXIMUM}
+                className="me-1"
+              />
+
               <OverlayTrigger
                 overlay={<Tooltip>Change view with facets in focus</Tooltip>}
               >

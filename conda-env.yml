@@ -18,8 +18,8 @@ dependencies:
   - gunicorn
   - markdown
   - mock
-  - mod_wsgi
   - mypy
+  - mysql-client <9
   - mysqlclient
   - nbval
   - nodejs
@@ -45,6 +45,7 @@ dependencies:
     - types-requests
     - types-toml
     - hurry.filesize
+    - mod_wsgi
   - pygtail
   - pylint
   - pyjwt

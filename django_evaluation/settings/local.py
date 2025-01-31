@@ -299,3 +299,38 @@ for title, url, html_id in web_config.get("menu_entries", []) or _MENU_ENTRIES:
         MENU_ENTRIES.append(
             {"name": title, "url": reverse_lazy(url), "html_id": html_id}
         )
+
+# STAC FastAPI Settings
+STAC_SETTINGS = {
+    'STAC_FASTAPI_TITLE': 'Freva STAC Service',
+    'STAC_FASTAPI_DESCRIPTION': 'Freva STAC Service provides a SpatioTemporal Asset Catalog (STAC) API implementation geospatial data cataloging and discovery.',
+    'STAC_USERNAME': 'stac',
+    'STAC_PASSWORD': 'secret',
+    'STAC_API_PORT': 8083,
+    # OpenSearch connection settings
+    'ES_HOST': 'localhost',
+    'ES_PORT': 9202,
+    'ES_USE_SSL': False,
+    'ES_VERIFY_CERTS': False,
+}
+
+# STAC Route Dependencies
+STAC_FASTAPI_ROUTE_DEPENDENCIES = [{
+    "routes": [
+        {"path": "/collections/{collection_id}/items/{item_id}", "method": ["PUT", "DELETE"]},
+        {"path": "/collections/{collection_id}/items", "method": ["POST"]},
+        {"path": "/collections", "method": ["POST"]},
+        {"path": "/collections/{collection_id}", "method": ["PUT", "DELETE"]},
+        {"path": "/collections/{collection_id}/bulk_items", "method": ["POST"]},
+        {"path": "/aggregations", "method": ["POST"]},
+        {"path": "/collections/{collection_id}/aggregations", "method": ["POST"]},
+        {"path": "/aggregate", "method": ["POST"]},
+        {"path": "/collections/{collection_id}/aggregate", "method": ["POST"]}
+    ],
+    "dependencies": [{
+        "method": "stac_fastapi.core.basic_auth.BasicAuth",
+        "kwargs": {
+            "credentials": [{"username": "stac", "password": "secret"}]
+        }
+    }]
+}]

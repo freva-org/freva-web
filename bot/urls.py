@@ -10,10 +10,10 @@ urlpatterns = [
 ]
 
 if int(os.environ.get("DEV_MODE", "0")) == 1:
-    urlpatterns.append(
-        path(
-            r"api/chatbot/<path:url>/",
-            ChatBotProxy.as_view(),
-            name="chatbot_proxy",
-        )
-    )
+   urlpatterns.append(
+       path(
+           r"api/chatbot/<path:url>/",
+           ChatBotProxy.as_view(),
+           name="chatbot_proxy",
+       )
+   )

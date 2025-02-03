@@ -20,7 +20,7 @@ import { isEmpty } from "lodash";
 
 import { FaStop, FaPlay } from "react-icons/fa";
 
-import queryString from 'query-string';
+import queryString from "query-string";
 
 import Spinner from "../../Components/Spinner";
 
@@ -93,10 +93,12 @@ class FrevaGPT extends React.Component {
     };
 
     const getBotModels = async () => {
-      const response = await fetch(
-        `/api/chatbot/availablechatbots?`
-      );
-      this.setState({ botModelList: await response.json() });
+      const response = await fetch(`/api/chatbot/availablechatbots?`);
+      if (response.ok) {
+        this.setState({ botModelList: await response.json() });
+      } else {
+        this.setState({ botModelList: ["No model information available."] });
+      }
     };
 
     if (await successfulPing()) {
@@ -123,7 +125,7 @@ class FrevaGPT extends React.Component {
   }
 
   async handleKeyDown(e) {
-    if (e.key === "Enter" && !isEmpty(e.target.value)) {
+    if (e.key === "Enter" && !isEmpty(e.target.value.trim())) {
       this.handleSubmit(e.target.value);
     }
   }
@@ -131,7 +133,7 @@ class FrevaGPT extends React.Component {
   async submitUserInput() {
     const userInput = this.state.userInput;
 
-    if (!isEmpty(userInput)) {
+    if (!isEmpty(userInput.trim())) {
       await this.handleSubmit(userInput);
     }
 
@@ -169,113 +171,126 @@ class FrevaGPT extends React.Component {
       `/api/chatbot/streamresponse?` + queryString.stringify(queryObject)
     ); //, signal);
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder("utf-8");
+    if (response.ok) {
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
 
-    let buffer = "";
-    let varObj = {};
+      let buffer = "";
+      let varObj = {};
 
-    // eslint-disable-next-line no-constant-condition
-    while (true) {
-      // eslint-disable-next-line no-await-in-loop
-      const { done, value } = await reader.read();
-      if (done) {
-        break;
-      }
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        // eslint-disable-next-line no-await-in-loop
+        const { done, value } = await reader.read();
+        if (done) {
+          break;
+        }
 
-      const decodedValues = decoder.decode(value);
-      buffer = buffer + decodedValues;
+        const decodedValues = decoder.decode(value);
+        buffer = buffer + decodedValues;
 
-      let foundSomething = true;
+        let foundSomething = true;
 
-      while (foundSomething) {
-        foundSomething = false;
+        while (foundSomething) {
+          foundSomething = false;
 
-        for (let bufferIndex = 0; bufferIndex < buffer.length; bufferIndex++) {
-          if (buffer[bufferIndex] !== "}") {
-            continue;
-          }
-          const subBuffer = buffer.slice(0, bufferIndex + 1);
-
-          try {
-            const jsonBuffer = JSON.parse(subBuffer);
-            buffer = buffer.slice(bufferIndex + 1); // shorten string by already evaluated string
-
-            // object is not empty so compare variants
-            if (Object.keys(varObj).length !== 0) {
-              // if object has not same variant, add answer to conversation and override object
-              if (varObj.variant !== jsonBuffer.variant) {
-                this.props.dispatch(addElement(varObj));
-                this.setState({ dynamicAnswer: "", dynamicVariant: "" });
-                varObj = jsonBuffer;
-              } else {
-                // if object has same variant, add content
-                // eslint-disable-next-line no-lonely-if
-                if (
-                  varObj.variant === "Code" ||
-                  varObj.variant === "CodeOutput"
-                ) {
-                  varObj.content[0] = varObj.content[0] + jsonBuffer.content[0];
-                  this.setState({
-                    dynamicAnswer: varObj.content[0],
-                    dynamicVariant: varObj.variant,
-                  });
-                } else {
-                  varObj.content = varObj.content + jsonBuffer.content;
-                  this.setState({
-                    dynamicAnswer: varObj.content,
-                    dynamicVariant: varObj.variant,
-                  });
-                }
-              }
-            } else {
-              // object is empty so add content
-              varObj = jsonBuffer;
-
-              // set thread id
-              if (
-                this.props.frevaGPT.thread === "" &&
-                varObj.variant === "ServerHint"
-              ) {
-                try {
-                  this.props.dispatch(
-                    setThread(JSON.parse(varObj.content).thread_id)
-                  );
-                  browserHistory.push({
-                    pathname: "/chatbot/",
-                    search: `?thread_id=${this.props.frevaGPT.thread}`,
-                  });
-                } catch (err) {
-                  // handle warning
-                }
-              }
+          for (
+            let bufferIndex = 0;
+            bufferIndex < buffer.length;
+            bufferIndex++
+          ) {
+            if (buffer[bufferIndex] !== "}") {
+              continue;
             }
+            const subBuffer = buffer.slice(0, bufferIndex + 1);
 
-            foundSomething = true;
-            break;
-          } catch (err) {
-            // ServerHints and CodeBlocks include nested JSON Objects
-            // eslint-disable-next-line no-console
-            if (
-              !subBuffer.includes("ServerHint") &&
-              !subBuffer.includes("Code")
-            ) {
-              this.props.dispatch(
-                addElement({
-                  variant: "FrontendError",
-                  content: "Incomplete message received.",
-                })
-              );
+            try {
+              const jsonBuffer = JSON.parse(subBuffer);
+              buffer = buffer.slice(bufferIndex + 1); // shorten string by already evaluated string
+
+              // object is not empty so compare variants
+              if (Object.keys(varObj).length !== 0) {
+                // if object has not same variant, add answer to conversation and override object
+                if (varObj.variant !== jsonBuffer.variant) {
+                  this.props.dispatch(addElement(varObj));
+                  this.setState({ dynamicAnswer: "", dynamicVariant: "" });
+                  varObj = jsonBuffer;
+                } else {
+                  // if object has same variant, add content
+                  // eslint-disable-next-line no-lonely-if
+                  if (
+                    varObj.variant === "Code" ||
+                    varObj.variant === "CodeOutput"
+                  ) {
+                    varObj.content[0] =
+                      varObj.content[0] + jsonBuffer.content[0];
+                    this.setState({
+                      dynamicAnswer: varObj.content[0],
+                      dynamicVariant: varObj.variant,
+                    });
+                  } else {
+                    varObj.content = varObj.content + jsonBuffer.content;
+                    this.setState({
+                      dynamicAnswer: varObj.content,
+                      dynamicVariant: varObj.variant,
+                    });
+                  }
+                }
+              } else {
+                // object is empty so add content
+                varObj = jsonBuffer;
+
+                // set thread id
+                if (
+                  this.props.frevaGPT.thread === "" &&
+                  varObj.variant === "ServerHint"
+                ) {
+                  try {
+                    this.props.dispatch(
+                      setThread(JSON.parse(varObj.content).thread_id)
+                    );
+                    browserHistory.push({
+                      pathname: "/chatbot/",
+                      search: `?thread_id=${this.props.frevaGPT.thread}`,
+                    });
+                  } catch (err) {
+                    // handle warning
+                  }
+                }
+              }
+
+              foundSomething = true;
+              break;
+            } catch (err) {
+              // ServerHints and CodeBlocks include nested JSON Objects
+              // eslint-disable-next-line no-console
+              if (
+                !subBuffer.includes("ServerHint") &&
+                !subBuffer.includes("Code")
+              ) {
+                this.props.dispatch(
+                  addElement({
+                    variant: "FrontendError",
+                    content: "Incomplete message received.",
+                  })
+                );
+              }
             }
           }
         }
       }
+    } else {
+      this.props.dispatch(
+        addElement({
+          variant: "ServerError",
+          content: response.statusText,
+        })
+      );
     }
   }
 
   async getOldThread(thread) {
-
-    const queryObject = { "thread_id": thread };
+    const queryObject = { thread_id: thread };
     const response = await fetch(
       `/api/chatbot/getthread?` + queryString.stringify(queryObject)
     );
@@ -287,11 +302,9 @@ class FrevaGPT extends React.Component {
   async handleStop() {
     // stop of thread only possible if a thread id is given
 
-    const queryObject = { thread_id: this.props.frevaGPT.thread }
+    const queryObject = { thread_id: this.props.frevaGPT.thread };
     if (this.props.frevaGPT.thread) {
-      await fetch(
-        `/api/chatbot/stop?` + queryString.stringify(queryObject)
-      );
+      await fetch(`/api/chatbot/stop?` + queryString.stringify(queryObject));
     }
 
     // abort fetch request anyway (especially if no thread is given)
@@ -372,13 +385,18 @@ class FrevaGPT extends React.Component {
                   placeholder="Ask a question"
                 />
                 {this.state.loading ? (
-                  <Button variant="outline-danger" onClick={this.handleStop}>
+                  <Button
+                    variant="outline-danger"
+                    onClick={this.handleStop}
+                    className="d-flex align-items-center"
+                  >
                     <FaStop />
                   </Button>
                 ) : (
                   <Button
                     variant="outline-success"
                     onClick={this.submitUserInput}
+                    className="d-flex align-items-center"
                   >
                     <FaPlay />
                   </Button>

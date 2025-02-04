@@ -26,9 +26,9 @@ class ChatBlock extends React.Component {
     this.renderDefault = this.renderDefault.bind(this);
   }
 
-  renderImage(element) {
+  renderImage(element, index) {
     return (
-      <Col key={element.content} md={constants.BOT_COLUMN_STYLE}>
+      <Col key={`${index}-image`} md={constants.BOT_COLUMN_STYLE}>
         <img
           className="w-100"
           src={`data:image/jpeg;base64,${element.content}`}
@@ -37,21 +37,21 @@ class ChatBlock extends React.Component {
     );
   }
 
-  renderCode(element) {
+  renderCode(element, index) {
     if (isEmpty(element.content[0])) {
       return null;
     } else {
       return (
-        <Col md={constants.BOT_COLUMN_STYLE} key={element.content}>
+        <Col md={constants.BOT_COLUMN_STYLE} key={`${index}-code`}>
           <CodeBlock title={element.variant} code={element.content} />
         </Col>
       );
     }
   }
 
-  renderUser(element) {
+  renderUser(element, index) {
     return (
-      <Col md={{ span: 10, offset: 2 }} key={element.content}>
+      <Col md={{ span: 10, offset: 2 }} key={`${index}-user`}>
         <Card
           className="shadow-sm card-body border-0 border-bottom mb-3"
           style={{ backgroundColor: "#eee" }}
@@ -62,9 +62,9 @@ class ChatBlock extends React.Component {
     );
   }
 
-  renderError(element) {
+  renderError(element, index) {
     return (
-      <Col md={constants.BOT_COLUMN_STYLE} key={element.content}>
+      <Col md={constants.BOT_COLUMN_STYLE} key={`${index}-error`}>
         <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-danger">
           <span className="fw-bold">{element.variant}</span>
           <ReactMarkdown>{replaceLinebreaks(element.content)}</ReactMarkdown>
@@ -73,9 +73,9 @@ class ChatBlock extends React.Component {
     );
   }
 
-  renderDefault(element) {
+  renderDefault(element, index) {
     return (
-      <Col md={constants.BOT_COLUMN_STYLE} key={element.content}>
+      <Col md={constants.BOT_COLUMN_STYLE} key={`${index}-default`}>
         <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
             {replaceLinebreaks(element.content)}
@@ -85,30 +85,30 @@ class ChatBlock extends React.Component {
     );
   }
 
-  renderChatComponents(element) {
+  renderChatComponents(element, index) {
     switch (element.variant) {
       case "ServerHint":
       case "StreamEnd":
         return null;
       case "Image":
-        return this.renderImage(element);
+        return this.renderImage(element, index);
 
       case "Code":
       case "CodeOutput":
-        return this.renderCode(element);
+        return this.renderCode(element, index);
 
       case "User":
-        return this.renderUser(element);
+        return this.renderUser(element, index);
 
       case "ServerError":
       case "OpenAIError":
       case "CodeError":
       case "FrontendError":
       case "UserStop":
-        return this.renderError(element);
+        return this.renderError(element, index);
 
       default:
-        return this.renderDefault(element);
+        return this.renderDefault(element, index);
     }
   }
 
@@ -117,8 +117,8 @@ class ChatBlock extends React.Component {
 
     return (
       <Col>
-        {conversation.map((element) => {
-          return this.renderChatComponents(element);
+        {conversation.map((element, index) => {
+          return this.renderChatComponents(element, index);
         })}
       </Col>
     );

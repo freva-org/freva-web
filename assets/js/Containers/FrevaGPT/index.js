@@ -340,9 +340,9 @@ class FrevaGPT extends React.Component {
             <Row className="mb-2 g-2">
               {botSuggestions.map((element) => {
                 return (
-                  <div key={element} className="col-md-3">
+                  <div key={`${element}div`} className="col-md-3">
                     <OverlayTrigger
-                      key={element}
+                      key={`${element}tooltip`}
                       overlay={<Tooltip>{element}</Tooltip>}
                     >
                       <Button
@@ -421,8 +421,8 @@ class FrevaGPT extends React.Component {
           placeholder="Model"
           hidden={this.state.hideBotModelList}
         >
-          {this.state.botModelList.map((x) => {
-            return <option key={x}>{x}</option>;
+          {this.state.botModelList.map((model) => {
+            return <option key={model}>{model}</option>;
           })}
         </Form.Select>
         <Button onClick={this.createNewChat} variant="info">

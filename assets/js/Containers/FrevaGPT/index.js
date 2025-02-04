@@ -336,12 +336,11 @@ class FrevaGPT extends React.Component {
   }
 
   renderBotContent() {
-
-    const windowHeight = document.documentElement.clientHeight*0.65; 
+    const windowHeight = document.documentElement.clientHeight * 0.65;
     // better solution needed (need of fixed height for overflow-auto -> scrolling)
     const chatWindow = {
-      height: windowHeight
-    }
+      height: windowHeight,
+    };
 
     return (
       <>
@@ -349,10 +348,17 @@ class FrevaGPT extends React.Component {
           <SidePanel />
         </Col>
 
-        <Col md={8} 
-            className={ "d-flex flex-column "+(this.state.showSuggestions ? "justify-content-start" : "justify-content-between")} 
-            style={chatWindow}>
-          <Row className="overflow-auto">
+        <Col
+          md={8}
+          className={
+            "d-flex flex-column " +
+            (this.state.showSuggestions
+              ? "justify-content-start"
+              : "justify-content-between")
+          }
+          style={chatWindow}
+        >
+          <Row className="overflow-auto" id="chatContainer">
             <Col>
               <ChatBlock />
 

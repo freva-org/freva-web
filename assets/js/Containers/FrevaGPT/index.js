@@ -48,6 +48,7 @@ class FrevaGPT extends React.Component {
     this.toggleBotSelect = this.toggleBotSelect.bind(this);
     this.handleStop = this.handleStop.bind(this);
     this.submitUserInput = this.submitUserInput.bind(this);
+    this.resizeInputField = this.resizeInputField.bind(this);
 
     this.state = {
       loading: false,
@@ -320,6 +321,15 @@ class FrevaGPT extends React.Component {
     this.setState({ hideBotModelList: !this.state.hideBotModelList });
   }
 
+  resizeInputField() {
+    const input_field = document.getElementById('input_field');
+    const style = input_field.style;
+
+    style.height = input_field.style.minHeight = 'auto';
+    style.minHeight = `${ Math.min(input_field.scrollHeight, parseInt(input_field.style.maxHeight)) }px`;
+    style.height = `${ input_field.scrollHeight }px`;
+  }
+
   renderAlert() {
     return (
       <Alert key="botError" variant="danger">
@@ -378,9 +388,15 @@ class FrevaGPT extends React.Component {
             <Col md={12}>
               <InputGroup className="mb-2 pb-2">
                 <FormControl
-                  type="text"
+                  as="textarea"
+                  id="input_field"
+                  rows={1}
                   value={this.state.userInput}
-                  onChange={this.handleUserInput}
+                  onChange={e => {
+                      this.handleUserInput(e);
+                      this.resizeInputField();
+                    }
+                  }
                   onKeyDown={this.handleKeyDown}
                   placeholder="Ask a question"
                 />

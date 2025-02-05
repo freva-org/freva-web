@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 
-import { Col, Card } from "react-bootstrap";
+import { Col, Card, Modal } from "react-bootstrap";
 
 import { isEmpty } from "lodash";
 
@@ -24,6 +24,10 @@ class ChatBlock extends React.Component {
     this.renderUser = this.renderUser.bind(this);
     this.renderError = this.renderError.bind(this);
     this.renderDefault = this.renderDefault.bind(this);
+
+    this.state = {
+      showModal: false
+    }
   }
 
   renderImage(element, index) {
@@ -31,6 +35,7 @@ class ChatBlock extends React.Component {
       <Col key={`${index}-image`} md={constants.BOT_COLUMN_STYLE}>
         <img
           className="w-100"
+          onClick={() => this.setState({showModal: true, image: `data:image/jpeg;base64,${element.content}`})}
           src={`data:image/jpeg;base64,${element.content}`}
         />
       </Col>
@@ -116,11 +121,26 @@ class ChatBlock extends React.Component {
     const { conversation } = this.props.chatBlock;
 
     return (
-      <Col>
-        {conversation.map((element, index) => {
-          return this.renderChatComponents(element, index);
-        })}
-      </Col>
+      <>
+        <Col>
+          {conversation.map((element, index) => {
+            return this.renderChatComponents(element, index);
+          })}
+        </Col>
+
+        <Modal 
+            size="lg" 
+            aria-labelledby="contained-modal-title-vcenter"
+            centered
+            show={this.state.showModal}
+            onHide={() => this.setState({ showModal: false, image: '' })}>
+          <Modal.Header closeButton></Modal.Header>
+          <Modal.Body>
+            <img className="w-100" src={this.state.image}/>
+          </Modal.Body>
+        </Modal>
+      </>
+      
     );
   }
 }

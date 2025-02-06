@@ -2,12 +2,14 @@ import React from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 
-import { Col, Card } from "react-bootstrap";
+import { Col, Card, Modal, Button } from "react-bootstrap";
 
 import { isEmpty } from "lodash";
 
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+
+import { FaExpand } from "react-icons/fa";
 
 import { replaceLinebreaks } from "../utils";
 
@@ -24,34 +26,55 @@ class ChatBlock extends React.Component {
     this.renderUser = this.renderUser.bind(this);
     this.renderError = this.renderError.bind(this);
     this.renderDefault = this.renderDefault.bind(this);
+    this.enlargeImage = this.enlargeImage.bind(this);
+
+    this.state = {
+      showModal: false
+    }
   }
 
-  renderImage(element) {
+  enlargeImage(imageString) {
+    this.setState({showModal: true, image: `data:image/jpeg;base64,${imageString}`})
+  }
+
+  renderImage(element, index) {
     return (
-      <Col key={element.content} md={constants.BOT_COLUMN_STYLE}>
+      <Col 
+        key={`${index}-image`}
+        md={constants.BOT_COLUMN_STYLE}
+        className="border-0 border-bottom mb-3 shadow-sm card-body">
         <img
           className="w-100"
+          onClick={() => this.enlargeImage(element.content)}
           src={`data:image/jpeg;base64,${element.content}`}
         />
+        <div className="d-flex justify-content-end">
+          <Button 
+            variant="link"
+            onClick={() => this.enlargeImage(element.content)}
+            className="d-flex align-items-center">
+            <FaExpand/>
+          </Button>
+        </div>
       </Col>
     );
   }
 
-  renderCode(element) {
+  renderCode(element, index) {
     if (isEmpty(element.content[0])) {
       return null;
     } else {
       return (
-        <Col md={constants.BOT_COLUMN_STYLE} key={element.content}>
+        <Col md={constants.BOT_COLUMN_STYLE} key={`${index}-code`}>
           <CodeBlock title={element.variant} code={element.content} />
         </Col>
       );
     }
   }
 
-  renderUser(element) {
+  renderUser(element, index) {
     return (
-      <Col md={{ span: 10, offset: 2 }} key={element.content}>
+      <Col md={{ span: 10, offset: 2 }} key={`${index}-user`}>
         <Card
           className="shadow-sm card-body border-0 border-bottom mb-3"
           style={{ backgroundColor: "#eee" }}
@@ -62,9 +85,9 @@ class ChatBlock extends React.Component {
     );
   }
 
-  renderError(element) {
+  renderError(element, index) {
     return (
-      <Col md={constants.BOT_COLUMN_STYLE} key={element.content}>
+      <Col md={constants.BOT_COLUMN_STYLE} key={`${index}-error`}>
         <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-danger">
           <span className="fw-bold">{element.variant}</span>
           <ReactMarkdown>{replaceLinebreaks(element.content)}</ReactMarkdown>
@@ -73,9 +96,9 @@ class ChatBlock extends React.Component {
     );
   }
 
-  renderDefault(element) {
+  renderDefault(element, index) {
     return (
-      <Col md={constants.BOT_COLUMN_STYLE} key={element.content}>
+      <Col md={constants.BOT_COLUMN_STYLE} key={`${index}-default`}>
         <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
             {replaceLinebreaks(element.content)}
@@ -85,30 +108,30 @@ class ChatBlock extends React.Component {
     );
   }
 
-  renderChatComponents(element) {
+  renderChatComponents(element, index) {
     switch (element.variant) {
       case "ServerHint":
       case "StreamEnd":
         return null;
       case "Image":
-        return this.renderImage(element);
+        return this.renderImage(element, index);
 
       case "Code":
       case "CodeOutput":
-        return this.renderCode(element);
+        return this.renderCode(element, index);
 
       case "User":
-        return this.renderUser(element);
+        return this.renderUser(element, index);
 
       case "ServerError":
       case "OpenAIError":
       case "CodeError":
       case "FrontendError":
       case "UserStop":
-        return this.renderError(element);
+        return this.renderError(element, index);
 
       default:
-        return this.renderDefault(element);
+        return this.renderDefault(element, index);
     }
   }
 
@@ -116,11 +139,26 @@ class ChatBlock extends React.Component {
     const { conversation } = this.props.chatBlock;
 
     return (
-      <Col>
-        {conversation.map((element) => {
-          return this.renderChatComponents(element);
-        })}
-      </Col>
+      <>
+        <Col>
+          {conversation.map((element, index) => {
+            return this.renderChatComponents(element, index);
+          })}
+        </Col>
+
+        <Modal 
+            size="lg" 
+            aria-labelledby="contained-modal-title-vcenter"
+            centered
+            show={this.state.showModal}
+            onHide={() => this.setState({ showModal: false, image: '' })}>
+          <Modal.Header closeButton></Modal.Header>
+          <Modal.Body>
+            <img className="w-100" src={this.state.image}/>
+          </Modal.Body>
+        </Modal>
+      </>
+      
     );
   }
 }

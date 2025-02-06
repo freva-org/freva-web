@@ -301,7 +301,7 @@ MENU_ENTRIES = []
 
 CHAT_BOT_URL = "http://vader5-icpub.lvt.dkrz.de:8502"
 CHAT_BOT_AUTH_KEY = os.environ.get("CHAT_BOT_AUTH_KEY")
-CHAT_BOT_FREVA_CONFIG = os.environ.get("CHAT_BOT_AUTH_KEY")
+CHAT_BOT_FREVA_CONFIG = os.environ.get("CHAT_BOT_FREVA_CONFIG")
 
 if os.getenv("CHAT_BOT", "0").isdigit():
     ACTIVATE_CHAT_BOT = bool(int(os.getenv("CHAT_BOT", "0")))

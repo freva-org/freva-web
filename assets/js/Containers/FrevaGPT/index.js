@@ -50,6 +50,7 @@ class FrevaGPT extends React.Component {
     this.handleStop = this.handleStop.bind(this);
     this.submitUserInput = this.submitUserInput.bind(this);
     this.handleScroll = this.handleScroll.bind(this);
+    this.resizeInputField = this.resizeInputField.bind(this);
 
     this.state = {
       loading: false,
@@ -339,6 +340,15 @@ class FrevaGPT extends React.Component {
     const container = document.querySelector('#chatContainer');
     this.setState({ atBottom: container.scrollTop + container.clientHeight >= container.scrollHeight - 200});
   }
+  
+  resizeInputField() {
+    const input_field = document.getElementById('input_field');
+    const style = input_field.style;
+
+    style.height = input_field.style.minHeight = 'auto';
+    style.minHeight = `${ Math.min(input_field.scrollHeight, parseInt(input_field.style.maxHeight)) }px`;
+    style.height = `${ input_field.scrollHeight }px`;
+  }
 
   renderAlert() {
     return (
@@ -380,6 +390,7 @@ class FrevaGPT extends React.Component {
           }
           style={chatWindow}
         >
+
           <Row className="overflow-auto position-relative" id="chatContainer" onScroll={debounce(this.handleScroll, 100)}>
             <Col>
               <ChatBlock />
@@ -388,7 +399,6 @@ class FrevaGPT extends React.Component {
                 content={this.state.dynamicAnswer}
                 variant={this.state.dynamicVariant}
               />
-
 
               {this.state.loading && !this.state.dynamicAnswer ? (
                 <Row className="mb-3">
@@ -399,7 +409,6 @@ class FrevaGPT extends React.Component {
               ) : null}
 
               <div ref={this.chatEndRef}></div>
-
             </Col>
 
             <Button 
@@ -411,14 +420,14 @@ class FrevaGPT extends React.Component {
 
           </Row>
           
-          <Row>
+          <Row>             
             {this.state.showSuggestions ? (
               <Row className="mb-2 g-2">
                 {botSuggestions.map((element) => {
                   return (
-                    <div key={element} className="col-md-3">
+                    <div key={`${element}-div`} className="col-md-3">
                       <OverlayTrigger
-                        key={element}
+                        key={`${element}-tooltip`}
                         overlay={<Tooltip>{element}</Tooltip>}
                       >
                         <Button
@@ -438,9 +447,15 @@ class FrevaGPT extends React.Component {
             <Col>
               <InputGroup className="mb-2 pb-2">
                 <FormControl
-                  type="text"
+                  as="textarea"
+                  id="input_field"
+                  rows={1}
                   value={this.state.userInput}
-                  onChange={this.handleUserInput}
+                  onChange={e => {
+                      this.handleUserInput(e);
+                      this.resizeInputField();
+                    }
+                  }
                   onKeyDown={this.handleKeyDown}
                   placeholder="Ask a question"
                 />
@@ -481,8 +496,8 @@ class FrevaGPT extends React.Component {
           placeholder="Model"
           hidden={this.state.hideBotModelList}
         >
-          {this.state.botModelList.map((x) => {
-            return <option key={x}>{x}</option>;
+          {this.state.botModelList.map((model) => {
+            return <option key={model}>{model}</option>;
           })}
         </Form.Select>
         <Button onClick={this.createNewChat} variant="info">

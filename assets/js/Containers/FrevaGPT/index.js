@@ -16,9 +16,9 @@ import {
 } from "react-bootstrap";
 
 import { browserHistory } from "react-router";
-import { isEmpty } from "lodash";
+import { isEmpty, debounce } from "lodash";
 
-import { FaStop, FaPlay } from "react-icons/fa";
+import { FaStop, FaPlay, FaArrowDown } from "react-icons/fa";
 
 import queryString from "query-string";
 
@@ -49,6 +49,7 @@ class FrevaGPT extends React.Component {
     this.toggleBotSelect = this.toggleBotSelect.bind(this);
     this.handleStop = this.handleStop.bind(this);
     this.submitUserInput = this.submitUserInput.bind(this);
+    this.handleScroll = this.handleScroll.bind(this);
 
     this.state = {
       loading: false,
@@ -60,12 +61,17 @@ class FrevaGPT extends React.Component {
       showSuggestions: true,
       dynamicAnswer: "",
       dynamicVariant: "",
+      atBottom: true,
     };
 
     this.chatEndRef = React.createRef();
   }
 
   async componentDidMount() {
+
+    // document.querySelector
+    // document.getElementById('chatContainer').addEventListener('scroll', this.handleScroll)
+
     // if thread giving on mounting the component, set thread within store
     const givenQueryParams = browserHistory.getCurrentLocation().query;
     if (
@@ -113,7 +119,9 @@ class FrevaGPT extends React.Component {
   }
 
   componentDidUpdate() {
-   this.chatEndRef.current?.scrollIntoView(); 
+    if (this.state.atBottom) {
+      this.chatEndRef.current?.scrollIntoView(); 
+    }
   }
 
   createNewChat() {
@@ -327,6 +335,11 @@ class FrevaGPT extends React.Component {
     this.setState({ hideBotModelList: !this.state.hideBotModelList });
   }
 
+  handleScroll() {
+    const container = document.querySelector('#chatContainer');
+    this.setState({ atBottom: container.scrollTop + container.clientHeight >= container.scrollHeight - 200});
+  }
+
   renderAlert() {
     return (
       <Alert key="botError" variant="danger">
@@ -337,10 +350,19 @@ class FrevaGPT extends React.Component {
 
   renderBotContent() {
     const windowHeight = document.documentElement.clientHeight * 0.65;
-    // better solution needed (need of fixed height for overflow-auto -> scrolling)
+
+    // better solution needed (wasn't able to find any suitable bootstrap class -> need of fixed height for overflow-auto -> scrolling)
     const chatWindow = {
       height: windowHeight,
     };
+
+    // here also no suitable solutions using bootstrap found -> need for better solution
+    const scrollButtonStyle = {
+      zIndex: 10,
+      right: '40px',
+      bottom: '10px',
+      position: 'sticky',
+    }
 
     return (
       <>
@@ -358,7 +380,7 @@ class FrevaGPT extends React.Component {
           }
           style={chatWindow}
         >
-          <Row className="overflow-auto" id="chatContainer">
+          <Row className="overflow-auto position-relative" id="chatContainer" onScroll={debounce(this.handleScroll, 100)}>
             <Col>
               <ChatBlock />
 
@@ -366,6 +388,7 @@ class FrevaGPT extends React.Component {
                 content={this.state.dynamicAnswer}
                 variant={this.state.dynamicVariant}
               />
+
 
               {this.state.loading && !this.state.dynamicAnswer ? (
                 <Row className="mb-3">
@@ -376,9 +399,18 @@ class FrevaGPT extends React.Component {
               ) : null}
 
               <div ref={this.chatEndRef}></div>
-            </Col>
-          </Row>
 
+            </Col>
+
+            <Button 
+              variant="secondary"
+              style={scrollButtonStyle}
+              onClick={() => this.chatEndRef.current?.scrollIntoView({behavior: 'smooth'})}>
+              <FaArrowDown/>
+            </Button> 
+
+          </Row>
+          
           <Row>
             {this.state.showSuggestions ? (
               <Row className="mb-2 g-2">
@@ -403,36 +435,34 @@ class FrevaGPT extends React.Component {
               </Row>
             ) : null}
 
-            <Row>
-              <Col md={12}>
-                <InputGroup className="mb-2 pb-2">
-                  <FormControl
-                    type="text"
-                    value={this.state.userInput}
-                    onChange={this.handleUserInput}
-                    onKeyDown={this.handleKeyDown}
-                    placeholder="Ask a question"
-                  />
-                  {this.state.loading ? (
-                    <Button
-                      variant="outline-danger"
-                      onClick={this.handleStop}
-                      className="d-flex align-items-center"
-                    >
-                      <FaStop />
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="outline-success"
-                      onClick={this.submitUserInput}
-                      className="d-flex align-items-center"
-                    >
-                      <FaPlay />
-                    </Button>
-                  )}
-                </InputGroup>
-              </Col>
-            </Row>
+            <Col>
+              <InputGroup className="mb-2 pb-2">
+                <FormControl
+                  type="text"
+                  value={this.state.userInput}
+                  onChange={this.handleUserInput}
+                  onKeyDown={this.handleKeyDown}
+                  placeholder="Ask a question"
+                />
+                {this.state.loading ? (
+                  <Button
+                    variant="outline-danger"
+                    onClick={this.handleStop}
+                    className="d-flex align-items-center"
+                  >
+                    <FaStop />
+                  </Button>
+                ) : (
+                  <Button
+                    variant="outline-success"
+                    onClick={this.submitUserInput}
+                    className="d-flex align-items-center"
+                  >
+                    <FaPlay />
+                  </Button>
+                )}
+              </InputGroup>
+            </Col>
           </Row>
         </Col>
       </>

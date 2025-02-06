@@ -93,6 +93,9 @@ function BBoxSelector({ databrowser, router, location }) {
 
   let errorMessage = minLonError || maxLonError || minLatError || maxLatError;
 
+  if (!minLon || !maxLon || !minLat || !maxLat) {
+    errorMessage = "All coordinates are required";
+  }
   if (
     !errorMessage &&
     minLon &&
@@ -124,7 +127,7 @@ function BBoxSelector({ databrowser, router, location }) {
     );
   } else {
     applyButton = (
-      <Button variant="primary" onClick={applyChanges}>
+      <Button variant="primary" onClick={applyChanges.bind(this)}>
         Apply
       </Button>
     );

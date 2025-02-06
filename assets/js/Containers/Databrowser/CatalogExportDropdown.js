@@ -55,41 +55,40 @@ const CatalogExportDropdown = ({
 }) => {
   const isDisabled = disabled || numFiles > maxFiles;
 
-  if (isDisabled) {
-    return (
+  return (
+    <Dropdown className={className}>
       <OverlayTrigger
         overlay={
-          <Tooltip>
-            Please narrow down your search to a maximum of 100,000 results to
-            enable catalog exports
-          </Tooltip>
+          isDisabled ? (
+            <Tooltip>
+              Please narrow down your search to a maximum of 100,000 results to
+              enable catalog exports
+            </Tooltip>
+          ) : (
+            <></>
+          )
         }
       >
         <span>
-          <CustomToggle disabled className={className}>
+          <Dropdown.Toggle as={CustomToggle} disabled={isDisabled}>
             Export Catalog
-          </CustomToggle>
+          </Dropdown.Toggle>
         </span>
       </OverlayTrigger>
-    );
-  }
 
-  return (
-    <Dropdown className={className}>
-      <Dropdown.Toggle as={CustomToggle}>Export Catalog</Dropdown.Toggle>
+      {!isDisabled && (
+        <Dropdown.Menu style={{ minWidth: "200px" }}>
+          <Dropdown.Item
+            href={createCatalogLink("intake")}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <DropdownItemContent icon={IntakeIcon}>
+              Intake Catalog
+            </DropdownItemContent>
+          </Dropdown.Item>
 
-      <Dropdown.Menu style={{ minWidth: "200px" }}>
-        <Dropdown.Item
-          href={createCatalogLink("intake")}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <DropdownItemContent icon={IntakeIcon}>
-            Intake Catalog
-          </DropdownItemContent>
-        </Dropdown.Item>
-
-        <Dropdown.Divider />
+          <Dropdown.Divider />
         <Dropdown.Header className="fw-bold">STAC Catalog</Dropdown.Header>
 
         <Dropdown.Item
@@ -111,7 +110,8 @@ const CatalogExportDropdown = ({
             Dynamic STAC
           </DropdownItemContent>
         </Dropdown.Item>
-      </Dropdown.Menu>
+        </Dropdown.Menu>
+      )}
     </Dropdown>
   );
 };

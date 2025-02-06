@@ -89,27 +89,27 @@ const CatalogExportDropdown = ({
           </Dropdown.Item>
 
           <Dropdown.Divider />
-        <Dropdown.Header className="fw-bold">STAC Catalog</Dropdown.Header>
+          <Dropdown.Header className="fw-bold">STAC Catalog</Dropdown.Header>
 
-        <Dropdown.Item
-          href={createCatalogLink("stac")}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <DropdownItemContent icon={STACSTATICIcon}>
-            Static STAC
-          </DropdownItemContent>
-        </Dropdown.Item>
+          <Dropdown.Item
+            href={createCatalogLink("stac")}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <DropdownItemContent icon={STACSTATICIcon}>
+              Static STAC
+            </DropdownItemContent>
+          </Dropdown.Item>
 
-        <Dropdown.Item
-          href={createCatalogLink("stac", true)}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <DropdownItemContent icon={STACDYNAMICIcon}>
-            Dynamic STAC
-          </DropdownItemContent>
-        </Dropdown.Item>
+          <Dropdown.Item
+            href={createCatalogLink("stac", true)}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <DropdownItemContent icon={STACDYNAMICIcon}>
+              Dynamic STAC
+            </DropdownItemContent>
+          </Dropdown.Item>
         </Dropdown.Menu>
       )}
     </Dropdown>

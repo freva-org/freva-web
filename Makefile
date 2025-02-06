@@ -33,10 +33,9 @@ setup-stac: # this is a setup only for STAC-API and STAC-Browser, and not static
 	python -m pip install stac-fastapi.opensearch
 	@echo "STAC FastAPI dependencies installed successfully"
 	@if [ ! -d "stac-browser" ]; then \
-		git clone https://github.com/radiantearth/stac-browser.git stac-browser && \
-		cd stac-browser; \
+		git clone https://github.com/radiantearth/stac-browser.git stac-browser; \
 	fi
-	npm install
+	cd stac-browser && npm install
 
 setup-node:
 	npm install

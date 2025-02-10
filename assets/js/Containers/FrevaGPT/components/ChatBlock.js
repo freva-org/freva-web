@@ -29,31 +29,36 @@ class ChatBlock extends React.Component {
     this.enlargeImage = this.enlargeImage.bind(this);
 
     this.state = {
-      showModal: false
-    }
+      showModal: false,
+    };
   }
 
   enlargeImage(imageString) {
-    this.setState({showModal: true, image: `data:image/jpeg;base64,${imageString}`})
+    this.setState({
+      showModal: true,
+      image: `data:image/jpeg;base64,${imageString}`,
+    });
   }
 
   renderImage(element, index) {
     return (
-      <Col 
+      <Col
         key={`${index}-image`}
         md={constants.BOT_COLUMN_STYLE}
-        className="border-0 border-bottom mb-3 shadow-sm card-body">
+        className="border-0 border-bottom mb-3 shadow-sm card-body"
+      >
         <img
           className="w-100"
           onClick={() => this.enlargeImage(element.content)}
           src={`data:image/jpeg;base64,${element.content}`}
         />
         <div className="d-flex justify-content-end">
-          <Button 
+          <Button
             variant="link"
             onClick={() => this.enlargeImage(element.content)}
-            className="d-flex align-items-center">
-            <FaExpand/>
+            className="d-flex align-items-center"
+          >
+            <FaExpand />
           </Button>
         </div>
       </Col>
@@ -146,19 +151,19 @@ class ChatBlock extends React.Component {
           })}
         </Col>
 
-        <Modal 
-            size="lg" 
-            aria-labelledby="contained-modal-title-vcenter"
-            centered
-            show={this.state.showModal}
-            onHide={() => this.setState({ showModal: false, image: '' })}>
+        <Modal
+          size="lg"
+          aria-labelledby="contained-modal-title-vcenter"
+          centered
+          show={this.state.showModal}
+          onHide={() => this.setState({ showModal: false, image: "" })}
+        >
           <Modal.Header closeButton></Modal.Header>
           <Modal.Body>
-            <img className="w-100" src={this.state.image}/>
+            <img className="w-100" src={this.state.image} />
           </Modal.Body>
         </Modal>
       </>
-      
     );
   }
 }

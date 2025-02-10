@@ -40,7 +40,6 @@ class FrevaGPT extends React.Component {
   // const signal = abortController.signal;
 
   constructor(props) {
-
     super(props);
     this.handleUserInput = this.handleUserInput.bind(this);
     this.handleKeyDown = this.handleKeyDown.bind(this);
@@ -69,7 +68,6 @@ class FrevaGPT extends React.Component {
   }
 
   async componentDidMount() {
-
     // document.querySelector
     // document.getElementById('chatContainer').addEventListener('scroll', this.handleScroll)
 
@@ -334,17 +332,21 @@ class FrevaGPT extends React.Component {
   }
 
   handleScroll() {
-    const container = document.querySelector('#chatContainer');
-    this.setState({ atBottom: container.scrollTop + container.clientHeight >= container.scrollHeight - 200});
+    const container = document.querySelector("#chatContainer");
+    this.setState({
+      atBottom:
+        container.scrollTop + container.clientHeight >=
+        container.scrollHeight - 200,
+    });
   }
-  
+
   resizeInputField() {
-    const input_field = document.getElementById('input_field');
+    const input_field = document.getElementById("input_field");
     const style = input_field.style;
 
-    style.height = input_field.style.minHeight = 'auto';
-    style.minHeight = `${ Math.min(input_field.scrollHeight, parseInt(input_field.style.maxHeight)) }px`;
-    style.height = `${ input_field.scrollHeight }px`;
+    style.height = input_field.style.minHeight = "auto";
+    style.minHeight = `${Math.min(input_field.scrollHeight, parseInt(input_field.style.maxHeight))}px`;
+    style.height = `${input_field.scrollHeight}px`;
   }
 
   renderAlert() {
@@ -366,10 +368,10 @@ class FrevaGPT extends React.Component {
     // here also no suitable solutions using bootstrap found -> need for better solution
     const scrollButtonStyle = {
       zIndex: 10,
-      right: '40px',
-      bottom: '10px',
-      position: 'sticky',
-    }
+      right: "40px",
+      bottom: "10px",
+      position: "sticky",
+    };
 
     return (
       <>
@@ -387,8 +389,11 @@ class FrevaGPT extends React.Component {
           }
           style={chatWindow}
         >
-
-          <Row className="overflow-auto position-relative" id="chatContainer" onScroll={debounce(this.handleScroll, 100)}>
+          <Row
+            className="overflow-auto position-relative"
+            id="chatContainer"
+            onScroll={debounce(this.handleScroll, 100)}
+          >
             <Col md={12}>
               <ChatBlock />
 
@@ -408,19 +413,29 @@ class FrevaGPT extends React.Component {
               <div ref={this.chatEndRef}></div>
             </Col>
 
-            {this.state.atBottom ? <Col md={12}></Col> : (
-              <Col md={12} style={scrollButtonStyle} className="d-flex flex-row justify-content-end">
-                <Button 
+            {this.state.atBottom ? (
+              <Col md={12}></Col>
+            ) : (
+              <Col
+                md={12}
+                style={scrollButtonStyle}
+                className="d-flex flex-row justify-content-end"
+              >
+                <Button
                   variant="secondary"
-                  onClick={() => this.chatEndRef.current?.scrollIntoView({behavior: 'smooth'})}>
-                  <FaArrowDown/>
-                </Button> 
+                  onClick={() =>
+                    this.chatEndRef.current?.scrollIntoView({
+                      behavior: "smooth",
+                    })
+                  }
+                >
+                  <FaArrowDown />
+                </Button>
               </Col>
             )}
-
           </Row>
-          
-          <Row>             
+
+          <Row>
             {this.state.showSuggestions ? (
               <Row className="mb-2 g-2">
                 {botSuggestions.map((element) => {
@@ -451,11 +466,10 @@ class FrevaGPT extends React.Component {
                   id="input_field"
                   rows={1}
                   value={this.state.userInput}
-                  onChange={e => {
-                      this.handleUserInput(e);
-                      this.resizeInputField();
-                    }
-                  }
+                  onChange={(e) => {
+                    this.handleUserInput(e);
+                    this.resizeInputField();
+                  }}
                   onKeyDown={this.handleKeyDown}
                   placeholder="Ask a question"
                 />

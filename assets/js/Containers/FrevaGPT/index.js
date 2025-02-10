@@ -117,6 +117,8 @@ class FrevaGPT extends React.Component {
     } else {
       this.setState({ botOkay: false });
     }
+
+    this.handleScroll();
   }
 
   createNewChat() {

@@ -119,12 +119,6 @@ class FrevaGPT extends React.Component {
     }
   }
 
-  componentDidUpdate() {
-    if (this.state.atBottom) {
-      this.chatEndRef.current?.scrollIntoView(); 
-    }
-  }
-
   createNewChat() {
     this.props.dispatch(setConversation([]));
     this.props.dispatch(setThread(""));
@@ -392,7 +386,7 @@ class FrevaGPT extends React.Component {
         >
 
           <Row className="overflow-auto position-relative" id="chatContainer" onScroll={debounce(this.handleScroll, 100)}>
-            <Col>
+            <Col md={12}>
               <ChatBlock />
 
               <PendingAnswerComponent
@@ -411,12 +405,15 @@ class FrevaGPT extends React.Component {
               <div ref={this.chatEndRef}></div>
             </Col>
 
-            <Button 
-              variant="secondary"
-              style={scrollButtonStyle}
-              onClick={() => this.chatEndRef.current?.scrollIntoView({behavior: 'smooth'})}>
-              <FaArrowDown/>
-            </Button> 
+            {this.state.atBottom ? <Col md={12}></Col> : (
+              <Col md={12} style={scrollButtonStyle} className="d-flex flex-row justify-content-end">
+                <Button 
+                  variant="secondary"
+                  onClick={() => this.chatEndRef.current?.scrollIntoView({behavior: 'smooth'})}>
+                  <FaArrowDown/>
+                </Button> 
+              </Col>
+            )}
 
           </Row>
           

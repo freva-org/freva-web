@@ -69,27 +69,41 @@ function BBoxSelector({ databrowser, router, location }) {
   }
 
   const isValidLongitude = (value) => {
-    const num = parseFloat(value);
-    return !isNaN(num) && num >= -180 && num <= 180;
+    const num = Number(value);
+    return Number.isFinite(num) && num >= -180 && num <= 180;
   };
 
   const isValidLatitude = (value) => {
-    const num = parseFloat(value);
-    return !isNaN(num) && num >= -90 && num <= 90;
+    const num = Number(value);
+    return Number.isFinite(num) && num >= -90 && num <= 90;
   };
 
   const minLonError =
     minLon && !isValidLongitude(minLon)
       ? "Invalid longitude (-180 to 180)"
-      : "";
+      : minLon && maxLon && parseFloat(minLon) > parseFloat(maxLon)
+        ? "Max longitude must be greater than min longitude"
+        : "";
+
   const maxLonError =
     maxLon && !isValidLongitude(maxLon)
       ? "Invalid longitude (-180 to 180)"
-      : "";
+      : minLon && maxLon && parseFloat(minLon) > parseFloat(maxLon)
+        ? "Max longitude must be greater than min longitude"
+        : "";
   const minLatError =
-    minLat && !isValidLatitude(minLat) ? "Invalid latitude (-90 to 90)" : "";
+    minLat && !isValidLatitude(minLat)
+      ? "Invalid latitude (-90 to 90)"
+      : minLat && maxLat && parseFloat(minLat) > parseFloat(maxLat)
+        ? "Max latitude must be greater than min latitude"
+        : "";
+
   const maxLatError =
-    maxLat && !isValidLatitude(maxLat) ? "Invalid latitude (-90 to 90)" : "";
+    maxLat && !isValidLatitude(maxLat)
+      ? "Invalid latitude (-90 to 90)"
+      : minLat && maxLat && parseFloat(minLat) > parseFloat(maxLat)
+        ? "Max latitude must be greater than min latitude"
+        : "";
 
   let errorMessage = minLonError || maxLonError || minLatError || maxLatError;
 
@@ -161,25 +175,32 @@ function BBoxSelector({ databrowser, router, location }) {
         </DropdownButton>
       </InputGroup>
 
-      <div className="d-flex gap-3 mb-2">
-        <div className="flex-grow-1">
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(2, 1fr)",
+          gap: "1rem",
+          marginBottom: "1rem",
+        }}
+      >
+        <div>
           <InputGroup>
-            <InputGroup.Text>West</InputGroup.Text>
+            <InputGroup.Text>Min Lon</InputGroup.Text>
             <Form.Control
               value={minLon}
-              placeholder="e.g. -10"
+              placeholder="-180"
               onChange={(e) => setMinLon(e.target.value)}
               isInvalid={!!minLonError}
             />
           </InputGroup>
           <div className="text-danger small">{minLonError}&nbsp;</div>
         </div>
-        <div className="flex-grow-1">
+        <div>
           <InputGroup>
-            <InputGroup.Text>East</InputGroup.Text>
+            <InputGroup.Text>Max Lon</InputGroup.Text>
             <Form.Control
               value={maxLon}
-              placeholder="e.g. 10"
+              placeholder="180"
               onChange={(e) => setMaxLon(e.target.value)}
               isInvalid={!!maxLonError}
             />
@@ -187,26 +208,32 @@ function BBoxSelector({ databrowser, router, location }) {
           <div className="text-danger small">{maxLonError}&nbsp;</div>
         </div>
       </div>
-
-      <div className="d-flex gap-3 mb-3">
-        <div className="flex-grow-1">
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(2, 1fr)",
+          gap: "1rem",
+          marginBottom: "1.5rem",
+        }}
+      >
+        <div>
           <InputGroup>
-            <InputGroup.Text>South</InputGroup.Text>
+            <InputGroup.Text>Min Lat</InputGroup.Text>
             <Form.Control
               value={minLat}
-              placeholder="e.g. -10"
+              placeholder="-90"
               onChange={(e) => setMinLat(e.target.value)}
               isInvalid={!!minLatError}
             />
           </InputGroup>
           <div className="text-danger small">{minLatError}&nbsp;</div>
         </div>
-        <div className="flex-grow-1">
+        <div>
           <InputGroup>
-            <InputGroup.Text>North</InputGroup.Text>
+            <InputGroup.Text>Max Lat</InputGroup.Text>
             <Form.Control
               value={maxLat}
-              placeholder="e.g. 10"
+              placeholder="90"
               onChange={(e) => setMaxLat(e.target.value)}
               isInvalid={!!maxLatError}
             />

@@ -26,12 +26,12 @@ class CodeBlock extends React.Component {
   render() {
     return (
       <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
-        <p className="m-0">
+        <a href="#" className="m-0" onClick={() => {this.toggleShowCode(this.state.showCode)}}>
           Analyzed 
           <span>
-            {this.state.showCode ? <FaAngleUp onClick={() => {this.toggleShowCode(this.state.showCode)}}/> : <FaAngleDown onClick={() => {this.toggleShowCode(this.state.showCode)}}/>}
+            {this.state.showCode ? <FaAngleUp/> : <FaAngleDown/>}
           </span>
-        </p>
+        </a>
         <Collapse in={this.state.showCode} className="mt-2">
         <Card className="shadow-sm">
           <Card.Header>python</Card.Header>

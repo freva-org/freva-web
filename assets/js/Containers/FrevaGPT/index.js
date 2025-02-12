@@ -13,6 +13,8 @@ import {
   Alert,
   Tooltip,
   OverlayTrigger,
+  Spinner,
+  Card,
 } from "react-bootstrap";
 
 import { browserHistory } from "react-router";
@@ -21,8 +23,6 @@ import { isEmpty, debounce } from "lodash";
 import { FaStop, FaPlay, FaArrowDown } from "react-icons/fa";
 
 import queryString from "query-string";
-
-import Spinner from "../../Components/Spinner";
 
 import ChatBlock from "./components/ChatBlock";
 import SidePanel from "./components/SidePanel";
@@ -65,6 +65,7 @@ class FrevaGPT extends React.Component {
     };
 
     this.chatEndRef = React.createRef();
+    this.lastVariant = React.createRef("User");
   }
 
   async componentDidMount() {
@@ -224,6 +225,7 @@ class FrevaGPT extends React.Component {
                 // if object has not same variant, add answer to conversation and override object
                 if (varObj.variant !== jsonBuffer.variant) {
                   this.props.dispatch(addElement(varObj));
+                  this.lastVariant.current = varObj.variant;
                   this.setState({ dynamicAnswer: "", dynamicVariant: "" });
                   varObj = jsonBuffer;
                 } else {
@@ -404,8 +406,11 @@ class FrevaGPT extends React.Component {
 
               {this.state.loading && !this.state.dynamicAnswer ? (
                 <Row className="mb-3">
-                  <Col md={1}>
-                    <Spinner />
+                  <Col md={3}>
+                    <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light d-flex flex-row align-items-center">
+                      <Spinner size="sm"/>
+                      <span className="ms-2">{ this.lastVariant.current === "Code" ? "Executing..." : "Thinking..." }</span>
+                    </Card>
                   </Col>
                 </Row>
               ) : null}

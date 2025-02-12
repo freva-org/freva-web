@@ -50,7 +50,6 @@ function PendingAnswerComponent(props) {
           </Col>
         );
       case "Code":
-      case "CodeBlock":
         return (
           <Col md={constants.BOT_COLUMN_STYLE}>
             <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">

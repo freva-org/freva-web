@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 
-import { Col, Card, Spinner, Accordion, Row } from "react-bootstrap";
+import { Col, Card, Spinner, Row } from "react-bootstrap";
 
 import Markdown from "react-markdown";
 
@@ -53,20 +53,20 @@ function PendingAnswerComponent(props) {
       case "CodeBlock":
         return (
           <Col md={constants.BOT_COLUMN_STYLE}>
-            <div className="mb-3">
-              <Accordion defaultActiveKey="0">
-                <Accordion.Item eventKey="0">
-                  <Accordion.Header>python</Accordion.Header>
-                  <Accordion.Body>
-                    <Highlight className="python">{renderedCode}</Highlight>
-                    <span>
-                      <Spinner size="sm" />
-                      <span className="m-2">Analyzing...</span>
-                    </span>
-                  </Accordion.Body>
-                </Accordion.Item>
-              </Accordion>
-            </div>
+            <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
+              <p className="m-0">Analyzing...</p>
+              <Card className="shadow-sm mt-2">
+                <Card.Header>python</Card.Header>
+                <Card.Body className="p-0 m-0">
+                  <Highlight className="python">
+                    {renderedCode}
+                  </Highlight>
+                  <span>
+                    <Spinner size="sm" />
+                  </span>
+                </Card.Body>
+              </Card>
+            </Card>
           </Col>
         );
       case "ServerHint":

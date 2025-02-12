@@ -1,28 +1,50 @@
 import React from "react";
-import { Accordion } from "react-bootstrap";
+import { Card, Collapse } from "react-bootstrap";
+import { FaAngleDown, FaAngleUp } from "react-icons/fa";
 
 import PropTypes from "prop-types";
 
 import Highlight from "react-highlight";
-import "highlight.js/styles/atom-one-light.css";
 
 import { formatCode } from "../utils";
 
-function CodeBlock(props) {
-  return (
-    <div className="mb-3">
-      <Accordion defaultActiveKey="0">
-        <Accordion.Item eventKey="0">
-          <Accordion.Header>python</Accordion.Header>
-          <Accordion.Body>
+class CodeBlock extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.toggleShowCode = this.toggleShowCode.bind(this);
+
+    this.state = {
+      showCode: false,
+    }
+  }
+
+  toggleShowCode(status) {
+    this.setState({showCode: !status});
+  }
+
+  render() {
+    return (
+      <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
+        <p className="m-0">
+          Analyzed 
+          <span>
+            {this.state.showCode ? <FaAngleUp onClick={() => {this.toggleShowCode(this.state.showCode)}}/> : <FaAngleDown onClick={() => {this.toggleShowCode(this.state.showCode)}}/>}
+          </span>
+        </p>
+        <Collapse in={this.state.showCode} className="mt-2">
+        <Card className="shadow-sm">
+          <Card.Header>python</Card.Header>
+          <Card.Body className="p-0 m-0">
             <Highlight className="python">
-              {formatCode(props.title, props.code[0])}
+              {formatCode(this.props.title, this.props.code[0])}
             </Highlight>
-          </Accordion.Body>
-        </Accordion.Item>
-      </Accordion>
-    </div>
-  );
+          </Card.Body>
+        </Card>
+        </Collapse>
+      </Card>
+    );
+  }
 }
 
 CodeBlock.propTypes = {

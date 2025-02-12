@@ -279,10 +279,17 @@ class Databrowser extends React.Component {
   renderFacetBadges() {
     const { dateSelector, minDate, maxDate } = this.props.databrowser;
     const isDateSelected = !!minDate;
+    const isBBoxSelected = !!(
+      this.props.databrowser.minLon ||
+      this.props.databrowser.maxLon ||
+      this.props.databrowser.minLat ||
+      this.props.databrowser.maxLat
+    );
     let values = [];
     if (
       Object.keys(this.props.databrowser.selectedFacets).length > 0 ||
-      isDateSelected
+      isDateSelected ||
+      isBBoxSelected
     ) {
       values.push(
         <Button

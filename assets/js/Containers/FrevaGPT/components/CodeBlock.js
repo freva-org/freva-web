@@ -13,6 +13,7 @@ class CodeBlock extends React.Component {
   constructor(props) {
     super(props);
     this.toggleShowCode = this.toggleShowCode.bind(this);
+    this.extractElements = this.extractElements.bind(this);
 
     this.state = {
       showCode: false,
@@ -21,6 +22,10 @@ class CodeBlock extends React.Component {
 
   toggleShowCode(status) {
     this.setState({showCode: !status});
+  }
+
+  extractElements(content, variant) {
+    return content.filter(elem => elem.variant === variant)
   }
 
   render() {
@@ -32,15 +37,32 @@ class CodeBlock extends React.Component {
             {this.state.showCode ? <FaAngleUp/> : <FaAngleDown/>}
           </span>
         </a>
+
         <Collapse in={this.state.showCode} className="mt-2">
-        <Card className="shadow-sm">
-          <Card.Header>python</Card.Header>
-          <Card.Body className="p-0 m-0">
-            <Highlight className="python">
-              {formatCode(this.props.title, this.props.code[0])}
-            </Highlight>
-          </Card.Body>
-        </Card>
+          <Card className="shadow-sm">
+            <Card.Header>python</Card.Header>
+
+            {this.extractElements(this.props.content, "Code").map((codeElement) => {
+              return(
+                <Card.Body className="p-0 m-0" key={`${codeElement.content[1]}-code`}>
+                  <Highlight className="python">
+                    {formatCode("Code", codeElement.content[0])}
+                  </Highlight>
+                </Card.Body>
+              )}
+            )}
+
+            {this.extractElements(this.props.content, "CodeOutput").map((codeElement, index) => {
+              return(
+                <Card.Footer className="p-0 m-0" key={`${codeElement.content[1]}-codeoutput-${index}`}>
+                  <Highlight className="python">
+                    {formatCode("CodeOutput", codeElement.content[0])}
+                  </Highlight>
+                </Card.Footer>
+              )}
+            )}
+            
+          </Card>
         </Collapse>
       </Card>
     );
@@ -48,8 +70,7 @@ class CodeBlock extends React.Component {
 }
 
 CodeBlock.propTypes = {
-  code: PropTypes.array,
-  title: PropTypes.string,
+  content: PropTypes.array,
 };
 
 export default CodeBlock;

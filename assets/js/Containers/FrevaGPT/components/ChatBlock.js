@@ -27,6 +27,7 @@ class ChatBlock extends React.Component {
     this.renderError = this.renderError.bind(this);
     this.renderDefault = this.renderDefault.bind(this);
     this.enlargeImage = this.enlargeImage.bind(this);
+    this.rearrangeCodeElement = this.rearrangeCodeElements.bind(this);
 
     this.state = {
       showModal: false,
@@ -38,6 +39,29 @@ class ChatBlock extends React.Component {
       showModal: true,
       image: `data:image/jpeg;base64,${imageString}`,
     });
+  }
+
+  rearrangeCodeElements(conversation) {
+    const newConv = [];
+
+    for (const element of conversation) {
+      if (element.variant !== "Code" && element.variant !== "CodeOutput") {
+        if (element.variant !== "ServerHint" && element.variant !== "StreamEnd") {
+          newConv.push([element]);
+        }
+      } else {
+        const existingIndex = newConv.findIndex(
+          (x) => x[0].content.length > 1 && x[0].content[1] === element.content[1]
+        );
+        if (existingIndex === -1) {
+          newConv.push([element]);
+        } else {
+          newConv[existingIndex].push(element);
+        }
+      }
+    }
+
+    return newConv;
   }
 
   renderImage(element, index) {
@@ -66,12 +90,12 @@ class ChatBlock extends React.Component {
   }
 
   renderCode(element, index) {
-    if (isEmpty(element.content[0])) {
+    if (isEmpty(element[0].content[0])) {
       return null;
     } else {
       return (
         <Col md={constants.BOT_COLUMN_STYLE} key={`${index}-code`}>
-          <CodeBlock title={element.variant} code={element.content} />
+          <CodeBlock content={element} />
         </Col>
       );
     }
@@ -114,39 +138,40 @@ class ChatBlock extends React.Component {
   }
 
   renderChatComponents(element, index) {
-    switch (element.variant) {
+    switch (element[0].variant) {
       case "ServerHint":
       case "StreamEnd":
         return null;
       case "Image":
-        return this.renderImage(element, index);
+        return this.renderImage(element[0], index);
 
       case "Code":
       case "CodeOutput":
         return this.renderCode(element, index);
 
       case "User":
-        return this.renderUser(element, index);
+        return this.renderUser(element[0], index);
 
       case "ServerError":
       case "OpenAIError":
       case "CodeError":
       case "FrontendError":
       case "UserStop":
-        return this.renderError(element, index);
+        return this.renderError(element[0], index);
 
       default:
-        return this.renderDefault(element, index);
+        return this.renderDefault(element[0], index);
     }
   }
 
   render() {
     const { conversation } = this.props.chatBlock;
+    const rearrangedConversation = this.rearrangeCodeElements(conversation);
 
     return (
       <>
         <Col>
-          {conversation.map((element, index) => {
+          {rearrangedConversation.map((element, index) => {
             return this.renderChatComponents(element, index);
           })}
         </Col>

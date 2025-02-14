@@ -1,9 +1,11 @@
 import React from "react";
-import { Card } from "react-bootstrap";
+import { Card, OverlayTrigger, Tooltip } from "react-bootstrap";
 
 import { browserHistory } from "react-router";
 
 import { botRequests } from "../exampleRequests";
+
+import { truncate } from "../utils";
 
 function SidePanel() {
   function changeToThread(thread) {
@@ -23,13 +25,18 @@ function SidePanel() {
           {botRequests.general.map((element) => {
             return (
               <div key={element.thread} className="mb-2">
-                <a
-                  className="text-wrap"
-                  href=""
-                  onClick={() => changeToThread(element.thread)}
+                <OverlayTrigger
+                  key={`${element.title}-tooltip`}
+                  overlay={<Tooltip>{element.title}</Tooltip>}
                 >
-                  {element.title}
-                </a>
+                  <a
+                    className="text-wrap"
+                    href=""
+                    onClick={() => changeToThread(element.thread)}
+                  >
+                    {truncate(element.title)}
+                  </a>
+                </OverlayTrigger>
               </div>
             );
           })}
@@ -44,13 +51,18 @@ function SidePanel() {
           {botRequests.freva.map((element) => {
             return (
               <div key={element.thread} className="mb-2">
-                <a
-                  className="text-wrap"
-                  href=""
-                  onClick={() => changeToThread(element.thread)}
+                <OverlayTrigger
+                  key={`${element.title}-tooltip`}
+                  overlay={<Tooltip>{element.title}</Tooltip>}
                 >
-                  {element.title}
-                </a>
+                  <a
+                    className="text-wrap"
+                    href=""
+                    onClick={() => changeToThread(element.thread)}
+                  >
+                    {truncate(element.title)}
+                  </a>
+                </OverlayTrigger>
               </div>
             );
           })}

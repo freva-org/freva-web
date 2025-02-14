@@ -377,12 +377,12 @@ class FrevaGPT extends React.Component {
 
     return (
       <>
-        <Col md={4}>
+        <Col md={3}>
           <SidePanel />
         </Col>
 
         <Col
-          md={8}
+          md={9}
           className={
             "d-flex flex-column " +
             (this.state.showSuggestions

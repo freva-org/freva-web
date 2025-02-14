@@ -32,9 +32,9 @@ class CodeBlock extends React.Component {
     return (
       <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
         <Button variant="link" className="m-0 p-0 d-inline-flex text-decoration-none" onClick={() => {this.toggleShowCode(this.state.showCode)}}>
-          <span style={{ fontWeight: "bold" }}>Analyzed</span>
+          <span style={{ fontWeight: "bold" }} className="color">Analyzed</span>
           <span>
-            {this.state.showCode ? <FaAngleUp/> : <FaAngleDown/>}
+            {this.state.showCode ? <FaAngleUp className="color"/> : <FaAngleDown className="color"/>}
           </span>
         </Button>
 

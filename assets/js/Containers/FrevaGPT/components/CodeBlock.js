@@ -31,8 +31,8 @@ class CodeBlock extends React.Component {
   render() {
     return (
       <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
-        <Button variant="link" className="m-0 p-0 d-inline-flex" onClick={() => {this.toggleShowCode(this.state.showCode)}}>
-          Analyzed 
+        <Button variant="link" className="m-0 p-0 d-inline-flex text-decoration-none" onClick={() => {this.toggleShowCode(this.state.showCode)}}>
+          <span style={{ fontWeight: "bold" }}>Analyzed</span>
           <span>
             {this.state.showCode ? <FaAngleUp/> : <FaAngleDown/>}
           </span>
@@ -40,7 +40,7 @@ class CodeBlock extends React.Component {
 
         <Collapse in={this.state.showCode} className="mt-2">
           <Card className="shadow-sm">
-            <Card.Header>python</Card.Header>
+            <Card.Header style={{ backgroundColor: "#eee" }}>python</Card.Header>
 
             {this.extractElements(this.props.content, "Code").map((codeElement) => {
               return(

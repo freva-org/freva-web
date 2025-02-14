@@ -34,6 +34,10 @@ class ChatBlock extends React.Component {
     };
   }
 
+  componentDidUpdate() {
+    this.props.onScrollDown();
+  }
+
   enlargeImage(imageString) {
     this.setState({
       showModal: true,
@@ -198,6 +202,7 @@ ChatBlock.propTypes = {
     thread: PropTypes.string,
     conversation: PropTypes.array,
   }),
+  onScrollDown: PropTypes.func,
 };
 
 const mapStateToProps = (state) => ({

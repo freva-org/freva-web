@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, forwardRef } from "react";
 import PropTypes from "prop-types";
 
 import { Col, Card, Spinner, Row } from "react-bootstrap";
@@ -10,13 +10,17 @@ import "highlight.js/styles/atom-one-light.css";
 
 import * as constants from "../constants";
 
-function PendingAnswerComponent(props) {
+const PendingAnswerComponent = forwardRef((props, ref) => {
   const [renderedCode, setRenderedCode] = useState("");
 
   useEffect(() => {
     const parsedCode = renderCode(props.content);
     if (parsedCode !== "") {
       setRenderedCode(parsedCode);
+    }
+    
+    if (props.position && props.content !== "") {
+      ref.current?.scrollIntoView({behavior: 'smooth'});
     }
   }, [props.content]);
 
@@ -82,11 +86,12 @@ function PendingAnswerComponent(props) {
   }
 
   return renderAnswer(props);
-}
+});
 
 PendingAnswerComponent.propTypes = {
   content: PropTypes.string,
   variant: PropTypes.string,
+  position: PropTypes.bool,
 };
 
 export default PendingAnswerComponent;

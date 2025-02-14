@@ -50,6 +50,7 @@ class FrevaGPT extends React.Component {
     this.submitUserInput = this.submitUserInput.bind(this);
     this.handleScroll = this.handleScroll.bind(this);
     this.resizeInputField = this.resizeInputField.bind(this);
+    this.scrollDown = this.scrollDown.bind(this);
 
     this.state = {
       loading: false,
@@ -359,8 +360,14 @@ class FrevaGPT extends React.Component {
     );
   }
 
+  scrollDown() {
+    if (this.state.atBottom) {
+      this.chatEndRef.current?.scrollIntoView();
+    }
+  }
+
   renderBotContent() {
-    const windowHeight = document.documentElement.clientHeight * 0.65;
+    const windowHeight = document.documentElement.clientHeight * 0.75;
 
     // better solution needed (wasn't able to find any suitable bootstrap class -> need of fixed height for overflow-auto -> scrolling)
     const chatWindow = {
@@ -397,11 +404,13 @@ class FrevaGPT extends React.Component {
             onScroll={debounce(this.handleScroll, 100)}
           >
             <Col md={12}>
-              <ChatBlock />
+              <ChatBlock onScrollDown={this.scrollDown}/>
 
               <PendingAnswerComponent
                 content={this.state.dynamicAnswer}
                 variant={this.state.dynamicVariant}
+                position={this.state.atBottom}
+                ref={this.chatEndRef}
               />
 
               {this.state.loading && !this.state.dynamicAnswer ? (

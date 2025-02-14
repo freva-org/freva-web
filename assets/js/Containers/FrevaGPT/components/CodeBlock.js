@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Collapse } from "react-bootstrap";
+import { Card, Collapse, Button } from "react-bootstrap";
 import { FaAngleDown, FaAngleUp } from "react-icons/fa";
 
 import PropTypes from "prop-types";
@@ -31,12 +31,12 @@ class CodeBlock extends React.Component {
   render() {
     return (
       <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
-        <a href="#" className="m-0" onClick={() => {this.toggleShowCode(this.state.showCode)}}>
+        <Button variant="link" className="m-0 d-inline-flex" onClick={() => {this.toggleShowCode(this.state.showCode)}}>
           Analyzed 
           <span>
             {this.state.showCode ? <FaAngleUp/> : <FaAngleDown/>}
           </span>
-        </a>
+        </Button>
 
         <Collapse in={this.state.showCode} className="mt-2">
           <Card className="shadow-sm">

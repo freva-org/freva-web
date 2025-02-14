@@ -404,7 +404,7 @@ class FrevaGPT extends React.Component {
             onScroll={debounce(this.handleScroll, 100)}
           >
             <Col md={12}>
-              <ChatBlock onScrollDown={this.scrollDown}/>
+              <ChatBlock onScrollDown={this.scrollDown} />
 
               <PendingAnswerComponent
                 content={this.state.dynamicAnswer}
@@ -417,8 +417,12 @@ class FrevaGPT extends React.Component {
                 <Row className="mb-3">
                   <Col md={3}>
                     <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light d-flex flex-row align-items-center">
-                      <Spinner size="sm"/>
-                      <span className="ms-2">{ this.lastVariant.current === "Code" ? "Executing..." : "Thinking..." }</span>
+                      <Spinner size="sm" />
+                      <span className="ms-2">
+                        {this.lastVariant.current === "Code"
+                          ? "Executing..."
+                          : "Thinking..."}
+                      </span>
                     </Card>
                   </Col>
                 </Row>

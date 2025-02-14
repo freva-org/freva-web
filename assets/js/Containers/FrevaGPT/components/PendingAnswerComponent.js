@@ -18,9 +18,9 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
     if (parsedCode !== "") {
       setRenderedCode(parsedCode);
     }
-    
+
     if (props.position && props.content !== "") {
-      ref.current?.scrollIntoView({behavior: 'smooth'});
+      ref.current?.scrollIntoView({ behavior: "smooth" });
     }
   }, [props.content]);
 
@@ -61,9 +61,7 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
               <Card className="shadow-sm mt-2">
                 <Card.Header>python</Card.Header>
                 <Card.Body className="p-0 m-0">
-                  <Highlight className="python">
-                    {renderedCode}
-                  </Highlight>
+                  <Highlight className="python">{renderedCode}</Highlight>
                   <span>
                     <Spinner size="sm" />
                   </span>

@@ -50,12 +50,16 @@ class ChatBlock extends React.Component {
 
     for (const element of conversation) {
       if (element.variant !== "Code" && element.variant !== "CodeOutput") {
-        if (element.variant !== "ServerHint" && element.variant !== "StreamEnd") {
+        if (
+          element.variant !== "ServerHint" &&
+          element.variant !== "StreamEnd"
+        ) {
           newConv.push([element]);
         }
       } else {
         const existingIndex = newConv.findIndex(
-          (x) => x[0].content.length > 1 && x[0].content[1] === element.content[1]
+          (x) =>
+            x[0].content.length > 1 && x[0].content[1] === element.content[1]
         );
         if (existingIndex === -1) {
           newConv.push([element]);

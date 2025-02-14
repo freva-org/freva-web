@@ -9,7 +9,6 @@ import Highlight from "react-highlight";
 import { formatCode } from "../utils";
 
 class CodeBlock extends React.Component {
-
   constructor(props) {
     super(props);
     this.toggleShowCode = this.toggleShowCode.bind(this);
@@ -17,51 +16,74 @@ class CodeBlock extends React.Component {
 
     this.state = {
       showCode: true,
-    }
+    };
   }
 
   toggleShowCode(status) {
-    this.setState({showCode: !status});
+    this.setState({ showCode: !status });
   }
 
   extractElements(content, variant) {
-    return content.filter(elem => elem.variant === variant)
+    return content.filter((elem) => elem.variant === variant);
   }
 
   render() {
     return (
       <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
-        <Button variant="link" className="m-0 p-0 d-inline-flex text-decoration-none" onClick={() => {this.toggleShowCode(this.state.showCode)}}>
-          <span style={{ fontWeight: "bold" }} className="color">Analyzed</span>
+        <Button
+          variant="link"
+          className="m-0 p-0 d-inline-flex text-decoration-none"
+          onClick={() => {
+            this.toggleShowCode(this.state.showCode);
+          }}
+        >
+          <span style={{ fontWeight: "bold" }} className="color">
+            Analyzed
+          </span>
           <span>
-            {this.state.showCode ? <FaAngleUp className="color"/> : <FaAngleDown className="color"/>}
+            {this.state.showCode ? (
+              <FaAngleUp className="color" />
+            ) : (
+              <FaAngleDown className="color" />
+            )}
           </span>
         </Button>
 
         <Collapse in={this.state.showCode} className="mt-2">
           <Card className="shadow-sm">
-            <Card.Header style={{ backgroundColor: "#eee" }}>python</Card.Header>
+            <Card.Header style={{ backgroundColor: "#eee" }}>
+              python
+            </Card.Header>
 
-            {this.extractElements(this.props.content, "Code").map((codeElement) => {
-              return(
-                <Card.Body className="p-0 m-0" key={`${codeElement.content[1]}-code`}>
-                  <Highlight className="python">
-                    {formatCode("Code", codeElement.content[0])}
-                  </Highlight>
-                </Card.Body>
-              )}
+            {this.extractElements(this.props.content, "Code").map(
+              (codeElement) => {
+                return (
+                  <Card.Body
+                    className="p-0 m-0"
+                    key={`${codeElement.content[1]}-code`}
+                  >
+                    <Highlight className="python">
+                      {formatCode("Code", codeElement.content[0])}
+                    </Highlight>
+                  </Card.Body>
+                );
+              }
             )}
 
-            {this.extractElements(this.props.content, "CodeOutput").map((codeElement, index) => {
-              return(
-                <Card.Footer className="p-0 m-0" key={`${codeElement.content[1]}-codeoutput-${index}`}>
-                  <Highlight className="python">
-                    {formatCode("CodeOutput", codeElement.content[0])}
-                  </Highlight>
-                </Card.Footer>
-              )}
+            {this.extractElements(this.props.content, "CodeOutput").map(
+              (codeElement, index) => {
+                return (
+                  <Card.Footer
+                    className="p-0 m-0"
+                    key={`${codeElement.content[1]}-codeoutput-${index}`}
+                  >
+                    <Highlight className="python">
+                      {formatCode("CodeOutput", codeElement.content[0])}
+                    </Highlight>
+                  </Card.Footer>
+                );
+              }
             )}
-            
           </Card>
         </Collapse>
       </Card>

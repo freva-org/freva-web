@@ -127,7 +127,7 @@ class FrevaGPT extends React.Component {
       pathname: "/chatbot/",
       search: "",
     });
-    this.setState({ showSuggestions: true });
+    this.setState({ showSuggestions: true, atBottom: true });
     window.scrollTo(0, 0);
   }
 

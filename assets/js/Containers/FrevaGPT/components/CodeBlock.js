@@ -16,7 +16,7 @@ class CodeBlock extends React.Component {
     this.extractElements = this.extractElements.bind(this);
 
     this.state = {
-      showCode: false,
+      showCode: true,
     }
   }
 
@@ -31,7 +31,7 @@ class CodeBlock extends React.Component {
   render() {
     return (
       <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
-        <Button variant="link" className="m-0 d-inline-flex" onClick={() => {this.toggleShowCode(this.state.showCode)}}>
+        <Button variant="link" className="m-0 p-0 d-inline-flex" onClick={() => {this.toggleShowCode(this.state.showCode)}}>
           Analyzed 
           <span>
             {this.state.showCode ? <FaAngleUp/> : <FaAngleDown/>}

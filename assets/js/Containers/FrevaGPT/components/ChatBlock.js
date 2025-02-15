@@ -35,7 +35,9 @@ class ChatBlock extends React.Component {
   }
 
   componentDidUpdate() {
-    this.props.onScrollDown();
+    if (!isEmpty(this.state.conversation)) {
+      this.props.onScrollDown();
+    }
   }
 
   enlargeImage(imageString) {

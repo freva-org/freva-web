@@ -2,9 +2,10 @@ import React from "react";
 import { Card, Collapse, Button } from "react-bootstrap";
 import { FaAngleDown, FaAngleUp } from "react-icons/fa";
 
-import PropTypes from "prop-types";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { materialOceanic } from "react-syntax-highlighter/dist/esm/styles/prism";
 
-import Highlight from "react-highlight";
+import PropTypes from "prop-types";
 
 import { formatCode } from "../utils";
 
@@ -61,10 +62,14 @@ class CodeBlock extends React.Component {
                   <Card.Body
                     className="p-0 m-0"
                     key={`${codeElement.content[1]}-code`}
+                    style={{ backgroundColor: "#263238" }}
                   >
-                    <Highlight className="python">
+                    <SyntaxHighlighter
+                      language="python"
+                      style={materialOceanic}
+                    >
                       {formatCode("Code", codeElement.content[0])}
-                    </Highlight>
+                    </SyntaxHighlighter>
                   </Card.Body>
                 );
               }
@@ -76,10 +81,14 @@ class CodeBlock extends React.Component {
                   <Card.Footer
                     className="p-0 m-0"
                     key={`${codeElement.content[1]}-codeoutput-${index}`}
+                    style={{ backgroundColor: "#263238" }}
                   >
-                    <Highlight className="python">
+                    <SyntaxHighlighter
+                      language="python"
+                      style={materialOceanic}
+                    >
                       {formatCode("CodeOutput", codeElement.content[0])}
-                    </Highlight>
+                    </SyntaxHighlighter>
                   </Card.Footer>
                 );
               }

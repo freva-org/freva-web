@@ -3,10 +3,10 @@ import PropTypes from "prop-types";
 
 import { Col, Card, Spinner, Row } from "react-bootstrap";
 
-import Markdown from "react-markdown";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { materialOceanic } from "react-syntax-highlighter/dist/esm/styles/prism";
 
-import Highlight from "react-highlight";
-import "highlight.js/styles/atom-one-light.css";
+import Markdown from "react-markdown";
 
 import * as constants from "../constants";
 
@@ -60,8 +60,13 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
               <p className="m-0">Analyzing...</p>
               <Card className="shadow-sm mt-2">
                 <Card.Header>python</Card.Header>
-                <Card.Body className="p-0 m-0">
-                  <Highlight className="python">{renderedCode}</Highlight>
+                <Card.Body
+                  className="p-0 m-0"
+                  style={{ backgroundColor: "#263238" }}
+                >
+                  <SyntaxHighlighter language="python" style={materialOceanic}>
+                    {renderedCode}
+                  </SyntaxHighlighter>
                   <span>
                     <Spinner size="sm" />
                   </span>

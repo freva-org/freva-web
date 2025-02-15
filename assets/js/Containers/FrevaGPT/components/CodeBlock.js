@@ -60,7 +60,7 @@ class CodeBlock extends React.Component {
               (codeElement) => {
                 return (
                   <Card.Body
-                    className="p-0 m-0"
+                    className="p-0 m-0 border-bottom"
                     key={`${codeElement.content[1]}-code`}
                     style={{ backgroundColor: "#263238" }}
                   >

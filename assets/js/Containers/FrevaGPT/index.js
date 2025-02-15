@@ -410,7 +410,7 @@ class FrevaGPT extends React.Component {
                 content={this.state.dynamicAnswer}
                 variant={this.state.dynamicVariant}
                 position={this.state.atBottom}
-                ref={this.chatEndRef}
+                ref={{chatEndRef: this.chatEndRef, lastVariant: this.lastVariant}}
               />
 
               {this.state.loading && !this.state.dynamicAnswer ? (

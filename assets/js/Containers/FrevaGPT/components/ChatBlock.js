@@ -76,15 +76,17 @@ class ChatBlock extends React.Component {
 
   renderImage(element, index) {
     return (
-      <Col
-        key={`${index}-image`}
-        md={constants.BOT_COLUMN_STYLE}
-        className="border-0 border-bottom mb-3 shadow-sm card-body"
-      >
+      // <Col
+      //   key={`${index}-image`}
+      //   md={constants.BOT_COLUMN_STYLE}
+      //   className="border-0 border-bottom mb-3 shadow-sm card-body"
+      // >
+      <div className="w-75 mb-5">
         <img
-          className="w-100"
+          key={index}
           onClick={() => this.enlargeImage(element.content)}
           src={`data:image/jpeg;base64,${element.content}`}
+          className="mw-100"
         />
         <div className="d-flex justify-content-end">
           <Button
@@ -95,7 +97,9 @@ class ChatBlock extends React.Component {
             <FaExpand />
           </Button>
         </div>
-      </Col>
+      </div>
+        
+      // </Col>
     );
   }
 

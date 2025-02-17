@@ -98,7 +98,7 @@ class ChatBlock extends React.Component {
           </Button>
         </div>
       </div>
-        
+
       // </Col>
     );
   }

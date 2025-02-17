@@ -3,7 +3,10 @@ import { Card, Collapse, Button } from "react-bootstrap";
 import { FaAngleDown, FaAngleUp } from "react-icons/fa";
 
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { materialDark, oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
+import {
+  materialDark,
+  oneLight,
+} from "react-syntax-highlighter/dist/esm/styles/prism";
 
 import PropTypes from "prop-types";
 
@@ -64,10 +67,7 @@ class CodeBlock extends React.Component {
                     key={`${codeElement.content[1]}-code`}
                     style={{ backgroundColor: "#fafafa" }}
                   >
-                    <SyntaxHighlighter
-                      language="python"
-                      style={oneLight}
-                    >
+                    <SyntaxHighlighter language="python" style={oneLight}>
                       {formatCode("Code", codeElement.content[0])}
                     </SyntaxHighlighter>
                   </Card.Body>
@@ -83,10 +83,7 @@ class CodeBlock extends React.Component {
                     key={`${codeElement.content[1]}-codeoutput-${index}`}
                     style={{ backgroundColor: "#263238" }}
                   >
-                    <SyntaxHighlighter
-                      language="python"
-                      style={materialDark}
-                    >
+                    <SyntaxHighlighter language="python" style={materialDark}>
                       {formatCode("CodeOutput", codeElement.content[0])}
                     </SyntaxHighlighter>
                   </Card.Footer>

@@ -81,7 +81,7 @@ class CodeBlock extends React.Component {
                   <Card.Footer
                     className="p-0 m-0"
                     key={`${codeElement.content[1]}-codeoutput-${index}`}
-                    style={{ backgroundColor: "#263238" }}
+                    style={{ backgroundColor: "#263238", fontSize: "0.72em" }}
                   >
                     <SyntaxHighlighter language="python" style={materialDark}>
                       {formatCode("CodeOutput", codeElement.content[0])}

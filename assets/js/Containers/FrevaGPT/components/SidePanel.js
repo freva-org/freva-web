@@ -5,8 +5,6 @@ import { browserHistory } from "react-router";
 
 import { botRequests } from "../exampleRequests";
 
-import { truncate } from "../utils";
-
 function SidePanel() {
   function changeToThread(thread) {
     browserHistory.push({
@@ -24,17 +22,16 @@ function SidePanel() {
         <Card.Body className="p-3 py-2">
           {botRequests.general.map((element) => {
             return (
-              <div key={element.thread} className="mb-2">
+              <div key={element.thread} className="mb-2 text-truncate color">
                 <OverlayTrigger
                   key={`${element.title}-tooltip`}
                   overlay={<Tooltip>{element.title}</Tooltip>}
                 >
                   <a
-                    className="text-wrap"
                     href=""
                     onClick={() => changeToThread(element.thread)}
                   >
-                    {truncate(element.title)}
+                    {element.title}
                   </a>
                 </OverlayTrigger>
               </div>
@@ -50,17 +47,16 @@ function SidePanel() {
         <Card.Body className="p-3 py-2">
           {botRequests.freva.map((element) => {
             return (
-              <div key={element.thread} className="mb-2">
+              <div key={element.thread} className="mb-2 text-truncate color">
                 <OverlayTrigger
                   key={`${element.title}-tooltip`}
                   overlay={<Tooltip>{element.title}</Tooltip>}
                 >
                   <a
-                    className="text-wrap"
                     href=""
                     onClick={() => changeToThread(element.thread)}
                   >
-                    {truncate(element.title)}
+                    {element.title}
                   </a>
                 </OverlayTrigger>
               </div>

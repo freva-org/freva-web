@@ -367,7 +367,7 @@ class FrevaGPT extends React.Component {
   }
 
   renderBotContent() {
-    const windowHeight = document.documentElement.clientHeight * 0.75;
+    const windowHeight = document.documentElement.clientHeight * 0.80;
 
     // better solution needed (wasn't able to find any suitable bootstrap class -> need of fixed height for overflow-auto -> scrolling)
     const chatWindow = {

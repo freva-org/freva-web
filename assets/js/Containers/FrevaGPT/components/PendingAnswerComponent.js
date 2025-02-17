@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import { Col, Card, Spinner, Row } from "react-bootstrap";
 
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { materialOceanic } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 import Markdown from "react-markdown";
 
@@ -62,9 +62,9 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
                 <Card.Header>python</Card.Header>
                 <Card.Body
                   className="p-0 m-0"
-                  style={{ backgroundColor: "#263238" }}
+                  style={{ backgroundColor: "#fafafa" }}
                 >
-                  <SyntaxHighlighter language="python" style={materialOceanic}>
+                  <SyntaxHighlighter language="python" style={oneLight}>
                     {renderedCode}
                   </SyntaxHighlighter>
                   <span>

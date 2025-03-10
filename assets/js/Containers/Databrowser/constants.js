@@ -30,4 +30,6 @@ export const ViewTypes = {
   FACET_CENTERED: "FACET_CENTERED",
 };
 
-export const CATALOGUE_MAXIMUM = 100_000;
+export const STREAM_CATALOGUE_MAXIMUM = 100_000;
+export const ENABLE_STAC_API = true;
+export const STAC_API_MAXIMUM = 1000;

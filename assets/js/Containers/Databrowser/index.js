@@ -36,7 +36,11 @@ import TimeRangeSelector from "./TimeRangeSelector";
 import FilesPanel from "./FilesPanel";
 import DataBrowserCommand from "./DataBrowserCommand";
 import FacetDropdown from "./MetaFacet";
-import { ViewTypes, DEFAULT_FLAVOUR, CATALOGUE_MAXIMUM } from "./constants";
+import {
+  ViewTypes,
+  DEFAULT_FLAVOUR,
+  STREAM_CATALOGUE_MAXIMUM,
+} from "./constants";
 import { FacetPanel } from "./FacetPanel";
 import { prepareSearchParams } from "./utils";
 import CatalogExportDropdown from "./CatalogExportDropdown";
@@ -415,10 +419,12 @@ class Databrowser extends React.Component {
               </Form.Select>
 
               <CatalogExportDropdown
-                disabled={this.props.databrowser.numFiles > CATALOGUE_MAXIMUM}
+                disabled={
+                  this.props.databrowser.numFiles > STREAM_CATALOGUE_MAXIMUM
+                }
                 createCatalogLink={this.createCatalogLink}
                 numFiles={this.props.databrowser.numFiles}
-                maxFiles={CATALOGUE_MAXIMUM}
+                maxFiles={STREAM_CATALOGUE_MAXIMUM}
                 className="me-1"
               />
 

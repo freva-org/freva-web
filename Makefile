@@ -25,7 +25,7 @@ setup-django:
 
 setup-rest:
 	TEMP_DIR=$$(mktemp -d) && \
-	git clone -b stac-catalog https://github.com/FREVA-CLINT/freva-nextgen.git $$TEMP_DIR &&\
+	git clone https://github.com/FREVA-CLINT/freva-nextgen.git $$TEMP_DIR &&\
 	python -m pip install $$TEMP_DIR/freva-rest $$TEMP_DIR/freva-data-portal-worker &&\
 	rm -rf $$TEMP_DIR
 

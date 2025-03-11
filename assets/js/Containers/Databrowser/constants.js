@@ -31,11 +31,5 @@ export const ViewTypes = {
 };
 
 export const STREAM_CATALOGUE_MAXIMUM = 100_000;
-export const ENABLE_STAC_API = (() => {
-  const value = process.env.ENABLE_STAC_API;
-  if (value === "true" || value === "1" || value === "yes") {
-    return true;
-  }
-  return false;
-})();
+export const ENABLE_STAC_API = true;
 export const STAC_API_MAXIMUM = 1000;

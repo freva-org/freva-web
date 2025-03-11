@@ -25,17 +25,13 @@ setup-django:
 
 setup-rest:
 	TEMP_DIR=$$(mktemp -d) && \
-	git clone -b stac-catalog https://github.com/FREVA-CLINT/freva-nextgen.git $$TEMP_DIR &&\
+	git clone https://github.com/FREVA-CLINT/freva-nextgen.git $$TEMP_DIR &&\
 	python -m pip install $$TEMP_DIR/freva-rest $$TEMP_DIR/freva-data-portal-worker &&\
 	rm -rf $$TEMP_DIR
 
 setup-stac: # this is a setup only for STAC-API and STAC-Browser, and not static STAC
 	python -m pip install stac-fastapi.opensearch
 	@echo "STAC FastAPI dependencies installed successfully"
-	@if [ ! -d "stac-browser" ]; then \
-		git clone https://github.com/radiantearth/stac-browser.git stac-browser; \
-	fi
-	cd stac-browser && npm install
 
 setup-node:
 	npm install
@@ -95,9 +91,6 @@ runstac: wait-for-opensearch
 	python -m stac_fastapi.opensearch.app >> stac.log 2>&1 &
 	@echo "STAC service is running..."
 	@echo "To watch the STAC logs, run 'tail -f stac.log'"
-	cd stac-browser && npm start -- --open --catalogUrl=http://localhost:8083 --port 8085 > stac-browser.log 2>&1 &
-	@echo "STAC Browser is running..."
-	@echo "To watch the STAC Browser logs, run 'tail -f stac-browser.log'"
 
 stopserver:
 	ps aux | grep '[f]reva_rest.cli' | awk '{print $$2}' | xargs -r kill
@@ -107,12 +100,10 @@ stopserver:
 		ps aux | grep '[s]tac_fastapi.opensearch.app' | awk '{print $$2}' | head -n 1 | xargs kill; \
 		sleep 1; \
 	fi
-	pkill -f "stac-browser" || true
 	rm -fr .data-portal-cluster-config.json
 	echo "Stopped Django development server..." > runserver.log
 	echo "Stopped freva-rest development server..." > rest.log
 	echo "Stopped STAC service..." > stac.log
-	echo "Stopped STAC Browser..." >> stac-browser.log
 
 stopfrontend:
 	pkill -f "npm run dev"

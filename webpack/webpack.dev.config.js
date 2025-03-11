@@ -38,6 +38,11 @@ if (isDevServer) {
   plugins = [
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NoEmitOnErrorsPlugin(),
+    new webpack.DefinePlugin({
+      "process.env": {
+        ENABLE_STAC_API: JSON.stringify(process.env.ENABLE_STAC_API),
+      },
+    }),
   ];
 }
 

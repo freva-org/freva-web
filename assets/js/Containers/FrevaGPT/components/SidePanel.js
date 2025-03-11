@@ -27,10 +27,7 @@ function SidePanel() {
                   key={`${element.title}-tooltip`}
                   overlay={<Tooltip>{element.title}</Tooltip>}
                 >
-                  <a
-                    href=""
-                    onClick={() => changeToThread(element.thread)}
-                  >
+                  <a href="" onClick={() => changeToThread(element.thread)}>
                     {element.title}
                   </a>
                 </OverlayTrigger>
@@ -52,10 +49,7 @@ function SidePanel() {
                   key={`${element.title}-tooltip`}
                   overlay={<Tooltip>{element.title}</Tooltip>}
                 >
-                  <a
-                    href=""
-                    onClick={() => changeToThread(element.thread)}
-                  >
+                  <a href="" onClick={() => changeToThread(element.thread)}>
                     {element.title}
                   </a>
                 </OverlayTrigger>

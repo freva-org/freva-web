@@ -344,12 +344,12 @@ class FrevaGPT extends React.Component {
   }
 
   resizeInputField() {
-    const input_field = document.getElementById("input_field");
-    const style = input_field.style;
+    const inputField = document.getElementById("inputField");
+    const style = inputField.style;
 
-    style.height = input_field.style.minHeight = "auto";
-    style.minHeight = `${Math.min(input_field.scrollHeight, parseInt(input_field.style.maxHeight))}px`;
-    style.height = `${input_field.scrollHeight}px`;
+    style.height = inputField.style.minHeight = "auto";
+    style.minHeight = `${Math.min(inputField.scrollHeight, parseInt(inputField.style.maxHeight))}px`;
+    style.height = `${inputField.scrollHeight}px`;
   }
 
   renderAlert() {
@@ -367,7 +367,7 @@ class FrevaGPT extends React.Component {
   }
 
   renderBotContent() {
-    const windowHeight = document.documentElement.clientHeight * 0.80;
+    const windowHeight = document.documentElement.clientHeight * 0.8;
 
     // better solution needed (wasn't able to find any suitable bootstrap class -> need of fixed height for overflow-auto -> scrolling)
     const chatWindow = {
@@ -484,7 +484,7 @@ class FrevaGPT extends React.Component {
               <InputGroup className="mb-2 pb-2">
                 <FormControl
                   as="textarea"
-                  id="input_field"
+                  id="inputField"
                   rows={1}
                   value={this.state.userInput}
                   onChange={(e) => {

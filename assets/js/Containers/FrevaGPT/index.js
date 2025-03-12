@@ -370,10 +370,10 @@ class FrevaGPT extends React.Component {
     return (
       <>
         {this.state.showSuggestions ? (
-          <Row className="mb-2 g-2">
+          <>
             {botSuggestions.map((element) => {
               return (
-                <div key={`${element}-div`} className="col-md-3">
+                <div key={`${element}-div`} className="col-md-3 mb-2">
                   <OverlayTrigger
                     key={`${element}-tooltip`}
                     overlay={<Tooltip>{element}</Tooltip>}
@@ -389,7 +389,7 @@ class FrevaGPT extends React.Component {
                 </div>
               );
             })}
-          </Row>
+          </>
         ) : null}
       </>
     )

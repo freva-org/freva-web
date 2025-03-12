@@ -76,11 +76,11 @@ class CodeBlock extends React.Component {
             )}
 
             {this.extractElements(this.props.content, "CodeOutput").map(
-              (codeElement, index) => {
+              (codeElement) => {
                 return (
                   <Card.Footer
                     className="p-0 m-0"
-                    key={`${codeElement.content[1]}-codeoutput-${index}`}
+                    key={`${codeElement.content[1]}-codeoutput`}
                     style={{ backgroundColor: "#263238", fontSize: "0.72em" }}
                   >
                     <SyntaxHighlighter language="python" style={materialDark}>

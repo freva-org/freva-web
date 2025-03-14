@@ -1,6 +1,14 @@
 # Changelog
 
+
+
 All notable changes to this project will be documented in this file.
+## [v2411.0.0]
+## Changed
+- Create STAC API
+- Add opensearch functionlity
+- Limit opensearch entries to 1000 by default
+
 ## [v2408.0.0]
 
 ### Changed

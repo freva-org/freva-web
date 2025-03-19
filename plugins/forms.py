@@ -53,6 +53,7 @@ class PluginSelectFieldWidget(Input):
         self.options = kwargs.pop("options")
         self.custom = kwargs.pop("custom", False)
         self.multiple = kwargs.pop("multiple", False)
+        print(self.multiple, self.custom, "foo")
         import operator
 
         self.sorted_options = sorted(

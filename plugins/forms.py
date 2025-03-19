@@ -51,9 +51,8 @@ class PluginFileFieldWidget(Input):
 class PluginSelectFieldWidget(Input):
     def __init__(self, *args, **kwargs):
         self.options = kwargs.pop("options")
-        self.custom = kwargs.pop("custom", False)
+        self.allow_user_input = kwargs.pop("allow_user_input", False)
         self.multiple = kwargs.pop("multiple", False)
-        print(self.multiple, self.custom, "foo")
         import operator
 
         self.sorted_options = sorted(
@@ -66,12 +65,13 @@ class PluginSelectFieldWidget(Input):
             "plugins/selectfield.html",
             {
                 "name": name,
-                "value": value,
+                #"value": value,
+                "value": ",".join(value) if isinstance(value, list) else value,
                 "attrs": attrs,
                 "options": self.sorted_options,
                 "option_keys": list(map(str, self.options.keys())),
                 "multiple": self.multiple,
-                "custom": self.custom,
+                "allow_user_input": self.allow_user_input,
             },
         )
 
@@ -206,7 +206,7 @@ class PluginForm(forms.Form):
                     widget=PluginSelectFieldWidget(
                         options=param.options,
                         multiple=getattr(param, "multiple", False),
-                        custom=getattr(param, "custom", False),
+                        allow_user_input=getattr(param, "allow_user_input", False),
                     ),
                 )
             elif isinstance(param, parameters.SolrField):

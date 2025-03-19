@@ -6,45 +6,75 @@
     }
 </style>
 
-<select class="col-md-12 {{attrs.class}}"
-        id="{{name}}"
-        name="{{name}}{% if multiple %}[]{% endif %}}"
-        {% if multiple %} multiple="multiple"{% endif %}>
-    {% if not multiple %}
-        <option></option>
-    {% endif %}
-    {% for key, val in options %}
-        {% if multiple %}
-            <option value="{{key}}" {% if value and key in value %}selected{% endif %}>{{val}}</option>
-        {% else %}
-            <option value="{{key}}" {% if val == value %}selected{% endif %}>{{val}}</option>
-        {% endif %}
-    {% endfor %}
-</select>
+<!--data-multiple="{{multiple}}"-->
+<input type="hidden"
+       class="col-md-12 {{attrs.class}}"
+       value="{% if value %}{{ value|safe }}{% endif %}"
+       id="{{name}}"
+       name="{{name}}"
+/>
 
 <script>
     $(document).ready(function() {
-        $('#{{name}}').select2({
-            placeholder: "Select a {{name}}",
-            allowClear: true,
-            {% if custom %}
-                tags: true,  // Allows custom user input
-                tokenSeparators: [',', ' '],  // Optional: allows comma/space to create tags
-            {% endif %}
-        });
 
-        {% if multiple and value %}
-            // Preload custom values (if any) not in options
-            const existingKeys = new Set({{ option_keys|safe }});
-            const userValues = {{ value|safe }};
-            const $select = $('#{{name}}');
-
-            userValues.forEach(function(val) {
-                if (!existingKeys.has(val)) {
-                    const newOption = new Option(val, val, true, true);
-                    $select.append(newOption).trigger('change');
+        var isMultiple = {{ multiple|yesno:"true,false" }};  // Convert Django bool to JS bool
+	console.log("ismult", isMultiple)
+        $("#{{name}}").select2({
+            placeholder: "Select a {{ name }}",
+            //{% if multiple %}
+            //allowClear: true,
+            //multiple: true,
+            //{% endif %}
+            initSelection : function (element, callback) {
+		console.log("ELEMENT", element.val()[0])
+                if(isMultiple){
+                    var data = [];
+                    var vals = element.val().split(",")
+                    $.each(vals, function(key,value){
+                        data.push({
+                            id: value,
+                            text: value
+                        });
+                    });
+                } else {
+                    var data = {id: element.val(), text: element.val()};
                 }
-            });
-        {% endif %}
+                callback(data);
+            },
+
+
+            {% if multiple %} 
+	    tags: isMultiple,
+            multiple: isMultiple,
+            tokenSeparators: [',', ';'],  // Allow separating values with commas or semicolons
+	    {% endif %}
+	    //
+            //createTag: function(params) {
+            //    var term = $.trim(params.term);
+            //    if (term === '') {
+            //        return null;
+            //    }
+            //    return {
+            //        id: term,
+            //        text: term,
+            //        newTag: true  // Identify newly added values
+            //    };
+            //},
+            data: [
+                {% for key, val in options %}
+                    { id: "{{ key }}", text: "{{ val }}" },
+                {% endfor %}
+            ],
+	    {% if allow_user_input %}
+          //Allow manually entered text in drop down.
+            createSearchChoice:function(term, data) {
+              if ( $(data).filter( function() {
+                  return this.text.localeCompare(term) === 0;
+              }).length === 0) {
+                  return {id:term, text:term};
+              }
+            },
+	  {% endif %}
+        });
     });
 </script>

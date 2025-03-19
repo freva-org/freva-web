@@ -68,6 +68,7 @@ class PluginSelectFieldWidget(Input):
                 "value": value,
                 "attrs": attrs,
                 "options": self.sorted_options,
+                "option_keys": list(map(str, self.options.keys())),
                 "multiple": self.multiple,
                 "custom": self.custom,
             },

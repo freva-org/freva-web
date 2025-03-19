@@ -35,7 +35,7 @@
 
         {% if multiple and value %}
             // Preload custom values (if any) not in options
-            const existingKeys = new Set({{ options|dict_keys|safe }});
+            const existingKeys = new Set({{ option_keys|safe }});
             const userValues = {{ value|safe }};
             const $select = $('#{{name}}');
 

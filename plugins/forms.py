@@ -206,7 +206,7 @@ class PluginForm(forms.Form):
                     widget=PluginSelectFieldWidget(
                         options=param.options,
                         multiple=getattr(param, "multiple", False),
-                        custom=getattr(param, "allow_user_input", False),
+                        custom=getattr(param, "custom", False),
                     ),
                 )
             elif isinstance(param, parameters.SolrField):

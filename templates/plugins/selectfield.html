@@ -18,15 +18,9 @@
     $(document).ready(function() {
 
         var isMultiple = {{ multiple|yesno:"true,false" }};  // Convert Django bool to JS bool
-	console.log("ismult", isMultiple)
         $("#{{name}}").select2({
             placeholder: "Select a {{ name }}",
-            //{% if multiple %}
-            //allowClear: true,
-            //multiple: true,
-            //{% endif %}
             initSelection : function (element, callback) {
-		console.log("ELEMENT", element.val()[0])
                 if(isMultiple){
                     var data = [];
                     var vals = element.val().split(",")
@@ -43,24 +37,12 @@
             },
 
 
-            {% if multiple %} 
+            {% if multiple %}
 	    tags: isMultiple,
             multiple: isMultiple,
             tokenSeparators: [',', ';'],  // Allow separating values with commas or semicolons
 	    {% endif %}
-	    //
-            //createTag: function(params) {
-            //    var term = $.trim(params.term);
-            //    if (term === '') {
-            //        return null;
-            //    }
-            //    return {
-            //        id: term,
-            //        text: term,
-            //        newTag: true  // Identify newly added values
-            //    };
-            //},
-            data: [
+	        data: [
                 {% for key, val in options %}
                     { id: "{{ key }}", text: "{{ val }}" },
                 {% endfor %}

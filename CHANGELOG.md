@@ -3,6 +3,10 @@
 
 
 All notable changes to this project will be documented in this file.
+## [v2502.0.0]
+## Changed
+- Adjusted SelectField widget to support multiple inputs
+
 ## [v2411.0.0]
 ## Changed
 - Create STAC API

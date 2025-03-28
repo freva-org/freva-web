@@ -20,7 +20,7 @@ import {
 import { browserHistory } from "react-router";
 import { isEmpty, debounce } from "lodash";
 
-import { FaStop, FaPlay, FaArrowDown } from "react-icons/fa";
+import { FaStop, FaPlay, FaArrowDown, FaArrowUp } from "react-icons/fa";
 
 import queryString from "query-string";
 
@@ -48,7 +48,7 @@ class FrevaGPT extends React.Component {
     this.toggleBotSelect = this.toggleBotSelect.bind(this);
     this.handleStop = this.handleStop.bind(this);
     this.submitUserInput = this.submitUserInput.bind(this);
-    this.handleScroll = this.handleScroll.bind(this);
+    this.setPosition = this.setPosition.bind(this);
     this.resizeInputField = this.resizeInputField.bind(this);
     this.scrollDown = this.scrollDown.bind(this);
 
@@ -62,10 +62,12 @@ class FrevaGPT extends React.Component {
       showSuggestions: true,
       dynamicAnswer: "",
       dynamicVariant: "",
-      atBottom: true,
+      atBottom: false,
+      atTop: true,
     };
 
     this.chatEndRef = React.createRef();
+    this.chatStartRef = React.createRef();
     this.lastVariant = React.createRef("User");
   }
 
@@ -118,7 +120,7 @@ class FrevaGPT extends React.Component {
       this.setState({ botOkay: false });
     }
 
-    this.handleScroll();
+    this.setPosition();
   }
 
   createNewChat() {
@@ -128,7 +130,7 @@ class FrevaGPT extends React.Component {
       pathname: "/chatbot/",
       search: "",
     });
-    this.setState({ showSuggestions: true, atBottom: true });
+    this.setState({ showSuggestions: true, atBottom: false, atTop: true });
     window.scrollTo(0, 0);
   }
 
@@ -334,12 +336,13 @@ class FrevaGPT extends React.Component {
     this.setState({ hideBotModelList: !this.state.hideBotModelList });
   }
 
-  handleScroll() {
+  setPosition() {
     const container = document.querySelector("#chatContainer");
     this.setState({
       atBottom:
         container.scrollTop + container.clientHeight >=
         container.scrollHeight - 200,
+      atTop: container.scrollTop < 50
     });
   }
 
@@ -466,26 +469,36 @@ class FrevaGPT extends React.Component {
 
     return (
       <>
-        {this.state.atBottom ? (
-          <Col md={12}></Col>
-        ) : (
           <Col
             md={12}
             style={scrollButtonStyle}
             className="d-flex flex-row justify-content-end"
           >
-            <Button
-              variant="secondary"
-              onClick={() =>
-                this.chatEndRef.current?.scrollIntoView({
-                  behavior: "smooth",
-                })
-              }
-            >
-              <FaArrowDown />
-            </Button>
+            <div className="d-flex flex-column">
+              {!this.state.atTop ? (<Button 
+                variant="secondary"
+                className="mb-2"
+                onClick={() => 
+                  this.chatStartRef.current?.scrollIntoView({
+                    behavior: "smooth"
+                  })
+                }
+              >
+                <FaArrowUp />
+              </Button>) : null}
+          
+              {!this.state.atBottom ? (<Button
+                variant="secondary"
+                onClick={() =>
+                  this.chatEndRef.current?.scrollIntoView({
+                    behavior: "smooth",
+                  })
+                }
+              >
+                <FaArrowDown />
+              </Button>) : null}
+            </div>
           </Col>
-        )}
       </>
     )
   }
@@ -517,9 +530,10 @@ class FrevaGPT extends React.Component {
           <Row
             className="overflow-auto position-relative"
             id="chatContainer"
-            onScroll={debounce(this.handleScroll, 100)}
+            onScroll={debounce(this.setPosition, 100)}
           >
             <Col md={12}>
+              <div ref={this.chatStartRef}></div>
               <ChatBlock onScrollDown={this.scrollDown} />
 
               <PendingAnswerComponent

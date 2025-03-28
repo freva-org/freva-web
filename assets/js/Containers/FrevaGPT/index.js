@@ -342,7 +342,7 @@ class FrevaGPT extends React.Component {
       atBottom:
         container.scrollTop + container.clientHeight >=
         container.scrollHeight - 200,
-      atTop: container.scrollTop < 50
+      atTop: container.scrollTop < 50,
     });
   }
 
@@ -395,7 +395,7 @@ class FrevaGPT extends React.Component {
           </>
         ) : null}
       </>
-    )
+    );
   }
 
   renderBotInput() {
@@ -433,7 +433,7 @@ class FrevaGPT extends React.Component {
           )}
         </InputGroup>
       </Col>
-    )
+    );
   }
 
   renderChatSpinner() {
@@ -454,11 +454,10 @@ class FrevaGPT extends React.Component {
           </Row>
         ) : null}
       </>
-    )
+    );
   }
 
   renderScrollButtons() {
-
     // here also no suitable solutions using bootstrap found -> need for better solution
     const scrollButtonStyle = {
       zIndex: 10,
@@ -469,25 +468,28 @@ class FrevaGPT extends React.Component {
 
     return (
       <>
-          <Col
-            md={12}
-            style={scrollButtonStyle}
-            className="d-flex flex-row justify-content-end"
-          >
-            <div className="d-flex flex-column">
-              {!this.state.atTop ? (<Button 
+        <Col
+          md={12}
+          style={scrollButtonStyle}
+          className="d-flex flex-row justify-content-end"
+        >
+          <div className="d-flex flex-column">
+            {!this.state.atTop ? (
+              <Button
                 variant="secondary"
                 className="mb-2"
-                onClick={() => 
+                onClick={() =>
                   this.chatStartRef.current?.scrollIntoView({
-                    behavior: "smooth"
+                    behavior: "smooth",
                   })
                 }
               >
                 <FaArrowUp />
-              </Button>) : null}
-          
-              {!this.state.atBottom ? (<Button
+              </Button>
+            ) : null}
+
+            {!this.state.atBottom ? (
+              <Button
                 variant="secondary"
                 onClick={() =>
                   this.chatEndRef.current?.scrollIntoView({
@@ -496,11 +498,12 @@ class FrevaGPT extends React.Component {
                 }
               >
                 <FaArrowDown />
-              </Button>) : null}
-            </div>
-          </Col>
+              </Button>
+            ) : null}
+          </div>
+        </Col>
       </>
-    )
+    );
   }
 
   renderBotContent() {
@@ -509,7 +512,7 @@ class FrevaGPT extends React.Component {
     // better solution needed (wasn't able to find any suitable bootstrap class -> need of fixed height for overflow-auto -> scrolling)
     const chatWindow = {
       height: windowHeight,
-    };   
+    };
 
     return (
       <>

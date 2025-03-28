@@ -4,9 +4,9 @@ from typing import Union
 import requests
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse, QueryDict
 from django.shortcuts import render
-from django.core.exceptions import PermissionDenied
 
 
 @login_required()

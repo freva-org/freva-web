@@ -18,8 +18,8 @@ export const botRequests = {
     },
     {
       title: "Name the most common projections for climate data",
-      thread: "ROexyJChy8HcMNk0Mr70tFAGIctxApHi"
-    }
+      thread: "ROexyJChy8HcMNk0Mr70tFAGIctxApHi",
+    },
   ],
   freva: [
     {
@@ -28,12 +28,13 @@ export const botRequests = {
     },
     {
       title: "What facets can I specify using the data browser?",
-      thread: "l3kLSpRUizJzTmeEd3ZWAoW02IpdP1bz"
+      thread: "l3kLSpRUizJzTmeEd3ZWAoW02IpdP1bz",
     },
     {
-      title: "Use the data browser to specify the available experiments for CMIP5 data",
-      thread: "WPAJdUq5mdGWE6uHSNPRNLXYDszTS24J"
-    }
+      title:
+        "Use the data browser to specify the available experiments for CMIP5 data",
+      thread: "WPAJdUq5mdGWE6uHSNPRNLXYDszTS24J",
+    },
   ],
 };
 

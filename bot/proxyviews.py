@@ -2,7 +2,7 @@ from urllib.parse import urljoin
 
 import requests
 from django.conf import settings
-from django.http import StreamingHttpResponse, HttpResponseForbidden
+from django.http import HttpResponseForbidden, StreamingHttpResponse
 from django.views import View
 
 

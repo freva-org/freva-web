@@ -28,7 +28,7 @@ import ChatBlock from "./components/ChatBlock";
 import SidePanel from "./components/SidePanel";
 import PendingAnswerComponent from "./components/PendingAnswerComponent";
 
-import { truncate } from "./utils";
+import { truncate, chatExceedsWindow, getPosition } from "./utils";
 
 import { setThread, setConversation, addElement } from "./actions";
 
@@ -72,9 +72,6 @@ class FrevaGPT extends React.Component {
   }
 
   async componentDidMount() {
-    // document.querySelector
-    // document.getElementById('chatContainer').addEventListener('scroll', this.handleScroll)
-
     // if thread giving on mounting the component, set thread within store
     const givenQueryParams = browserHistory.getCurrentLocation().query;
     if (
@@ -337,12 +334,10 @@ class FrevaGPT extends React.Component {
   }
 
   setPosition() {
-    const container = document.querySelector("#chatContainer");
+    const position = getPosition();
     this.setState({
-      atBottom:
-        container.scrollTop + container.clientHeight >=
-        container.scrollHeight - 200,
-      atTop: container.scrollTop < 50,
+      atBottom: position.atBottom,
+      atTop: position.atTop,
     });
   }
 
@@ -356,8 +351,8 @@ class FrevaGPT extends React.Component {
   }
 
   scrollDown() {
-    if (this.state.atBottom) {
-      this.chatEndRef.current?.scrollIntoView();
+    if (chatExceedsWindow() && this.state.atBottom) {
+      this.chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
   }
 
@@ -400,7 +395,7 @@ class FrevaGPT extends React.Component {
 
   renderBotInput() {
     return (
-      <Col>
+      <Col id="botInput">
         <InputGroup className="mb-2 pb-2">
           <FormControl
             as="textarea"
@@ -542,7 +537,7 @@ class FrevaGPT extends React.Component {
               <PendingAnswerComponent
                 content={this.state.dynamicAnswer}
                 variant={this.state.dynamicVariant}
-                position={this.state.atBottom}
+                atBottom={this.state.atBottom}
                 ref={{
                   chatEndRef: this.chatEndRef,
                   lastVariant: this.lastVariant,

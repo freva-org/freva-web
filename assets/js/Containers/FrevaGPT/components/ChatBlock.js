@@ -11,7 +11,7 @@ import remarkGfm from "remark-gfm";
 
 import { FaExpand } from "react-icons/fa";
 
-import { replaceLinebreaks } from "../utils";
+import { replaceLinebreaks, chatExceedsWindow } from "../utils";
 
 import * as constants from "../constants";
 
@@ -35,8 +35,16 @@ class ChatBlock extends React.Component {
   }
 
   componentDidUpdate() {
-    if (!isEmpty(this.state.conversation)) {
-      this.props.onScrollDown();
+    // only scroll when user input is added to conversation which is long (exceedswindowheight)
+    // all other scrolling is done by the pendinganswercomponent
+    if (chatExceedsWindow()) {
+      if (
+        this.props.chatBlock.conversation[
+          this.props.chatBlock.conversation.length - 1
+        ].variant === "User"
+      ) {
+        this.props.onScrollDown();
+      }
     }
   }
 

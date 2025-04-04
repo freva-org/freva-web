@@ -472,7 +472,7 @@ class FrevaGPT extends React.Component {
             {!this.state.atTop ? (
               <Button
                 variant="secondary"
-                className="mb-2"
+                className={!this.state.atBottom ? "mb-2" : ""}
                 onClick={() =>
                   this.chatStartRef.current?.scrollIntoView({
                     behavior: "smooth",

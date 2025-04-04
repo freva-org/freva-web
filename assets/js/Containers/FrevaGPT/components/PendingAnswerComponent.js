@@ -72,7 +72,7 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
                     {renderedCode}
                   </SyntaxHighlighter>
                   <span>
-                    <Spinner size="sm" />
+                    <Spinner className="mx-1" size="sm" />
                   </span>
                 </Card.Body>
               </Card>

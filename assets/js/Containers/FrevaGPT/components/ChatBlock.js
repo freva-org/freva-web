@@ -89,9 +89,8 @@ class ChatBlock extends React.Component {
       //   md={constants.BOT_COLUMN_STYLE}
       //   className="border-0 border-bottom mb-3 shadow-sm card-body"
       // >
-      <div className="w-75 mb-5">
+      <div className="w-75 mb-5" key={index}>
         <img
-          key={index}
           onClick={() => this.enlargeImage(element.content)}
           src={`data:image/jpeg;base64,${element.content}`}
           className="mw-100"

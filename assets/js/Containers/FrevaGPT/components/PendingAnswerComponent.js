@@ -9,7 +9,7 @@ import { oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 import Markdown from "react-markdown";
 
 import * as constants from "../constants";
-import { chatExceedsWindow } from "../utils";
+import { chatExceedsWindow, scrollToChatBottom } from "../utils";
 
 const PendingAnswerComponent = forwardRef((props, ref) => {
   const [renderedCode, setRenderedCode] = useState("");
@@ -23,7 +23,7 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
     // conditional autoscrolling (might need some debounce for performance)
     if (props.content !== "" && chatExceedsWindow()) {
       if (props.atBottom) {
-        ref.chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        scrollToChatBottom();
       }
     }
   }, [props.content]);

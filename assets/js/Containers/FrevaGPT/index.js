@@ -28,7 +28,12 @@ import ChatBlock from "./components/ChatBlock";
 import SidePanel from "./components/SidePanel";
 import PendingAnswerComponent from "./components/PendingAnswerComponent";
 
-import { truncate, chatExceedsWindow, getPosition } from "./utils";
+import {
+  truncate,
+  chatExceedsWindow,
+  getPosition,
+  scrollToChatBottom,
+} from "./utils";
 
 import { setThread, setConversation, addElement } from "./actions";
 
@@ -66,8 +71,6 @@ class FrevaGPT extends React.Component {
       atTop: true,
     };
 
-    this.chatEndRef = React.createRef();
-    this.chatStartRef = React.createRef();
     this.lastVariant = React.createRef("User");
   }
 
@@ -352,7 +355,7 @@ class FrevaGPT extends React.Component {
 
   scrollDown() {
     if (chatExceedsWindow() && this.state.atBottom) {
-      this.chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      scrollToChatBottom();
     }
   }
 
@@ -474,9 +477,9 @@ class FrevaGPT extends React.Component {
                 variant="secondary"
                 className={!this.state.atBottom ? "mb-2" : ""}
                 onClick={() =>
-                  this.chatStartRef.current?.scrollIntoView({
-                    behavior: "smooth",
-                  })
+                  document
+                    .getElementById("chatContainer")
+                    .scrollTo({ top: 0, behavior: "smooth" })
                 }
               >
                 <FaArrowUp />
@@ -484,14 +487,7 @@ class FrevaGPT extends React.Component {
             ) : null}
 
             {!this.state.atBottom ? (
-              <Button
-                variant="secondary"
-                onClick={() =>
-                  this.chatEndRef.current?.scrollIntoView({
-                    behavior: "smooth",
-                  })
-                }
-              >
+              <Button variant="secondary" onClick={() => scrollToChatBottom()}>
                 <FaArrowDown />
               </Button>
             ) : null}
@@ -531,7 +527,6 @@ class FrevaGPT extends React.Component {
             onScroll={debounce(this.setPosition, 100)}
           >
             <Col md={12}>
-              <div ref={this.chatStartRef}></div>
               <ChatBlock onScrollDown={this.scrollDown} />
 
               <PendingAnswerComponent
@@ -539,13 +534,11 @@ class FrevaGPT extends React.Component {
                 variant={this.state.dynamicVariant}
                 atBottom={this.state.atBottom}
                 ref={{
-                  chatEndRef: this.chatEndRef,
                   lastVariant: this.lastVariant,
                 }}
               />
 
               {this.renderChatSpinner()}
-              <div ref={this.chatEndRef}></div>
             </Col>
             {this.renderScrollButtons()}
           </Row>

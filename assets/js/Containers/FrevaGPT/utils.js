@@ -54,3 +54,10 @@ export function chatExceedsWindow() {
 
   return chatExceedsWindowHeight;
 }
+
+export function scrollToChatBottom() {
+  document.getElementById("chatContainer").scrollTo({
+    top: document.getElementById("chatContainer").scrollHeight,
+    behavior: "smooth",
+  });
+}

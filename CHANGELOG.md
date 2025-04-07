@@ -3,6 +3,10 @@
 
 
 All notable changes to this project will be documented in this file.
+## [v2504.0.0]
+## Changed
+- Dropped STAC-API and supported only STATIC catalog
+
 ## [v2502.0.0]
 ## Changed
 - Adjusted SelectField widget to support multiple inputs

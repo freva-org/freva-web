@@ -28,7 +28,6 @@ dependencies:
   - paramiko
   - pep8
   - pip
-  - mod_wsgi
   - pip:
     - black
     - isort
@@ -46,6 +45,7 @@ dependencies:
     - types-requests
     - types-toml
     - hurry.filesize
+    - mod_wsgi
   - pygtail
   - pylint
   - pyjwt

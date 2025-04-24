@@ -40,7 +40,6 @@ import { setThread, setConversation, addElement } from "./actions";
 import { botSuggestions } from "./exampleRequests";
 
 class FrevaGPT extends React.Component {
-
   constructor(props) {
     super(props);
     this.handleUserInput = this.handleUserInput.bind(this);

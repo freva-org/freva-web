@@ -3,6 +3,10 @@
 
 
 All notable changes to this project will be documented in this file.
+## [v2505.0.0]
+## Changed
+- Fix an issue on BBOX and removed the minor leftover of STAC-API
+
 ## [v2504.0.0]
 ## Changed
 - Dropped STAC-API and supported only STATIC catalog

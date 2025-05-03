@@ -3,7 +3,6 @@ channels:
   - conda-forge
 dependencies:
   - bleach
-  - conda
   - configparser
   - coverage
   - distributed
@@ -33,7 +32,6 @@ dependencies:
     - black
     - isort
     - requests_mock
-    - django-auth-ldap
     - django-datatable-view
     - django-templated-email
     - django_compressor
@@ -53,8 +51,8 @@ dependencies:
   - pytest-cov
   - pytest-env
   - pytest-html
-  - python-ldap
   - redis-py
   - requests-mock
   - sphinx
   - testpath
+  - toml

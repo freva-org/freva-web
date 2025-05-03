@@ -1,0 +1,47 @@
+# Python artifacts
+*.pyc
+*.db
+*.log
+
+# Dev tools and temp
+bump.py
+virt
+venv/*
+conda/*
+node_modules
+evaluation_system.conf
+activate_web
+python=*/  # unclear — adjust as needed
+*.log
+*.ini
+# Static files
+static/*
+static/preview/*
+static_root/img/favicon.svg
+assets/bundles/*
+webpack-stats.json
+tail/*
+Makefile
+dummy_plugin
+tests
+docker-compose.yaml
+package-lock.json
+# Docker-specific configs
+freva_web.conf
+docker/
+db
+Dockerfile
+README.md
+LICENSE.md
+CHANGELOG.md
+
+# Git and dotfiles (ignore all, then allow a few)
+.*
+!.envrc
+!.eslintrc
+!.project
+!.babelrc
+!.npmrc
+!.prettierrc
+# Django migrations
+base/migrations/*

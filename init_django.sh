@@ -1,7 +1,5 @@
 #!/bin/bash
 
-export PATH=/opt/condaenv/bin:$PATH
-
 python manage.py makemigrations base
 python manage.py migrate --fake-initial --noinput
 python manage.py migrate --fake contenttypes

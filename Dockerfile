@@ -1,4 +1,5 @@
-FROM condaforge/mambaforge
+FROM docker.io/mambaorg/micromamba
+USER root
 ARG CONDA_ENV_DIR=/opt/condaenv
 ARG FREVA_WEB_DIR=/opt/freva_web
 ARG EMAIL_HOST_PASSWORD=""
@@ -7,24 +8,31 @@ ARG VERSION
 LABEL org.opencontainers.image.authors="DRKZ-CLINT"
 LABEL org.opencontainers.image.source="https://github.com/FREVA-CLINT/freva-web"
 LABEL org.opencontainers.image.version="$VERSION"
-ARG CONDA_ENV_DIR
-ARG FREVA_WEB_DIR
-
-# mamba automatically creates CONDA_ENV_DIR
-RUN set -e && \
-    mkdir -p /opt/conda/pkgs/cache && \
-    mamba update mamba -n base -c conda-forge -y && \
-    mamba clean -afy
+ENV PATH=/opt/conda/bin:$PATH\
+    DJANGO_SUPERUSER_EMAIL=freva@dkrz.de\
+    EMAIL_HOST_PASSWORD=$EMAIL_HOST_PASSWORD\
+    PYTHONUNBUFFERED=1
 
 WORKDIR ${FREVA_WEB_DIR}
+
 COPY . .
-ENV PATH=$CONDA_ENV_DIR/bin:$PATH\
-    DJANGO_SUPERUSER_EMAIL=freva@dkrz.de\
-    EMAIL_HOST_PASSWORD=$EMAIL_HOST_PASSWORD
-RUN  set -e && \
-     mamba env create -y -p ${CONDA_ENV_DIR} -f conda-env.yml --debug &&\
-     mamba clean -afy &&\
-     npm install && npm run build-production &&\
-     rm -rf node_modules
+
+RUN  set -eu && \
+     micromamba create -n webpack -y -q -c conda-forge --override-channels webpack-cli &&\
+     micromamba run -n webpack npm install && \
+     micromamba run -n webpack npm run build-production &&\
+     rm -rf node_modules .eslintrc .project .babelrc .npmrc .prettierrc &&\
+     micromamba env remove -n webpack -y -q &&\
+     micromamba clean -qafyitl --trash
+
+
+RUN  set -eu && \
+     micromamba env create -y -q -n freva-web -f conda-env.yml && \
+     micromamba clean -qafyitl --trash && \
+     micromamba run -n freva-web python -m pip cache purge --no-input -q &&\
+     micromamba clean -qafyitl --trash &&\
+     rm conda-env.yml
+
+ENV ENV_NAME=freva-web
 EXPOSE 8000
-CMD  ["./init_django.sh"] 
+CMD  ["./init_django.sh"]

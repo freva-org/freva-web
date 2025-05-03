@@ -17,6 +17,12 @@ evaluation_system.conf
 !.gitignore
 !.github
 !.envrc
+!.dockerignore
+!.project
+!.eslintrc
+!.babelrc
+!.npmrc
+!.prettierrc
 
 static/preview/*
 tail/*

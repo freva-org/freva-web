@@ -17,7 +17,7 @@ WORKDIR ${FREVA_WEB_DIR}
 
 COPY . .
 
-RUN  set -eu && \
+RUN  set -exu && \
      micromamba create -n webpack -y -q -c conda-forge --override-channels webpack-cli &&\
      micromamba run -n webpack npm install && \
      micromamba run -n webpack npm run build-production &&\
@@ -26,7 +26,7 @@ RUN  set -eu && \
      micromamba clean -y -i -t -l -f
 
 
-RUN  set -eu && \
+RUN  set -exu && \
      micromamba env create -y -q -n freva-web -f conda-env.yml && \
      micromamba run -n freva-web python -m pip cache purge --no-input -q &&\
      rm conda-env.yml &&\

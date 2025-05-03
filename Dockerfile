@@ -23,15 +23,14 @@ RUN  set -eu && \
      micromamba run -n webpack npm run build-production &&\
      rm -rf node_modules .eslintrc .project .babelrc .npmrc .prettierrc &&\
      micromamba env remove -n webpack -y -q &&\
-     micromamba clean -qafyitl --trash
+     micromamba clean -y -i -t -l -f
 
 
 RUN  set -eu && \
      micromamba env create -y -q -n freva-web -f conda-env.yml && \
-     micromamba clean -qafyitl --trash && \
      micromamba run -n freva-web python -m pip cache purge --no-input -q &&\
-     micromamba clean -qafyitl --trash &&\
-     rm conda-env.yml
+     rm conda-env.yml &&\
+     micromamba clean -y -i -t -l -f
 
 ENV ENV_NAME=freva-web
 EXPOSE 8000

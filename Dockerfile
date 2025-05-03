@@ -19,7 +19,7 @@ COPY . .
 
 RUN  set -exu && \
      micromamba create -n webpack -y -q -c conda-forge --override-channels webpack-cli &&\
-     micromamba run -n webpack npm insall npm && \
+     micromamba run -n webpack npm install -g npm && \
      micromamba run -n webpack npm install && \
      micromamba run -n webpack npm run build-production &&\
      rm -rf node_modules .eslintrc .project .babelrc .npmrc .prettierrc &&\

@@ -1,12 +1,12 @@
 """ Default urlconf for django_evaluation """
-
 from django.conf import settings
 from django.conf.urls import static
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from django.urls import include
+from django.urls import include, path
 from django.urls import re_path as url
 from django.views.generic import RedirectView
+from django_evaluation.auth import CustomOIDCCallbackView
 
 from base.views_api import AuthenticatedUser
 from history.views_api import ResultFacets, ResultFiles
@@ -18,6 +18,41 @@ from plugins.views_api import (
 )
 from solr.views_api import ncdump
 
+
+
+from django.http import HttpResponseRedirect
+from django.views.decorators.http import require_GET
+import logging
+import time
+logger = logging.getLogger(__name__)
+
+# @require_GET
+# def oidc_token_callback(request):
+#     """
+#     Simple view to extract OIDC tokens from the session after authentication.
+#     Should be called after OIDC authentication completes.
+#     """
+#     logger.info("OIDC token callback called")
+    
+#     if request.user.is_authenticated:
+#         id_token = request.session.get('oidc_id_token')
+#         access_token = request.session.get('oidc_auth_tokens', {}).get('access_token')
+#         refresh_token = request.session.get('oidc_auth_tokens', {}).get('refresh_token')
+        
+#         if id_token:
+#             # Store in our own keys
+#             request.session['oidc_access_token'] = access_token
+#             request.session['oidc_refresh_token'] = refresh_token
+#             request.session['oidc_token_expiry'] = int(time.time()) + 3600  # 1 hour default
+#             logger.info(f"Tokens extracted and stored in session")
+        
+#         next_url = request.session.get('oidc_login_next')
+#         if next_url:
+#             logger.info(f"Redirecting to: {next_url}")
+#             del request.session['oidc_login_next']
+#             return HttpResponseRedirect(next_url)
+    
+#     return HttpResponseRedirect('/')
 admin.autodiscover()
 
 urlpatterns = [
@@ -58,6 +93,11 @@ urlpatterns = [
         ResultFiles.as_view(),
         name="api-history-files",
     ),
+    path('oidc/callback/', CustomOIDCCallbackView.as_view(), name='oidc_authentication_callback'),
+
+    path('oidc/', include('mozilla_django_oidc.urls')),
+    # path('oidc-token-callback/', oidc_token_callback, name='oidc_token_callback'),
+
 ]
 
 if settings.DEBUG:

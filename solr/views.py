@@ -7,16 +7,66 @@ views for the solr application
 """
 
 import logging
-from typing import Union
-
 import requests
 from django.conf import settings
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse, QueryDict
 from django.shortcuts import render
+from django.http import JsonResponse, QueryDict, StreamingHttpResponse
+from django_evaluation.auth import oidc_token_required, get_auth_header
 
+from functools import wraps
 
-@login_required()
+# TODO: when we have time we need to refactor here to keep it clean and unite
+def conditional_oidc_required(view_func):
+    """
+    Decorator to conditionally apply the oidc_token_required decorator
+    based on the presence of the 'zarr_stream' query parameter.
+    """
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+        if request.GET.get('zarr_stream') == 'true':
+            return oidc_token_required(view_func)(request, *args, **kwargs)
+        else:
+            return view_func(request, *args, **kwargs)
+    return wrapper
+@oidc_token_required
+def load_data(request, flavour):
+    """
+    Proxy and stream the databrowser load endpoint,
+    automatically passing through the Bearer token and query params.
+    """
+    api_url = f"{settings.DATA_BROWSER_HOST}/api/freva-nextgen/databrowser/load/{flavour}"
+    params = QueryDict(request.META.get('QUERY_STRING', ''), mutable=True).dict()
+    
+    headers = get_auth_header(request)
+    try:
+        upstream = requests.get(
+            api_url,
+            params=params,
+            headers=headers,
+            stream=True,
+            timeout=100,
+        )
+    except requests.RequestException as e:
+        return JsonResponse({"error": str(e)}, status=503)
+    
+    if upstream.status_code != 201:
+        try:
+            payload = upstream.json()
+        except ValueError:
+            payload = upstream.text
+        return JsonResponse(payload, status=upstream.status_code)
+    response = StreamingHttpResponse(
+        upstream.iter_content(chunk_size=8192),
+        status=upstream.status_code,
+        content_type= "text/plain",
+    )
+    if request.GET.get("catalogue-type") == "intake":
+        filename = f"IntakeEsmCatalogue_{flavour}_file_zarr.json"
+        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        return response
+    return response
+
+@oidc_token_required
 def databrowser(request):
     """
     New view for plugin list
@@ -30,11 +80,11 @@ def search_overview(request):
         request, f"{settings.DATA_BROWSER_HOST}/api/freva-nextgen/databrowser/overview"
     )
 
-
-def extended_search(request, flavour, unique_key):
+@conditional_oidc_required
+def extended_search(request, flavour):
     return reverse_proxy(
         request,
-        f"{settings.DATA_BROWSER_HOST}/api/freva-nextgen/databrowser/extended-search/{flavour}/{unique_key}",
+        f"{settings.DATA_BROWSER_HOST}/api/freva-nextgen/databrowser/extended-search/{flavour}/file",
     )
 
 
@@ -75,15 +125,19 @@ def get_all_parameters(query_string):
     return parameters
 
 
+@oidc_token_required
 def reverse_proxy(request, path):
     api_url = path
     query_string = request.META["QUERY_STRING"]
     all_parameters = get_all_parameters(query_string)
+    headers = get_auth_header(request)
+    
     try:
         response = requests.request(
             method="GET",
             url=api_url,
             params=all_parameters,
+            headers=headers,  # Authorization header
             timeout=100,
         )
         return JsonResponse(response.json(), status=response.status_code)

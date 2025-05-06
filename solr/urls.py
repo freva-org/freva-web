@@ -12,10 +12,12 @@ from django.urls import path
 from django.urls import re_path as url
 
 from .proxyviews import DataBrowserProxy
-from .views import databrowser
+from .views import databrowser, load_data, extended_search
 
 urlpatterns = [
     url(r"^databrowser/$", databrowser, name="data_browser"),
+    path("api/freva-nextgen/databrowser/load/<str:flavour>/", load_data, name="load_data"),
+    path("api/freva-nextgen/databrowser/extended-search/<str:flavour>/file/", extended_search, name="extended_search"),
 ]
 if int(os.environ.get("DEV_MODE", "0")) == 1:
     urlpatterns.append(

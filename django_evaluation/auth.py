@@ -1,14 +1,14 @@
-import logging
-from mozilla_django_oidc.auth import OIDCAuthenticationBackend
 import functools
+import logging
 import time
+
 import requests
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
-from mozilla_django_oidc.views import OIDCAuthenticationCallbackView
 from django.urls import reverse
-
+from mozilla_django_oidc.auth import OIDCAuthenticationBackend
+from mozilla_django_oidc.views import OIDCAuthenticationCallbackView
 
 logger = logging.getLogger(__name__)
 

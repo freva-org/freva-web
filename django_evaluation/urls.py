@@ -1,14 +1,19 @@
 """ Default urlconf for django_evaluation """
+import logging
+import time
+
 from django.conf import settings
 from django.conf.urls import static
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.http import HttpResponseRedirect
 from django.urls import include, path
 from django.urls import re_path as url
+from django.views.decorators.http import require_GET
 from django.views.generic import RedirectView
-from django_evaluation.auth import CustomOIDCCallbackView
 
 from base.views_api import AuthenticatedUser
+from django_evaluation.auth import CustomOIDCCallbackView
 from history.views_api import ResultFacets, ResultFiles
 from plugins.views_api import (
     ExportPlugin,
@@ -18,12 +23,6 @@ from plugins.views_api import (
 )
 from solr.views_api import ncdump
 
-
-
-from django.http import HttpResponseRedirect
-from django.views.decorators.http import require_GET
-import logging
-import time
 logger = logging.getLogger(__name__)
 
 # @require_GET

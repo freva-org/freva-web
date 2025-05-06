@@ -7,13 +7,15 @@ views for the solr application
 """
 
 import logging
+from functools import wraps
+
 import requests
 from django.conf import settings
-from django.shortcuts import render
 from django.http import JsonResponse, QueryDict, StreamingHttpResponse
-from django_evaluation.auth import oidc_token_required, get_auth_header
+from django.shortcuts import render
 
-from functools import wraps
+from django_evaluation.auth import get_auth_header, oidc_token_required
+
 
 # TODO: when we have time we need to refactor here to keep it clean and unite
 def conditional_oidc_required(view_func):

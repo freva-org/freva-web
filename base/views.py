@@ -12,6 +12,7 @@ from evaluation_system.misc import config
 from base.models import UIMessages
 from django_evaluation.monitor import _restart
 
+
 def home(request):
     """Default view for the root"""
     messages = UIMessages.objects.order_by("-id").filter(resolved=False)

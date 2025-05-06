@@ -12,7 +12,7 @@ from django.urls import path
 from django.urls import re_path as url
 
 from .proxyviews import DataBrowserProxy
-from .views import databrowser, load_data, extended_search
+from .views import databrowser, extended_search, load_data
 
 urlpatterns = [
     url(r"^databrowser/$", databrowser, name="data_browser"),

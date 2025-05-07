@@ -838,10 +838,29 @@ function DataBrowserCommandImpl(props) {
 
     if (type === "intake") {
       if (zarrEnabled && zarrAllowed) {
-        // zarr → load endpoint with catalogue_type=intake
-        return `/api/freva-nextgen/databrowser/load/${flavour}?catalogue-type=intake`;
+        // it's always constant for the API
+        const queryParams = [`catalogue-type=intake`];
+
+        // add search parameters to load endpoint
+        // other search parameters
+        Object.keys(selectedFacets).forEach(key => {
+          queryParams.push(`${props.facetMapping[key]}=${encodeURIComponent(selectedFacets[key])}`);
+        });
+
+        // date and bbox parameters if they exist
+        if (props.minDate) {
+          queryParams.push(`time=${props.minDate}to${props.maxDate}`);
+          if (dateSelectorToCli) queryParams.push(`time_select=${dateSelectorToCli}`);
+        }
+        
+        if (props.minLon) {
+          queryParams.push(`bbox=${props.minLon},${props.maxLon},${props.minLat},${props.maxLat}`);
+          if (bboxSelectorToCli) queryParams.push(`bbox_select=${bboxSelectorToCli}`);
+        }
+        
+        return `/api/freva-nextgen/databrowser/load/${flavour}?${queryParams.join('&')}`;
       } else {
-        // classic intake-catalogue
+        // intake-catalogue without zarr
         return `/api/freva-nextgen/databrowser/intake-catalogue/${uniq_key}`;
       }
     }

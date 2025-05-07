@@ -191,8 +191,8 @@ DATABASES = {
     },
 }
 AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-    'django_evaluation.auth.CustomOIDCBackend',
+    "django.contrib.auth.backends.ModelBackend",
+    "django_evaluation.auth.CustomOIDCBackend",
 )
 ### Caching stuff
 REDIS_HOST = os.environ.get("REDIS_HOST", "127.0.0.1")
@@ -304,17 +304,17 @@ for title, url, html_id in web_config.get("menu_entries", []) or _MENU_ENTRIES:
             {"name": title, "url": reverse_lazy(url), "html_id": html_id}
         )
 
-OIDC_RP_CLIENT_ID = os.environ.get('OIDC_RP_CLIENT_ID', 'freva')
-OIDC_RP_CLIENT_SECRET = os.environ.get('OIDC_RP_CLIENT_SECRET', 'secret')
-OIDC_OP_AUTHORIZATION_ENDPOINT = OIDC_URL + '/protocol/openid-connect/auth'
-OIDC_OP_TOKEN_ENDPOINT = OIDC_URL + '/protocol/openid-connect/token'
-OIDC_OP_USER_ENDPOINT = OIDC_URL + '/protocol/openid-connect/userinfo'
-OIDC_OP_JWKS_ENDPOINT = OIDC_URL + '/protocol/openid-connect/certs'
-OIDC_RP_SIGN_ALGO = 'RS256'
+OIDC_RP_CLIENT_ID = os.environ.get("OIDC_RP_CLIENT_ID", "freva")
+OIDC_RP_CLIENT_SECRET = os.environ.get("OIDC_RP_CLIENT_SECRET", "secret")
+OIDC_OP_AUTHORIZATION_ENDPOINT = OIDC_URL + "/protocol/openid-connect/auth"
+OIDC_OP_TOKEN_ENDPOINT = OIDC_URL + "/protocol/openid-connect/token"
+OIDC_OP_USER_ENDPOINT = OIDC_URL + "/protocol/openid-connect/userinfo"
+OIDC_OP_JWKS_ENDPOINT = OIDC_URL + "/protocol/openid-connect/certs"
+OIDC_RP_SIGN_ALGO = "RS256"
 OIDC_CREATE_USER = True
-OIDC_STORE_ID_TOKEN = True # important for the logout callback
-OIDC_STORE_ACCESS_TOKEN = True # important for the logout callback
+OIDC_STORE_ID_TOKEN = True  # important for the logout callback
+OIDC_STORE_ACCESS_TOKEN = True  # important for the logout callback
 
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
-OIDC_VERIFY_SSL = False # Set to True in production
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+OIDC_VERIFY_SSL = False  # Set to True in production

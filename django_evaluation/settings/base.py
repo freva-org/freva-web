@@ -63,7 +63,6 @@ INSTALLED_APPS = (
     "datatableview",
     "webpack_loader",
     "rest_framework",
-    "mod_wsgi.server",
     "debug_toolbar_user_panel",
     "base",
     "plugins",
@@ -260,7 +259,11 @@ REST_FRAMEWORK = {
 }
 
 MENU_ENTRIES = [
-    {"name": "Plugins", "url": reverse_lazy("plugins:home"), "html_id": "plugin_menu"},
+    {
+        "name": "Plugins",
+        "url": reverse_lazy("plugins:home"),
+        "html_id": "plugin_menu",
+    },
     {
         "name": "History",
         "url": reverse_lazy("history:history"),
@@ -272,5 +275,9 @@ MENU_ENTRIES = [
         "html_id": "browser_menu",
     },
     {"name": "Help", "url": reverse_lazy("plugins:about"), "html_id": "doc_menu"},
-    {"name": "Contact", "url": reverse_lazy("base:contact"), "html_id": "contact_menu"},
+    {
+        "name": "Contact",
+        "url": reverse_lazy("base:contact"),
+        "html_id": "contact_menu",
+    },
 ]

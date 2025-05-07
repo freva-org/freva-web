@@ -18,6 +18,25 @@ WORKDIR ${FREVA_WEB_DIR}
 
 COPY . .
 
+RUN set -eu \
+     && for user in sync news uucp irc list lp games gnats ftp man proxy operator talk nobody _apt;do\
+       deluser $user 2> /dev/null || true;\
+     done \
+     && delgroup mambauser || true \
+     && rm -rf /home/mambauser || true \
+     && delgroup nogroup || true \
+     && addgroup --system --gid 65534 nobody || true \
+     && adduser \
+    --system \
+    --uid 65534 \
+    --gid 65534 \
+    --no-create-home \
+    --disabled-password \
+    --shell /usr/sbin/nologin \
+    nobody
+
+
+
 RUN  set -exu && \
      sed -i "s|\"path\": \"${BUNDLE_HOST_PATH}|\"path\": \"${FREVA_WEB_DIR}|g" \
      ${FREVA_WEB_DIR}/webpack-stats.json &&\

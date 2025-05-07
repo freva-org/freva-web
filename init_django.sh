@@ -19,5 +19,5 @@ python manage.py shell -c \
     'from django.contrib.sites.models import Site; Site.objects.create(id=1, domain="example.com", name="example.com").save()' || echo 0
 exec gunicorn -b [::]:8000 -w 1 django_evaluation.wsgi \
      --log-level $LOG_LEVEL --error-logfile $LOG_DIR/freva-web.error.log \
-     --user ${USER:-$(id -u)} \
-     --group ${GROUP:-$(id-g)}
+     --user ${USER:-65534} \
+     --group ${GROUP:-65534}

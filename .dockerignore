@@ -18,8 +18,6 @@ python=*/  # unclear — adjust as needed
 static/*
 static/preview/*
 static_root/img/favicon.svg
-assets/bundles/*
-webpack-stats.json
 tail/*
 Makefile
 dummy_plugin
@@ -34,6 +32,10 @@ Dockerfile
 README.md
 LICENSE.md
 CHANGELOG.md
+
+# We need pre-build webpack stuff
+!assets/bundles/*
+!webpack-stats.json
 
 # Git and dotfiles (ignore all, then allow a few)
 .*

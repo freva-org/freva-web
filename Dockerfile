@@ -2,6 +2,7 @@ FROM docker.io/mambaorg/micromamba
 USER root
 ARG CONDA_ENV_DIR=/opt/condaenv
 ARG FREVA_WEB_DIR=/opt/freva_web
+ENV BUNDLE_HOST_PATH=${BUNDLE_HOST_PATH}
 ARG EMAIL_HOST_PASSWORD=""
 ARG VERSION
 
@@ -18,14 +19,9 @@ WORKDIR ${FREVA_WEB_DIR}
 COPY . .
 
 RUN  set -exu && \
-     micromamba create -n webpack -y -q -c conda-forge --override-channels webpack-cli &&\
-     micromamba run -n webpack npm install -g npm && \
-     micromamba run -n webpack npm install && \
-     micromamba run -n webpack npm run build-production &&\
-     rm -rf node_modules .eslintrc .project .babelrc .npmrc .prettierrc &&\
-     micromamba env remove -n webpack -y -q &&\
-     micromamba clean -y -i -t -l -f
-
+     sed -i "s|\"path\": \"${BUNDLE_HOST_PATH}|\"path\": \"${FREVA_WEB_DIR}|g" \
+     ${FREVA_WEB_DIR}/webpack-stats.json &&\
+     mkdir -p /data/logs && chmod 1777 -R /data &&
 
 RUN  set -exu && \
      micromamba env create -y -q -n freva-web -f conda-env.yml && \

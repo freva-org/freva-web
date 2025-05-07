@@ -56,3 +56,4 @@ dependencies:
   - sphinx
   - testpath
   - toml
+  - webpack-cli

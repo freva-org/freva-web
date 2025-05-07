@@ -3,7 +3,9 @@ channels:
   - conda-forge
 dependencies:
   - bleach
+  - django-debug-toolbar
   - django-ipware
+  - django-nose
   - django-webpack-loader
   - djangorestframework
   - fabric
@@ -20,6 +22,7 @@ dependencies:
   - pip:
       - django-datatable-view
       - django-templated-email
+      - django-debug-toolbar-user-panel
       - django_compressor
       - django-bootstrap-v5
       - django-model-utils

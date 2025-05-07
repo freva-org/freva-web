@@ -18,7 +18,7 @@ jobs:
         uses: mamba-org/setup-micromamba@v1
         with:
           environment-name: freva-web
-          environment-file: conda-env.yml
+          environment-file: dev-env.yml
           cache-environment: false
           cache-downloads: false
           init-shell: bash

@@ -2,4 +2,4 @@
 
 import warnings
 
-warnings.filterwarnings("always", category=DeprecationWarning, module="*")
+warnings.filterwarnings("always", category=DeprecationWarning)

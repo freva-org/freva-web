@@ -5,7 +5,6 @@ repo. If you need to override a setting locally, use local.py
 
 import logging
 import os
-from pathlib import Path
 
 import django.utils
 
@@ -240,7 +239,7 @@ SECRET_KEY = os.environ.get(
 
 
 # filter for user numbers
-USERNAME_FILTER = "[a-z]\d{6,6}"
+USERNAME_FILTER = r"[a-z]\d{6}"
 USERNAME_REPLACE = "*****"
 
 

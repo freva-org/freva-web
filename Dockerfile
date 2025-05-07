@@ -40,7 +40,7 @@ RUN set -eu \
 RUN  set -exu && \
      sed -i "s|\"path\": \"${BUNDLE_HOST_PATH}|\"path\": \"${FREVA_WEB_DIR}|g" \
      ${FREVA_WEB_DIR}/webpack-stats.json &&\
-     mkdir -p /data/logs && chmod 1777 -R /data
+     mkdir -p /data/logs ./base/migrations && chmod 1777 -R /data ./base/migrations
 
 RUN  set -exu && \
      micromamba env create -y -q -n freva-web -f conda-env.yml && \

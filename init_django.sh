@@ -3,7 +3,7 @@ set -u -o nounset -o pipefail -o errexit
 
 LOG_DIR=${API_LOG_DIR:-/data/logs}
 LOG_LEVEL="info"
-if [ "${DEBUG:0}" = "1" ];then
+if [ "${DEBUG:-0}" = "1" ];then
     LOG_LEVEL="debug"
 fi
 

@@ -11,13 +11,9 @@ node_modules
 venv/*
 conda/*
 evaluation_system.conf
-
+dev-env.yml
+dist/
 .*
-!.ci
-!.gitignore
-!.github
-!.envrc
-!.dockerignore
 !.project
 !.eslintrc
 !.babelrc

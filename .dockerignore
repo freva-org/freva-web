@@ -11,9 +11,10 @@ conda/*
 node_modules
 evaluation_system.conf
 activate_web
-python=*/  # unclear — adjust as needed
+python=*/
 *.log
 *.ini
+dev-env.yml
 # Static files
 static/*
 static/preview/*
@@ -32,6 +33,7 @@ Dockerfile
 README.md
 LICENSE.md
 CHANGELOG.md
+dist/
 
 # We need pre-build webpack stuff
 !assets/bundles/*

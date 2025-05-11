@@ -26,7 +26,7 @@ def oidc_token_required(view_func):
         if not request.user.is_authenticated:
             next_url = request.get_full_path()
             return HttpResponseRedirect(f"/?login_required=1&next={next_url}")
-
+        OIDC_VERIFY_SSL = settings.OIDC_VERIFY_SSL
         access_token = request.session.get("oidc_access_token")
         if not access_token:
             request.session["oidc_login_next"] = request.get_full_path()
@@ -51,7 +51,7 @@ def oidc_token_required(view_func):
                         "refresh_token": refresh_token,
                     }
 
-                    response = requests.post(token_url, data=data)
+                    response = requests.post(token_url, data=data, verify=OIDC_VERIFY_SSL)
                     if response.status_code == 200:
                         # Update tokens in session
                         token_info = response.json()

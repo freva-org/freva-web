@@ -10,8 +10,6 @@ DEV_MODE : 0|1
 PROJECT_ROOT : str
 FREVA_REST_URL : str
 OIDC_URL : str
-OIDC_RP_CLIENT_ID : str
-OIDC_RP_CLIENT_SECRET : str
 SCHEDULER_HOST : str
 REDIS_HOST : str
 REDIS_PORT : str
@@ -101,7 +99,7 @@ try:
     web_config = toml.loads(web_config_path.read_text())
 except FileNotFoundError:
     web_config = {}
-# SECURITY WARNING: don't run with debug turned on in production!
+# SECURITY WARNING: don"t run with debug turned on in production!
 # Set this to 0 on all server instances and True only for development.
 DEV = DEBUG = TEMPLATE_DEBUG = bool(int(os.environ.get("DEV_MODE", 0)))
 PROJECT_ROOT = os.environ.get("PROJECT_ROOT", None) or str(
@@ -184,15 +182,15 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": db_name,
         "USER": db_user,
-        "PASSWORD": db_password,  #'miklip',
-        "HOST": db_host,  #'wwwdev-miklip',
+        "PASSWORD": db_password,  #"miklip",
+        "HOST": db_host,  #"wwwdev-miklip",
         "PORT": db_port,
         "OPTIONS": {"charset": "utf8mb4"},
     },
 }
 AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-    'django_evaluation.auth.CustomOIDCBackend',
+    "django.contrib.auth.backends.ModelBackend",
+    "django_evaluation.auth.CustomOIDCBackend",
 )
 ### Caching stuff
 REDIS_HOST = os.environ.get("REDIS_HOST", "127.0.0.1")
@@ -304,17 +302,17 @@ for title, url, html_id in web_config.get("menu_entries", []) or _MENU_ENTRIES:
             {"name": title, "url": reverse_lazy(url), "html_id": html_id}
         )
 
-OIDC_RP_CLIENT_ID = os.environ.get('OIDC_RP_CLIENT_ID', 'freva')
-OIDC_RP_CLIENT_SECRET = os.environ.get('OIDC_RP_CLIENT_SECRET', 'secret')
-OIDC_OP_AUTHORIZATION_ENDPOINT = OIDC_URL + '/protocol/openid-connect/auth'
-OIDC_OP_TOKEN_ENDPOINT = OIDC_URL + '/protocol/openid-connect/token'
-OIDC_OP_USER_ENDPOINT = OIDC_URL + '/protocol/openid-connect/userinfo'
-OIDC_OP_JWKS_ENDPOINT = OIDC_URL + '/protocol/openid-connect/certs'
-OIDC_RP_SIGN_ALGO = 'RS256'
+OIDC_RP_CLIENT_ID = os.environ.get("OIDC_RP_CLIENT_ID", "freva")
+OIDC_RP_CLIENT_SECRET = "" # it would be changed
+OIDC_OP_AUTHORIZATION_ENDPOINT = OIDC_URL + "/protocol/openid-connect/auth"
+OIDC_OP_TOKEN_ENDPOINT = OIDC_URL + "/protocol/openid-connect/token"
+OIDC_OP_USER_ENDPOINT = OIDC_URL + "/protocol/openid-connect/userinfo"
+OIDC_OP_JWKS_ENDPOINT = OIDC_URL + "/protocol/openid-connect/certs"
+OIDC_RP_SIGN_ALGO = "RS256"
 OIDC_CREATE_USER = True
 OIDC_STORE_ID_TOKEN = True # important for the logout callback
 OIDC_STORE_ACCESS_TOKEN = True # important for the logout callback
 
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
 OIDC_VERIFY_SSL = False # Set to True in production

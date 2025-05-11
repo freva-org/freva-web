@@ -21,11 +21,11 @@ from django_evaluation.auth import get_auth_header, oidc_token_required
 def conditional_oidc_required(view_func):
     """
     Decorator to conditionally apply the oidc_token_required decorator
-    based on the presence of the 'zarr_stream' query parameter.
+    based on the presence of the "zarr_stream" query parameter.
     """
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
-        if request.GET.get('zarr_stream') == 'true':
+        if request.GET.get("zarr_stream") == "true":
             return oidc_token_required(view_func)(request, *args, **kwargs)
         else:
             return view_func(request, *args, **kwargs)
@@ -37,7 +37,7 @@ def load_data(request, flavour):
     automatically passing through the Bearer token and query params.
     """
     api_url = f"{settings.DATA_BROWSER_HOST}/api/freva-nextgen/databrowser/load/{flavour}"
-    params = QueryDict(request.META.get('QUERY_STRING', ''), mutable=True).dict()
+    params = QueryDict(request.META.get("QUERY_STRING", ""), mutable=True).dict()
     
     headers = get_auth_header(request)
     try:
@@ -64,7 +64,7 @@ def load_data(request, flavour):
     )
     if request.GET.get("catalogue-type") == "intake":
         filename = f"IntakeEsmCatalogue_{flavour}_file_zarr.json"
-        response['Content-Disposition'] = f'attachment; filename="{filename}"'
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
         return response
     return response
 

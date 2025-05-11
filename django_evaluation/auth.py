@@ -26,18 +26,23 @@ def oidc_token_required(view_func):
         if not request.user.is_authenticated:
             next_url = request.get_full_path()
             return HttpResponseRedirect(f"/?login_required=1&next={next_url}")
+
         access_token = request.session.get("oidc_access_token")
         if not access_token:
             request.session["oidc_login_next"] = request.get_full_path()
             request.session.save()
             return HttpResponseRedirect(reverse("oidc_authentication_init"))
 
-        token_expiry = request.session.get("oidc_id_token_expiration", 0)
+        token_expiry = request.session.get("oidc_token_expiry", 0)
         current_time = int(time.time())
-        if token_expiry and current_time > token_expiry - 30:  # 30 seconds buffer
+        time_remaining = token_expiry - current_time
+        needs_refresh = time_remaining < 30  # 30 seconds buffer
+        if needs_refresh:
             refresh_token = request.session.get("oidc_refresh_token")
             if refresh_token:
                 try:
+                    request.session["oidc_login_next"] = request.get_full_path()
+                    request.session.save()
                     token_url = settings.OIDC_OP_TOKEN_ENDPOINT
                     data = {
                         "client_id": settings.OIDC_RP_CLIENT_ID,
@@ -67,6 +72,8 @@ def oidc_token_required(view_func):
                     logger.error(f"Token refresh failed: {e}")
                     return redirect("oidc_authentication_init")
             else:
+                request.session["oidc_login_next"] = request.get_full_path()
+                request.session.save()
                 return redirect("oidc_authentication_init")
         return view_func(request, *args, **kwargs)
 
@@ -127,6 +134,7 @@ class CustomOIDCBackend(OIDCAuthenticationBackend):
 class CustomOIDCCallbackView(OIDCAuthenticationCallbackView):
     """Custom OIDC callback view to store tokens in session"""
 
+    # TODO: we don"t need this class at all, since we are not using the OIDC class for managing the login callback
     def get(self, request):
         """Override get to handle the state not found error gracefully"""
         if "oidc_states" not in request.session:
@@ -143,6 +151,7 @@ class CustomOIDCCallbackView(OIDCAuthenticationCallbackView):
 
     def login_success(self):
         """Store tokens and expiry time in session after successful login"""
+        # TODO: we don"t have self.token_info on login success since callback doesn"t go through this class
         if hasattr(self, "token_info"):
             self.request.session["oidc_access_token"] = self.token_info.get(
                 "access_token", ""

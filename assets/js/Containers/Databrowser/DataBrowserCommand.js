@@ -1,5 +1,5 @@
 // [ESLint]: External library imports first
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import {
@@ -54,6 +54,7 @@ function DataBrowserCommandImpl(props) {
   const [showToast, setShowToast] = useState(false);
   const [mode, setMode] = useState(Modes.CLI);
   const [copying, setCopying] = useState(false);
+  const hostName = window.location.host;
 
   // read “zarr_stream” right out of Redux: location.query
   const zarrEnabled = props.selectedFacets.zarr_stream === "true";
@@ -79,10 +80,19 @@ function DataBrowserCommandImpl(props) {
   };
 
   const [activeOption, setActiveOption] = useState("search");
+  useEffect(() => {
+    // To reset the dropdown, for cases that we are already
+    // on intake or stac catalogue and the user clear the
+    // all facets and we exceed the maximum number of files
+    // for catalogues
+    if (props.numFiles > STREAM_CATALOGUE_MAXIMUM && activeOption !== "search") {
+      setActiveOption("search");
+    }
+  }, [props.numFiles, activeOption]);
   const isStac = activeOption === "stac";
   const zarrAllowed = !isStac;
   const catalogueType = getCatalogueType(activeOption);
-  // avoid zarr_stream=true from the URL sneak into any of our MODES
+  // avoid zarr_stream=true from the URL to sneak into any of our MODES
   const selectedFacets = Object.fromEntries(
     Object.entries(props.selectedFacets).filter(([k]) => k !== "zarr_stream")
   );
@@ -115,9 +125,10 @@ function DataBrowserCommandImpl(props) {
   function getFullCliCommand(dateSelectorToCli, bboxSelectorToCli) {
     let command =
       `freva-client databrowser ${catalogueType} ` +
+      `--host ${hostName} ` +
       (props.selectedFlavour !== constants.DEFAULT_FLAVOUR
         ? `--flavour ${props.selectedFlavour} `
-        : "") + // don't show the freva flavour if it's the default
+        : "") + // don't show the freva flavour if it's the default (freva)
       (props.minDate ? `time=${props.minDate}to${props.maxDate} ` : "") +
       (props.minLon
         ? `bbox=${props.minLon},${props.maxLon},${props.minLat},${props.maxLat} `
@@ -160,7 +171,7 @@ function DataBrowserCommandImpl(props) {
           ...props.location.query,
           zarr_stream: "true",
         });
-        // Use router to navigate
+        // Use router to navigate to the new URL
         props.router.push(currentLocation + "?" + query);
       } else {
         const base = window.location.pathname;
@@ -191,7 +202,7 @@ function DataBrowserCommandImpl(props) {
   function renderCLICommand() {
     const dateSelectorToCli = getCliTimeSelector();
     const bboxSelectorToCli = getCliBBoxSelector();
-    const username = props.currentUser
+    const usernameDisplay = props.currentUser
       ? props.currentUser.username
       : "$USERNAME";
     const fullCommand = getFullCliCommand(dateSelectorToCli, bboxSelectorToCli);
@@ -199,7 +210,7 @@ function DataBrowserCommandImpl(props) {
     const pipInstallCmd = "pip install freva-client";
     const tokenCmd =
       zarrEnabled && zarrAllowed
-        ? "token=$(freva-client auth -u ${username} | jq -r .access_token)"
+        ? `token=$(freva-client auth -u ${usernameDisplay} --host ${hostName} | jq -r .access_token)`
         : "";
 
     // Combine commands (for the sake of better copy functionality)
@@ -225,7 +236,7 @@ function DataBrowserCommandImpl(props) {
               <React.Fragment>
                 <span className="command-prompt">$ </span>
                 <span className="command-param">
-                  token=$(freva-client auth -u ${username} | jq -r
+                  token=$(freva-client auth -u {usernameDisplay} --host {hostName} | jq -r
                   .access_token)
                 </span>
                 <br />
@@ -284,6 +295,10 @@ function DataBrowserCommandImpl(props) {
                 <span className="fw-bold">{bboxSelectorToCli}</span>
               </React.Fragment>
             )}
+            <React.Fragment>
+              <span className="command-option"> --host </span>
+              <span className="command-param">{hostName}</span>
+            </React.Fragment>
             {zarrEnabled && zarrAllowed && (
               <React.Fragment>
                 <span className="command-option"> --zarr</span>
@@ -316,7 +331,7 @@ function DataBrowserCommandImpl(props) {
 
   function getFullPythonCommand(dateSelectorToCli, bboxSelectorToCli) {
     let args = [];
-
+    args.push(`host="${hostName}"`);
     if (props.selectedFlavour !== constants.DEFAULT_FLAVOUR) {
       args.push(`flavour="${props.selectedFlavour}"`);
     }
@@ -344,7 +359,6 @@ function DataBrowserCommandImpl(props) {
         args.push(`bbox_select="${bboxSelectorToCli}"`);
       }
     }
-
     if (catalogueType === CatalogueTypes.DEFAULT && zarrEnabled) {
       args.push("zarr_stream=True");
       return `databrowser(${args.join(", ")})`;
@@ -360,14 +374,13 @@ function DataBrowserCommandImpl(props) {
       const dbCall = `db = databrowser(${args.join(", ")})`;
       return `${dbCall}\ndb.stac_catalogue()`;
     }
-
     return `databrowser(${args.join(", ")})`;
   }
 
   function renderPythonCommand() {
     const dateSelectorToCli = getCliTimeSelector();
     const bboxSelectorToCli = getCliBBoxSelector();
-    const username = props.currentUser
+    const usernameDisplay = props.currentUser
       ? props.currentUser.username
       : "$USERNAME";
     const fullCommand = getFullPythonCommand(
@@ -377,7 +390,7 @@ function DataBrowserCommandImpl(props) {
 
     let importStatement;
     if (zarrEnabled && zarrAllowed) {
-      importStatement = `from freva_client import authenticate, databrowser\n\n# Authenticate to get token for Zarr streaming\ntoken_info = authenticate(username="${username}")\n\n`;
+      importStatement = `from freva_client import authenticate, databrowser\n\n# Authenticate to get token for Zarr streaming\ntoken_info = authenticate(username="${usernameDisplay}", host="${hostName}")\n\n`;
     } else {
       importStatement = "from freva_client import databrowser\n\n";
     }
@@ -417,7 +430,9 @@ function DataBrowserCommandImpl(props) {
                 <span className="command-option">= </span>
                 <span className="command-param">authenticate</span>
                 <span>(username=</span>
-                <span className="command-param">{`"${username}"`}</span>
+                <span className="command-param">{`"${usernameDisplay}"`}</span>
+                <span>, host=</span>
+                <span className="command-param">{`"${hostName}"`}</span>
                 <span>)</span>
               </div>
             </div>
@@ -499,6 +514,11 @@ function DataBrowserCommandImpl(props) {
                     <span className="fw-bold">True</span>
                   </React.Fragment>
                 )}
+                <React.Fragment>
+                  <span>, </span>
+                  <span className="command-option">host=</span>
+                  <span className="fw-bold">{`"${hostName}"`}</span>
+                </React.Fragment>
                 <span>)</span>
               </div>
             </div>
@@ -573,6 +593,11 @@ function DataBrowserCommandImpl(props) {
                       <span className="command-param">{`"${bboxSelectorToCli}"`}</span>
                     </React.Fragment>
                   )}
+                  <span>, </span>
+                  <React.Fragment>
+                    <span className="command-option">host=</span>
+                    <span className="command-param">{`"${hostName}"`}</span>
+                  </React.Fragment>
                   <span>)</span>
                 </div>
               </div>
@@ -697,12 +722,12 @@ function DataBrowserCommandImpl(props) {
   }
 
   function getCurlCommand(apiUrl) {
-    const username = props.currentUser
+    const usernameDisplay = props.currentUser
       ? props.currentUser.username
       : "$USERNAME";
 
     if (zarrEnabled && zarrAllowed) {
-      return `# First get authentication token\ncurl -X POST /api/freva-nextgen/auth/v2/token \\\n  -d "username=${username}" \\\n  -d "password=$PASSWORD"\n\n# Then use the token with the API\ncurl -X GET "${apiUrl}" \\\n  -H "accept: application/json" \\\n  -H "Authorization: Bearer {access_token}"`;
+      return `# First get authentication token\ncurl -X POST /api/freva-nextgen/auth/v2/token \\\n  -d "username=${usernameDisplay}" \\\n  -d "password=YOUR_PASSWORD"\n\n# Then use the token with the API\ncurl -X GET "${apiUrl}" \\\n  -H "accept: application/json" \\\n  -H "Authorization: Bearer {access_token}"`;
     }
     return `curl -X GET "${apiUrl}" -H "accept: application/json"`;
   }
@@ -713,7 +738,7 @@ function DataBrowserCommandImpl(props) {
 
     const apiUrl = getFullApiCommand(dateSelectorToCli, bboxSelectorToCli);
     const curlCommand = getCurlCommand(apiUrl);
-    const username = props.currentUser
+    const usernameDisplay = props.currentUser
       ? props.currentUser.username
       : "$USERNAME";
 
@@ -742,7 +767,7 @@ function DataBrowserCommandImpl(props) {
                 <br />
                 <span> -d </span>
                 <span className="command-param">
-                  &quot;username=${username}&quot;{" "}
+                  &quot;username={usernameDisplay}&quot;{" "}
                 </span>
                 <span>\</span>
                 <br />
@@ -852,12 +877,12 @@ function DataBrowserCommandImpl(props) {
           queryParams.push(`time=${props.minDate}to${props.maxDate}`);
           if (dateSelectorToCli) queryParams.push(`time_select=${dateSelectorToCli}`);
         }
-        
+
         if (props.minLon) {
           queryParams.push(`bbox=${props.minLon},${props.maxLon},${props.minLat},${props.maxLat}`);
           if (bboxSelectorToCli) queryParams.push(`bbox_select=${bboxSelectorToCli}`);
         }
-        
+
         return `/api/freva-nextgen/databrowser/load/${flavour}?${queryParams.join('&')}`;
       } else {
         // intake-catalogue without zarr

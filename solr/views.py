@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 def conditional_oidc_required(view_func):
     """
     Decorator to conditionally apply the oidc_token_required decorator
-    based on the presence of the 'zarr_stream' query parameter.
+    based on the presence of the "zarr_stream" query parameter.
     """
 
     @wraps(view_func)

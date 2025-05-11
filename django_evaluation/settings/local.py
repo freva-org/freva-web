@@ -10,8 +10,6 @@ DEV_MODE : 0|1
 PROJECT_ROOT : str
 FREVA_REST_URL : str
 OIDC_URL : str
-OIDC_RP_CLIENT_ID : str
-OIDC_RP_CLIENT_SECRET : str
 SCHEDULER_HOST : str
 REDIS_HOST : str
 REDIS_PORT : str
@@ -101,7 +99,7 @@ try:
     web_config = toml.loads(web_config_path.read_text())
 except FileNotFoundError:
     web_config = {}
-# SECURITY WARNING: don't run with debug turned on in production!
+# SECURITY WARNING: don"t run with debug turned on in production!
 # Set this to 0 on all server instances and True only for development.
 DEV = DEBUG = TEMPLATE_DEBUG = bool(int(os.environ.get("DEV_MODE", 0)))
 PROJECT_ROOT = os.environ.get("PROJECT_ROOT", None) or str(
@@ -184,8 +182,8 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": db_name,
         "USER": db_user,
-        "PASSWORD": db_password,  #'miklip',
-        "HOST": db_host,  #'wwwdev-miklip',
+        "PASSWORD": db_password,  # "miklip",
+        "HOST": db_host,  # "wwwdev-miklip",
         "PORT": db_port,
         "OPTIONS": {"charset": "utf8mb4"},
     },
@@ -305,7 +303,7 @@ for title, url, html_id in web_config.get("menu_entries", []) or _MENU_ENTRIES:
         )
 
 OIDC_RP_CLIENT_ID = os.environ.get("OIDC_RP_CLIENT_ID", "freva")
-OIDC_RP_CLIENT_SECRET = os.environ.get("OIDC_RP_CLIENT_SECRET", "secret")
+OIDC_RP_CLIENT_SECRET = ""  # it would be changed
 OIDC_OP_AUTHORIZATION_ENDPOINT = OIDC_URL + "/protocol/openid-connect/auth"
 OIDC_OP_TOKEN_ENDPOINT = OIDC_URL + "/protocol/openid-connect/token"
 OIDC_OP_USER_ENDPOINT = OIDC_URL + "/protocol/openid-connect/userinfo"

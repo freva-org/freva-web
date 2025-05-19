@@ -8,7 +8,6 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse
 from mozilla_django_oidc.auth import OIDCAuthenticationBackend
-from mozilla_django_oidc.views import OIDCAuthenticationCallbackView
 
 logger = logging.getLogger(__name__)
 
@@ -101,19 +100,32 @@ class CustomOIDCBackend(OIDCAuthenticationBackend):
     """
 
     def get_username(self, claims):
+        """without this replacemnet funcm,the username
+        is set to the sub claim"""
         return claims.get("preferred_username") or claims.get("sub")
 
     def create_user(self, claims):
+        """Create a new user with the given claims from
+        the OIDC provider."""
+        
         user = super().create_user(claims)
+        print(f"Creating user with claims: {claims} {user.__dict__ }")
         user.first_name = claims.get("given_name", "")
         user.last_name = claims.get("family_name", "")
+        self.request.session['user_home_dir'] = claims.get("home", "")
         user.save()
 
         return user
 
     def update_user(self, user, claims):
+        """Update the user with the given claims from
+        the OIDC provider."""
         user.first_name = claims.get("given_name", "")
         user.last_name = claims.get("family_name", "")
+        user.home = claims.get("home", "")
+        print(f"Updating user with claims: {claims} {user.__dict__ }")
+        
+        self.request.session['user_home_dir'] = claims.get("home", "")
         user.save()
         return user
 
@@ -129,47 +141,3 @@ class CustomOIDCBackend(OIDCAuthenticationBackend):
         else:
             logger.warning("No refresh_token returned; check your scopes/settings")
         return token_info
-
-
-class CustomOIDCCallbackView(OIDCAuthenticationCallbackView):
-    """Custom OIDC callback view to store tokens in session"""
-
-    # TODO: we don"t need this class at all, since we are not using the OIDC class for managing the login callback
-    def get(self, request):
-        """Override get to handle the state not found error gracefully"""
-        if "oidc_states" not in request.session:
-            # Redirect to authentication init instead of raising an exception
-            return HttpResponseRedirect(reverse("oidc_authentication_init"))
-
-        return super().get(request)
-
-    def get_token_info(self, code, state, redirect_uri):
-        """Override to store token info for access in login_success"""
-        token_info = super().get_token_info(code, state, redirect_uri)
-        self.token_info = token_info
-        return token_info
-
-    def login_success(self):
-        """Store tokens and expiry time in session after successful login"""
-        # TODO: we don"t have self.token_info on login success since callback doesn"t go through this class
-        if hasattr(self, "token_info"):
-            self.request.session["oidc_access_token"] = self.token_info.get(
-                "access_token", ""
-            )
-            self.request.session["oidc_id_token"] = self.token_info.get("id_token", "")
-            self.request.session["oidc_refresh_token"] = self.token_info.get(
-                "refresh_token", ""
-            )
-            if "expires_in" in self.token_info:
-                expiry_time = int(time.time()) + self.token_info["expires_in"]
-                self.request.session["oidc_token_expiry"] = expiry_time
-            self.request.session.save()
-            logger.info(f"Stored OIDC tokens in session")
-        next_url = self.request.session.get("oidc_login_next")
-        if next_url:
-            logger.info(f"Redirecting to: {next_url}")
-            del self.request.session["oidc_login_next"]
-            self.request.session.save()
-            return HttpResponseRedirect(next_url)
-
-        return super().login_success()

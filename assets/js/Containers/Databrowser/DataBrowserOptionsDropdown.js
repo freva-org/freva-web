@@ -49,7 +49,7 @@ DropdownItemContent.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
-const CatalogExportDropdown = ({
+const DataBrowserOptionsDropdown = ({
   disabled = false,
   numFiles,
   maxFiles,
@@ -135,37 +135,83 @@ const CatalogExportDropdown = ({
           </DropdownItemContent>
         </Dropdown.Item>
 
-        <Dropdown.Item
-          onClick={(e) => handleItemClick("intake", e)}
-          active={activeOption === "intake"}
-          disabled={isDisabled}
-          href={!isDisabled ? createCatalogLink("intake") : undefined}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <DropdownItemContent icon={IntakeIcon}>
-            Intake Catalog
-          </DropdownItemContent>
-        </Dropdown.Item>
+        {isDisabled ? (
+          <OverlayTrigger
+            overlay={
+              <Tooltip>
+                Please narrow down your search to a maximum of 100,000 results
+                to enable catalog exports
+              </Tooltip>
+            }
+          >
+            <div>
+              <Dropdown.Item
+                onClick={(e) => e.preventDefault()}
+                active={activeOption === "intake"}
+                disabled
+              >
+                <DropdownItemContent icon={IntakeIcon}>
+                  Intake Catalog
+                </DropdownItemContent>
+              </Dropdown.Item>
+            </div>
+          </OverlayTrigger>
+        ) : (
+          <Dropdown.Item
+            onClick={(e) => handleItemClick("intake", e)}
+            active={activeOption === "intake"}
+            disabled={false}
+            href={createCatalogLink("intake")}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <DropdownItemContent icon={IntakeIcon}>
+              Intake Catalog
+            </DropdownItemContent>
+          </Dropdown.Item>
+        )}
 
-        <Dropdown.Item
-          onClick={(e) => handleItemClick("stac", e)}
-          active={activeOption === "stac"}
-          disabled={isDisabled}
-          href={!isDisabled ? createCatalogLink("stac") : undefined}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <DropdownItemContent icon={STACIcon}>
-            STAC Catalog
-          </DropdownItemContent>
-        </Dropdown.Item>
+        {isDisabled ? (
+          <OverlayTrigger
+            overlay={
+              <Tooltip>
+                Please narrow down your search to a maximum of 100,000 results
+                to enable catalog exports
+              </Tooltip>
+            }
+          >
+            <div>
+              <Dropdown.Item
+                onClick={(e) => e.preventDefault()}
+                active={activeOption === "stac"}
+                disabled
+              >
+                <DropdownItemContent icon={STACIcon}>
+                  STAC Catalog
+                </DropdownItemContent>
+              </Dropdown.Item>
+            </div>
+          </OverlayTrigger>
+        ) : (
+          <Dropdown.Item
+            onClick={(e) => handleItemClick("stac", e)}
+            active={activeOption === "stac"}
+            disabled={false}
+            href={createCatalogLink("stac")}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <DropdownItemContent icon={STACIcon}>
+              STAC Catalog
+            </DropdownItemContent>
+          </Dropdown.Item>
+        )}
       </Dropdown.Menu>
     </Dropdown>
   );
 };
 
-CatalogExportDropdown.propTypes = {
+DataBrowserOptionsDropdown.propTypes = {
   disabled: PropTypes.bool,
   createCatalogLink: PropTypes.func.isRequired,
   numFiles: PropTypes.number.isRequired,
@@ -175,4 +221,4 @@ CatalogExportDropdown.propTypes = {
   activeOption: PropTypes.string,
 };
 
-export default CatalogExportDropdown;
+export default DataBrowserOptionsDropdown;

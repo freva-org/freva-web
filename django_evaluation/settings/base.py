@@ -241,7 +241,7 @@ SECRET_KEY = os.environ.get(
 
 
 # filter for user numbers
-USERNAME_FILTER = "[a-z]\d{6,6}"
+USERNAME_FILTER = r"^[a-z]\d{6}$"
 USERNAME_REPLACE = "*****"
 
 

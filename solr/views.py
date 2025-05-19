@@ -16,7 +16,6 @@ from django.shortcuts import render
 
 from django_evaluation.auth import get_auth_header, oidc_token_required
 
-
 logger = logging.getLogger(__name__)
 
 

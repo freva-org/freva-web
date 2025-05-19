@@ -303,7 +303,7 @@ for title, url, html_id in web_config.get("menu_entries", []) or _MENU_ENTRIES:
         )
 
 OIDC_RP_CLIENT_ID = os.environ.get("OIDC_RP_CLIENT_ID", "freva")
-OIDC_RP_CLIENT_SECRET = ""  # it would be changed
+OIDC_RP_CLIENT_SECRET = ""
 OIDC_OP_AUTHORIZATION_ENDPOINT = OIDC_URL + "/protocol/openid-connect/auth"
 OIDC_OP_TOKEN_ENDPOINT = OIDC_URL + "/protocol/openid-connect/token"
 OIDC_OP_USER_ENDPOINT = OIDC_URL + "/protocol/openid-connect/userinfo"
@@ -315,4 +315,4 @@ OIDC_STORE_ACCESS_TOKEN = True  # important for the logout callback
 
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
-OIDC_VERIFY_SSL = False  # Set to True in production
+OIDC_VERIFY_SSL = os.environ.get("OIDC_VERIFY_SSL", False)  # Set to True in production

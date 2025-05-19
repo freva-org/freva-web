@@ -22,7 +22,7 @@ import { copyTextToClipboard } from "../../utils";
 
 import ZarrStreamIcon from "../../Icons/ZarrStreamIcon";
 
-import CatalogExportDropdown from "./CatalogExportDropdown";
+import DataBrowserOptionsDropdown from "./DataBrowserOptionsDropdown";
 
 import * as constants from "./constants";
 
@@ -44,7 +44,7 @@ const Modes = {
   API: "API",
 };
 
-const CatalogueTypes = {
+const DataBrowserOptions = {
   DEFAULT: "data-search",
   INTAKE: "intake-catalogue",
   STAC: "stac-catalogue",
@@ -56,26 +56,27 @@ function DataBrowserCommandImpl(props) {
   const [copying, setCopying] = useState(false);
   const hostName = window.location.host;
 
+  const isGuest = !(props.currentUser && props.currentUser.home);
   // read “zarr_stream” right out of Redux: location.query
-  const zarrEnabled = props.selectedFacets.zarr_stream === "true";
+  const zarrEnabled = !isGuest && props.selectedFacets.zarr_stream === "true";
 
-  const getCatalogueType = (activeOption) => {
+  const getDataBrowserOption = (activeOption) => {
     switch (activeOption) {
       case "intake":
-        return CatalogueTypes.INTAKE;
+        return DataBrowserOptions.INTAKE;
       case "stac":
-        return CatalogueTypes.STAC;
+        return DataBrowserOptions.STAC;
       case "search":
       default:
-        return CatalogueTypes.DEFAULT;
+        return DataBrowserOptions.DEFAULT;
     }
   };
 
-  const handleCatalogueTypeChange = (option) => {
-    // handle catalogue type changes from the dropdown
+  const handleDataBrowserOptionChange = (option) => {
+    // handle databrowser option changes from the dropdown
 
-    // This will be passed to the CatalogExportDropdown component
-    // The catalogueType will be derived from this option when needed
+    // This will be passed to the DataBrowserOptionsDropdown component
+    // The databrowserOption will be derived from this option when needed
     setActiveOption(option);
   };
 
@@ -85,13 +86,16 @@ function DataBrowserCommandImpl(props) {
     // on intake or stac catalogue and the user clear the
     // all facets and we exceed the maximum number of files
     // for catalogues
-    if (props.numFiles > STREAM_CATALOGUE_MAXIMUM && activeOption !== "search") {
+    if (
+      props.numFiles > STREAM_CATALOGUE_MAXIMUM &&
+      activeOption !== "search"
+    ) {
       setActiveOption("search");
     }
   }, [props.numFiles, activeOption]);
   const isStac = activeOption === "stac";
   const zarrAllowed = !isStac;
-  const catalogueType = getCatalogueType(activeOption);
+  const databrowserOption = getDataBrowserOption(activeOption);
   // avoid zarr_stream=true from the URL to sneak into any of our MODES
   const selectedFacets = Object.fromEntries(
     Object.entries(props.selectedFacets).filter(([k]) => k !== "zarr_stream")
@@ -124,7 +128,7 @@ function DataBrowserCommandImpl(props) {
 
   function getFullCliCommand(dateSelectorToCli, bboxSelectorToCli) {
     let command =
-      `freva-client databrowser ${catalogueType} ` +
+      `freva-client databrowser ${databrowserOption} ` +
       `--host ${hostName} ` +
       (props.selectedFlavour !== constants.DEFAULT_FLAVOUR
         ? `--flavour ${props.selectedFlavour} `
@@ -236,8 +240,8 @@ function DataBrowserCommandImpl(props) {
               <React.Fragment>
                 <span className="command-prompt">$ </span>
                 <span className="command-param">
-                  token=$(freva-client auth -u {usernameDisplay} --host {hostName} | jq -r
-                  .access_token)
+                  token=$(freva-client auth -u {usernameDisplay} --host{" "}
+                  {hostName} | jq -r .access_token)
                 </span>
                 <br />
                 <br />
@@ -247,7 +251,7 @@ function DataBrowserCommandImpl(props) {
             {/* essensial commands */}
             <span className="command-prompt">$ </span>
             <span className="command-option">
-              freva-client databrowser {catalogueType}
+              freva-client databrowser {databrowserOption}
             </span>
             {props.selectedFlavour !== constants.DEFAULT_FLAVOUR && (
               <React.Fragment>
@@ -359,16 +363,16 @@ function DataBrowserCommandImpl(props) {
         args.push(`bbox_select="${bboxSelectorToCli}"`);
       }
     }
-    if (catalogueType === CatalogueTypes.DEFAULT && zarrEnabled) {
+    if (databrowserOption === DataBrowserOptions.DEFAULT && zarrEnabled) {
       args.push("zarr_stream=True");
       return `databrowser(${args.join(", ")})`;
-    } else if (catalogueType === CatalogueTypes.INTAKE) {
+    } else if (databrowserOption === DataBrowserOptions.INTAKE) {
       const dbCall = `db = databrowser(${args.join(", ")})`;
       if (zarrEnabled) {
         return `${dbCall}\ncat = db.intake_catalogue(stream_zarr=True)\nprint(cat.df)`;
       }
       return `${dbCall}\ncat = db.intake_catalogue()\nprint(cat.df)`;
-    } else if (catalogueType === CatalogueTypes.STAC) {
+    } else if (databrowserOption === DataBrowserOptions.STAC) {
       // TODO: would be removed in the future
       // STAC catalogue: zarr streaming not supported
       const dbCall = `db = databrowser(${args.join(", ")})`;
@@ -439,7 +443,7 @@ function DataBrowserCommandImpl(props) {
           </div>
         )}
 
-        {catalogueType === CatalogueTypes.DEFAULT && (
+        {databrowserOption === DataBrowserOptions.DEFAULT && (
           <div className="jupyter-cell">
             <div className="jupyter-prompt">
               In [{zarrEnabled ? "3" : "2"}]:
@@ -456,20 +460,15 @@ function DataBrowserCommandImpl(props) {
                   </span>
                 )}
 
-                {Object.keys(selectedFacets).map((key, index) => {
+                {Object.keys(selectedFacets).map((key) => {
                   const value = selectedFacets[key];
-                  const isLast =
-                    index === Object.keys(selectedFacets).length - 1 &&
-                    !props.minDate &&
-                    !props.minLon &&
-                    !zarrEnabled;
                   return (
                     <React.Fragment key={`python-cmd-${key}`}>
                       <span className="command-option">
                         {props.facetMapping[key]}=
                       </span>
                       <span className="command-param">{`"${value}"`}</span>
-                      {!isLast && <span>, </span>}
+                      {<span>, </span>}
                     </React.Fragment>
                   );
                 })}
@@ -512,10 +511,10 @@ function DataBrowserCommandImpl(props) {
                   <React.Fragment>
                     <span className="command-option">zarr_stream=</span>
                     <span className="fw-bold">True</span>
+                    <span>, </span>
                   </React.Fragment>
                 )}
                 <React.Fragment>
-                  <span>, </span>
                   <span className="command-option">host=</span>
                   <span className="fw-bold">{`"${hostName}"`}</span>
                 </React.Fragment>
@@ -525,8 +524,8 @@ function DataBrowserCommandImpl(props) {
           </div>
         )}
 
-        {(catalogueType === CatalogueTypes.INTAKE ||
-          catalogueType === CatalogueTypes.STAC) && (
+        {(databrowserOption === DataBrowserOptions.INTAKE ||
+          databrowserOption === DataBrowserOptions.STAC) && (
           <>
             <div className="jupyter-cell">
               <div className="jupyter-prompt">
@@ -609,7 +608,7 @@ function DataBrowserCommandImpl(props) {
               </div>
               <div className="jupyter-content">
                 <div className="jupyter-code">
-                  {catalogueType === CatalogueTypes.INTAKE ? (
+                  {databrowserOption === DataBrowserOptions.INTAKE ? (
                     <>
                       <span className="fw-bold">cat </span>
                       <span className="command-option">= </span>
@@ -631,7 +630,7 @@ function DataBrowserCommandImpl(props) {
               </div>
             </div>
 
-            {catalogueType === CatalogueTypes.INTAKE && (
+            {databrowserOption === DataBrowserOptions.INTAKE && (
               <div className="jupyter-cell">
                 <div className="jupyter-prompt">
                   In [{zarrEnabled ? "5" : "4"}]:
@@ -702,18 +701,18 @@ function DataBrowserCommandImpl(props) {
         : `/${constants.DEFAULT_FLAVOUR}`;
 
     let endpoint = "";
-    if (catalogueType === CatalogueTypes.DEFAULT) {
+    if (databrowserOption === DataBrowserOptions.DEFAULT) {
       endpoint = `/api/freva-nextgen/data-search${flavourPath}/file`;
       if (zarrEnabled && zarrAllowed) {
         endpoint = `/api/freva-nextgen/load${flavourPath}`;
       }
-    } else if (catalogueType === CatalogueTypes.INTAKE) {
+    } else if (databrowserOption === DataBrowserOptions.INTAKE) {
       endpoint = `/api/freva-nextgen/intake-catalogue${flavourPath}/file`;
       if (zarrEnabled && zarrAllowed) {
         endpoint = `/api/freva-nextgen/load${flavourPath}`;
         queryParams.push("catalogue-type=intake");
       }
-    } else if (catalogueType === CatalogueTypes.STAC) {
+    } else if (databrowserOption === DataBrowserOptions.STAC) {
       // TODO: STAC would be added in the future
       endpoint = `/api/freva-nextgen/stac-catalogue${flavourPath}/file`;
     }
@@ -868,22 +867,28 @@ function DataBrowserCommandImpl(props) {
 
         // add search parameters to load endpoint
         // other search parameters
-        Object.keys(selectedFacets).forEach(key => {
-          queryParams.push(`${props.facetMapping[key]}=${encodeURIComponent(selectedFacets[key])}`);
+        Object.keys(selectedFacets).forEach((key) => {
+          queryParams.push(
+            `${props.facetMapping[key]}=${encodeURIComponent(selectedFacets[key])}`
+          );
         });
 
         // date and bbox parameters if they exist
         if (props.minDate) {
           queryParams.push(`time=${props.minDate}to${props.maxDate}`);
-          if (dateSelectorToCli) queryParams.push(`time_select=${dateSelectorToCli}`);
+          if (dateSelectorToCli)
+            queryParams.push(`time_select=${dateSelectorToCli}`);
         }
 
         if (props.minLon) {
-          queryParams.push(`bbox=${props.minLon},${props.maxLon},${props.minLat},${props.maxLat}`);
-          if (bboxSelectorToCli) queryParams.push(`bbox_select=${bboxSelectorToCli}`);
+          queryParams.push(
+            `bbox=${props.minLon},${props.maxLon},${props.minLat},${props.maxLat}`
+          );
+          if (bboxSelectorToCli)
+            queryParams.push(`bbox_select=${bboxSelectorToCli}`);
         }
 
-        return `/api/freva-nextgen/databrowser/load/${flavour}?${queryParams.join('&')}`;
+        return `/api/freva-nextgen/databrowser/load/${flavour}?${queryParams.join("&")}`;
       } else {
         // intake-catalogue without zarr
         return `/api/freva-nextgen/databrowser/intake-catalogue/${uniq_key}`;
@@ -958,7 +963,11 @@ function DataBrowserCommandImpl(props) {
             font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
             margin-bottom: 20px;
           }
-          
+          .jupyter-notebook .position-absolute.d-flex.align-items-center {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 1rem;
+            font-weight: 400;
+          }
           .jupyter-cell {
             display: flex;
             margin-bottom: 8px;
@@ -982,6 +991,8 @@ function DataBrowserCommandImpl(props) {
           }
           
           .jupyter-code {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
             background-color: #f7f7f7;
             color: #333333;
             padding: 8px 10px;
@@ -1016,15 +1027,17 @@ function DataBrowserCommandImpl(props) {
         `}
       </style>
       <Card className={"p-3 py-2 d-block shadow-sm " + props.className}>
-        <div className="fw-bold d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
-          Freva databrowser
-          <div className="d-flex justify-content-between align-items-center">
+        <div className="fw-bold d-flex flex-wrap justify-content-between align-items-center border-bottom pb-2 mb-2">
+          <div className="me-2 mb-2">Freva databrowser</div>
+          <div className="d-flex flex-wrap align-items-center">
             {!isStac && (
-              <div className="zarr-toggle-wrapper px-2 py-1 me-2 d-flex flex-column align-items-center justify-content-center">
+              <div className="zarr-toggle-wrapper px-2 py-1 me-2 mb-2 d-flex flex-column align-items-center justify-content-center">
                 <OverlayTrigger
                   overlay={
                     <Tooltip>
-                      Enable Zarr streaming for cloud-optimized data access
+                      {isGuest
+                        ? "Zarr streaming is not available for guest users"
+                        : "Enable Zarr streaming for cloud-optimized data access"}
                     </Tooltip>
                   }
                 >
@@ -1032,7 +1045,9 @@ function DataBrowserCommandImpl(props) {
                     className={
                       zarrEnabled
                         ? "text-primary fw-bold mb-1"
-                        : "text-muted mb-1"
+                        : isGuest
+                          ? "text-muted opacity-50 mb-1"
+                          : "text-muted mb-1"
                     }
                     style={{ cursor: "help" }}
                   >
@@ -1043,6 +1058,7 @@ function DataBrowserCommandImpl(props) {
                   type="switch"
                   id="zarr-streaming-toggle"
                   checked={zarrEnabled}
+                  disabled={isGuest}
                   onChange={() => {
                     const next = !zarrEnabled;
                     // write or remove ?zarr_stream=true
@@ -1065,18 +1081,18 @@ function DataBrowserCommandImpl(props) {
                 />
               </div>
             )}
-            <CatalogExportDropdown
+            <DataBrowserOptionsDropdown
               disabled={props.numFiles > STREAM_CATALOGUE_MAXIMUM}
               createCatalogLink={props.createCatalogLink || createCatalogLink}
               numFiles={props.numFiles}
               maxFiles={STREAM_CATALOGUE_MAXIMUM}
-              className="me-2"
-              onOptionChange={handleCatalogueTypeChange}
+              className="me-2 mb-2"
+              onOptionChange={handleDataBrowserOptionChange}
               activeOption={activeOption}
             />
             <OverlayTrigger overlay={<Tooltip>Show CLI command</Tooltip>}>
               <Button
-                className="trigger-button me-1 d-flex align-items-center justify-content-center"
+                className="trigger-button me-1 mb-2 d-flex align-items-center justify-content-center"
                 active={mode === Modes.CLI}
                 variant="outline-secondary"
                 onClick={() => setMode(Modes.CLI)}
@@ -1089,7 +1105,7 @@ function DataBrowserCommandImpl(props) {
 
             <OverlayTrigger overlay={<Tooltip>Show Python command</Tooltip>}>
               <Button
-                className="trigger-button me-1 d-flex align-items-center justify-content-center"
+                className="trigger-button me-1 mb-2 d-flex align-items-center justify-content-center"
                 active={mode === Modes.PYTHON}
                 variant="outline-secondary"
                 onClick={() => setMode(Modes.PYTHON)}
@@ -1102,7 +1118,7 @@ function DataBrowserCommandImpl(props) {
 
             <OverlayTrigger overlay={<Tooltip>Show API endpoint</Tooltip>}>
               <Button
-                className="trigger-button me-1 d-flex align-items-center justify-content-center"
+                className="trigger-button me-1 mb-2 d-flex align-items-center justify-content-center"
                 active={mode === Modes.API}
                 variant="outline-secondary"
                 onClick={() => setMode(Modes.API)}
@@ -1146,7 +1162,6 @@ DataBrowserCommandImpl.propTypes = {
     id: PropTypes.number,
     username: PropTypes.string,
     email: PropTypes.string,
-    isGuest: PropTypes.bool,
     home: PropTypes.string,
     scratch: PropTypes.string,
   }),

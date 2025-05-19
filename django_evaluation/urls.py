@@ -7,9 +7,9 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import include, path
 from django.urls import re_path as url
 from django.views.generic import RedirectView
+from mozilla_django_oidc.views import OIDCAuthenticationCallbackView
 
 from base.views_api import AuthenticatedUser
-from django_evaluation.auth import CustomOIDCCallbackView
 from history.views_api import ResultFacets, ResultFiles
 from plugins.views_api import (
     ExportPlugin,
@@ -61,7 +61,7 @@ urlpatterns = [
     ),
     # callback has to be first in the list since 
     # the parent (oidc) url is included as well
-    path('oidc/callback/', CustomOIDCCallbackView.as_view(), name='oidc_authentication_callback'),
+    path('oidc/callback/', OIDCAuthenticationCallbackView.as_view(), name='oidc_authentication_callback'),
 
     path('oidc/', include('mozilla_django_oidc.urls')),
     

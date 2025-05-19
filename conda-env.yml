@@ -29,6 +29,7 @@ dependencies:
   - pep8
   - pip
   - mod_wsgi
+  - gevent
   - pip:
     - black
     - isort

@@ -28,4 +28,4 @@ fi
 
 # Start webserver
 exec gunicorn -b [::]:8000 -w 1 django_evaluation.wsgi \
-    --log-level "$LOG_LEVEL" --error-logfile "$LOG_DIR/freva-web.error.log" \
+    --log-level "$LOG_LEVEL" --error-logfile "$LOG_DIR/freva-web.error.log"

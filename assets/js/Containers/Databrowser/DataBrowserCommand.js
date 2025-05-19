@@ -876,16 +876,18 @@ function DataBrowserCommandImpl(props) {
         // date and bbox parameters if they exist
         if (props.minDate) {
           queryParams.push(`time=${props.minDate}to${props.maxDate}`);
-          if (dateSelectorToCli)
+          if (dateSelectorToCli) {
             queryParams.push(`time_select=${dateSelectorToCli}`);
+          }
         }
 
         if (props.minLon) {
           queryParams.push(
             `bbox=${props.minLon},${props.maxLon},${props.minLat},${props.maxLat}`
           );
-          if (bboxSelectorToCli)
+          if (bboxSelectorToCli) {
             queryParams.push(`bbox_select=${bboxSelectorToCli}`);
+          }
         }
 
         return `/api/freva-nextgen/databrowser/load/${flavour}?${queryParams.join("&")}`;
@@ -1064,8 +1066,11 @@ function DataBrowserCommandImpl(props) {
                     // write or remove ?zarr_stream=true
                     const base = window.location.pathname;
                     const q = { ...props.location.query };
-                    if (next) q.zarr_stream = "true";
-                    else delete q.zarr_stream;
+                    if (next) {
+                      q.zarr_stream = "true";
+                    } else {
+                      delete q.zarr_stream;
+                    }
                     props.router.push(
                       base +
                         (queryString.stringify(q)

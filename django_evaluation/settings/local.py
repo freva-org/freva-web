@@ -99,7 +99,7 @@ try:
     web_config = toml.loads(web_config_path.read_text())
 except FileNotFoundError:
     web_config = {}
-# SECURITY WARNING: don"t run with debug turned on in production!
+# SECURITY WARNING: don't run with debug turned on in production!
 # Set this to 0 on all server instances and True only for development.
 DEV = DEBUG = TEMPLATE_DEBUG = bool(int(os.environ.get("DEV_MODE", 0)))
 PROJECT_ROOT = os.environ.get("PROJECT_ROOT", None) or str(
@@ -182,8 +182,8 @@ DATABASES = {
         "ENGINE": "django.db.backends.mysql",
         "NAME": db_name,
         "USER": db_user,
-        "PASSWORD": db_password,  # "miklip",
-        "HOST": db_host,  # "wwwdev-miklip",
+        "PASSWORD": db_password,  # 'miklip',
+        "HOST": db_host,  # 'wwwdev-miklip',
         "PORT": db_port,
         "OPTIONS": {"charset": "utf8mb4"},
     },
@@ -312,6 +312,10 @@ OIDC_RP_SIGN_ALGO = "RS256"
 OIDC_CREATE_USER = True
 OIDC_STORE_ID_TOKEN = True  # important for the logout callback
 OIDC_STORE_ACCESS_TOKEN = True  # important for the logout callback
+
+# we need this for the followinfs next redirect
+LOGIN_URL = reverse_lazy('oidc_authentication_init')
+OIDC_RENDER_NEXT = True
 
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"

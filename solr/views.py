@@ -11,6 +11,7 @@ from functools import wraps
 
 import requests
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, QueryDict, StreamingHttpResponse
 from django.shortcuts import render
 
@@ -77,8 +78,7 @@ def load_data(request, flavour):
         return response
     return response
 
-
-@oidc_token_required
+@login_required()
 def databrowser(request):
     """
     New view for plugin list

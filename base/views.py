@@ -101,7 +101,7 @@ def contact(request):
 
 def logout(request):
     """
-    Comprehensive logout that clears both Django and Keycloak sessions
+    logout that clears both Django and Keycloak sessions
     """
     id_token = request.session.get('oidc_id_token', '')
 

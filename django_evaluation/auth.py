@@ -37,6 +37,9 @@ def oidc_token_required(view_func):
         time_remaining = token_expiry - current_time
         needs_refresh = time_remaining < 30  # 30 seconds buffer
         if needs_refresh:
+            # Basically since mozilla_django_oidc does not support
+            # refresh tokens, we need to do the prcedure manually
+            # in our codeabse
             refresh_token = request.session.get("oidc_refresh_token")
             if refresh_token:
                 try:
@@ -112,6 +115,7 @@ class CustomOIDCBackend(OIDCAuthenticationBackend):
         print(f"Creating user with claims: {claims} {user.__dict__ }")
         user.first_name = claims.get("given_name", "")
         user.last_name = claims.get("family_name", "")
+        user.home = claims.get("home", "")
         self.request.session['user_home_dir'] = claims.get("home", "")
         user.save()
 
@@ -122,9 +126,7 @@ class CustomOIDCBackend(OIDCAuthenticationBackend):
         the OIDC provider."""
         user.first_name = claims.get("given_name", "")
         user.last_name = claims.get("family_name", "")
-        user.home = claims.get("home", "")
-        print(f"Updating user with claims: {claims} {user.__dict__ }")
-        
+        user.home = claims.get("home", "")        
         self.request.session['user_home_dir'] = claims.get("home", "")
         user.save()
         return user

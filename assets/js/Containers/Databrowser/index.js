@@ -148,7 +148,10 @@ class Databrowser extends React.Component {
 
     return primaryFacets.map((key) => {
       const value = facets[key];
-      if (!value) return undefined;
+      if (!value) {
+        return undefined;
+      }
+
       return (
         <FacetPanel
           value={value}
@@ -175,7 +178,10 @@ class Databrowser extends React.Component {
       })
       .map((key) => {
         const value = facets[key];
-        if (!value) return undefined;
+        if (!value) {
+          return undefined;
+        }
+
         return (
           <FacetPanel
             value={value}

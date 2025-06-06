@@ -329,7 +329,14 @@ class FrevaGPT extends React.Component {
       this.props.dispatch(setConversation(variantArray));
     } else {
       this.props.dispatch(setThread(""));
-      this.props.dispatch(setConversation([{variant: "ServerError", content: "There was an issue fetching the conversation"}]))
+      this.props.dispatch(
+        setConversation([
+          {
+            variant: "ServerError",
+            content: "There was an issue fetching the conversation",
+          },
+        ])
+      );
     }
   }
 

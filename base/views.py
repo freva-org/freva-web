@@ -160,3 +160,12 @@ def restart(request):
         return render(request, "base/restart.html")
 
     return render(request, "base/home.html")
+
+
+def stacbrowser(request):
+    """STAC Browser view - embeds STAC browser"""
+    context = {
+        'title': 'STAC Browser',
+        'stac_url': 'http://localhost:8085',
+    }
+    return render(request, 'stacbrowser.html', context)

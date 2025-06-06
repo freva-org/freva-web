@@ -27,12 +27,18 @@ setup-django:
 
 setup-rest:
 	TEMP_DIR=$$(mktemp -d) && \
-	git clone https://github.com/FREVA-CLINT/freva-nextgen.git $$TEMP_DIR &&\
+	git clone -b stacapi-base https://github.com/FREVA-CLINT/freva-nextgen.git $$TEMP_DIR &&\
 	python -m pip install $$TEMP_DIR/freva-rest $$TEMP_DIR/freva-data-portal-worker &&\
 	rm -rf $$TEMP_DIR
 
 setup-node:
 	npm install
+
+setup-stacbrowser:
+	@if [ ! -d "stac-browser" ]; then \
+		git clone https://github.com/radiantearth/stac-browser.git stac-browser; \
+	fi
+	cd stac-browser && npm install
 
 runserver:
 	@echo "Starting Django development server..."
@@ -58,42 +64,35 @@ runfrontend:
 	@echo "npm development server is running..."
 	@echo "To watch the npm logs, run 'tail -f npm.log'"
 
-wait-for-opensearch:
-	@echo "wait until openseach wakes up"
-	@until curl -s "localhost:9202/_cluster/health" > /dev/null; do \
-		echo "we wait 2 secs for OpenSearch to wake up"; \
-		sleep 2; \
-	done
-	@echo "OpenSearch is ready to go, now we have to enable auto index creation"
-	@curl -XPUT "localhost:9202/_cluster/settings" -H 'Content-Type: application/json' -d'{ \
-		"persistent": { \
-			"cluster.blocks.create_index": null, \
-			"action.auto_create_index": true \
-		} \
-	}'
+runstacbrowser:
+	cd stac-browser && npm start -- --catalogUrl=http://localhost:7777/api/freva-nextgen/stacapi --port 8085 > stac-browser.log 2>&1 &
+	@echo "STAC Browser is running..."
+	@echo "To watch the STAC Browser logs, run 'tail -f stac-browser.log'"
 
 stopserver:
+	ps aux | grep '[m]anage.py runserver' | awk '{print $$2}' | xargs -r kill
+	echo "Stopped Django development server..." > runserver.log
+
+stoprest:
 	ps aux | grep '[f]reva_rest.cli' | awk '{print $$2}' | xargs -r kill
 	ps aux | grep '[d]ata_portal_worker' | awk '{print $$2}' | xargs -r kill
-	ps aux | grep '[m]anage.py runserver' | awk '{print $$2}' | xargs -r kill
-	@if pgrep -f '[s]tac_fastapi.opensearch.app' > /dev/null; then \
-		ps aux | grep '[s]tac_fastapi.opensearch.app' | awk '{print $$2}' | head -n 1 | xargs kill; \
-		sleep 1; \
-	fi
 	rm -fr .data-portal-cluster-config.json
-	echo "Stopped Django development server..." > runserver.log
 	echo "Stopped freva-rest development server..." > rest.log
+
+stopstacbrowser:
+	pkill -f "stac-browser"
+	echo "Stopped STAC Browser..." > stac-browser.log
 
 stopfrontend:
 	pkill -f "npm run dev"
 	echo "Stopped npm development server..." > npm.log
 
-stop: stopserver stopfrontend
+stop: stopserver stopfrontend stoprest stopstacbrowser
 	@echo "All services have been stopped."
 
-setup: setup-rest setup-node setup-django dummy-data
+setup: setup-rest setup-stacbrowser setup-node setup-django dummy-data
 
-run: runrest runfrontend runserver
+run: runrest runfrontend runserver runstacbrowser
 
 lint: setup-node
 	npm run lint-format

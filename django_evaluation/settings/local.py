@@ -313,6 +313,7 @@ else:
 # prefix to your relative url (the second value in each of the lists), e.g. "/impressum"
 _MENU_ENTRIES = [
     ["Data-Browser", "solr:data_browser", "browser_menu"],
+    ["STAC-Browser", "base:stacbrowser", "stacbrowser_menu"],
     ["Plugins", "plugins:home", "plugin_menu"],
     ["History", "history:history", "history_menu"],
     ["Result-Browser", "history:result_browser", "result_browser_menu"],

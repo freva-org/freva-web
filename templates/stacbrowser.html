@@ -1,0 +1,19 @@
+{% extends "_layouts/menu.html" %}
+
+{% load render_bundle from webpack_loader %}
+
+{% block page_title %}{{ title }} - Evaluation System{% endblock %}
+{% block page_class %}home-page{% endblock %}
+{% block title %}STAC Browser{% endblock %}
+
+{% block content %}
+<div class="stac-browser-container">
+    <iframe 
+        src="{{ stac_url }}"
+        width="100%" 
+        height="800px"
+        frameborder="0"
+        title="STAC Browser">
+    </iframe>
+</div>
+{% endblock %}

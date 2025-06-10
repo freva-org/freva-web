@@ -334,7 +334,7 @@ class FrevaGPT extends React.Component {
           {
             variant: "InvalidThread",
             content:
-              "The thread id is invalid or the thread doesn't exists anymore.",
+              "The thread id is invalid or the thread doesn't exist anymore.",
           },
         ])
       );

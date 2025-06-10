@@ -324,7 +324,7 @@ class FrevaGPT extends React.Component {
       `/api/chatbot/getthread?` + queryString.stringify(queryObject)
     );
 
-    if (response.status === 200) {
+    if (response.status >= 200 && response.status <= 299) {
       const variantArray = await response.json();
       this.props.dispatch(setConversation(variantArray));
     } else {
@@ -332,8 +332,9 @@ class FrevaGPT extends React.Component {
       this.props.dispatch(
         setConversation([
           {
-            variant: "ServerError",
-            content: "There was an issue fetching the conversation",
+            variant: "InvalidThread",
+            content:
+              "The thread id is invalid or the thread doesn't exists anymore.",
           },
         ])
       );

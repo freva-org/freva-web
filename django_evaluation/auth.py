@@ -4,10 +4,11 @@ import logging
 from typing import Any, Optional
 
 import requests
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth.models import User
-from django.conf import settings
+
 from django_evaluation.utils import sync_mail_users
 
 logger = logging.getLogger(__name__)
@@ -80,12 +81,12 @@ class OIDCAuthorizationCodeBackend(BaseBackend):
     def get_user(self, user_id: int) -> Optional[User]:
         """
         Retrieve a user instance by its ID.
-        
+
         Parameters
         ----------
         user_id : int
             The ID of the user.
-            
+
         Returns
         -------
         Optional[User]: The user instance if found, otherwise None.

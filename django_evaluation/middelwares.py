@@ -1,13 +1,15 @@
 """middleware for handling OAuth2 token refresh and plugin reloading."""
 
-import time
 import logging
+import time
+
 import requests
 from django.conf import settings
 from django.contrib.auth import logout
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from evaluation_system.api import plugin_manager as pm
+
 from base.views import TOKEN_URL
 
 logger = logging.getLogger(__name__)

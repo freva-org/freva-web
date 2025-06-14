@@ -4,7 +4,8 @@ from urllib.parse import urlencode
 
 import requests
 from django.conf import settings
-from django.contrib.auth import authenticate, login, logout as auth_logout
+from django.contrib.auth import authenticate, login
+from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
@@ -356,6 +357,7 @@ def restart(request):
     try:
         if request.POST["restart"] == "1":
             _restart(path=None)
+    # TODO: Exception too broad!
     except:
         return render(request, "base/restart.html")
 

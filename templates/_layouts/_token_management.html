@@ -624,7 +624,6 @@
     }
 
     function loadTokenData() {
-        // FIXED: Fetch current session data instead of using template variables
         fetch('{% url "base:collect_current_token" %}', {
             method: 'GET',
             headers: {

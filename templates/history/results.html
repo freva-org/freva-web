@@ -105,7 +105,7 @@
                             {% for key,value in history_object.config_dict.items %}
                                 <tr>
                                     <td>{{key}}:</td>
-                                    <td>{{value|mask_uid}}</td>
+                                    <td>{{value}}</td>
                                 </tr>
                             {% endfor %}
                             <tr>
@@ -115,10 +115,10 @@
                                 <td>Freva plugin command:</td>
                                 <td>
                                     <div class="d-flex justify-content-between">
-                                        <pre style="white-space: pre-wrap;">{{analyze_command.strip|mask_uid}}</pre>
+                                        <pre style="white-space: pre-wrap;">{{analyze_command.strip}}</pre>
                                         <div>
                                             <button class="btn btn-primary text-nowrap"
-                                                onClick="copyTextToClipboard('{{analyze_command | mask_uid | escapejs}}');"
+                                                onClick="copyTextToClipboard('{{analyze_command | escapejs}}');"
                                                 id="copy_button">
                                                 <i class="fw-bold fa fa-clone me-2"></i> Copy
                                             </button>
@@ -272,7 +272,7 @@
 
                             <div class="col-md-12">
                                 <ul class="jqueryFileTree">
-                                    {{ file_list|preview_tree|mask_safe_uid }}
+                                    {{ file_list|preview_tree }}
                                 </ul>
                             </div>
                         {%endif%}
@@ -318,7 +318,7 @@
             $("#clipboard-toast").toast("show");
           } catch (err) {
             // Fallback for the fallback: Show window prompt to copy-paste the command
-            window.prompt('Copy to clipboard: Ctrl+C, Enter', '{{analyze_command | mask_uid | escapejs}}')
+            window.prompt('Copy to clipboard: Ctrl+C, Enter', '{{analyze_command | escapejs}}')
           }
 
           document.body.removeChild(textArea);
@@ -333,7 +333,7 @@
             $("#clipboard-toast").toast("show");
           }, function(err) {
             // Fallback: Show window prompt to copy-paste the command
-            window.prompt('Copy to clipboard: Ctrl+C, Enter', '{{analyze_command | mask_uid | escapejs}}')
+            window.prompt('Copy to clipboard: Ctrl+C, Enter', '{{analyze_command | escapejs}}')
           });
         }
 

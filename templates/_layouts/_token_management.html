@@ -335,9 +335,6 @@
     <div class="user-hover-btn btn btn-outline-light login-btn" onclick="handleUserClick(event)">
         <div class="user-text">
             <i class="fas fa-user-circle"></i> {{ request.user.username }}
-            {% if is_guest_user %}
-                <span class="badge bg-info ms-1">Guest</span>
-            {% endif %}
         </div>
         <div class="logout-text">
             <i class="fas fa-sign-out-alt"></i> Logout

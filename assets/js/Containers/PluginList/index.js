@@ -402,7 +402,6 @@ PluginList.propTypes = {
     id: PropTypes.number,
     username: PropTypes.string,
     email: PropTypes.string,
-    isGuest: PropTypes.bool,
     home: PropTypes.string,
     scratch: PropTypes.string,
   }),

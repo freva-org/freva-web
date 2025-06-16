@@ -26,7 +26,6 @@ from base.exceptions import UserNotFoundError
 from base.Users import OpenIdUser
 from django_evaluation import settings
 from history.models import HistoryTag
-from history.templatetags.resulttags import mask_uid
 from history.utils import FileDict, sendmail_to_follower
 from plugins.utils import get_scheduler_hosts, ssh_call
 
@@ -93,7 +92,7 @@ class HistoryDatatable(Datatable):
             # this is much faster than the routine config_dict.
             config_dict = json.loads(instance.configuration)
             for key, value in config_dict.items():
-                text = escape(mask_uid(str(value), request.session.get('user_info', {}).get('is_guest')))
+                text = escape(str(value))
                 config += (
                     '<tr class="blacktable"><td class="blacktable">%s</td><td class="blacktable">%s<td></tr>'
                     % (key, text)
@@ -344,8 +343,6 @@ def results(request, id, show_output_only=False):
                 History.Flag.shared
             ]:
                 raise PermissionDenied
-    # if not request.user.is_authenticated:
-    #     request.user._guest = True
 
     try:
         documentation = FlatPage.objects.get(title__iexact=history_object.tool)

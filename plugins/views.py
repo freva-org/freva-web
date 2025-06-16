@@ -63,37 +63,34 @@ def search_similar_results(request, plugin_name=None, history_id=None):
 
     data = {}
 
-    if request.session.get('user_info', {}).get('is_guest'):
-        hist_objects = History.objects.filter(uid=request.user).filter(tool=plugin_name)
+    try:
+        user = OpenIdUser(request.user.username)
+    except UserNotFoundError:
+        user = User()
+    if history_id is not None:
+        o = Configuration.objects.filter(history_id_id=history_id)
+        hist_objects = History.find_similar_entries(o, max_entries=5)
+
     else:
+        # create the tool
+        tool = pm.get_plugin_instance(plugin_name, user=user)
+        param_dict = tool.__parameters__
+        param_dict.synchronize(plugin_name)
+        plugin_fields = param_dict.keys()
+
+        # don't search for empty form fields
+        for key, val in request.GET.items():
+            if val != "":
+                if key in plugin_fields:
+                    data[key] = val
+
         try:
-            user = OpenIdUser(request.user.username)
-        except UserNotFoundError:
-            user = User()
-        if history_id is not None:
-            o = Configuration.objects.filter(history_id_id=history_id)
-            hist_objects = History.find_similar_entries(o, max_entries=5)
-
-        else:
-            # create the tool
-            tool = pm.get_plugin_instance(plugin_name, user=user)
-            param_dict = tool.__parameters__
-            param_dict.synchronize(plugin_name)
-            plugin_fields = param_dict.keys()
-
-            # don't search for empty form fields
-            for key, val in request.GET.items():
-                if val != "":
-                    if key in plugin_fields:
-                        data[key] = val
-
-            try:
-                o = pm.dict2conf(plugin_name, data, user=user)
-            except Exception:
-                return HttpResponse("[]")
-            hist_objects = History.find_similar_entries(
-                    o, uid=request.user.username, max_entries=5
-                )
+            o = pm.dict2conf(plugin_name, data, user=user)
+        except Exception:
+            return HttpResponse("[]")
+        hist_objects = History.find_similar_entries(
+                o, uid=request.user.username, max_entries=5
+            )
 
     res = list()
     for obj in hist_objects:
@@ -107,13 +104,9 @@ def search_similar_results(request, plugin_name=None, history_id=None):
 @login_required()
 def setup(request, plugin_name, row_id=None):
     pm.reload_plugins(request.user.username)
-    user_can_submit = request.session.get("user_info", {}).get("isGuest")
-    if user_can_submit:
-        try:
-            user = OpenIdUser(request.user.username)
-        except UserNotFoundError:
-            user = User()
-    else:
+    try:
+        user = OpenIdUser(request.user.username)
+    except UserNotFoundError:
         user = User()
 
     plugin = get_plugin_or_404(plugin_name, user=user)
@@ -250,7 +243,6 @@ def setup(request, plugin_name, row_id=None):
             "user_home": home_dir,
             "user_scratch": scratch_dir,
             "error_message": error_msg,
-            "restricted_user": not user_can_submit,
             "show_pw_error": "password_hidden" in form.errors.keys(),
             "PREVIEW_URL": settings.PREVIEW_URL,
         },

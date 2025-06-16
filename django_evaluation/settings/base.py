@@ -243,13 +243,6 @@ SECRET_KEY = os.environ.get(
 USERNAME_FILTER = r"^[a-z]\d{6}$"
 USERNAME_REPLACE = "*****"
 
-
-# send an email to the admins whenever a guest logs-in
-SEND_MAIL_AT_GUEST_LOGIN = True
-
-# result to show at guest tour
-GUEST_TOUR_RESULT = 17508
-
 # Django rest framework
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [

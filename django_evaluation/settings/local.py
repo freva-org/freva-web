@@ -278,8 +278,7 @@ MIKLIP_LOGO = STATIC_URL + "img/miklip-logo.png"
 LOAD_MODULE = " "
 FREVA_BIN = os.environ.get("FREVA_BIN", os.path.join(sys.exec_prefix, "bin"))
 NCDUMP_BINARY = os.path.join(FREVA_BIN, "metadata-inspector") + " --html"
-# result to show at guest tour
-GUEST_TOUR_RESULT = 105
+
 SHELL_IN_A_BOX = "/shell/"
 WEBPACK_LOADER = {
     "DEFAULT": {

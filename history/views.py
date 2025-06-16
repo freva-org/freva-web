@@ -228,7 +228,7 @@ def change_flag(request):
 
     changed = 0
 
-    if not (flag is None or request.session.get('user_info', {}).get('is_guest')):
+    if flag is not None:
         for id in ids:
             changed += 1
 
@@ -269,14 +269,9 @@ def follow_result(request, history_id):
 
     history_object = get_object_or_404(History, id=history_id)
 
-    # check if the user has the permission to access the result
-    flag = history_object.flag
-    guest = request.session.get('user_info', {}).get('is_guest')
-
-    if not guest and flag in [
+    if history_object.flag in [
         History.Flag.free,
         History.Flag.public,
-        History.Flag.guest,
     ]:
         user = OpenIdUser(str(request.user))
         pm.follow_history_tag(history_object.id, user, "Web page: follow")
@@ -344,14 +339,13 @@ def results(request, id, show_output_only=False):
             return redirect_to_login(path)
 
         elif not history_object.uid == request.user:
-            if not (
-                request.user.username.lower() != "guest"
-                and flag
-                in [History.Flag.public, History.Flag.shared, History.Flag.guest]
-            ):
+            if flag not in [
+                History.Flag.public,
+                History.Flag.shared
+            ]:
                 raise PermissionDenied
-    if not request.user.is_authenticated:
-        request.user._guest = True
+    # if not request.user.is_authenticated:
+    #     request.user._guest = True
 
     try:
         documentation = FlatPage.objects.get(title__iexact=history_object.tool)
@@ -541,7 +535,7 @@ def tail_file(request, id):
 @login_required()
 def set_caption(request, id):
     hist = History.objects.get(id=id)
-    if not request.session.get('user_info', {}).get('is_guest') and hist.uid == request.user:
+    if hist.uid == request.user:
         caption = escape(request.POST["caption"].strip())
         hist.caption = caption
         hist.save()
@@ -628,7 +622,7 @@ def edit_htag(request, history_id, tag_id):
 
     retval = ""
 
-    if not request.session.get('user_info', {}).get('is_guest') and type in allowed_types:
+    if type in allowed_types:
         user = request.user
         db = UserDB(user)
 

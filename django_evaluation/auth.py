@@ -16,14 +16,14 @@ logger = logging.getLogger(__name__)
 
 class OIDCAuthorizationCodeBackend(BaseBackend):
     """
-    OIDC authentication backend using Authorization Code Flow.
+    OIDC authorization backend using Authorization Code Flow.
 
     This backend authenticates users through the freva-rest OIDC endpoints
     and stores tokens in the session for subsequent API calls.
     """
 
     def __init__(self):
-        self.userinfo_url = getattr(settings, 'FREVA_REST_URL', 'http://localhost:7777').rstrip('/') + '/api/freva-nextgen/auth/v2/userinfo'
+        self.userinfo_url = getattr(settings, 'FREVA_REST_URL').rstrip('/') + '/api/freva-nextgen/auth/v2/userinfo'
 
     def authenticate(self, request: Any, access_token: str = None, **kwargs):
         """

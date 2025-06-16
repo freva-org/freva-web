@@ -125,18 +125,12 @@ def home(request):
 
     login_required_param = request.GET.get("login_required", False)
 
-    is_guest_user = False
-    if request.user.is_authenticated:
-        user_info = request.session.get('user_info', {})
-        is_guest_user = user_info.get('is_guest', False)
-
     return render(
         request,
         "base/home.html",
         {
             "login_required": login_required_param,
-            "messages": messages,
-            "is_guest_user": is_guest_user,
+            "messages": messages
         },
     )
 

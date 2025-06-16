@@ -8,10 +8,6 @@ from django.views import View
 
 class ChatBotProxy(View):
     def get(self, request, *args, **kwargs):
-        if request.session.get('user_info', {}).get('is_guest'):
-            return HttpResponseForbidden(
-                "Guest users are not allowed to access the chatbot API."
-            )
         path = request.path
         base_url = urljoin(settings.CHAT_BOT_URL, path)
         params = request.GET.dict()

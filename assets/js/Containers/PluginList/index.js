@@ -213,19 +213,17 @@ class PluginList extends React.Component {
             <h2>Plugins</h2>
           </Col>
           <Col md={6} className="pt-2">
-            {!currentUser.isGuest ? (
-              <Button
-                variant="info"
-                className="float-end"
-                onClick={() => {
-                  return exported
-                    ? this.props.dispatch(exportPlugin())
-                    : this.setState({ showModal: true });
-                }}
-              >
-                {exported ? "Remove imported Plugin" : "Plug-my-Plugin"}
-              </Button>
-            ) : null}
+            <Button
+              variant="info"
+              className="float-end"
+              onClick={() => {
+                return exported
+                  ? this.props.dispatch(exportPlugin())
+                  : this.setState({ showModal: true });
+              }}
+            >
+              {exported ? "Remove imported Plugin" : "Plug-my-Plugin"}
+            </Button>
           </Col>
         </Row>
 

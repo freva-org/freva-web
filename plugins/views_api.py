@@ -60,9 +60,6 @@ basically useless.
 
 class ExportPlugin(APIView):
     def post(self, request):
-        if request.session.get('user_info', {}).get('is_guest'):
-            return Response("Guests are not allowed to add plugins")
-
         # try to remove plugin from enironment
         try:
             del os.environ["EVALUATION_SYSTEM_PLUGINS_%s" % request.user]
@@ -86,8 +83,6 @@ class SendMailToDeveloper(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
-        if request.session.get('user_info', {}).get('is_guest'):
-            return Response(False)
         from templated_email import send_templated_mail
 
         text = request.data.get("text", None)
@@ -136,10 +131,6 @@ class ShareResultsByMail(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
-        if request.session.get('user_info', {}).get('is_guest'):
-            status = "Normally, the selected recipients would get an email containing a link to this result,"
-            status += "but this feature is turned off for guest users."
-            return Response(status)
         from templated_email import send_templated_mail
 
         text = request.data.get("text", None)

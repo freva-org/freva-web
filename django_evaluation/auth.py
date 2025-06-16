@@ -48,18 +48,14 @@ class OIDCAuthorizationCodeBackend(BaseBackend):
             # Get user info from freva-rest API
             headers = {"Authorization": f"Bearer {access_token}"}
             response = requests.get(self.userinfo_url, headers=headers, timeout=5)
-            print(f"User info response: {response.status_code} {response.text}")
             if response.status_code == 200:
                 user_info = response.json()
                 user_model = get_user_model()
-                
                 username = user_info.get("username")
                 if not username:
                     logger.warning("No username in user_info response")
                     return None
-                    
                 user, created = user_model.objects.get_or_create(username=username)
-                
                 # Update user info without changing model structure
                 # for satisfying the User model requirements (Freva-legacy)
                 user.email = user_info.get("email", "")

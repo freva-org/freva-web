@@ -11,9 +11,8 @@ class ChatBotProxy(View):
         """Collect authentication headers for chatbot backend."""
         headers = {}
         if hasattr(request, 'session'):
-            user_info = request.session.get('user_info', {})
-            access_token = user_info.get('access_token')
-            token_type = user_info.get('token_type', 'Bearer')
+            access_token = request.session.get('access_token', None)
+            token_type = request.session.get('token_type', "Bearer")
             if access_token:
                 token_type = token_type or 'Bearer'
                 headers['X-Freva-Authorization'] = f'{token_type} {access_token}'
@@ -30,7 +29,7 @@ class ChatBotProxy(View):
 
         # get the authentication headers
         headers = self.get_auth_headers(request)
-
+        print(f"Requesting {base_url} with params {params} and headers {headers}")
         try:
             upstream_response = requests.get(
                 base_url[:-1],

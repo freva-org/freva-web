@@ -119,12 +119,21 @@ class PasswordField(forms.CharField):
         self._user = kwargs.pop("uid")
 
     def validate(self, value):
-        try:
-            ssh_call(self._user, value, "ls", settings.SCHEDULER_HOSTS)
-        except:
-            raise exceptions.ValidationError(
-                "You've entered a wrong password!", code="invalid_password"
-            )
+        password_type = getattr(settings, "FORM_PASSWORD_CHECK", "LDAP")
+        if password_type == "LDAP":
+            u = auth.authenticate(username=self._user)
+            print(f"Validating password for user {self._user}: {u}")
+            if u is None:
+                raise exceptions.ValidationError(
+                    "You've entered a wrong password!", code="invalid_password"
+                )
+        elif password_type == "ssh":
+            try:
+                ssh_call(self._user, value, "ls", settings.SCHEDULER_HOSTS)
+            except:
+                raise exceptions.ValidationError(
+                    "You've entered a wrong password!", code="invalid_password"
+                )
         super(PasswordField, self).validate(value)
 
 

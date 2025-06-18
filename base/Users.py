@@ -30,8 +30,7 @@ class OpenIdUser(User):
             self._email = user_info.get('email', _user.email)
         else:
             self._email = _user.email
-            
-        self._home_directory = "NA"
+
         self._userconfig = Config(interpolation=ExtendedInterpolation())
         self._userconfig.read([User.EVAL_SYS_DEFAULT_CONFIG])
         self._db = UserDB(self)
@@ -48,13 +47,10 @@ class OpenIdUser(User):
     def getUserId(self):
         return self._uid
 
-    def getUserHome(self):
-        return self._home_directory
-
     def getEmail(self):
         return self._email
 
     def __str__(self):
         return (
-            f"User: {self._username} Mail: {self._email} Home: {self._home_directory}"
+            f"User: {self._username} Mail: {self._email}"
         )

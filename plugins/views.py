@@ -17,7 +17,6 @@ from evaluation_system.model.user import User
 
 from base.exceptions import UserNotFoundError
 from base.Users import OpenIdUser
-from django_evaluation.settings.local import HOME_DIRS_AVAILABLE
 from history.models import Configuration, History
 from plugins.forms import PluginForm, PluginWeb
 from plugins.utils import (
@@ -104,9 +103,14 @@ def search_similar_results(request, plugin_name=None, history_id=None):
 @login_required()
 def setup(request, plugin_name, row_id=None):
     pm.reload_plugins(request.user.username)
-    try:
-        user = OpenIdUser(request.user.username)
-    except UserNotFoundError:
+    user_can_submit = request.session.get("system_user_valid", False)
+
+    if user_can_submit:
+        try:
+            user = OpenIdUser(request.user.username)
+        except UserNotFoundError:
+            user = User()
+    else:
         user = User()
 
     plugin = get_plugin_or_404(plugin_name, user=user)
@@ -114,7 +118,7 @@ def setup(request, plugin_name, row_id=None):
     error_msg = pm.get_error_warning(plugin_name)[0]
 
     if request.method == "POST":
-        form = PluginForm(request.POST, tool=plugin, uid=request.user.username)
+        form = PluginForm(request.POST, tool=plugin, uid=request.user.username, request=request)
         if form.is_valid():
             # read the configuration
             config_dict = dict(form.data)
@@ -222,11 +226,10 @@ def setup(request, plugin_name, row_id=None):
         else:
             config_dict = plugin.setup_configuration(check_cfg=False, substitute=True)
 
-        form = PluginForm(initial=config_dict, tool=plugin, uid=user.getName())
+        form = PluginForm(initial=config_dict, tool=plugin, uid=user.getName(), request=request)
 
     plugin_dict = pm.get_plugin_metadata(plugin_name, user_name=request.user.username)
 
-    home_dir = user.getUserHome() if HOME_DIRS_AVAILABLE else None
     try:
         scratch_dir = user.getUserScratch()
     except:
@@ -240,9 +243,9 @@ def setup(request, plugin_name, row_id=None):
             "tool": plugin_web,
             "user_exported": plugin_dict.user_exported,
             "form": form,
-            "user_home": home_dir,
             "user_scratch": scratch_dir,
             "error_message": error_msg,
+            "restricted_user": not user_can_submit,
             "show_pw_error": "password_hidden" in form.errors.keys(),
             "PREVIEW_URL": settings.PREVIEW_URL,
         },
@@ -253,7 +256,6 @@ def setup(request, plugin_name, row_id=None):
 def dirlist(request):
     try:
         user = OpenIdUser(request.user.username)
-        home_dir = user.getUserHome()
         scratch_dir = user.getUserScratch()
     except UserNotFoundError as e:
         logging.exception(e)
@@ -264,7 +266,7 @@ def dirlist(request):
         )
 
     base_directory = Path(urllib.parse.unquote(request.POST.get("dir"))).resolve()
-    if not is_path_relative_to(base_directory, home_dir) and not is_path_relative_to(
+    if not is_path_relative_to(
         base_directory, scratch_dir
     ):
         # user is trying to get a listing of a folder he is not allowed to see
@@ -307,7 +309,6 @@ def dirlist(request):
 def list_dir(request):
     try:
         user = OpenIdUser(request.user.username)
-        home_dir = user.getUserHome()
         scratch_dir = user.getUserScratch()
     except UserNotFoundError:
         # This user has no access to the underlying system and therefore
@@ -322,10 +323,7 @@ def list_dir(request):
     # we can specify an ending in GET request
     base_directory = Path(urllib.parse.unquote(request.GET.get("dir")))
     resolved_dir = base_directory.resolve()
-    if (
-        not is_path_relative_to(base_directory, home_dir)
-        and not is_path_relative_to(base_directory, scratch_dir)
-    ) or not resolved_dir.exists():
+    if (not is_path_relative_to(base_directory, scratch_dir)) or not resolved_dir.exists():
         # user is trying to get a listing of a folder he is not allowed to see
         return JsonResponse({"status": "Invalid base folder requested", "folders": []})
     elif not base_directory.exists():

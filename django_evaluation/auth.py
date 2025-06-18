@@ -24,6 +24,7 @@ class OIDCAuthorizationCodeBackend(BaseBackend):
 
     def __init__(self):
         self.userinfo_url = getattr(settings, 'FREVA_REST_URL').rstrip('/') + '/api/freva-nextgen/auth/v2/userinfo'
+        self.systemuser_url = getattr(settings, 'FREVA_REST_URL').rstrip('/') + '/api/freva-nextgen/auth/v2/systemuser'
 
     def authenticate(self, request: Any, access_token: str = None, **kwargs):
         """
@@ -66,6 +67,18 @@ class OIDCAuthorizationCodeBackend(BaseBackend):
                 # authentication and authorization checks
                 request.session['user_info'] = user_info
 
+                # Fetch and cache system user info for validation
+                # At the moment, we only validate the system user
+                # via this and use the pw_dir for the home directory.
+                system_user_info = self._get_system_user_info(access_token)
+                if system_user_info:
+                    request.session['system_user_info'] = system_user_info
+                    request.session['system_user_valid'] = True
+                    logger.info(f"System user validated for {username}")
+                else:
+                    request.session['system_user_valid'] = False
+                    logger.warning(f"System user validation failed for {username}")
+
                 sync_mail_users(oneshot=True)
                 return user
                 
@@ -73,6 +86,36 @@ class OIDCAuthorizationCodeBackend(BaseBackend):
             logger.error(f"Authentication failed: {e}")
             
         return None
+
+    def _get_system_user_info(self, access_token: str) -> Optional[dict]:
+        """
+        Fetch system user information.
+
+        Parameters
+        ----------
+        access_token : str
+            The access token for API authentication.
+        Returns
+        -------
+        Optional[dict]: System user info if successful
+        or {Unknown user} if not found.
+        """
+        try:
+            headers = {"Authorization": f"Bearer {access_token}"}
+            response = requests.get(self.systemuser_url, headers=headers, timeout=5)
+
+            if response.status_code == 200:
+                return response.json()
+            elif response.status_code == 404:
+                logger.warning("System user not found (unknown user)")
+                return None
+            else:
+                logger.error(f"System user API error: {response.status_code} - {response.text}")
+                return None
+
+        except Exception as e:
+            logger.error(f"Failed to fetch system user info: {e}")
+            return None
 
     def get_user(self, user_id: int) -> Optional[User]:
         """

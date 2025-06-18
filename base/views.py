@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 # Since the endpoints of auth are managing via Freva-rest API and always constant, we define the URLs here instead of settings.py
 # shared variables for OIDC endpoints
 TOKEN_URL = getattr(settings, 'FREVA_REST_URL', 'http://localhost:7777').rstrip('/') + '/api/freva-nextgen/auth/v2/token'
-LOGIN_URL = getattr(settings, 'FREVA_REST_URL', 'http://localhost:7777').rstrip('/') + '/api/freva-nextgen/auth/v2/login'
+LOGIN_URL = '/api/freva-nextgen/auth/v2/login'
 
 
 class OIDCLoginView(View):
@@ -47,7 +47,8 @@ class OIDCLoginView(View):
             'prompt': 'login'
         }
 
-        full_login_url = f"{LOGIN_URL}?{urlencode(params)}"
+        proxy_path = f"/api/freva-nextgen/auth/v2/login?{urlencode(params)}"
+        full_login_url = request.build_absolute_uri(proxy_path)
         return HttpResponseRedirect(full_login_url)
 
 
@@ -94,10 +95,16 @@ class OIDCCallbackView(View):
                     next_url = request.session.pop('login_next', '/')
                     # Validate next URL
                     if url_has_allowed_host_and_scheme(next_url, allowed_hosts=request.get_host()):
-                        return HttpResponseRedirect(next_url)
+                        response = HttpResponseRedirect(next_url)
                     else:
-                        return HttpResponseRedirect('/')
-
+                        response = HttpResponseRedirect('/')
+                    response.set_cookie(
+                        'freva_auth_token', 
+                        f"Bearer {token_data['access_token']}",
+                        httponly=True,
+                        secure=True  # if using HTTPS
+                    )
+                    return response
                 else:
                     logger.error("User authentication failed despite valid token")
                     return render(request, 'base/home.html', {
@@ -124,13 +131,17 @@ def home(request):
     messages = UIMessages.objects.order_by("-id").filter(resolved=False)
 
     login_required_param = request.GET.get("login_required", False)
+    is_guest_user = False
+    if request.user.is_authenticated:
+        is_guest_user = not request.session.get("system_user_valid", False)
 
     return render(
         request,
         "base/home.html",
         {
             "login_required": login_required_param,
-            "messages": messages
+            "messages": messages,
+            "is_guest_user": is_guest_user,
         },
     )
 

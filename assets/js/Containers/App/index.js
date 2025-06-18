@@ -37,7 +37,7 @@ App.propTypes = {
     username: PropTypes.string,
     email: PropTypes.string,
     first_name: PropTypes.string,
-    home: PropTypes.string,
+    isGuest: PropTypes.bool,
     scratch: PropTypes.string,
   }),
   error: PropTypes.string,

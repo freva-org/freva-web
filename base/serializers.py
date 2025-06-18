@@ -1,11 +1,9 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from django_evaluation.settings.local import HOME_DIRS_AVAILABLE
-
 
 class UserSerializer(serializers.ModelSerializer):
-    home = serializers.SerializerMethodField()
+    isGuest = serializers.SerializerMethodField()
     scratch = serializers.SerializerMethodField()
 
     class Meta:
@@ -15,19 +13,16 @@ class UserSerializer(serializers.ModelSerializer):
             "username",
             "email",
             "first_name",
-            "home",
             "scratch",
+            "isGuest",
         )
 
-
-    def get_home(self, instance):
-        """Get user home directory."""
-        if not HOME_DIRS_AVAILABLE:
-            return None
-        _user = self.context.get("user")
-        if _user:
-            return _user.getUserHome()
-        return None
+    def get_isGuest(self, instance):
+        """Check if the user is a guest."""
+        request = self.context.get("request")
+        if request.session.get("system_user_valid", False):
+            return True
+        return False
 
     def get_scratch(self, instance):
         """Get user scratch directory."""

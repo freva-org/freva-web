@@ -251,8 +251,6 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "apikey"
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
-HOME_DIRS_AVAILABLE = False
-
 # Hosts/domain names that are valid for this site; required if DEBUG is False
 # See https://docs.djangoproject.com/en/1.5/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = [
@@ -270,7 +268,7 @@ CSRF_TRUSTED_ORIGINS = [
 
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-
+FORM_PASSWORD_CHECK="OIDC"  # OIDC or ssh
 # path to the site packages used:
 VENV_PYTHON_DIR = "/usr/bin/python3"
 # Path to miklip-logo

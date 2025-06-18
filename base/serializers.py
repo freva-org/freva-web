@@ -21,8 +21,8 @@ class UserSerializer(serializers.ModelSerializer):
         """Check if the user is a guest."""
         request = self.context.get("request")
         if request.session.get("system_user_valid", False):
-            return True
-        return False
+            return False
+        return True
 
     def get_scratch(self, instance):
         """Get user scratch directory."""

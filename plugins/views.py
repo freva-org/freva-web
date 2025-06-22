@@ -3,6 +3,8 @@
 import json
 import logging
 import os
+import subprocess
+import sys
 import urllib
 from pathlib import Path
 
@@ -185,15 +187,45 @@ def setup(request, plugin_name, row_id=None):
             command = " ".join(cmd)
             ssh_cmd = f'bash -c "{eval_str} {exe_path} {export_user_plugin} freva-plugin {command}"'
             logging.info(ssh_cmd)
-            # finally send the ssh call
-            _, stdout, stderr = ssh_call(
-                username=username,
-                password=password,
-                # we use "bash -c because users with other login shells can't use "export"
-                # not clear why we removed this in the first place...
-                command=ssh_cmd,
-                hostnames=hostnames,
-            )
+            scheduler_system = config.get("scheduler_system", "")
+
+            if scheduler_system == "local":
+                local_env = os.environ.copy()
+                local_env['EVALUATION_SYSTEM_CONFIG_FILE'] = config.CONFIG_FILE
+                # important: we need to get rid of the django settings module since
+                # freva core django makes the conflict with the django installed on
+                # the web and as a result the plugin can't be run
+                local_env.pop('DJANGO_SETTINGS_MODULE', None)
+
+                # Add user plugin environment if it exists
+                if export_user_plugin:
+                    plugin_parts = export_user_plugin.split('=', 1)
+                    if len(plugin_parts) == 2:
+                        local_env[plugin_parts[0]] = plugin_parts[1]
+                # remove the --batchmode to run the plugin in local mode
+                if "--batchmode" in command:
+                    command = command.replace("--batchmode", "").strip()
+                process = subprocess.Popen(
+                    f"freva-plugin {command}",
+                    shell=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    env=local_env
+                )
+                stdout = process.stdout
+                stderr = process.stderr
+                process.wait()
+            else:
+                # finally send the ssh call
+                _, stdout, stderr = ssh_call(
+                    username=username,
+                    password=password,
+                    # we use "bash -c because users with other login shells can't use "export"
+                    # not clear why we removed this in the first place...
+                    command=ssh_cmd,
+                    hostnames=hostnames,
+                )
 
             # get the text form stdout
             out = stdout.readlines()

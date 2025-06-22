@@ -507,7 +507,9 @@
             });
 
             {% if restricted_user %}
-                $('.btn').attr('disabled', 'disabled'); // {{ disable_buttons }}
+                // disable run buttons but enable the token management button.
+                $('#runButton, .tool-btn, .form-btn').attr('disabled', 'disabled');
+                // $('.btn').attr('disabled', 'disabled'); // {{ disable_buttons }}
 
                 // actually the runbutton is a forwarding
                 $('#runButton').removeAttr('disabled');

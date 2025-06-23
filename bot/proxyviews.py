@@ -7,11 +7,9 @@ from django.views import View
 
 
 class ChatBotProxy(View):
+    """ A view to proxy requests to the chatbot API."""
     def get(self, request, *args, **kwargs):
-        if request.user.isGuest():
-            return HttpResponseForbidden(
-                "Guest users are not allowed to access the chatbot API."
-            )
+        """ Handle GET requests to the chatbot proxy."""
         path = request.path
         base_url = urljoin(settings.CHAT_BOT_URL, path)
         params = request.GET.dict()
@@ -21,7 +19,11 @@ class ChatBotProxy(View):
         params["freva_config"] = settings.CHAT_BOT_FREVA_CONFIG
 
         try:
-            upstream_response = requests.get(base_url[:-1], params=params, stream=True)
+            upstream_response = requests.get(
+                base_url[:-1],
+                params=params,
+                stream=True
+            )
             upstream_response.raise_for_status()
         except requests.RequestException as e:
             return StreamingHttpResponse(
@@ -31,6 +33,7 @@ class ChatBotProxy(View):
 
         # Stream the content of the external API to the Django response
         def stream():
+            """Generator to stream the content."""
             for chunk in upstream_response.iter_content(chunk_size=8192):
                 if chunk:
                     yield chunk

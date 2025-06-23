@@ -33,6 +33,7 @@ import {
   chatExceedsWindow,
   getPosition,
   scrollToChatBottom,
+  fetchWithAuth,
 } from "./utils";
 
 import { setThread, setConversation, addElement } from "./actions";
@@ -90,7 +91,7 @@ class FrevaGPT extends React.Component {
       let pingSuccessful = false;
 
       try {
-        const response = await fetch("/api/chatbot/ping");
+        const response = await fetchWithAuth("/api/chatbot/ping");
         if (response.status === 200) {
           pingSuccessful = true;
         }
@@ -102,7 +103,7 @@ class FrevaGPT extends React.Component {
     };
 
     const getBotModels = async () => {
-      const response = await fetch(`/api/chatbot/availablechatbots?`);
+      const response = await fetchWithAuth(`/api/chatbot/availablechatbots?`);
       if (response.ok) {
         this.setState({ botModelList: await response.json() });
       } else {
@@ -194,7 +195,7 @@ class FrevaGPT extends React.Component {
     };
 
     // response of a new bot request is streamed
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `/api/chatbot/streamresponse?` + queryString.stringify(queryObject)
     ); //, signal);
 
@@ -320,7 +321,7 @@ class FrevaGPT extends React.Component {
 
   async getOldThread(thread) {
     const queryObject = { thread_id: thread };
-    const response = await fetch(
+    const response = await fetchWithAuth(
       `/api/chatbot/getthread?` + queryString.stringify(queryObject)
     );
 
@@ -348,7 +349,9 @@ class FrevaGPT extends React.Component {
     }
     const queryObject = { thread_id: this.props.frevaGPT.thread };
     if (this.props.frevaGPT.thread) {
-      await fetch(`/api/chatbot/stop?` + queryString.stringify(queryObject));
+      await fetchWithAuth(
+        `/api/chatbot/stop?` + queryString.stringify(queryObject)
+      );
     }
 
     this.setState({ loading: false, reader: undefined });

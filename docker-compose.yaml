@@ -80,22 +80,6 @@ services:
     entrypoint: ["sh", "/create-user.sh"]
     networks:
       - freva-web
-  ldap:
-    image: osixia/openldap:latest
-    environment:
-      LDAP_ORGANISATION: "My Organization"
-      LDAP_DOMAIN: "example.com"
-      LDAP_ADMIN_PASSWORD: "admin_password"
-      LDAP_ADMIN_USERNAME: "admin"
-    ports:
-      - "389:389"
-      - "636:636"
-    command: --copy-service
-    hostname: ldap
-    networks:
-      - freva-web
-    volumes:
-      - ./docker/config/keycloak/users.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/users.ldif
   mongodb:
     image: mongo:latest
     networks:
@@ -107,7 +91,6 @@ services:
     ports:
       - "27017:27017"
     hostname: mongodb
-
 networks:
   freva-web:
     driver: bridge

@@ -1,6 +1,6 @@
-import os
 from configparser import ConfigParser as Config
 from configparser import ExtendedInterpolation
+from typing import NamedTuple
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
@@ -9,6 +9,18 @@ from evaluation_system.model.db import UserDB
 from evaluation_system.model.user import User
 
 from base.exceptions import UserNotFoundError
+
+
+class UserData(NamedTuple):
+    """A class the defines pwd's entries."""
+
+    pw_name: str
+    pw_gecos: str
+    pw_dir: str
+    pw_uid: int = 1000
+    pw_gid: int = 1001
+    pw_shell = str = "/bin/bash"
+    pw_passwd: str = "x"
 
 
 class OpenIdUser(User):
@@ -21,7 +33,6 @@ class OpenIdUser(User):
         except ObjectDoesNotExist as error:
             raise UserNotFoundError() from error
         self._dir_type = config.get(config.DIRECTORY_STRUCTURE_TYPE)
-
         self._username = username
         self._uid = "web"
         self._email = _user.email
@@ -40,6 +51,9 @@ class OpenIdUser(User):
             self._db.updateUserLogin(row_id, self._email)
         else:
             self._db.createUser(self.getName(), email=self._email)
+        self._userdata = UserData(
+            pw_name=username, pw_dir=self._home_directory, pw_gecos=username
+        )
 
     def getName(self):
         return self._username
@@ -54,6 +68,4 @@ class OpenIdUser(User):
         return self._email
 
     def __str__(self):
-        return (
-            f"User: {self._username} Mail: {self._email} Home: {self._home_directory}"
-        )
+        return f"User: {self._username} Mail: {self._email} Home: {self._home_directory}"

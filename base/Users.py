@@ -19,7 +19,7 @@ class UserData(NamedTuple):
     pw_dir: str
     pw_uid: int = 1000
     pw_gid: int = 1001
-    pw_shell = str = "/bin/bash"
+    pw_shell: str = "/bin/bash"
     pw_passwd: str = "x"
 
 

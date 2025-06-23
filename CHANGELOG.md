@@ -3,6 +3,13 @@
 
 
 All notable changes to this project will be documented in this file.
+## [v2506.0.0]
+## Added
+- Build the authentication based on the auth-flow on Freva-Nextgen RestAPI
+- Add Token button next to user account button to user be able to copy/downlaod the access token and refresh token to apply on CLI and Python of freva-client
+- Recognize the guest user based on the SystemUser endpoint
+- Open the plug-my-plugin for all
+
 ## [v2505.0.0]
 ## Changed
 - Fix an issue on BBOX and removed the minor leftover of STAC-API

@@ -20,12 +20,12 @@ RUN  set -xe  && \
     DEBIAN_FRONTEND=noninteractive apt -y install sssd libnss-sss libpam-sss \
     sssd-common sssd-tools &&\
     rm -rf /var/lib/apt/lists/* && \
-     printf "\n\
+    printf "\n\
 auth required pam_sss.so\n\
 account required pam_sss.so\n\
 password required pam_sss.so\n\
 session required pam_sss.so\n\
-" > /etc/pam.d/login &&\
+" > /etc/pam.d/login
 
 WORKDIR ${FREVA_WEB_DIR}
 

@@ -5,10 +5,11 @@
 All notable changes to this project will be documented in this file.
 ## [v2506.0.0]
 ## Added
-- Build the authentication based on the auth-flow on Freva-Nextgen RestAPI
-- Add Token button next to user account button to user be able to copy/downlaod the access token and refresh token to apply on CLI and Python of freva-client
-- Recognize the guest user based on the SystemUser endpoint
-- Open the plug-my-plugin for all
+- Introduced a new component called FrevaGPT.
+- Implemented authentication based on the auth-flow of the Freva-Nextgen REST API.
+- Added a Token button next to the user account menu, allowing users to copy or download their access token and refresh token for use with the Freva CLI and Python client.
+- Guest users are now automatically recognized via the SystemUser endpoint.
+- Made the Plug-My-Plugin available to all users.
 
 ## [v2505.0.0]
 ## Changed

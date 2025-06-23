@@ -55,7 +55,7 @@ runrest:
 		--key-file $(REDIS_SSL_KEYFILE)
 	python -m data_portal_worker -c .data-portal-cluster-config.json > rest.log 2>&1 &
 	python docker/config/dev-utils.py oidc http://localhost:8080/realms/freva/.well-known/openid-configuration
-	python -m freva_rest.cli -p 7777 --redis-ssl-keyfile $(REDIS_SSL_KEYFILE) --redis-ssl-certfile $(REDIS_SSL_CERTFILE) --debug --dev >> rest.log 2>&1 &
+	python -m freva_rest.cli -p 7777 --oidc-discovery-url http://localhost:8080/realms/freva/.well-known/openid-configuration --redis-ssl-keyfile $(REDIS_SSL_KEYFILE) --redis-ssl-certfile $(REDIS_SSL_CERTFILE) --oidc-client-id freva --debug --dev >> rest.log 2>&1 &
 	@echo "To watch the freva-rest logs, run 'tail -f rest.log'"
 
 runfrontend:
@@ -76,6 +76,7 @@ stopserver:
 stoprest:
 	ps aux | grep '[f]reva_rest.cli' | awk '{print $$2}' | xargs -r kill
 	ps aux | grep '[d]ata_portal_worker' | awk '{print $$2}' | xargs -r kill
+	ps aux | grep '[m]anage.py runserver' | awk '{print $$2}' | xargs -r kill
 	rm -fr .data-portal-cluster-config.json
 	echo "Stopped freva-rest development server..." > rest.log
 

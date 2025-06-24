@@ -77,6 +77,30 @@ REDIS_PASSWD=secret
 USER=$(whoami) docker compose --env-file .env.dev up -d
 ```
 
+### Chatbot Configuration
+
+The chatbot requires specific environment variables to run, as its backend operates on a production system. This setup ensures it connects to an accessible Freva instance and project as a hub.
+
+#### Required Environment Variables:
+Choose one of running Freva instances and get the values from there and set via environment.
+
+| Variable                 | Description                                                                          |
+| ------------------------ | ------------------------------------------------------------------------------------ |
+| `CHAT_BOT_URL`           | URL of the chatbot backend (default example: `http://vader4-icpub.lvt.dkrz.de:8502`) |
+| `CHAT_BOT_AUTH_KEY`      | Authentication key for the chatbot (set via environment variable)                    |
+| `CHAT_BOT_FREVA_CONFIG`  | Path or configuration string for Freva (set via environment variable)                |
+| `VAULT_URL`              | URL of the Vault system providing secrets (set via environment variable)             |
+| `CHAT_BOT_FREVA_PROJECT` | Name of the Freva project the chatbot should use (set via environment variable)      |
+| `FREVA_REST_URL` | URL of the freva-rest of one running freva instance (set via environment variable)      |
+
+#### Optional:
+
+| Variable   | Description                                                                     |
+| ---------- | ------------------------------------------------------------------------------- |
+| `CHAT_BOT` | Set to `"1"` to activate the chatbot, `"0"` to disable it (default is disabled) |
+
+
+
 ### Running tests
 
 There are some rudimentary tests that check the integration of `django` and the

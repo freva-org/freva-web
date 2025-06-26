@@ -120,7 +120,7 @@ jobs:
       - name: Get the release script
         run: >
           curl -H 'Cache-Control: no-cache' -Ls -o bump.py
-          https://raw.githubusercontent.com/FREVA-CLINT/freva-deployment/main/release.py
+          https://raw.githubusercontent.com/freva-org/freva-admin/main/release.py
 
       - name: Get tag
         id: repository

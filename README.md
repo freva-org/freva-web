@@ -9,7 +9,7 @@ web front end in a production environment use the
 To start development with freva clone the repository and its sub-modules:
 
 ```console
-git clone --recursive git@github.com:FREVA-CLINT/freva-web.git
+git clone --recursive git@github.com:freva-org/freva-web.git
 ```
 
 And create a pair of self-signed keys. These keys will be used by various
@@ -39,7 +39,7 @@ source .envrc
 ### Additional services running on docker
 
 The web ui will need a connection to a solr,
-[freva-databrowser](https://github.com/FREVA-CLINT/freva-nextgen/) and
+[freva-databrowser](https://github.com/freva-org/freva-nextgen/) and
 mariadb service. This services can be deployed using
 [`docker-compose`](https://docs.docker.com/compose/install/).
 
@@ -144,7 +144,7 @@ to deploy the web app in production mode.
 A pre-build image of the web app is available via:
 
 ```console
-docker pull ghcr.io/freva-clint/freva-web:latest
+docker pull ghcr.io/freva-org/freva-web:latest
 ```
 
 When running in production mode you should set the following container
@@ -173,7 +173,7 @@ docker run -it -e EVALUATION_SYSTEM_CONFIG_FILE=/work/freva/evaluation_system.co
         -v /work/freva:/work/freva:z \
         -v /srv/static:/opt/freva_web/static:z \
         -p 8000:8000 \
-        ghcr.io/freva-clint/freva-web:latest
+        ghcr.io/freva-org/freva-web:latest
 ```
 The web app is then available via port 8000 on the host system.
 
@@ -206,7 +206,7 @@ LoadModule proxy_http_module modules/mod_proxy_http.so
 
 # Create a new web release.
 The production systems are deployed in a docker image hosted on the GitHub
-container registry: `ghcr.io/freva-clint/freva-web`. A GitHub workflow has to
+container registry: `ghcr.io/freva-org/freva-web`. A GitHub workflow has to
 be triggered in order to build an updated version of the docker image and push
 it to the registry. To do so please follow the following steps.
 

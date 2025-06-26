@@ -101,7 +101,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build-and-push-image, lint]
     permissions:
-      contents: read
+      contents: write
       packages: write
     steps:
       - name: Checkout repository

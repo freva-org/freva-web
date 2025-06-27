@@ -9,20 +9,17 @@ import urllib
 from pathlib import Path
 
 import evaluation_system.api.plugin_manager as pm
-from base.exceptions import UserNotFoundError
-from base.Users import OpenIdUser
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
-from django.views.decorators.debug import (
-    sensitive_post_parameters,
-    sensitive_variables,
-)
+from django.views.decorators.debug import sensitive_post_parameters, sensitive_variables
 from evaluation_system.misc import config
 from evaluation_system.model.user import User
-from history.models import Configuration, History
 
+from base.exceptions import UserNotFoundError
+from base.Users import OpenIdUser
+from history.models import Configuration, History
 from plugins.forms import PluginForm, PluginWeb
 from plugins.utils import (
     get_plugin_or_404,

@@ -1,5 +1,9 @@
 import base64
+import io
 import logging
+import shlex
+import socket
+import subprocess
 
 import evaluation_system.api.plugin_manager as pm
 import paramiko
@@ -7,6 +11,46 @@ from django.conf import settings
 from django.http import Http404
 from django.views.decorators.debug import sensitive_variables
 from evaluation_system.misc import config
+
+
+def is_local_host(hostname: str) -> bool:
+    """Return True if hostname refers to this machine."""
+    local_names = {
+        "localhost",
+        "127.0.0.1",
+        socket.gethostname(),
+        socket.getfqdn(),
+    }
+    # Also check if the hostname IP resolves to any local interface
+    try:
+        ips = {ai[4][0] for ai in socket.getaddrinfo(hostname, None)}
+        local_ips = {
+            addr["addr"]
+            for iface in socket.if_nameindex()
+            for addr in socket.if_nameindex()  # (you could use netifaces here)
+        }
+        if ips & local_ips:
+            return True
+    except Exception:
+        pass
+
+    return hostname in local_names
+
+
+def local_exec(command: str, env: dict = None) -> LocalResult:
+    """Run a command locally."""
+    # CompletedProcess holds stdout/stderr/text or bytes
+    try:
+        res = subprocess.run(
+            shlex.split(command),
+            check=False,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=env,
+        )
+        return io.BytesIO(), io.BytesIO(res.stdout), io.BytesIO(res.stderr)
+    except FileNotFoundError as error:
+        return io.BytesIO(), io.BytesIO(), io.BytesIO(str(error).encode("utf-8"))
 
 
 def get_scheduler_hosts(user):
@@ -49,6 +93,8 @@ def ssh_call(username, password, command, hostnames=["127.0.0.1"]):
     sentto = hostname
     env_dict = {"LC_TELEPHONE": base64.b64encode(password.encode()).decode()}
     while hostname:
+        if is_local_host(hostname):
+            return local_exec(command, env_dict)
         try:
             # create the ssh client
             ssh = paramiko.SSHClient()
@@ -74,7 +120,9 @@ def ssh_call(username, password, command, hostnames=["127.0.0.1"]):
             else:
                 raise
 
-    (stdin, stdout, stderr) = ssh.exec_command(command=command, environment=env_dict)
+    (stdin, stdout, stderr) = ssh.exec_command(
+        command=command, environment=env_dict
+    )
 
     logging.debug("sent command '%s' to '%s'" % (command, sentto))
 

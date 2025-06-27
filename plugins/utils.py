@@ -37,7 +37,7 @@ def is_local_host(hostname: str) -> bool:
     return hostname in local_names
 
 
-def local_exec(command: str, env: dict = None) -> LocalResult:
+def local_exec(command, env=None):
     """Run a command locally."""
     # CompletedProcess holds stdout/stderr/text or bytes
     try:

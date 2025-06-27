@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from base.exceptions import UserNotFoundError
-from base.Users import ensure_url_scheme
+from base.views import ensure_url_scheme
 
 from .serializers import UserSerializer
 

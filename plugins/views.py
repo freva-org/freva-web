@@ -9,17 +9,20 @@ import urllib
 from pathlib import Path
 
 import evaluation_system.api.plugin_manager as pm
+from base.exceptions import UserNotFoundError
+from base.Users import OpenIdUser
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
-from django.views.decorators.debug import sensitive_post_parameters, sensitive_variables
+from django.views.decorators.debug import (
+    sensitive_post_parameters,
+    sensitive_variables,
+)
 from evaluation_system.misc import config
 from evaluation_system.model.user import User
-
-from base.exceptions import UserNotFoundError
-from base.Users import OpenIdUser
 from history.models import Configuration, History
+
 from plugins.forms import PluginForm, PluginWeb
 from plugins.utils import (
     get_plugin_or_404,
@@ -90,8 +93,8 @@ def search_similar_results(request, plugin_name=None, history_id=None):
         except Exception:
             return HttpResponse("[]")
         hist_objects = History.find_similar_entries(
-                o, uid=request.user.username, max_entries=5
-            )
+            o, uid=request.user.username, max_entries=5
+        )
 
     res = list()
     for obj in hist_objects:
@@ -120,7 +123,9 @@ def setup(request, plugin_name, row_id=None):
     error_msg = pm.get_error_warning(plugin_name)[0]
 
     if request.method == "POST":
-        form = PluginForm(request.POST, tool=plugin, uid=request.user.username, request=request)
+        form = PluginForm(
+            request.POST, tool=plugin, uid=request.user.username, request=request
+        )
         if form.is_valid():
             # read the configuration
             config_dict = dict(form.data)
@@ -164,14 +169,18 @@ def setup(request, plugin_name, row_id=None):
             exe_path = f"PATH={settings.FREVA_BIN}:$PATH"
 
             if "EVALUATION_SYSTEM_PLUGINS_%s" % request.user in os.environ:
-                plugin_str = os.environ["EVALUATION_SYSTEM_PLUGINS_%s" % request.user]
+                plugin_str = os.environ[
+                    "EVALUATION_SYSTEM_PLUGINS_%s" % request.user
+                ]
                 export_user_plugin = "EVALUATION_SYSTEM_PLUGINS=%s" % plugin_str
             else:
                 export_user_plugin = ""
             scheduler_options = ",".join(
                 [
                     s
-                    for s in config_dict.get("extra_scheduler_options", "").split(",")
+                    for s in config_dict.get("extra_scheduler_options", "").split(
+                        ","
+                    )
                     if s.strip()
                 ]
             )
@@ -187,45 +196,16 @@ def setup(request, plugin_name, row_id=None):
             command = " ".join(cmd)
             ssh_cmd = f'bash -c "{eval_str} {exe_path} {export_user_plugin} freva-plugin {command}"'
             logging.info(ssh_cmd)
-            scheduler_system = config.get("scheduler_system", "")
 
-            if scheduler_system == "local":
-                local_env = os.environ.copy()
-                local_env['EVALUATION_SYSTEM_CONFIG_FILE'] = config.CONFIG_FILE
-                # important: we need to get rid of the django settings module since
-                # freva core django makes the conflict with the django installed on
-                # the web and as a result the plugin can't be run
-                local_env.pop('DJANGO_SETTINGS_MODULE', None)
-
-                # Add user plugin environment if it exists
-                if export_user_plugin:
-                    plugin_parts = export_user_plugin.split('=', 1)
-                    if len(plugin_parts) == 2:
-                        local_env[plugin_parts[0]] = plugin_parts[1]
-                # remove the --batchmode to run the plugin in local mode
-                if "--batchmode" in command:
-                    command = command.replace("--batchmode", "").strip()
-                process = subprocess.Popen(
-                    f"freva-plugin {command}",
-                    shell=True,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True,
-                    env=local_env
-                )
-                stdout = process.stdout
-                stderr = process.stderr
-                process.wait()
-            else:
-                # finally send the ssh call
-                _, stdout, stderr = ssh_call(
-                    username=username,
-                    password=password,
-                    # we use "bash -c because users with other login shells can't use "export"
-                    # not clear why we removed this in the first place...
-                    command=ssh_cmd,
-                    hostnames=hostnames,
-                )
+            # finally send the ssh call
+            _, stdout, stderr = ssh_call(
+                username=username,
+                password=password,
+                # we use "bash -c because users with other login shells can't use "export"
+                # not clear why we removed this in the first place...
+                command=ssh_cmd,
+                hostnames=hostnames,
+            )
 
             # get the text form stdout
             out = stdout.readlines()
@@ -236,7 +216,9 @@ def setup(request, plugin_name, row_id=None):
             logging.debug("errors of analyze:" + str(err))
             try:
                 row_id = (
-                    History.objects.filter(uid=request.user.username, tool=plugin_name)
+                    History.objects.filter(
+                        uid=request.user.username, tool=plugin_name
+                    )
                     .latest("timestamp")
                     .id
                 )
@@ -256,11 +238,17 @@ def setup(request, plugin_name, row_id=None):
             f = PluginForm(tool=plugin, uid=user.getName())
             config_dict[f.caption_field_name] = h.caption
         else:
-            config_dict = plugin.setup_configuration(check_cfg=False, substitute=True)
+            config_dict = plugin.setup_configuration(
+                check_cfg=False, substitute=True
+            )
 
-        form = PluginForm(initial=config_dict, tool=plugin, uid=user.getName(), request=request)
+        form = PluginForm(
+            initial=config_dict, tool=plugin, uid=user.getName(), request=request
+        )
 
-    plugin_dict = pm.get_plugin_metadata(plugin_name, user_name=request.user.username)
+    plugin_dict = pm.get_plugin_metadata(
+        plugin_name, user_name=request.user.username
+    )
 
     try:
         scratch_dir = user.getUserScratch()
@@ -298,9 +286,7 @@ def dirlist(request):
         )
 
     base_directory = Path(urllib.parse.unquote(request.POST.get("dir"))).resolve()
-    if not is_path_relative_to(
-        base_directory, scratch_dir
-    ):
+    if not is_path_relative_to(base_directory, scratch_dir):
         # user is trying to get a listing of a folder he is not allowed to see
         return HttpResponse(
             '<div class="alert alert-danger">Invalid base folder requested</div>'
@@ -355,9 +341,13 @@ def list_dir(request):
     # we can specify an ending in GET request
     base_directory = Path(urllib.parse.unquote(request.GET.get("dir")))
     resolved_dir = base_directory.resolve()
-    if (not is_path_relative_to(base_directory, scratch_dir)) or not resolved_dir.exists():
+    if (
+        not is_path_relative_to(base_directory, scratch_dir)
+    ) or not resolved_dir.exists():
         # user is trying to get a listing of a folder he is not allowed to see
-        return JsonResponse({"status": "Invalid base folder requested", "folders": []})
+        return JsonResponse(
+            {"status": "Invalid base folder requested", "folders": []}
+        )
     elif not base_directory.exists():
         return JsonResponse(
             {

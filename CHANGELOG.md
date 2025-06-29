@@ -3,6 +3,10 @@
 
 
 All notable changes to this project will be documented in this file.
+## [v2506.0.1]
+## Fixes
+- Try to get information on the user via SSSD
+
 ## [v2506.0.0]
 ## Added
 - Introduced a new component called FrevaGPT.

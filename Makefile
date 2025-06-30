@@ -2,6 +2,7 @@
 
 export EVALUATION_SYSTEM_CONFIG_FILE := $(PWD)/docker/local-eval-system.conf
 export EVALUATION_SYSTEM_DRS_CONFIG_FILE := $(PWD)/docker/drs_config.toml
+export OIDC_DISCOVERY_URL ?= http://localhost:8080/realms/freva/.well-known/openid-configuration
 export DJANGO_SUPERUSER_PASSWORD := secret
 export DEV_MODE := 1
 export CHAT_BOT := 1
@@ -54,8 +55,8 @@ runrest:
 		--cert-file $(REDIS_SSL_CERTFILE) \
 		--key-file $(REDIS_SSL_KEYFILE)
 	python -m data_portal_worker -c .data-portal-cluster-config.json > rest.log 2>&1 &
-	python docker/config/dev-utils.py oidc http://localhost:8080/realms/freva/.well-known/openid-configuration
-	python -m freva_rest.cli -p 7777 --services zarr-stream stacapi --oidc-discovery-url http://localhost:8080/realms/freva/.well-known/openid-configuration --redis-ssl-keyfile $(REDIS_SSL_KEYFILE) --redis-ssl-certfile $(REDIS_SSL_CERTFILE) --oidc-client-id freva --debug --dev >> rest.log 2>&1 &
+	python docker/config/dev-utils.py oidc $(OIDC_DISCOVERY_URL)
+	python -m freva_rest.cli -p 7777 --services zarr-stream stacapi --oidc-discovery-url $(OIDC_DISCOVERY_URL) --redis-ssl-keyfile $(REDIS_SSL_KEYFILE) --redis-ssl-certfile $(REDIS_SSL_CERTFILE) --oidc-client-id freva --debug --dev >> rest.log 2>&1 &
 	@echo "To watch the freva-rest logs, run 'tail -f rest.log'"
 
 runfrontend:

@@ -375,10 +375,14 @@ def restart(request):
     return render(request, "base/home.html")
 
 
+@login_required()
 def stacbrowser(request):
     """STAC Browser view - embeds STAC browser"""
+    stacapi_endpoint = f"/api/freva-nextgen/stacapi/"
+    stacapi_url = request.build_absolute_uri(stacapi_endpoint)
+    stacbrowser_url = f"https://radiantearth.github.io/stac-browser/#/{stacapi_url}"
     context = {
         'title': 'STAC Browser',
-        'stac_url': 'http://localhost:8085',
+        'stac_url': stacbrowser_url,
     }
     return render(request, 'stacbrowser.html', context)

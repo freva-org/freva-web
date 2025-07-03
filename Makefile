@@ -102,7 +102,7 @@ stop: stopserver stopfrontend stoprest
 
 setup: setup-rest setup-stacbrowser setup-node setup-django dummy-data
 
-run: runrest runfrontend runserver runstacbrowser
+run: runrest runfrontend runserver
 
 lint: setup-node
 	npm run lint-format

@@ -16,7 +16,7 @@ SERVER_EMAIL : str
 ALLOWED_HOSTS : str
 CSRF_TRUSTED_ORIGINS : str
 FREVA_BIN: str
-STAC_BROWSER: True|False
+STAC_BROWSER: 0|1
 """
 
 import logging

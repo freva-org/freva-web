@@ -278,7 +278,7 @@
     }
 </script>
 
-<!-- Where we import STAC Browser container -->
+<!-- Important" Where we import STAC Browser container -->
 <div class="stac-browser-wrapper">
     <div id="stac-browser"></div>
 </div>
@@ -306,7 +306,7 @@
                     try {
                         const vueInstance = document.getElementById('stac-browser').__vue__;
                     } catch (error) {
-                        console.warn('⚠️ Could not access Vue instance:', error);
+                        console.warn(error);
                     }
                 }, 1000);
             };

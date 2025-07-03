@@ -28,7 +28,7 @@ setup-django:
 
 setup-rest:
 	TEMP_DIR=$$(mktemp -d) && \
-	git clone -b stacapi-base https://github.com/freva-org/freva-nextgen.git $$TEMP_DIR &&\
+	git clone https://github.com/freva-org/freva-nextgen.git $$TEMP_DIR &&\
 	python -m pip install $$TEMP_DIR/freva-rest $$TEMP_DIR/freva-data-portal-worker &&\
 	rm -rf $$TEMP_DIR
 
@@ -93,15 +93,11 @@ stoprest:
 	rm -fr .data-portal-cluster-config.json
 	echo "Stopped freva-rest development server..." > rest.log
 
-stopstacbrowser:
-	pkill -f "stac-browser"
-	echo "Stopped STAC Browser..." > stac-browser.log
-
 stopfrontend:
 	pkill -f "npm run dev"
 	echo "Stopped npm development server..." > npm.log
 
-stop: stopserver stopfrontend stoprest stopstacbrowser
+stop: stopserver stopfrontend stoprest
 	@echo "All services have been stopped."
 
 setup: setup-rest setup-stacbrowser setup-node setup-django dummy-data

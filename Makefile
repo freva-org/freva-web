@@ -37,21 +37,24 @@ setup-node:
 
 setup-stacbrowser:
 	@echo "Setting up STAC Browser..."
+	rm -rf static_root/stac-browser
 	mkdir -p static_root/stac-browser
 	@if [ ! -d "stac-browser" ]; then \
 		git clone https://github.com/radiantearth/stac-browser.git stac-browser; \
 	fi
-	cd stac-browser 
-	npm run build -- --historyMode="hash" --allowExternalAccess=false
+	cd stac-browser && \
+	npm install && \
+	npm run build -- --historyMode="hash" --allowExternalAccess=false && \
 	cp -r dist/* ../static_root/stac-browser/
 
-	@APP_JS=$$(ls ../static_root/stac-browser/js/app.*.js 2>/dev/null | head -1); \
+	@APP_JS=$$(ls static_root/stac-browser/js/app.*.js 2>/dev/null | head -1); \
 	if [ -n "$$APP_JS" ]; then \
 		echo "Found app.js: $$APP_JS"; \
-		sed 's|t.exports={catalogUrl:null|t.exports={catalogUrl:window.STAC_CATALOG_URL|g' -i "$$APP_JS"; \
+		sed -i '' 's/catalogUrl:null/catalogUrl:window.STAC_CATALOG_URL/g' "$$APP_JS"; \
 		echo "Modified: $$APP_JS"; \
 	else \
-		echo "Error: app.js not found"; \
+		echo "Error: app.js not found in static_root/stac-browser/js/"; \
+		ls -la static_root/stac-browser/js/ || echo "Directory does not exist"; \
 		exit 1; \
 	fi
 

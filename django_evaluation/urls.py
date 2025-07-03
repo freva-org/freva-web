@@ -29,7 +29,7 @@ urlpatterns = [
     url(r"", include(("base.urls", "base"), namespace="base")),
     url(r"", include(("bot.urls", "bot"), namespace="bot")),
     url(
-        r"^favicon\.svg$",
+        r"^favicon\.(ico|svg|png)$",
         RedirectView.as_view(
             url=settings.STATIC_URL + "img/favicon.svg", permanent=True
         ),

@@ -36,10 +36,24 @@ setup-node:
 	npm install
 
 setup-stacbrowser:
+	@echo "Setting up STAC Browser..."
+	mkdir -p static_root/stac-browser
 	@if [ ! -d "stac-browser" ]; then \
 		git clone https://github.com/radiantearth/stac-browser.git stac-browser; \
 	fi
-	cd stac-browser && npm install
+	cd stac-browser 
+	npm run build -- --historyMode="hash" --allowExternalAccess=false
+	cp -r dist/* ../static_root/stac-browser/
+
+	@APP_JS=$$(ls ../static_root/stac-browser/js/app.*.js 2>/dev/null | head -1); \
+	if [ -n "$$APP_JS" ]; then \
+		echo "Found app.js: $$APP_JS"; \
+		sed 's|t.exports={catalogUrl:null|t.exports={catalogUrl:window.STAC_CATALOG_URL|g' -i "$$APP_JS"; \
+		echo "Modified: $$APP_JS"; \
+	else \
+		echo "Error: app.js not found"; \
+		exit 1; \
+	fi
 
 runserver:
 	@echo "Starting Django development server..."
@@ -64,11 +78,6 @@ runfrontend:
 	npm run dev > npm.log 2>&1 &
 	@echo "npm development server is running..."
 	@echo "To watch the npm logs, run 'tail -f npm.log'"
-
-runstacbrowser:
-	cd stac-browser && npm start -- --catalogUrl=http://localhost:7777/api/freva-nextgen/stacapi --port 8085 > stac-browser.log 2>&1 &
-	@echo "STAC Browser is running..."
-	@echo "To watch the STAC Browser logs, run 'tail -f stac-browser.log'"
 
 stopserver:
 	ps aux | grep '[m]anage.py runserver' | awk '{print $$2}' | xargs -r kill

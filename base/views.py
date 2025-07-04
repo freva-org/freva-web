@@ -1,4 +1,6 @@
+import glob
 import logging
+import os
 import time
 from urllib.parse import urlencode, urlparse, urlunparse
 
@@ -373,3 +375,32 @@ def restart(request):
         return render(request, "base/restart.html")
 
     return render(request, "base/home.html")
+
+
+@login_required()
+def stacbrowser(request):
+    """STAC Browser view """
+    stacapi_endpoint = f"/api/freva-nextgen/stacapi/"
+    stacapi_url = request.build_absolute_uri(stacapi_endpoint)
+    print(f"STAC API URL: {stacapi_url}")
+
+    # Find the current asset files dynamically. Because the name of the assets
+    # may change with each build, we use glob to find the latest files.
+    static_path = os.path.join(settings.PROJECT_ROOT, 'static_root', 'stac-browser')
+
+    vendor_js = glob.glob(os.path.join(static_path, 'js', 'chunk-vendors.*.js'))
+    app_js = glob.glob(os.path.join(static_path, 'js', 'app.*.js'))
+    vendor_css = glob.glob(os.path.join(static_path, 'css', 'chunk-vendors.*.css'))
+    app_css = glob.glob(os.path.join(static_path, 'css', 'app.*.css'))
+
+    context = {
+        'title': 'STAC Browser',
+        'stac_api_url': stacapi_url,
+        'stac_assets': {
+            'vendor_js': os.path.basename(vendor_js[0]) if vendor_js else '',
+            'app_js': os.path.basename(app_js[0]) if app_js else '',
+            'vendor_css': os.path.basename(vendor_css[0]) if vendor_css else '',
+            'app_css': os.path.basename(app_css[0]) if app_css else '',
+        }
+    }
+    return render(request, 'stacbrowser.html', context)

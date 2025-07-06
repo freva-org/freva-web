@@ -3,6 +3,8 @@
 import json
 import logging
 import os
+import subprocess
+import sys
 import urllib
 from pathlib import Path
 
@@ -17,7 +19,6 @@ from evaluation_system.model.user import User
 
 from base.exceptions import UserNotFoundError
 from base.Users import OpenIdUser
-from django_evaluation.settings.local import HOME_DIRS_AVAILABLE
 from history.models import Configuration, History
 from plugins.forms import PluginForm, PluginWeb
 from plugins.utils import (
@@ -63,37 +64,34 @@ def search_similar_results(request, plugin_name=None, history_id=None):
 
     data = {}
 
-    if request.session.get("user_home_dir", "") == "":
-        hist_objects = History.objects.filter(uid=request.user).filter(tool=plugin_name)
+    try:
+        user = OpenIdUser(request.user.username)
+    except UserNotFoundError:
+        user = User()
+    if history_id is not None:
+        o = Configuration.objects.filter(history_id_id=history_id)
+        hist_objects = History.find_similar_entries(o, max_entries=5)
+
     else:
+        # create the tool
+        tool = pm.get_plugin_instance(plugin_name, user=user)
+        param_dict = tool.__parameters__
+        param_dict.synchronize(plugin_name)
+        plugin_fields = param_dict.keys()
+
+        # don't search for empty form fields
+        for key, val in request.GET.items():
+            if val != "":
+                if key in plugin_fields:
+                    data[key] = val
+
         try:
-            user = OpenIdUser(request.user.username)
-        except UserNotFoundError:
-            user = User()
-        if history_id is not None:
-            o = Configuration.objects.filter(history_id_id=history_id)
-            hist_objects = History.find_similar_entries(o, max_entries=5)
-
-        else:
-            # create the tool
-            tool = pm.get_plugin_instance(plugin_name, user=user)
-            param_dict = tool.__parameters__
-            param_dict.synchronize(plugin_name)
-            plugin_fields = param_dict.keys()
-
-            # don't search for empty form fields
-            for key, val in request.GET.items():
-                if val != "":
-                    if key in plugin_fields:
-                        data[key] = val
-
-            try:
-                o = pm.dict2conf(plugin_name, data, user=user)
-            except Exception:
-                return HttpResponse("[]")
-            hist_objects = History.find_similar_entries(
-                    o, uid=request.user.username, max_entries=5
-                )
+            o = pm.dict2conf(plugin_name, data, user=user)
+        except Exception:
+            return HttpResponse("[]")
+        hist_objects = History.find_similar_entries(
+            o, uid=request.user.username, max_entries=5
+        )
 
     res = list()
     for obj in hist_objects:
@@ -107,9 +105,8 @@ def search_similar_results(request, plugin_name=None, history_id=None):
 @login_required()
 def setup(request, plugin_name, row_id=None):
     pm.reload_plugins(request.user.username)
+    user_can_submit = request.session.get("system_user_valid", False)
 
-    # user_can_submit = request.user.username.lower() != "guest"
-    user_can_submit = request.session.get("user_home_dir") != ""
     if user_can_submit:
         try:
             user = OpenIdUser(request.user.username)
@@ -122,7 +119,9 @@ def setup(request, plugin_name, row_id=None):
     error_msg = pm.get_error_warning(plugin_name)[0]
 
     if request.method == "POST":
-        form = PluginForm(request.POST, tool=plugin, uid=request.user.username)
+        form = PluginForm(
+            request.POST, tool=plugin, uid=request.user.username, request=request
+        )
         if form.is_valid():
             # read the configuration
             config_dict = dict(form.data)
@@ -166,14 +165,18 @@ def setup(request, plugin_name, row_id=None):
             exe_path = f"PATH={settings.FREVA_BIN}:$PATH"
 
             if "EVALUATION_SYSTEM_PLUGINS_%s" % request.user in os.environ:
-                plugin_str = os.environ["EVALUATION_SYSTEM_PLUGINS_%s" % request.user]
+                plugin_str = os.environ[
+                    "EVALUATION_SYSTEM_PLUGINS_%s" % request.user
+                ]
                 export_user_plugin = "EVALUATION_SYSTEM_PLUGINS=%s" % plugin_str
             else:
                 export_user_plugin = ""
             scheduler_options = ",".join(
                 [
                     s
-                    for s in config_dict.get("extra_scheduler_options", "").split(",")
+                    for s in config_dict.get("extra_scheduler_options", "").split(
+                        ","
+                    )
                     if s.strip()
                 ]
             )
@@ -189,6 +192,7 @@ def setup(request, plugin_name, row_id=None):
             command = " ".join(cmd)
             ssh_cmd = f'bash -c "{eval_str} {exe_path} {export_user_plugin} freva-plugin {command}"'
             logging.info(ssh_cmd)
+
             # finally send the ssh call
             _, stdout, stderr = ssh_call(
                 username=username,
@@ -208,7 +212,9 @@ def setup(request, plugin_name, row_id=None):
             logging.debug("errors of analyze:" + str(err))
             try:
                 row_id = (
-                    History.objects.filter(uid=request.user.username, tool=plugin_name)
+                    History.objects.filter(
+                        uid=request.user.username, tool=plugin_name
+                    )
                     .latest("timestamp")
                     .id
                 )
@@ -228,13 +234,18 @@ def setup(request, plugin_name, row_id=None):
             f = PluginForm(tool=plugin, uid=user.getName())
             config_dict[f.caption_field_name] = h.caption
         else:
-            config_dict = plugin.setup_configuration(check_cfg=False, substitute=True)
+            config_dict = plugin.setup_configuration(
+                check_cfg=False, substitute=True
+            )
 
-        form = PluginForm(initial=config_dict, tool=plugin, uid=user.getName())
+        form = PluginForm(
+            initial=config_dict, tool=plugin, uid=user.getName(), request=request
+        )
 
-    plugin_dict = pm.get_plugin_metadata(plugin_name, user_name=request.user.username)
+    plugin_dict = pm.get_plugin_metadata(
+        plugin_name, user_name=request.user.username
+    )
 
-    home_dir = user.getUserHome() if HOME_DIRS_AVAILABLE else None
     try:
         scratch_dir = user.getUserScratch()
     except:
@@ -248,7 +259,6 @@ def setup(request, plugin_name, row_id=None):
             "tool": plugin_web,
             "user_exported": plugin_dict.user_exported,
             "form": form,
-            "user_home": home_dir,
             "user_scratch": scratch_dir,
             "error_message": error_msg,
             "restricted_user": not user_can_submit,
@@ -262,7 +272,6 @@ def setup(request, plugin_name, row_id=None):
 def dirlist(request):
     try:
         user = OpenIdUser(request.user.username)
-        home_dir = user.getUserHome()
         scratch_dir = user.getUserScratch()
     except UserNotFoundError as e:
         logging.exception(e)
@@ -273,9 +282,7 @@ def dirlist(request):
         )
 
     base_directory = Path(urllib.parse.unquote(request.POST.get("dir"))).resolve()
-    if not is_path_relative_to(base_directory, home_dir) and not is_path_relative_to(
-        base_directory, scratch_dir
-    ):
+    if not is_path_relative_to(base_directory, scratch_dir):
         # user is trying to get a listing of a folder he is not allowed to see
         return HttpResponse(
             '<div class="alert alert-danger">Invalid base folder requested</div>'
@@ -316,7 +323,6 @@ def dirlist(request):
 def list_dir(request):
     try:
         user = OpenIdUser(request.user.username)
-        home_dir = user.getUserHome()
         scratch_dir = user.getUserScratch()
     except UserNotFoundError:
         # This user has no access to the underlying system and therefore
@@ -332,11 +338,12 @@ def list_dir(request):
     base_directory = Path(urllib.parse.unquote(request.GET.get("dir")))
     resolved_dir = base_directory.resolve()
     if (
-        not is_path_relative_to(base_directory, home_dir)
-        and not is_path_relative_to(base_directory, scratch_dir)
+        not is_path_relative_to(base_directory, scratch_dir)
     ) or not resolved_dir.exists():
         # user is trying to get a listing of a folder he is not allowed to see
-        return JsonResponse({"status": "Invalid base folder requested", "folders": []})
+        return JsonResponse(
+            {"status": "Invalid base folder requested", "folders": []}
+        )
     elif not base_directory.exists():
         return JsonResponse(
             {

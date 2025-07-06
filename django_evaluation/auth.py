@@ -1,145 +1,138 @@
-import functools
+"""Backend for the OIDC Server with Freva-rest OAuth2 Authorization Code Flow."""
+
 import logging
-import time
+from typing import Any, Optional
 
 import requests
 from django.conf import settings
-from django.http import HttpResponseRedirect
-from django.shortcuts import redirect
-from django.urls import reverse
-from mozilla_django_oidc.auth import OIDCAuthenticationBackend
+from django.contrib.auth import get_user_model
+from django.contrib.auth.backends import BaseBackend
+from django.contrib.auth.models import User
+
+from base.views import ensure_url_scheme
+from django_evaluation.utils import sync_mail_users
 
 logger = logging.getLogger(__name__)
 
 
-# The following decorator is the replacement for the login_required decorator
-# from django.contrib.auth.decorators. We need this for OIDC token handling
-def oidc_token_required(view_func):
+class OIDCAuthorizationCodeBackend(BaseBackend):
     """
-    Decorator to gurantee the user has a valid OIDC access token.
-    If not, redirects to OIDC authentication flow to obtain one.
+    OIDC authorization backend using Authorization Code Flow.
+
+    This backend authenticates users through the freva-rest OIDC endpoints
+    and stores tokens in the session for subsequent API calls.
     """
 
-    @functools.wraps(view_func)
-    def wrapper(request, *args, **kwargs):
-        if not request.user.is_authenticated:
-            next_url = request.get_full_path()
-            return HttpResponseRedirect(f"/?login_required=1&next={next_url}")
-        OIDC_VERIFY_SSL = settings.OIDC_VERIFY_SSL
-        access_token = request.session.get("oidc_access_token")
+    def __init__(self):
+        self.userinfo_url = f"{ensure_url_scheme(settings.FREVA_REST_URL).rstrip('/')}/api/freva-nextgen/auth/v2/userinfo"
+        self.systemuser_url = f"{ensure_url_scheme(settings.FREVA_REST_URL).rstrip('/')}/api/freva-nextgen/auth/v2/systemuser"
+
+    def authenticate(self, request: Any, access_token: str = None, **kwargs):
+        """
+        Authenticate a user using an access token from OIDC flow.
+
+        Parameters
+        ----------
+        request : HttpRequest
+            The HTTP request object.
+        access_token : str
+            The access token obtained from the authorization code flow.
+
+        Returns
+        -------
+        Optional[User]: The authenticated user instance if authentication is
+                        successful, otherwise None.
+        """
         if not access_token:
-            request.session["oidc_login_next"] = request.get_full_path()
-            request.session.save()
-            return HttpResponseRedirect(reverse("oidc_authentication_init"))
+            return None
 
-        token_expiry = request.session.get("oidc_token_expiry", 0)
-        current_time = int(time.time())
-        time_remaining = token_expiry - current_time
-        needs_refresh = time_remaining < 30  # 30 seconds buffer
-        if needs_refresh:
-            # Basically since mozilla_django_oidc does not support
-            # refresh tokens, we need to do the prcedure manually
-            # in our codeabse
-            refresh_token = request.session.get("oidc_refresh_token")
-            if refresh_token:
-                try:
-                    request.session["oidc_login_next"] = request.get_full_path()
-                    request.session.save()
-                    token_url = settings.OIDC_OP_TOKEN_ENDPOINT
-                    data = {
-                        "client_id": settings.OIDC_RP_CLIENT_ID,
-                        "client_secret": settings.OIDC_RP_CLIENT_SECRET,
-                        "grant_type": "refresh_token",
-                        "refresh_token": refresh_token,
-                    }
+        try:
+            # Get user info from freva-rest API
+            headers = {"Authorization": f"Bearer {access_token}"}
+            response = requests.get(self.userinfo_url, headers=headers, timeout=5)
+            if response.status_code == 200:
+                user_info = response.json()
+                user_model = get_user_model()
+                username = user_info.get("username")
+                if not username:
+                    logger.warning("No username in user_info response")
+                    return None
+                user, created = user_model.objects.get_or_create(username=username)
+                # Update user info without changing model structure
+                # for satisfying the User model requirements (Freva-legacy)
+                user.email = user_info.get("email", "")
+                user.last_name = user_info.get("last_name", "")
+                user.first_name = user_info.get("first_name", "")
+                user.save()
+                # Store user info in session for later use
+                # authentication and authorization checks
+                request.session['user_info'] = user_info
 
-                    response = requests.post(token_url, data=data, verify=OIDC_VERIFY_SSL)
-                    if response.status_code == 200:
-                        # Update tokens in session
-                        token_info = response.json()
-                        request.session["oidc_access_token"] = token_info[
-                            "access_token"
-                        ]
-                        request.session["oidc_id_token"] = token_info.get("id_token")
-                        request.session["oidc_refresh_token"] = token_info.get(
-                            "refresh_token"
-                        )
-                        if "expires_in" in token_info:
-                            request.session["oidc_token_expiry"] = (
-                                current_time + token_info["expires_in"]
-                            )
-                    else:
-                        return redirect("oidc_authentication_init")
-                except Exception as e:
-                    logger.error(f"Token refresh failed: {e}")
-                    return redirect("oidc_authentication_init")
+                # Fetch and cache system user info for validation
+                # At the moment, we only validate the system user
+                # via this and use the pw_dir for the home directory.
+                system_user_info = self._get_system_user_info(access_token)
+                if system_user_info:
+                    request.session['system_user_info'] = system_user_info
+                    request.session['system_user_valid'] = True
+                    logger.info(f"System user validated for {username}")
+                else:
+                    request.session['system_user_valid'] = False
+                    logger.warning(f"System user validation failed for {username}")
+
+                sync_mail_users(oneshot=True)
+                return user
+                
+        except Exception as e:
+            logger.error(f"Authentication failed: {e}")
+            
+        return None
+
+    def _get_system_user_info(self, access_token: str) -> Optional[dict]:
+        """
+        Fetch system user information.
+
+        Parameters
+        ----------
+        access_token : str
+            The access token for API authentication.
+        Returns
+        -------
+        Optional[dict]: System user info if successful
+        or {Unknown user} if not found.
+        """
+        try:
+            headers = {"Authorization": f"Bearer {access_token}"}
+            response = requests.get(self.systemuser_url, headers=headers, timeout=5)
+
+            if response.status_code == 200:
+                return response.json()
+            elif response.status_code == 404:
+                logger.warning("System user not found (unknown user)")
+                return None
             else:
-                request.session["oidc_login_next"] = request.get_full_path()
-                request.session.save()
-                return redirect("oidc_authentication_init")
-        return view_func(request, *args, **kwargs)
+                logger.error(f"System user API error: {response.status_code} - {response.text}")
+                return None
 
-    return wrapper
+        except Exception as e:
+            logger.error(f"Failed to fetch system user info: {e}")
+            return None
 
-
-def get_auth_header(request):
-    """
-    Get the authorization header for API requests.
-    """
-    access_token = request.session.get("oidc_access_token")
-    if access_token:
-        return {"Authorization": f"Bearer {access_token}"}
-    return {}
-
-
-class CustomOIDCBackend(OIDCAuthenticationBackend):
-    """
-    A light wrapper around the OIDCAuthenticationBackend to add
-    custom functionality for our application.
-
-    1. Use preferred_username or fall back to sub
-    2. Map OIDC claims into Django User fields
-    3. Store refresh_token in session (mozilla_django_oidc does not do this)
-    """
-
-    def get_username(self, claims):
-        """without this replacemnet funcm,the username
-        is set to the sub claim"""
-        return claims.get("preferred_username") or claims.get("sub")
-
-    def create_user(self, claims):
-        """Create a new user with the given claims from
-        the OIDC provider."""
-        
-        user = super().create_user(claims)
-        print(f"Creating user with claims: {claims} {user.__dict__ }")
-        user.first_name = claims.get("given_name", "")
-        user.last_name = claims.get("family_name", "")
-        user.home = claims.get("home", "")
-        self.request.session['user_home_dir'] = claims.get("home", "")
-        user.save()
-
-        return user
-
-    def update_user(self, user, claims):
-        """Update the user with the given claims from
-        the OIDC provider."""
-        user.first_name = claims.get("given_name", "")
-        user.last_name = claims.get("family_name", "")
-        user.home = claims.get("home", "")        
-        self.request.session['user_home_dir'] = claims.get("home", "")
-        user.save()
-        return user
-
-    def get_token(self, payload):
+    def get_user(self, user_id: int) -> Optional[User]:
         """
-        Exchange code<->tokens with the OP, then persist the refresh_token.
+        Retrieve a user instance by its ID.
+
+        Parameters
+        ----------
+        user_id : int
+            The ID of the user.
+
+        Returns
+        -------
+        Optional[User]: The user instance if found, otherwise None.
         """
-        token_info = super().get_token(payload)
-        refresh = token_info.get("refresh_token")
-        if refresh:
-            self.request.session["oidc_refresh_token"] = refresh
-            self.request.session.save()
-        else:
-            logger.warning("No refresh_token returned; check your scopes/settings")
-        return token_info
+        user_model = get_user_model()
+        try:
+            return user_model.objects.get(pk=user_id)
+        except user_model.DoesNotExist:
+            return None

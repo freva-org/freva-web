@@ -202,9 +202,7 @@ class PluginList extends React.Component {
         </Container>
       );
     }
-    const defaultSelection = currentUser.home
-      ? { id: "home", path: currentUser.home }
-      : { id: "scratch", path: currentUser.scratch };
+    const defaultSelection = { id: "scratch", path: currentUser.scratch };
 
     return (
       <Container>
@@ -213,20 +211,17 @@ class PluginList extends React.Component {
             <h2>Plugins</h2>
           </Col>
           <Col md={6} className="pt-2">
-            {/* do we need to give plug-my-Plugin access to guest?? i don't think so!*/}
-            {currentUser.home ? (
-              <Button
-                variant="info"
-                className="float-end"
-                onClick={() => {
-                  return exported
-                    ? this.props.dispatch(exportPlugin())
-                    : this.setState({ showModal: true });
-                }}
-              >
-                {exported ? "Remove imported Plugin" : "Plug-my-Plugin"}
-              </Button>
-            ) : null}
+            <Button
+              variant="info"
+              className="float-end"
+              onClick={() => {
+                return exported
+                  ? this.props.dispatch(exportPlugin())
+                  : this.setState({ showModal: true });
+              }}
+            >
+              {exported ? "Remove imported Plugin" : "Plug-my-Plugin"}
+            </Button>
           </Col>
         </Row>
 
@@ -330,19 +325,6 @@ class PluginList extends React.Component {
           <Modal.Body>
             <p>Here you can plugin your own plugin</p>
             <ButtonGroup className="mb-2">
-              {currentUser.home && (
-                <Button
-                  variant="primary"
-                  active={root.id === "home"}
-                  onClick={() =>
-                    this.props.dispatch(
-                      changeRoot({ id: "home", path: currentUser.home }, "py")
-                    )
-                  }
-                >
-                  Home
-                </Button>
-              )}
               {currentUser.scratch && (
                 <Button
                   variant="primary"
@@ -405,7 +387,6 @@ PluginList.propTypes = {
     id: PropTypes.number,
     username: PropTypes.string,
     email: PropTypes.string,
-    home: PropTypes.string,
     scratch: PropTypes.string,
   }),
   dispatch: PropTypes.func.isRequired,

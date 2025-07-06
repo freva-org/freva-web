@@ -7,6 +7,9 @@
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
+    <!-- Dynamic CSS for to use in base-navbar of token management-->
+    <link rel="stylesheet" type="text/css" href="{% url 'base:dynamic_css' %}">
+
     <style>
         @media (max-width: 768px) {
             .navbar-collapse {
@@ -24,7 +27,7 @@
             border-radius: 8px;
             text-decoration: none;
             color: white;
-            background: linear-gradient(135deg, #0f86c6 0%, #0a6da5 100%);
+            background: linear-gradient(135deg, #0f86c6 0%, #0a6da5 100%); /* we might make sign-on background dynamic in the future */
             border: none;
             letter-spacing: 0.5px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.2);
@@ -56,14 +59,6 @@
 
         .keycloak-signin-btn:hover i {
             transform: scale(1.1);
-        }
-
-        /* Styles for the user dropdown when logged in */
-        .login-btn {
-            padding: 8px 16px;
-            font-weight: 500;
-            border-radius: 4px;
-            transition: all 0.3s ease;
         }
     </style>
     <!-- Header starts -->
@@ -108,32 +103,13 @@
                     </ul>
                     <div class="d-flex">
                         {% if not request.user.is_authenticated %}
-                            <!-- sign-on button -->
-                            <a href="/oidc/authenticate/" class="keycloak-signin-btn">
+                            <!-- single sign-on button -->
+                            <a href="{% url 'base:oidc_login' %}{% if request.GET.next %}?next={{ request.GET.next|urlencode }}{% endif %}" class="keycloak-signin-btn">
                                 <i class="fas fa-fingerprint"></i> Sign-On
                             </a>
                         {% else %}
-                            <div class="dropdown">
-                                <button class="btn btn-outline-light login-btn" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="fas fa-user-circle me-1"></i> {{ request.user.username }}
-                                </button>
-                                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                    <!-- edit account option -->
-                                    <form action="{% url 'base:edit_account' %}" method="post" id="edit-link">
-                                        {% csrf_token %}
-                                        <button type="submit" class="dropdown-item text-danger" name="something">
-                                            <i class="fas fa-user-edit me-2"></i> Edit Account
-                                        </button>
-                                    </form>
-                                    <!-- logout -->
-                                    <form action="{% url 'base:logout' %}" method="post" id="logout-link">
-                                        {% csrf_token %}
-                                        <button type="submit" class="dropdown-item text-danger" name="something">
-                                            <i class="fas fa-sign-out-alt me-2"></i> Logout
-                                        </button>
-                                    </form>
-                                </div>
-                            </div>
+                            <!-- Include Token Management Template -->
+                            {% include "_layouts/_token_management.html" %}
                         {% endif %}
                     </div>
                 </div>
@@ -146,14 +122,12 @@
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
             var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl)
-            })
+            });
         });
     </script>
     <!-- Navigation Ends -->
 
-
 {% endblock %}
-
 
 {% block footer %}
 
@@ -182,7 +156,7 @@
                         {% for item in contacts %}
                         <li>{{ item|urlize }}</li>
                         {% endfor %}
-                        Created by <a href="https://github.com/FREVA-CLINT/Freva" target="_blank">Freva</a></p>
+                        Created by <a href="https://freva-org.github.io" target="_blank">Freva</a></p>
                     </ul>
 
                 </div>
@@ -207,15 +181,7 @@
                     </div>
                 {% endif %}
             </div>
-            <!-- <div class="row">
-                <hr />
-                <div class="col-md-12">
-                    <p class="copy pull-left">
-                        Created by <a href="https://github.com/FREVA-CLINT/Freva" target="_blank">Freva</a></p>
-                </div>
-            </div> -->
         </div>
-
     </footer>
 
 {% endblock %}

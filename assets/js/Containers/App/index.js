@@ -37,7 +37,6 @@ App.propTypes = {
     username: PropTypes.string,
     email: PropTypes.string,
     first_name: PropTypes.string,
-    home: PropTypes.string,
     scratch: PropTypes.string,
   }),
   error: PropTypes.string,

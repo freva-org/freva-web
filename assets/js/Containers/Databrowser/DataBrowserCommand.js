@@ -134,7 +134,7 @@ function DataBrowserCommandImpl(props) {
     );
   }
 
-  function getFullPythonCommand(dateSelectorToCli) {
+  function getFullPythonCommand(dateSelectorToCli, bboxSelectorToCli) {
     let args = [];
 
     if (props.selectedFlavour !== constants.DEFAULT_FLAVOUR) {
@@ -160,6 +160,9 @@ function DataBrowserCommandImpl(props) {
       args.push(
         `bbox="${props.minLon} ${props.maxLon} ${props.minLat} ${props.maxLat}"`
       );
+      if (bboxSelectorToCli) {
+        args.push(`bbox_select="${bboxSelectorToCli}"`);
+      }
     }
 
     return `freva_client.databrowser(${args.join(", ")})`;
@@ -167,9 +170,10 @@ function DataBrowserCommandImpl(props) {
 
   function renderPythonCommand() {
     const dateSelectorToCli = getCliTimeSelector();
+    const bboxSelectorToCli = getCliBBoxSelector();
     return (
       <pre className="mb-1" style={{ whiteSpace: "pre-wrap" }}>
-        {getFullPythonCommand(dateSelectorToCli)}
+        {getFullPythonCommand(dateSelectorToCli, bboxSelectorToCli)}
       </pre>
     );
   }
@@ -180,7 +184,10 @@ function DataBrowserCommandImpl(props) {
     dateSelectorToCli,
     bboxSelectorToCli
   );
-  const fullPythonCommand = getFullPythonCommand(dateSelectorToCli);
+  const fullPythonCommand = getFullPythonCommand(
+    dateSelectorToCli,
+    bboxSelectorToCli
+  );
 
   return (
     <React.Fragment>

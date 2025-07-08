@@ -57,10 +57,7 @@ function DataBrowserCommandImpl(props) {
 
   function getFullCliCommand(dateSelectorToCli, bboxSelectorToCli) {
     return (
-      "freva databrowser " +
-      (props.selectedFlavour !== constants.DEFAULT_FLAVOUR
-        ? `--flavour ${props.selectedFlavour} `
-        : "") +
+      "freva-client databrowser data-search " +
       (props.minDate ? `time=${props.minDate}to${props.maxDate} ` : "") +
       (props.minLon
         ? `bbox=${props.minLon},${props.maxLon},${props.minLat},${props.maxLat} `
@@ -76,6 +73,9 @@ function DataBrowserCommandImpl(props) {
         : "") +
       (bboxSelectorToCli && props.minLon
         ? ` --bbox-select ${bboxSelectorToCli}`
+        : "") +
+      (props.selectedFlavour !== constants.DEFAULT_FLAVOUR
+        ? ` --flavour ${props.selectedFlavour}`
         : "")
     ).trimEnd();
   }
@@ -86,10 +86,7 @@ function DataBrowserCommandImpl(props) {
 
     return (
       <pre className="mb-1" style={{ whiteSpace: "pre-wrap" }}>
-        freva databrowser
-        {props.selectedFlavour !== constants.DEFAULT_FLAVOUR
-          ? ` --flavour ${props.selectedFlavour}`
-          : ""}
+        freva-client databrowser data-search
         {props.minDate && (
           <React.Fragment>
             &nbsp;time=
@@ -127,6 +124,12 @@ function DataBrowserCommandImpl(props) {
             <span className="fw-bold">{bboxSelectorToCli}</span>
           </React.Fragment>
         )}
+        {props.selectedFlavour !== constants.DEFAULT_FLAVOUR && (
+          <React.Fragment>
+            &nbsp;--flavour{" "}
+            <span className="fw-bold">{props.selectedFlavour}</span>
+          </React.Fragment>
+        )}
       </pre>
     );
   }
@@ -162,13 +165,15 @@ function DataBrowserCommandImpl(props) {
       }
     }
 
-    return `freva.databrowser(${args.join(", ")})`;
+    return `freva_client.databrowser(${args.join(", ")})`;
   }
 
-  function renderPythonCommand(dateSelectorToCli) {
+  function renderPythonCommand() {
+    const dateSelectorToCli = getCliTimeSelector();
+    const bboxSelectorToCli = getCliBBoxSelector();
     return (
       <pre className="mb-1" style={{ whiteSpace: "pre-wrap" }}>
-        {getFullPythonCommand(dateSelectorToCli)}
+        {getFullPythonCommand(dateSelectorToCli, bboxSelectorToCli)}
       </pre>
     );
   }
@@ -228,7 +233,7 @@ function DataBrowserCommandImpl(props) {
           </div>
         </div>
         {mode === Modes.CLI && renderCLICommand()}
-        {mode === Modes.PYTHON && renderPythonCommand(dateSelectorToCli)}
+        {mode === Modes.PYTHON && renderPythonCommand()}
       </Card>
       <ClipboardToast show={showToast} setShow={setShowToast} />
     </React.Fragment>

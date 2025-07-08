@@ -610,7 +610,7 @@ class FrevaGPT extends React.Component {
       <Container>
         <Row>
           <div className="d-flex justify-content-between">
-            <h2 onClick={this.toggleBotSelect}>FrevaGPT</h2>
+            <h2 onClick={this.toggleBotSelect}>EVE</h2>
 
             {this.state.botOkay ? this.renderBotHeader() : null}
           </div>

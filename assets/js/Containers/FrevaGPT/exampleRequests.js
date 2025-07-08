@@ -1,39 +1,56 @@
 export const botRequests = {
+    eve: [
+    {
+      title: "What is EVE?",
+      thread: "kWogw4MZiBS8UdGB26rsxKrquxY4CI3u",
+    },
+    {
+      title: "What is EVE’s mission and how will it achieve it?",
+      thread: "8DcdK2x14QUvRevXKqpefyhVBsGSxi2g",
+    },
+    {
+      title: "How does EVE differ from other 'digital twin' climate initiatives?",
+      thread: "4YHs3t8PfX1Ea5gObe6iC8sbYstcQL87",
+    },
+    {
+      title: "Who can benefit from EVE? In what ways?",
+      thread: "mXsTUvQWGIsDwKXMQrnVlP6oR4fU7pG4",
+    },
+  ],
   general: [
     {
-      title: "Name the most important parameters in meteorology",
-      thread: "O7GbZrqU6sVTt2LsWLtp3mHqH6DxAod6",
+      title: "Name the most important parameters in meteorology.",
+      thread: "UZGAtweC1Ig4fm30NMXHVqYk4Qssum6u",
     },
     {
       title: "What is ENSO?",
-      thread: "vgJSy4qxc3xKyUXDxDyJsbJxZOnhCQaC",
-    },
-    {
-      title: "What is the difference between RCP and SSP?",
-      thread: "kUfvN0QVlzaXVnD0ssLpDhcOZgODyBRb",
+      thread: "ewWqUrESvCaP8SKcU1jfWp6Eko3zmWa3",
     },
     {
       title: "Name the most common climate models",
-      thread: "uwie5w5t1pIEI6DGyk7V8K0vu6EDzr8X",
+      thread: "jnoKLdXOyPjWNSoEUlZE9Gk5eGDHcZwQ",
     },
     {
       title: "Name the most common projections for climate data",
-      thread: "ROexyJChy8HcMNk0Mr70tFAGIctxApHi",
+      thread: "zmZUE2STnlgWjMrcya6Yq8NvLsQSVBC1",
     },
   ],
   freva: [
     {
       title: "What is freva?",
-      thread: "VE2umTqohK4UsUtYykH6PfqTrnYvHW36",
+      thread: "AsNEiUY6Ey0rhcCh34jAtMtXvOpBIG65",
+    },
+    {
+      title: "What tools are available in freva framework?",
+      thread: "LaPHgJUPIqJXpBRgA1iv9caO4nOjtrpW",
     },
     {
       title: "What facets can I specify using the data browser?",
-      thread: "l3kLSpRUizJzTmeEd3ZWAoW02IpdP1bz",
+      thread: "x6T5R0beDZjDVVbsYQGKwjfrpRYnoQZy",
     },
     {
-      title:
-        "Use the data browser to specify the available experiments for CMIP5 data",
-      thread: "WPAJdUq5mdGWE6uHSNPRNLXYDszTS24J",
+      title: "What are the available experiments for CMIP5 data?",
+      thread: "uwKTkvNmUx3rr35SQV4tVMYrirwqKmVE",
     },
   ],
 };

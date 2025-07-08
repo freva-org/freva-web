@@ -11,7 +11,8 @@ All notable changes to this project will be documented in this file.
 - add development env for production chatbot
 
 ## Changed
-- Turn token button into user dropdown button 
+- Turn token button into user dropdown button
+- Change the Freva databrowser command display based on the neew freva-client
 
 ## Fixed
 - Internal auth hotfix

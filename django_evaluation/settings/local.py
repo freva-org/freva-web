@@ -16,6 +16,7 @@ SERVER_EMAIL : str
 ALLOWED_HOSTS : str
 CSRF_TRUSTED_ORIGINS : str
 FREVA_BIN: str
+STAC_BROWSER: 0|1
 """
 
 import logging
@@ -337,5 +338,14 @@ if ACTIVATE_CHAT_BOT:
             "name": "FrevaGPT",
             "url": reverse_lazy("bot:chatbot"),
             "html_id": "chatbot_menu",
+        }
+    )
+
+if os.getenv("STAC_BROWSER", "0") == "1":
+    MENU_ENTRIES.append(
+        {
+            "name": "STAC-Browser",
+            "url": reverse_lazy("base:stacbrowser"),
+            "html_id": "stacbrowser_menu",
         }
     )

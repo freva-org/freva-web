@@ -92,6 +92,7 @@ Choose one of running Freva instances and get the values from there and set via 
 | `VAULT_URL`              | URL of the Vault system providing secrets (set via environment variable)             |
 | `CHAT_BOT_FREVA_PROJECT` | Name of the Freva project the chatbot should use (set via environment variable)      |
 | `FREVA_REST_URL` | URL of the freva-rest of one running freva instance (set via environment variable)      |
+| `OIDC_DISCOVERY_URL` | OpenID Connect discovery URL for authentication (set via environment variable) |
 
 #### Optional:
 
@@ -99,7 +100,8 @@ Choose one of running Freva instances and get the values from there and set via 
 | ---------- | ------------------------------------------------------------------------------- |
 | `CHAT_BOT` | Set to `"1"` to activate the chatbot, `"0"` to disable it (default is disabled) |
 
-
+> [!NOTE]  
+> When setting these environment variables, ensure you use the same well-known configuration (especially OIDC_DISCOVERY_URL) that the running Freva instance is using. This ensures both the chatbot and development environment use consistent authentication and configuration settings, allowing them to "speak the same auth language" and integrate seamlessly with the existing Freva infrastructure.
 
 ### Running tests
 

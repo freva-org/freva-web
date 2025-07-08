@@ -1,0 +1,318 @@
+{% extends "_layouts/menu.html" %}
+{% load static %}
+
+{% block page_title %}{{ title }} - Evaluation System{% endblock %}
+{% block page_class %}home-page{% endblock %}
+{% block title %}STAC Browser{% endblock %}
+
+{% block content %}
+<!-- Pass STAC API and STAC-Browser JS and CSS paths to JavaScript -->
+{{ stac_assets|json_script:"stac-assets" }}
+{{ stac_api_url|json_script:"stac-api-url" }}
+
+<script>
+    const assets = JSON.parse(document.getElementById('stac-assets').textContent);
+    const stacApiUrl = JSON.parse(document.getElementById('stac-api-url').textContent);
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        const head = document.head;
+
+        // check for the all required meta tags and create them if they don't exist
+        if (!document.getElementById('og-title')) {
+            const ogTitle = document.createElement('meta');
+            ogTitle.id = 'og-title';
+            ogTitle.property = 'og:title';
+            ogTitle.content = document.title;
+            head.appendChild(ogTitle);
+        }
+
+        if (!document.getElementById('meta-description')) {
+            const metaDesc = document.createElement('meta');
+            metaDesc.id = 'meta-description';
+            metaDesc.name = 'description';
+            metaDesc.content = 'STAC Browser - Evaluation System';
+            head.appendChild(metaDesc);
+        }
+
+        if (!document.getElementById('og-description')) {
+            const ogDesc = document.createElement('meta');
+            ogDesc.id = 'og-description';
+            ogDesc.property = 'og:description';
+            ogDesc.content = 'STAC Browser - Evaluation System';
+            head.appendChild(ogDesc);
+        }
+
+        if (!document.getElementById('og-locale')) {
+            const ogLocale = document.createElement('meta');
+            ogLocale.id = 'og-locale';
+            ogLocale.property = 'og:locale';
+            ogLocale.content = 'en';
+            head.appendChild(ogLocale);
+        }
+
+        if (!document.getElementById('og-url')) {
+            const ogUrl = document.createElement('meta');
+            ogUrl.id = 'og-url';
+            ogUrl.property = 'og:url';
+            ogUrl.content = window.location.href;
+            head.appendChild(ogUrl);
+        }
+        
+        loadScopedCSS();
+    });
+
+    // we load CSS dynamically in script to ensure it is loaded after the DOM is ready
+    // and it prevent conflicts with other styles of freva-web
+    const loadScopedCSS = () => {
+        return new Promise((resolve) => {
+            let loadedCount = 0;
+            const totalFiles = 2;
+            
+            const checkComplete = () => {
+                loadedCount++;
+                if (loadedCount === totalFiles) {
+                    addDropdownFixes();
+                    resolve();
+                }
+            };
+            
+            // load vendor and app CSS files dynamically
+            const vendorCSS = document.createElement('link');
+            vendorCSS.rel = 'stylesheet';
+            vendorCSS.href = `{% static "stac-browser/css/" %}${assets.vendor_css}`;
+            vendorCSS.onload = () => {
+                checkComplete();
+            };
+            vendorCSS.onerror = () => {
+                checkComplete();
+            };
+            
+            const appCSS = document.createElement('link');
+            appCSS.rel = 'stylesheet';
+            appCSS.href = `{% static "stac-browser/css/" %}${assets.app_css}`;
+            appCSS.onload = () => {
+                checkComplete();
+            };
+            appCSS.onerror = () => {
+                checkComplete();
+            };
+            
+            document.head.appendChild(vendorCSS);
+            document.head.appendChild(appCSS);
+        });
+    };
+    
+    // important:
+    // since the `additional-filters` and `queryable-group` classes are used in the STAC Browser,
+    // we need to ensure that the dropdowns and other elements are properly styled and contained
+    // otherwise they might overflow or not display correctly
+    function addDropdownFixes() {
+        const style = document.createElement('style');
+        style.textContent = `
+            #stac-browser .card,
+            #stac-browser .card-body {
+                overflow: visible !important;
+                position: relative !important;
+            }
+
+            #stac-browser .additional-filters {
+                position: relative !important;
+                overflow: visible !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+
+            #stac-browser .queryable-group {
+                position: relative !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                overflow: visible !important;
+                margin-bottom: 10px !important;
+                box-sizing: border-box !important;
+            }
+
+            #stac-browser .queryable-row {
+                display: flex !important;
+                align-items: center !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+                gap: 8px !important;
+                flex-wrap: nowrap !important;
+                position: relative !important;
+            }
+
+            #stac-browser .queryable-row .title {
+                flex-shrink: 0 !important;
+                width: 80px !important;
+                font-size: 14px !important;
+                font-weight: 500 !important;
+            }
+
+            #stac-browser .queryable-row .op {
+                flex-shrink: 0 !important;
+                width: 60px !important;
+            }
+
+            #stac-browser .queryable-row .value {
+                flex: 1 !important;
+                min-width: 0 !important;
+                max-width: none !important;
+            }
+
+            #stac-browser .queryable-row .delete {
+                flex-shrink: 0 !important;
+                width: 36px !important;
+                height: 32px !important;
+            }
+
+            #stac-browser .multiselect__content-wrapper {
+                position: absolute !important;
+                z-index: 1000 !important;
+                background: white !important;
+                border: 1px solid #e8e8e8 !important;
+                border-top: none !important;
+                border-radius: 0 0 5px 5px !important;
+                width: 100% !important;
+                max-height: 240px !important;
+                overflow-y: auto !important;
+                left: 0 !important;
+                top: 100% !important;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+            }
+
+            #stac-browser .multiselect__option {
+                display: block !important;
+                padding: 12px !important;
+                line-height: 16px !important;
+                color: #35495e !important;
+                cursor: pointer !important;
+                white-space: nowrap !important;
+                background: white !important;
+                font-size: 14px !important;
+                text-decoration: none !important;
+                border: none !important;
+                margin: 0 !important;
+            }
+
+            #stac-browser .multiselect__option:hover {
+                background: #f3f3f3 !important;
+                color: #35495e !important;
+            }
+
+            #stac-browser .multiselect__option--selected {
+                background: #41b883 !important;
+                color: white !important;
+                font-weight: bold !important;
+            }
+
+            #stac-browser .multiselect__option--highlight {
+                background: #41b883 !important;
+                color: white !important;
+            }
+
+            #stac-browser .multiselect {
+                position: relative !important;
+                display: block !important;
+                min-height: 40px !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+
+            #stac-browser .multiselect__tags {
+                min-height: 40px !important;
+                display: block !important;
+                padding: 8px 40px 0 8px !important;
+                border-radius: 5px !important;
+                border: 1px solid #e8e8e8 !important;
+                background: white !important;
+                font-size: 14px !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            #stac-browser .form-control {
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            #stac-browser .btn-group {
+                position: relative !important;
+                display: inline-flex !important;
+            }
+
+            #stac-browser .filter {
+                position: relative !important;
+                overflow: visible !important;
+            }
+
+            #stac-browser input[type="date"] {
+                width: 100% !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+            }
+
+            @media (max-width: 768px) {
+                #stac-browser .queryable-row {
+                    flex-wrap: wrap !important;
+                    gap: 5px !important;
+                }
+
+                #stac-browser .queryable-row .title {
+                    width: 100% !important;
+                    margin-bottom: 5px !important;
+                }
+
+                #stac-browser .queryable-row .op {
+                    width: 80px !important;
+                }
+
+                #stac-browser .queryable-row .value {
+                    flex: 1 !important;
+                    min-width: 120px !important;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+</script>
+
+<!-- Important" Where we import STAC Browser container -->
+<div class="stac-browser-wrapper">
+    <div id="stac-browser"></div>
+</div>
+
+<!-- Load STAC Browser config -->
+<script src="{% static 'stac-browser/config.js' %}"></script>
+<script>
+    window.STAC_CATALOG_URL = stacApiUrl;
+</script>
+
+<!-- Load STAC Browser JavaScript -->
+<script>
+    window.addEventListener('load', function() {
+
+        // Load vendor script and then app script
+        const vendorScript = document.createElement('script');
+        vendorScript.src = `{% static "stac-browser/js/" %}${assets.vendor_js}`;
+        vendorScript.onload = function() {
+
+            const appScript = document.createElement('script');
+            appScript.src = `{% static "stac-browser/js/" %}${assets.app_js}`;
+            appScript.onload = function() {
+                
+                setTimeout(() => {
+                    try {
+                        const vueInstance = document.getElementById('stac-browser').__vue__;
+                    } catch (error) {
+                        console.warn(error);
+                    }
+                }, 1000);
+            };
+            document.head.appendChild(appScript);
+        };
+        document.head.appendChild(vendorScript);
+    });
+</script>
+{% endblock %}

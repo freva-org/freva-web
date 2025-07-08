@@ -3,6 +3,19 @@
 
 
 All notable changes to this project will be documented in this file.
+
+## [v2507.0.0]
+## Added
+- STAC Browser as a SPA
+- Local ssh feature where the core lib is running on the same machin
+- add development env for production chatbot
+
+## Changed
+- Turn token button into user dropdown button 
+
+## Fixed
+- Internal auth hotfix
+
 ## [v2506.0.1]
 ## Fixes
 - Try to get information on the user via SSSD

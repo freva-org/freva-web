@@ -341,7 +341,7 @@ if ACTIVATE_CHAT_BOT:
         }
     )
 
-if os.getenv("STAC_BROWSER", "1") == "1":
+if os.getenv("STAC_BROWSER", "0") == "1":
     MENU_ENTRIES.append(
         {
             "name": "STAC-Browser",

@@ -410,18 +410,32 @@ class Databrowser extends React.Component {
               )}
             </h2>
             <div className="d-flex justify-content-between mb-2">
-              <Form.Select
-                aria-label="Default select example"
-                className="me-1"
-                value={flavour}
-                onChange={(x) => {
-                  this.clickFlavour(x.target.value);
-                }}
-              >
-                {this.props.databrowser.flavours.map((x) => {
-                  return <option key={x}>{x}</option>;
-                })}
-              </Form.Select>
+              <div className="position-relative me-1">
+                <Form.Select
+                  aria-label="Flavour selection"
+                  className="me-1"
+                  value={flavour}
+                  onChange={(x) => {
+                    this.clickFlavour(x.target.value);
+                  }}
+                >
+                  {this.props.databrowser.flavours.map((x) => {
+                    return <option key={x}>{x}</option>;
+                  })}
+                </Form.Select>
+                <small
+                  className="position-absolute text-muted"
+                  style={{
+                    top: "-7px",
+                    left: "2px",
+                    backgroundColor: "white",
+                    padding: "0 4px",
+                    fontSize: "0.7rem",
+                  }}
+                >
+                  flavour
+                </small>
+              </div>
 
               <CatalogExportDropdown
                 disabled={

@@ -57,10 +57,7 @@ function DataBrowserCommandImpl(props) {
 
   function getFullCliCommand(dateSelectorToCli, bboxSelectorToCli) {
     return (
-      "freva databrowser " +
-      (props.selectedFlavour !== constants.DEFAULT_FLAVOUR
-        ? `--flavour ${props.selectedFlavour} `
-        : "") +
+      "freva-client databrowser data-search " +
       (props.minDate ? `time=${props.minDate}to${props.maxDate} ` : "") +
       (props.minLon
         ? `bbox=${props.minLon},${props.maxLon},${props.minLat},${props.maxLat} `
@@ -76,6 +73,9 @@ function DataBrowserCommandImpl(props) {
         : "") +
       (bboxSelectorToCli && props.minLon
         ? ` --bbox-select ${bboxSelectorToCli}`
+        : "") +
+      (props.selectedFlavour !== constants.DEFAULT_FLAVOUR
+        ? ` --flavour ${props.selectedFlavour}`
         : "")
     ).trimEnd();
   }
@@ -86,10 +86,7 @@ function DataBrowserCommandImpl(props) {
 
     return (
       <pre className="mb-1" style={{ whiteSpace: "pre-wrap" }}>
-        freva databrowser
-        {props.selectedFlavour !== constants.DEFAULT_FLAVOUR
-          ? ` --flavour ${props.selectedFlavour}`
-          : ""}
+        freva-client databrowser data-search
         {props.minDate && (
           <React.Fragment>
             &nbsp;time=
@@ -117,14 +114,20 @@ function DataBrowserCommandImpl(props) {
         })}
         {dateSelectorToCli && props.minDate && (
           <React.Fragment>
-            &nbsp;--time-select&nbsp;
+            &nbsp;<span className="fw-bold">--time-select</span>&nbsp;
             <span className="fw-bold">{dateSelectorToCli}</span>
           </React.Fragment>
         )}
         {bboxSelectorToCli && props.minLon && (
           <React.Fragment>
-            &nbsp;--bbox-select&nbsp;
+            &nbsp;<span className="fw-bold">--bbox-select</span>&nbsp;
             <span className="fw-bold">{bboxSelectorToCli}</span>
+          </React.Fragment>
+        )}
+        {props.selectedFlavour !== constants.DEFAULT_FLAVOUR && (
+          <React.Fragment>
+            &nbsp;<span className="fw-bold">--flavour</span>{" "}
+            {props.selectedFlavour}
           </React.Fragment>
         )}
       </pre>
@@ -162,7 +165,7 @@ function DataBrowserCommandImpl(props) {
       }
     }
 
-    return `freva.databrowser(${args.join(", ")})`;
+    return `freva_client.databrowser(${args.join(", ")})`;
   }
 
   function renderPythonCommand(dateSelectorToCli) {

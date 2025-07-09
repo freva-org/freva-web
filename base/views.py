@@ -382,17 +382,30 @@ def stacbrowser(request):
     """STAC Browser view """
     stacapi_endpoint = f"/api/freva-nextgen/stacapi/"
     stacapi_url = request.build_absolute_uri(stacapi_endpoint)
-    print(f"STAC API URL: {stacapi_url}")
 
-    # Find the current asset files dynamically. Because the name of the assets
-    # may change with each build, we use glob to find the latest files.
+    try:
+        # based on one usecase, since there are two reverse
+        # proxies in place. To ensure we have the correct URL,
+        # we fetch the STAC API metadata and extract the self link.
+        response = requests.get(stacapi_url, timeout=10)
+        response.raise_for_status()
+        stac_data = response.json()
+
+        if 'links' in stac_data:
+            for link in stac_data['links']:
+                if link.get('rel') == 'self':
+                    stacapi_url = link.get('href').rstrip('/') + '/'
+                    break
+
+    except Exception:
+        pass  # Use fallback URL
+
+    # Find the current asset files dynamically
     static_path = os.path.join(settings.PROJECT_ROOT, 'static_root', 'stac-browser')
-
     vendor_js = glob.glob(os.path.join(static_path, 'js', 'chunk-vendors.*.js'))
     app_js = glob.glob(os.path.join(static_path, 'js', 'app.*.js'))
     vendor_css = glob.glob(os.path.join(static_path, 'css', 'chunk-vendors.*.css'))
     app_css = glob.glob(os.path.join(static_path, 'css', 'app.*.css'))
-
     context = {
         'title': 'STAC Browser',
         'stac_api_url': stacapi_url,

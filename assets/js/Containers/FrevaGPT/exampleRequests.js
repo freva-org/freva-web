@@ -1,5 +1,5 @@
 export const botRequests = {
-    eve: [
+  eve: [
     {
       title: "What is EVE?",
       thread: "kWogw4MZiBS8UdGB26rsxKrquxY4CI3u",
@@ -9,7 +9,8 @@ export const botRequests = {
       thread: "8DcdK2x14QUvRevXKqpefyhVBsGSxi2g",
     },
     {
-      title: "How does EVE differ from other 'digital twin' climate initiatives?",
+      title:
+        "How does EVE differ from other 'digital twin' climate initiatives?",
       thread: "4YHs3t8PfX1Ea5gObe6iC8sbYstcQL87",
     },
     {

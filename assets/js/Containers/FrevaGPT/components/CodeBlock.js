@@ -41,9 +41,7 @@ class CodeBlock extends React.Component {
             this.toggleShowCode(this.state.showCode);
           }}
         >
-          <span style={{ fontWeight: "bold", color: "#aa007d" }}>
-            Analyzed
-          </span>
+          <span style={{ fontWeight: "bold", color: "#aa007d" }}>Analyzed</span>
           <span>
             {this.state.showCode ? (
               <FaAngleUp style={{ color: "#aa007d" }} />

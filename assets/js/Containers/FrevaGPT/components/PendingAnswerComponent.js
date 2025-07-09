@@ -14,7 +14,7 @@ import { chatExceedsWindow, scrollToChatBottom } from "../utils";
 
 const PendingAnswerComponent = forwardRef((props, ref) => {
   const [renderedCode, setRenderedCode] = useState("");
-  const [showCode, setShowCode] = useState(false)
+  const [showCode, setShowCode] = useState(false);
 
   useEffect(() => {
     const parsedCode = renderCode(props.content);
@@ -63,7 +63,6 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
         return (
           <Col md={constants.BOT_COLUMN_STYLE}>
             <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
-              
               <Button
                 variant="link"
                 className="m-0 p-0 d-inline-flex text-decoration-none"
@@ -82,7 +81,6 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
                   )}
                 </span>
               </Button>
-
 
               <Collapse in={showCode} className="mt-2">
                 <Card className="shadow-sm mt-2">

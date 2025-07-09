@@ -199,14 +199,14 @@ class ChatBlock extends React.Component {
         </Col>
 
         <Modal
-          size="lg"
+          size="xl"
           aria-labelledby="contained-modal-title-vcenter"
           centered
           show={this.state.showModal}
           onHide={() => this.setState({ showModal: false, image: "" })}
         >
           <Modal.Header closeButton></Modal.Header>
-          <Modal.Body>
+          <Modal.Body style={{ display: "flex", justifyContent: "center" }}>
             <img className="w-100" src={this.state.image} />
           </Modal.Body>
         </Modal>

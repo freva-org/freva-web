@@ -598,7 +598,7 @@ class FrevaGPT extends React.Component {
             return <option key={model}>{model}</option>;
           })}
         </Form.Select>
-        <Button onClick={this.createNewChat} variant="info">
+        <Button onClick={this.createNewChat} variant="info" style={{ backgroundColor: "#aa007d", color: "white", borderColor: "#d797c4", fontWeight: "bold" }}>
           NewChat
         </Button>
       </div>

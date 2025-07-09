@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file.
 
 ## Fixed
 - Internal auth hotfix
+- Getting the Freva RestAPI link through STAC-API self-link
 
 ## [v2506.0.1]
 ## Fixes

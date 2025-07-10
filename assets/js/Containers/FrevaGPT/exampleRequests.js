@@ -43,7 +43,7 @@ export const botRequests = {
     },
     {
       title: "What tools are available in freva framework?",
-      thread: "LaPHgJUPIqJXpBRgA1iv9caO4nOjtrpW",
+      thread: "05KFYJ2vwpEn0auCEJGcPlsuurny9rhf",
     },
     {
       title: "What facets can I specify using the data browser?",

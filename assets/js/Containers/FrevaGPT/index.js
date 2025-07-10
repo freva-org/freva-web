@@ -558,7 +558,7 @@ class FrevaGPT extends React.Component {
           <Row
             className="overflow-auto position-relative"
             id="chatContainer"
-            onScroll={debounce(this.setPosition, 100)}
+            onScroll={debounce(this.setPosition, 10000)}
           >
             <Col md={12}>
               <ChatBlock onScrollDown={this.scrollDown} />

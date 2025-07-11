@@ -42,14 +42,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger("freva-web")
 
-
-freva_share_path = Path(os.environ["EVALUATION_SYSTEM_CONFIG_FILE"]).parent
-web_config_path = Path(
-    os.environ.get(
-        "FREVA_WEB_CONFIG_FILE",
-        freva_share_path / "web" / "freva_web_conf.toml",
-    )
-)
+eval_conf_file = os.getenv("EVALUATION_SYSTEM_CONFIG_FILE")
+web_config_path = os.getenv("FREVA_WEB_CONFIG_FILE")
+if not web_config_path and eval_conf_file:
+    web_config_path = Path(eval_conf_file).parent
 
 
 def _get_conf_key(cfg, key, alternative, is_file=True):
@@ -114,7 +110,7 @@ def _set_favicon(html_color: str, project_root: Path) -> None:
 
 try:
     web_config = toml.loads(web_config_path.read_text())
-except FileNotFoundError:
+except Exception:
     web_config = {}
 # SECURITY WARNING: don't run with debug turned on in production!
 # Set this to 0 on all server instances and True only for development.
@@ -189,18 +185,18 @@ STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.DefaultStorageFinder",
 )
 config.reloadConfiguration()
-db_name = config.get("db.db")
-db_user = config.get("db.user")
-db_password = config.get("db.passwd")
-db_host = config.get("db.host")
-db_port = config.get("db.port")
+db_name = os.getenv("DB_NAME", config.get("db.db"))
+db_user = os.getenv("DB_USER", config.get("db.user"))
+db_password = os.getenv("DB_PASSWD", config.get("db.passwd"))
+db_host = os.getenv("DB_HOST", config.get("db.host"))
+db_port = os.getenv("DB_PORT", config.get("db.port"))
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
         "NAME": db_name,
         "USER": db_user,
-        "PASSWORD": db_password,  #'miklip',
-        "HOST": db_host,  #'wwwdev-miklip',
+        "PASSWORD": db_password,
+        "HOST": db_host,
         "PORT": db_port,
         "OPTIONS": {"charset": "utf8mb4"},
     },
@@ -269,7 +265,7 @@ CSRF_TRUSTED_ORIGINS = [
 
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-FORM_PASSWORD_CHECK="OIDC"  # OIDC or ssh
+FORM_PASSWORD_CHECK = "OIDC"  # OIDC or ssh
 # path to the site packages used:
 VENV_PYTHON_DIR = "/usr/bin/python3"
 # Path to miklip-logo

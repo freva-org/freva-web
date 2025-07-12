@@ -185,11 +185,11 @@ STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.DefaultStorageFinder",
 )
 config.reloadConfiguration()
-db_name = os.getenv("DB_NAME", config.get("db.db"))
-db_user = os.getenv("DB_USER", config.get("db.user"))
-db_password = os.getenv("DB_PASSWD", config.get("db.passwd"))
-db_host = os.getenv("DB_HOST", config.get("db.host"))
-db_port = os.getenv("DB_PORT", config.get("db.port"))
+db_name = os.getenv("DB_NAME") or config.get("db.db", None)
+db_user = os.getenv("DB_USER") or config.get("db.user", None)
+db_password = os.getenv("DB_PASSWD") or config.get("db.passwd", None)
+db_host = os.getenv("DB_HOST") or config.get("db.host", None)
+db_port = os.getenv("DB_PORT") or config.get("db.port", None)
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",

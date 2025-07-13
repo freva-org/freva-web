@@ -45,7 +45,9 @@ logger = logging.getLogger("freva-web")
 eval_conf_file = os.getenv("EVALUATION_SYSTEM_CONFIG_FILE")
 web_config_path = os.getenv("FREVA_WEB_CONFIG_FILE")
 if not web_config_path and eval_conf_file:
-    web_config_path = Path(eval_conf_file).parent
+    web_config_path = Path(eval_conf_file).parent / "web" / "freva_web.toml"
+else:
+    web_config_path = Path(web_config_path)
 
 
 def _get_conf_key(cfg, key, alternative, is_file=True):
@@ -110,7 +112,8 @@ def _set_favicon(html_color: str, project_root: Path) -> None:
 
 try:
     web_config = toml.loads(web_config_path.read_text())
-except Exception:
+except Exception as error:
+    logger.error("Could not load web config file: %s", error)
     web_config = {}
 # SECURITY WARNING: don't run with debug turned on in production!
 # Set this to 0 on all server instances and True only for development.

@@ -349,5 +349,5 @@ if os.getenv("STAC_BROWSER", "1") == "1":
         }
     )
 # help menu entry has to stay at the end of the menu
-MENU_ENTRIES.sort(key=lambda m: m.get("name") == "Help")
+MENU_ENTRIES.sort(key=lambda m: m.get("html_id") == "doc_menu")
 

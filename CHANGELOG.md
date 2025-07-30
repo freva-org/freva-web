@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file.
 - Change the Freva databrowser command display based on the neew freva-client
 - After token expiration, user redirected to the home page instead of login page
 - Help page stays always, the last item on the navbar
+- Change the Sing-on text dynamic color to fixed white
 
 ## Fixed
 - Internal auth hotfix

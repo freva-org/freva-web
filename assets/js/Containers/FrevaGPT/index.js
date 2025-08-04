@@ -153,9 +153,11 @@ class FrevaGPT extends React.Component {
 
   async handleKeyDown(e) {
     if (e.keyCode === 13 && !e.shiftKey) {
-      if (!isEmpty(e.target.value.trim())) {
-        e.preventDefault(); // preventing to add a new line within textare when sending request by pressing enter
-        this.handleSubmit(e.target.value);
+      e.preventDefault(); // preventing to add a new line within textare when sending request by pressing enter
+      if (!this.state.loading) {
+        if (!isEmpty(e.target.value.trim())) {
+          this.handleSubmit(e.target.value);
+        }
       }
     }
   }

@@ -18,7 +18,7 @@ import {
 } from "react-bootstrap";
 
 import { browserHistory } from "react-router";
-import { isEmpty, debounce } from "lodash";
+import { isEmpty } from "lodash";
 
 import { FaStop, FaPlay, FaArrowDown, FaArrowUp } from "react-icons/fa";
 
@@ -30,10 +30,10 @@ import PendingAnswerComponent from "./components/PendingAnswerComponent";
 
 import {
   truncate,
-  chatExceedsWindow,
-  getPosition,
   scrollToChatBottom,
   fetchWithAuth,
+  scrollToChatTop,
+  chatExceedsWindow,
 } from "./utils";
 
 import { setThread, setConversation, addElement } from "./actions";
@@ -50,9 +50,7 @@ class FrevaGPT extends React.Component {
     this.toggleBotSelect = this.toggleBotSelect.bind(this);
     this.handleStop = this.handleStop.bind(this);
     this.submitUserInput = this.submitUserInput.bind(this);
-    this.setPosition = this.setPosition.bind(this);
     this.resizeInputField = this.resizeInputField.bind(this);
-    this.scrollDown = this.scrollDown.bind(this);
 
     this.state = {
       loading: false,
@@ -64,9 +62,8 @@ class FrevaGPT extends React.Component {
       showSuggestions: true,
       dynamicAnswer: "",
       dynamicVariant: "",
-      atBottom: false,
-      atTop: true,
       reader: undefined,
+      showScrollButtons: false,
     };
 
     this.lastVariant = React.createRef("User");
@@ -117,8 +114,6 @@ class FrevaGPT extends React.Component {
     } else {
       this.setState({ botOkay: false });
     }
-
-    this.setPosition();
   }
 
   createNewChat() {
@@ -132,11 +127,10 @@ class FrevaGPT extends React.Component {
         });
         this.setState({
           showSuggestions: true,
-          atBottom: true,
-          atTop: true,
           dynamicAnswer: "",
           dynamicVariant: "",
           reader: undefined,
+          showScrollButtons: false,
         });
         window.scrollTo(0, 0);
         return;
@@ -170,7 +164,17 @@ class FrevaGPT extends React.Component {
 
   async handleSubmit(input) {
     this.props.dispatch(addElement({ variant: "User", content: input }));
-    this.setState({ showSuggestions: false, userInput: "", loading: true });
+    this.setState(
+      { showSuggestions: false, userInput: "", loading: true },
+      () => {
+        scrollToChatBottom();
+      }
+    );
+
+    //eslint-disable-next-line no-console
+    if (chatExceedsWindow()) {
+      this.setState({ showScrollButtons: true });
+    }
 
     try {
       await this.fetchData(input);
@@ -366,14 +370,6 @@ class FrevaGPT extends React.Component {
     this.setState({ hideBotModelList: !this.state.hideBotModelList });
   }
 
-  setPosition() {
-    const position = getPosition();
-    this.setState({
-      atBottom: position.atBottom,
-      atTop: position.atTop,
-    });
-  }
-
   resizeInputField() {
     const inputField = document.getElementById("inputField");
     const style = inputField.style;
@@ -381,12 +377,6 @@ class FrevaGPT extends React.Component {
     style.height = inputField.style.minHeight = "auto";
     style.minHeight = `${Math.min(inputField.scrollHeight, parseInt(inputField.style.maxHeight))}px`;
     style.height = `${inputField.scrollHeight}px`;
-  }
-
-  scrollDown() {
-    if (chatExceedsWindow() && this.state.atBottom) {
-      scrollToChatBottom();
-    }
   }
 
   renderAlert() {
@@ -496,39 +486,35 @@ class FrevaGPT extends React.Component {
 
     return (
       <>
-        <Col
-          md={12}
-          style={scrollButtonStyle}
-          className="d-flex flex-row justify-content-end"
-        >
-          <div className="d-flex flex-column">
-            {!this.state.atTop ? (
+        {this.state.showScrollButtons ? (
+          <Col
+            md={12}
+            style={scrollButtonStyle}
+            className="d-flex flex-row justify-content-end"
+          >
+            <div className="d-flex flex-column">
               <Button
                 variant="secondary"
-                className={!this.state.atBottom ? "mb-2" : ""}
-                onClick={() =>
-                  document
-                    .getElementById("chatContainer")
-                    .scrollTo({ top: 0, behavior: "smooth" })
-                }
+                className="mb-2"
+                onClick={() => scrollToChatTop()}
               >
                 <FaArrowUp />
               </Button>
-            ) : null}
-
-            {!this.state.atBottom ? (
               <Button variant="secondary" onClick={() => scrollToChatBottom()}>
                 <FaArrowDown />
               </Button>
-            ) : null}
-          </div>
-        </Col>
+            </div>
+          </Col>
+        ) : null}
       </>
     );
   }
 
   renderBotContent() {
     const windowHeight = document.documentElement.clientHeight * 0.8;
+    const emptyDivHeight = this.state.showSuggestions
+      ? 0
+      : document.documentElement.clientHeight * 0.5;
 
     // better solution needed (wasn't able to find any suitable bootstrap class -> need of fixed height for overflow-auto -> scrolling)
     const chatWindow = {
@@ -551,24 +537,21 @@ class FrevaGPT extends React.Component {
           }
           style={chatWindow}
         >
-          <Row
-            className="overflow-auto position-relative"
-            id="chatContainer"
-            onScroll={debounce(this.setPosition, 100)}
-          >
+          <Row className="overflow-auto position-relative" id="chatContainer">
             <Col md={12}>
-              <ChatBlock onScrollDown={this.scrollDown} />
+              <ChatBlock />
 
               <PendingAnswerComponent
                 content={this.state.dynamicAnswer}
                 variant={this.state.dynamicVariant}
-                atBottom={this.state.atBottom}
                 ref={{
                   lastVariant: this.lastVariant,
                 }}
               />
 
               {this.renderChatSpinner()}
+
+              <div style={{ height: emptyDivHeight }}></div>
             </Col>
             {this.renderScrollButtons()}
           </Row>

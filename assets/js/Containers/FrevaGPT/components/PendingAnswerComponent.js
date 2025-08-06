@@ -30,7 +30,6 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
     }
   }, [props.content]);
 
-
   function extractCode(rawCode) {
     let jsonCode = "";
     let codeSnippets = "";
@@ -50,7 +49,6 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
     return codeSnippets;
   }
 
-
   function renderAssistant(props) {
     return (
       <Col md={constants.BOT_COLUMN_STYLE}>
@@ -60,7 +58,6 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
       </Col>
     );
   }
-
 
   function renderCode() {
     return (
@@ -73,9 +70,7 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
               setShowCode(!showCode);
             }}
           >
-            <span className="color">
-              Analyzing...
-            </span>
+            <span className="color">Analyzing...</span>
             <span>
               {showCode ? (
                 <FaAngleUp className="color" />
@@ -106,7 +101,6 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
     );
   }
 
-
   function renderServerHint() {
     return (
       <Row className="mb-3">
@@ -123,7 +117,6 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
       </Row>
     );
   }
-
 
   function renderAnswer(props) {
     switch (props.variant) {

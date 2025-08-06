@@ -11,7 +11,7 @@ import remarkGfm from "remark-gfm";
 
 import { FaExpand } from "react-icons/fa";
 
-import { replaceLinebreaks, chatExceedsWindow } from "../utils";
+import { replaceLinebreaks } from "../utils";
 
 import * as constants from "../constants";
 
@@ -32,20 +32,6 @@ class ChatBlock extends React.Component {
     this.state = {
       showModal: false,
     };
-  }
-
-  componentDidUpdate() {
-    // only scroll when user input is added to conversation which is long (exceedswindowheight)
-    // all other scrolling is done by the pendinganswercomponent
-    if (chatExceedsWindow()) {
-      if (
-        this.props.chatBlock.conversation[
-          this.props.chatBlock.conversation.length - 1
-        ].variant === "User"
-      ) {
-        this.props.onScrollDown();
-      }
-    }
   }
 
   enlargeImage(imageString) {
@@ -84,11 +70,6 @@ class ChatBlock extends React.Component {
 
   renderImage(element, index) {
     return (
-      // <Col
-      //   key={`${index}-image`}
-      //   md={constants.BOT_COLUMN_STYLE}
-      //   className="border-0 border-bottom mb-3 shadow-sm card-body"
-      // >
       <div className="w-75 mb-5" key={index}>
         <img
           onClick={() => this.enlargeImage(element.content)}
@@ -105,8 +86,6 @@ class ChatBlock extends React.Component {
           </Button>
         </div>
       </div>
-
-      // </Col>
     );
   }
 
@@ -220,7 +199,6 @@ ChatBlock.propTypes = {
     thread: PropTypes.string,
     conversation: PropTypes.array,
   }),
-  onScrollDown: PropTypes.func,
 };
 
 const mapStateToProps = (state) => ({

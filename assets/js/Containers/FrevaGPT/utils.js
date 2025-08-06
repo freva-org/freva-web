@@ -28,6 +28,15 @@ export function formatCode(mode, data) {
   return codeSnippets;
 }
 
+export const truncate = (value) => {
+  const trunc = value.substring(0, 32) + "\u2026";
+  return trunc;
+};
+
+/*-------------------------------------------------------------------------------------------------
+ *                                  Authentication related functions
+-------------------------------------------------------------------------------------------------*/
+
 export async function getAuthToken() {
   try {
     const response = await fetch("/get-current-token/");
@@ -47,22 +56,9 @@ export async function fetchWithAuth(url, options = {}) {
   return fetch(url, { ...options, headers });
 }
 
-export const truncate = (value) => {
-  const trunc = value.substring(0, 32) + "\u2026";
-  return trunc;
-};
-
-export function getPosition() {
-  const container = document.querySelector("#chatContainer");
-  const position = {};
-
-  position.atBottom =
-    container.scrollTop + container.clientHeight >=
-    container.scrollHeight - 200;
-  position.atTop = container.scrollTop < 50;
-
-  return position;
-}
+/*-------------------------------------------------------------------------------------------------
+ *                                  Scrolling related functions
+-------------------------------------------------------------------------------------------------*/
 
 export function chatExceedsWindow() {
   const wholeWindowHeight = document.documentElement.clientHeight * 0.8;
@@ -79,4 +75,10 @@ export function scrollToChatBottom() {
     top: document.getElementById("chatContainer").scrollHeight,
     behavior: "smooth",
   });
+}
+
+export function scrollToChatTop() {
+  document
+    .getElementById("chatContainer")
+    .scrollTo({ top: 0, behavior: "smooth" });
 }

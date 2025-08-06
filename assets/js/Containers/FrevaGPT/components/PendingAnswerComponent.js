@@ -9,7 +9,6 @@ import { oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 import Markdown from "react-markdown";
 
 import * as constants from "../constants";
-import { chatExceedsWindow, scrollToChatBottom } from "../utils";
 
 const PendingAnswerComponent = forwardRef((props, ref) => {
   const [renderedCode, setRenderedCode] = useState("");
@@ -18,13 +17,6 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
     const parsedCode = renderCode(props.content);
     if (parsedCode !== "") {
       setRenderedCode(parsedCode);
-    }
-
-    // conditional autoscrolling (might need some debounce for performance)
-    if (props.content !== "" && chatExceedsWindow()) {
-      if (props.atBottom) {
-        scrollToChatBottom();
-      }
     }
   }, [props.content]);
 
@@ -105,7 +97,6 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
 PendingAnswerComponent.propTypes = {
   content: PropTypes.string,
   variant: PropTypes.string,
-  atBottom: PropTypes.bool,
 };
 
 export default PendingAnswerComponent;

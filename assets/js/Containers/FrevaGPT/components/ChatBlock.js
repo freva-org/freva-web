@@ -1,6 +1,5 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { connect } from "react-redux";
+import React, { useState } from "react";
+import { useSelector } from "react-redux";
 
 import { Col, Card, Modal, Button, Alert } from "react-bootstrap";
 
@@ -11,51 +10,26 @@ import remarkGfm from "remark-gfm";
 
 import { FaExpand } from "react-icons/fa";
 
-import { replaceLinebreaks, chatExceedsWindow } from "../utils";
+import { replaceLinebreaks } from "../utils";
 
 import * as constants from "../constants";
 
 import CodeBlock from "./CodeBlock";
 
-class ChatBlock extends React.Component {
-  constructor(props) {
-    super(props);
+function ChatBlock() {
+  const [showModal, setShowModal] = useState(false);
+  const [image, setImage] = useState("");
 
-    this.renderImage = this.renderImage.bind(this);
-    this.renderCode = this.renderCode.bind(this);
-    this.renderUser = this.renderUser.bind(this);
-    this.renderError = this.renderError.bind(this);
-    this.renderDefault = this.renderDefault.bind(this);
-    this.enlargeImage = this.enlargeImage.bind(this);
-    this.rearrangeCodeElement = this.rearrangeCodeElements.bind(this);
+  const conversation = useSelector(
+    (state) => state.frevaGPTReducer.conversation
+  );
 
-    this.state = {
-      showModal: false,
-    };
+  function enlargeImage(imageString) {
+    setShowModal(true);
+    setImage(`data:image/jpeg;base64,${imageString}`);
   }
 
-  componentDidUpdate() {
-    // only scroll when user input is added to conversation which is long (exceedswindowheight)
-    // all other scrolling is done by the pendinganswercomponent
-    if (chatExceedsWindow()) {
-      if (
-        this.props.chatBlock.conversation[
-          this.props.chatBlock.conversation.length - 1
-        ].variant === "User"
-      ) {
-        this.props.onScrollDown();
-      }
-    }
-  }
-
-  enlargeImage(imageString) {
-    this.setState({
-      showModal: true,
-      image: `data:image/jpeg;base64,${imageString}`,
-    });
-  }
-
-  rearrangeCodeElements(conversation) {
+  function rearrangeCodeElements(conversation) {
     const newConv = [];
 
     for (const element of conversation) {
@@ -82,35 +56,28 @@ class ChatBlock extends React.Component {
     return newConv;
   }
 
-  renderImage(element, index) {
+  function renderImage(element, index) {
     return (
-      // <Col
-      //   key={`${index}-image`}
-      //   md={constants.BOT_COLUMN_STYLE}
-      //   className="border-0 border-bottom mb-3 shadow-sm card-body"
-      // >
       <div className="w-75 mb-5" key={index}>
         <img
-          onClick={() => this.enlargeImage(element.content)}
+          onClick={() => enlargeImage(element.content)}
           src={`data:image/jpeg;base64,${element.content}`}
           className="mw-100"
         />
         <div className="d-flex justify-content-end">
           <Button
             variant="link"
-            onClick={() => this.enlargeImage(element.content)}
+            onClick={() => enlargeImage(element.content)}
             className="d-flex align-items-center"
           >
             <FaExpand />
           </Button>
         </div>
       </div>
-
-      // </Col>
     );
   }
 
-  renderCode(element, index) {
+  function renderCode(element, index) {
     if (isEmpty(element[0].content[0])) {
       return null;
     } else {
@@ -122,7 +89,7 @@ class ChatBlock extends React.Component {
     }
   }
 
-  renderUser(element, index) {
+  function renderUser(element, index) {
     return (
       <Col md={{ span: 10, offset: 2 }} key={`${index}-user`}>
         <Card
@@ -135,7 +102,7 @@ class ChatBlock extends React.Component {
     );
   }
 
-  renderError(element, index) {
+  function renderError(element, index) {
     return (
       <Col md={12} key={`${index}-error`}>
         <Alert variant="danger" className="shadow-sm mb-3">
@@ -146,7 +113,7 @@ class ChatBlock extends React.Component {
     );
   }
 
-  renderDefault(element, index) {
+  function renderDefault(element, index) {
     return (
       <Col md={constants.BOT_COLUMN_STYLE} key={`${index}-default`}>
         <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
@@ -158,20 +125,20 @@ class ChatBlock extends React.Component {
     );
   }
 
-  renderChatComponents(element, index) {
+  function renderChatComponents(element, index) {
     switch (element[0].variant) {
       case "ServerHint":
       case "StreamEnd":
         return null;
       case "Image":
-        return this.renderImage(element[0], index);
+        return renderImage(element[0], index);
 
       case "Code":
       case "CodeOutput":
-        return this.renderCode(element, index);
+        return renderCode(element, index);
 
       case "User":
-        return this.renderUser(element[0], index);
+        return renderUser(element[0], index);
 
       case "ServerError":
       case "OpenAIError":
@@ -179,22 +146,21 @@ class ChatBlock extends React.Component {
       case "FrontendError":
       case "InvalidThread":
       case "UserStop":
-        return this.renderError(element[0], index);
+        return renderError(element[0], index);
 
       default:
-        return this.renderDefault(element[0], index);
+        return renderDefault(element[0], index);
     }
   }
 
-  render() {
-    const { conversation } = this.props.chatBlock;
-    const rearrangedConversation = this.rearrangeCodeElements(conversation);
+  function render() {
+    const rearrangedConversation = rearrangeCodeElements(conversation);
 
     return (
       <>
         <Col>
           {rearrangedConversation.map((element, index) => {
-            return this.renderChatComponents(element, index);
+            return renderChatComponents(element, index);
           })}
         </Col>
 
@@ -202,29 +168,22 @@ class ChatBlock extends React.Component {
           size="xl"
           aria-labelledby="contained-modal-title-vcenter"
           centered
-          show={this.state.showModal}
-          onHide={() => this.setState({ showModal: false, image: "" })}
+          show={showModal}
+          onHide={() => {
+            setShowModal(false);
+            setImage("");
+          }}
         >
           <Modal.Header closeButton></Modal.Header>
           <Modal.Body style={{ display: "flex", justifyContent: "center" }}>
-            <img className="w-100" src={this.state.image} />
+            <img className="w-100" src={image} />
           </Modal.Body>
         </Modal>
       </>
     );
   }
+
+  return render();
 }
 
-ChatBlock.propTypes = {
-  chatBlock: PropTypes.shape({
-    thread: PropTypes.string,
-    conversation: PropTypes.array,
-  }),
-  onScrollDown: PropTypes.func,
-};
-
-const mapStateToProps = (state) => ({
-  chatBlock: state.frevaGPTReducer,
-});
-
-export default connect(mapStateToProps)(ChatBlock);
+export default ChatBlock;

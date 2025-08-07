@@ -14,6 +14,13 @@ export function setConversation(conversation) {
   };
 }
 
+export function setBotModel(botModel) {
+  return {
+    type: "SET_BOT_MODEL",
+    payload: botModel,
+  };
+}
+
 export const addElement = (element) => (dispatch) => {
   dispatch({
     type: constants.ADD_ELEMENT,

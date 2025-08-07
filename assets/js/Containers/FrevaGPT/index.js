@@ -1,44 +1,26 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
-import {
-  Container,
-  Row,
-  Col,
-  FormControl,
-  InputGroup,
-  Button,
-  Form,
-  Alert,
-  Tooltip,
-  OverlayTrigger,
-  Spinner,
-  Card,
-} from "react-bootstrap";
+import { Container, Row, Col, Spinner } from "react-bootstrap";
 
 import { browserHistory } from "react-router";
-import { isEmpty, debounce } from "lodash";
-
-import { FaStop, FaPlay, FaArrowDown, FaArrowUp } from "react-icons/fa";
+import { isEmpty } from "lodash";
 
 import queryString from "query-string";
 
+import BotHeader from "./components/BotHeader";
 import ChatBlock from "./components/ChatBlock";
 import SidePanel from "./components/SidePanel";
+import Suggestions from "./components/Suggestions";
+import BotInput from "./components/BotInput";
+import BotLoadingSpinner from "./components/BotLoadingSpinner";
+import ScrollButtons from "./components/ScrollButtons";
+import BotUnavailableAlert from "./components/BotUnavailableAlert";
 import PendingAnswerComponent from "./components/PendingAnswerComponent";
 
-import {
-  truncate,
-  chatExceedsWindow,
-  getPosition,
-  scrollToChatBottom,
-  fetchWithAuth,
-  resizeInputField,
-} from "./utils";
+import { fetchWithAuth, successfulPing } from "./utils";
 
 import { setThread, setConversation, addElement } from "./actions";
-
-import { botSuggestions } from "./exampleRequests";
 
 function FrevaGPT() {
   useEffect(async () => {
@@ -57,58 +39,25 @@ function FrevaGPT() {
       setShowSuggestions(false);
     }
 
-    const successfulPing = async () => {
-      let pingSuccessful = false;
-
-      try {
-        const response = await fetchWithAuth("/api/chatbot/ping");
-        if (response.status === 200) {
-          pingSuccessful = true;
-        }
-      } catch (err) {
-        pingSuccessful = false;
-      }
-
-      return pingSuccessful;
-    };
-
-    const getBotModels = async () => {
-      const response = await fetchWithAuth(`/api/chatbot/availablechatbots?`);
-      if (response.ok) {
-        setBotModelList(await response.json());
-      } else {
-        setBotModelList(["No model information available."]);
-      }
-    };
-
     if (await successfulPing()) {
       setBotOkay(true);
-      await getBotModels();
     } else {
       setBotOkay(false);
     }
-
-    setPosition();
   }, []);
 
-  const [userInput, setUserInput] = useState("");
-  const [botModelList, setBotModelList] = useState([]);
-  const [botModel, setBotModel] = useState("");
   const [dynamicAnswer, setDynamicAnswer] = useState("");
   const [dynamicVariant, setDynamicVariant] = useState("");
   const [reader, setReader] = useState(undefined);
 
   const [loading, setLoading] = useState(false);
-  const [hideBotModelList, setHideBotModelList] = useState(true);
   const [botOkay, setBotOkay] = useState(undefined);
   const [showSuggestions, setShowSuggestions] = useState(true);
-
-  const [atBottom, setAtBottom] = useState(false);
-  const [atTop, setAtTop] = useState(true);
 
   const lastVariant = useRef("User");
 
   const thread = useSelector((state) => state.frevaGPTReducer.thread);
+  const botModel = useSelector((state) => state.frevaGPTReducer.botModel);
 
   const dispatch = useDispatch();
 
@@ -128,8 +77,6 @@ function FrevaGPT() {
         setDynamicAnswer("");
         setDynamicVariant("");
         setReader(undefined);
-        setAtBottom(true);
-        setAtTop(true);
         window.scrollTo(0, 0);
         return;
       })
@@ -137,10 +84,6 @@ function FrevaGPT() {
         // eslint-disable-next-line no-console
         console.error(err);
       });
-  }
-
-  function toggleBotSelect() {
-    setHideBotModelList(!hideBotModelList);
   }
 
   async function getOldThread(thread) {
@@ -169,28 +112,9 @@ function FrevaGPT() {
   /*-----------------------------------------------------------------------------------------------
   *                                       User interaction methods
   -----------------------------------------------------------------------------------------------*/
-  function handleUserInput(e) {
-    setUserInput(e.target.value);
-  }
-
-  async function handleKeyDown(e) {
-    if (e.key === "Enter" && !isEmpty(e.target.value.trim())) {
-      e.preventDefault(); // preventing to add a new line within textare when sending request by pressing enter
-      handleSubmit(e.target.value);
-    }
-  }
-
-  async function submitUserInput() {
-    if (!isEmpty(userInput.trim())) {
-      await handleSubmit(userInput);
-    }
-    setUserInput("");
-  }
-
   async function handleSubmit(input) {
     dispatch(addElement({ variant: "User", content: input }));
     setShowSuggestions(false);
-    setUserInput("");
     setLoading(true);
 
     try {
@@ -357,186 +281,8 @@ function FrevaGPT() {
   }
 
   /*-----------------------------------------------------------------------------------------------
-  *                                     
-  -----------------------------------------------------------------------------------------------*/
-  function setPosition() {
-    const position = getPosition();
-    setAtBottom(position.atBottom);
-    setAtTop(position.atTop);
-  }
-
-  function scrollDown() {
-    if (chatExceedsWindow() && atBottom) {
-      scrollToChatBottom();
-    }
-  }
-
-  /*-----------------------------------------------------------------------------------------------
   *                                         Render functions
   -----------------------------------------------------------------------------------------------*/
-  /*------------------------------------- Small content snippets --------------------------------*/
-  function renderAlert() {
-    return (
-      <Alert key="botError" variant="danger">
-        The bot is currently not available. Please retry later.
-      </Alert>
-    );
-  }
-
-  function renderChatSpinner() {
-    return (
-      <>
-        {loading && !dynamicAnswer ? (
-          <Row className="mb-3">
-            <Col md={3}>
-              <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light d-flex flex-row align-items-center">
-                <Spinner size="sm" />
-                <span className="ms-2">
-                  {lastVariant.current === "Code"
-                    ? "Executing..."
-                    : "Thinking..."}
-                </span>
-              </Card>
-            </Col>
-          </Row>
-        ) : null}
-      </>
-    );
-  }
-
-  function renderScrollButtons() {
-    // here also no suitable solutions using bootstrap found -> need for better solution
-    const scrollButtonStyle = {
-      zIndex: 10,
-      right: "40px",
-      bottom: "10px",
-      position: "sticky",
-    };
-
-    return (
-      <>
-        <Col
-          md={12}
-          style={scrollButtonStyle}
-          className="d-flex flex-row justify-content-end"
-        >
-          <div className="d-flex flex-column">
-            {!atTop ? (
-              <Button
-                variant="secondary"
-                className={!atBottom ? "mb-2" : ""}
-                onClick={() =>
-                  document
-                    .getElementById("chatContainer")
-                    .scrollTo({ top: 0, behavior: "smooth" })
-                }
-              >
-                <FaArrowUp />
-              </Button>
-            ) : null}
-
-            {!atBottom ? (
-              <Button variant="secondary" onClick={() => scrollToChatBottom()}>
-                <FaArrowDown />
-              </Button>
-            ) : null}
-          </div>
-        </Col>
-      </>
-    );
-  }
-
-  /*---------------------------------------- Bot components -------------------------------------*/
-  function renderBotHeader() {
-    return (
-      <div className="d-flex justify-content-between mb-2">
-        <Form.Select
-          value={botModel}
-          onChange={(e) => {
-            setBotModel(e.target.value);
-          }}
-          className="me-1"
-          placeholder="Model"
-          hidden={hideBotModelList}
-        >
-          {botModelList.map((model) => {
-            return <option key={model}>{model}</option>;
-          })}
-        </Form.Select>
-        <Button onClick={createNewChat} variant="info">
-          NewChat
-        </Button>
-      </div>
-    );
-  }
-
-  function renderSuggestions() {
-    return (
-      <>
-        {showSuggestions ? (
-          <>
-            {botSuggestions.map((element) => {
-              return (
-                <div key={`${element}-div`} className="col-md-3 mb-2">
-                  <OverlayTrigger
-                    key={`${element}-tooltip`}
-                    overlay={<Tooltip>{element}</Tooltip>}
-                  >
-                    <Button
-                      className="h-100 w-100"
-                      variant="outline-secondary"
-                      onClick={() => handleSubmit(element)}
-                    >
-                      {truncate(element)}
-                    </Button>
-                  </OverlayTrigger>
-                </div>
-              );
-            })}
-          </>
-        ) : null}
-      </>
-    );
-  }
-
-  function renderBotInput() {
-    return (
-      <Col id="botInput">
-        <InputGroup className="mb-2 pb-2">
-          <FormControl
-            as="textarea"
-            id="inputField"
-            rows={1}
-            value={userInput}
-            onChange={(e) => {
-              handleUserInput(e);
-              resizeInputField();
-            }}
-            onKeyDown={handleKeyDown}
-            placeholder="Ask a question"
-          />
-          {loading ? (
-            <Button
-              variant="outline-danger"
-              onClick={handleStop}
-              className="d-flex align-items-center"
-            >
-              <FaStop />
-            </Button>
-          ) : (
-            <Button
-              variant="outline-success"
-              onClick={submitUserInput}
-              className="d-flex align-items-center"
-            >
-              <FaPlay />
-            </Button>
-          )}
-        </InputGroup>
-      </Col>
-    );
-  }
-
   function renderBotContent() {
     const windowHeight = document.documentElement.clientHeight * 0.8;
 
@@ -561,29 +307,34 @@ function FrevaGPT() {
           }
           style={chatWindow}
         >
-          <Row
-            className="overflow-auto position-relative"
-            id="chatContainer"
-            onScroll={debounce(setPosition, 100)}
-          >
+          <Row className="overflow-auto position-relative" id="chatContainer">
             <Col md={12}>
-              <ChatBlock onScrollDown={scrollDown} />
+              <ChatBlock />
 
               <PendingAnswerComponent
                 content={dynamicAnswer}
                 variant={dynamicVariant}
-                atBottom={atBottom}
                 ref={{ lastVariant }}
               />
 
-              {renderChatSpinner()}
+              <BotLoadingSpinner
+                loading={loading}
+                dynamicAnswer={dynamicAnswer}
+                ref={{ lastVariant }}
+              />
             </Col>
-            {renderScrollButtons()}
+            <ScrollButtons />
           </Row>
 
           <Row>
-            {renderSuggestions()}
-            {renderBotInput()}
+            {showSuggestions ? (
+              <Suggestions handleSubmit={handleSubmit} />
+            ) : null}
+            <BotInput
+              loading={loading}
+              handleSubmit={handleSubmit}
+              handleStop={handleStop}
+            />
           </Row>
         </Col>
       </>
@@ -595,18 +346,13 @@ function FrevaGPT() {
     return (
       <Container>
         <Row>
-          <div className="d-flex justify-content-between">
-            <h2 onClick={toggleBotSelect}>FrevaGPT</h2>
-
-            {botOkay ? renderBotHeader() : null}
-          </div>
-
+          <BotHeader createNewChat={createNewChat} />
           {botOkay === undefined ? (
             <Spinner />
           ) : botOkay ? (
             renderBotContent()
           ) : (
-            renderAlert()
+            <BotUnavailableAlert />
           )}
         </Row>
       </Container>

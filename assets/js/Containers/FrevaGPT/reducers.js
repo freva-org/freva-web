@@ -3,6 +3,7 @@ import * as constants from "./constants";
 const frevaGPTInitialState = {
   conversation: [],
   thread: "",
+  botModel: "",
 };
 
 export const frevaGPTReducer = (state = frevaGPTInitialState, action) => {
@@ -11,6 +12,8 @@ export const frevaGPTReducer = (state = frevaGPTInitialState, action) => {
       return { ...state, conversation: action.payload };
     case constants.SET_THREAD:
       return { ...state, thread: action.payload };
+    case constants.SET_BOT_MODEL:
+      return { ...state, botModel: action.payload };
     case constants.ADD_ELEMENT:
       return {
         ...state,

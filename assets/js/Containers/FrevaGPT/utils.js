@@ -89,3 +89,18 @@ export function resizeInputField() {
   style.minHeight = `${Math.min(inputField.scrollHeight, parseInt(inputField.style.maxHeight))}px`;
   style.height = `${inputField.scrollHeight}px`;
 }
+
+export async function successfulPing() {
+  let pingSuccessful = false;
+
+  try {
+    const response = await fetchWithAuth("/api/chatbot/ping");
+    if (response.status === 200) {
+      pingSuccessful = true;
+    }
+  } catch (err) {
+    pingSuccessful = false;
+  }
+
+  return pingSuccessful;
+}

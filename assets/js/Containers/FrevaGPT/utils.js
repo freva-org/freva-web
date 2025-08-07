@@ -80,3 +80,12 @@ export function scrollToChatBottom() {
     behavior: "smooth",
   });
 }
+
+export function resizeInputField() {
+  const inputField = document.getElementById("inputField");
+  const style = inputField.style;
+
+  style.height = inputField.style.minHeight = "auto";
+  style.minHeight = `${Math.min(inputField.scrollHeight, parseInt(inputField.style.maxHeight))}px`;
+  style.height = `${inputField.scrollHeight}px`;
+}

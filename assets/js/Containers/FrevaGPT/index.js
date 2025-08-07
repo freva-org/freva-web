@@ -1,6 +1,5 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { connect } from "react-redux";
+import React, { useState, useRef, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
 
 import {
   Container,
@@ -34,57 +33,28 @@ import {
   getPosition,
   scrollToChatBottom,
   fetchWithAuth,
+  resizeInputField,
 } from "./utils";
 
 import { setThread, setConversation, addElement } from "./actions";
 
 import { botSuggestions } from "./exampleRequests";
 
-class FrevaGPT extends React.Component {
-  constructor(props) {
-    super(props);
-    this.handleUserInput = this.handleUserInput.bind(this);
-    this.handleKeyDown = this.handleKeyDown.bind(this);
-    this.createNewChat = this.createNewChat.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.toggleBotSelect = this.toggleBotSelect.bind(this);
-    this.handleStop = this.handleStop.bind(this);
-    this.submitUserInput = this.submitUserInput.bind(this);
-    this.setPosition = this.setPosition.bind(this);
-    this.resizeInputField = this.resizeInputField.bind(this);
-    this.scrollDown = this.scrollDown.bind(this);
-
-    this.state = {
-      loading: false,
-      userInput: "",
-      botModelList: [],
-      botModel: "",
-      hideBotModelList: true,
-      botOkay: undefined,
-      showSuggestions: true,
-      dynamicAnswer: "",
-      dynamicVariant: "",
-      atBottom: false,
-      atTop: true,
-      reader: undefined,
-    };
-
-    this.lastVariant = React.createRef("User");
-  }
-
-  async componentDidMount() {
+function FrevaGPT() {
+  useEffect(async () => {
     // if thread giving on mounting the component, set thread within store
     const givenQueryParams = browserHistory.getCurrentLocation().query;
     if (
       Object.hasOwn(givenQueryParams, "thread_id") &&
       !isEmpty(givenQueryParams.thread_id)
     ) {
-      this.props.dispatch(setThread(givenQueryParams.thread_id));
+      dispatch(setThread(givenQueryParams.thread_id));
 
       // request content of old thread if threa_id is given
-      this.setState({ loading: true });
-      await this.getOldThread(givenQueryParams.thread_id);
-      this.setState({ loading: false, showSuggestions: false });
+      setLoading(true);
+      await getOldThread(givenQueryParams.thread_id);
+      setLoading(false);
+      setShowSuggestions(false);
     }
 
     const successfulPing = async () => {
@@ -105,39 +75,61 @@ class FrevaGPT extends React.Component {
     const getBotModels = async () => {
       const response = await fetchWithAuth(`/api/chatbot/availablechatbots?`);
       if (response.ok) {
-        this.setState({ botModelList: await response.json() });
+        setBotModelList(await response.json());
       } else {
-        this.setState({ botModelList: ["No model information available."] });
+        setBotModelList(["No model information available."]);
       }
     };
 
     if (await successfulPing()) {
-      this.setState({ botOkay: true });
+      setBotOkay(true);
       await getBotModels();
     } else {
-      this.setState({ botOkay: false });
+      setBotOkay(false);
     }
 
-    this.setPosition();
-  }
+    setPosition();
+  }, []);
 
-  createNewChat() {
-    this.handleStop(false)
+  const [userInput, setUserInput] = useState("");
+  const [botModelList, setBotModelList] = useState([]);
+  const [botModel, setBotModel] = useState("");
+  const [dynamicAnswer, setDynamicAnswer] = useState("");
+  const [dynamicVariant, setDynamicVariant] = useState("");
+  const [reader, setReader] = useState(undefined);
+
+  const [loading, setLoading] = useState(false);
+  const [hideBotModelList, setHideBotModelList] = useState(true);
+  const [botOkay, setBotOkay] = useState(undefined);
+  const [showSuggestions, setShowSuggestions] = useState(true);
+
+  const [atBottom, setAtBottom] = useState(false);
+  const [atTop, setAtTop] = useState(true);
+
+  const lastVariant = useRef("User");
+
+  const thread = useSelector((state) => state.frevaGPTReducer.thread);
+
+  const dispatch = useDispatch();
+
+  /*-----------------------------------------------------------------------------------------------
+  *
+  -----------------------------------------------------------------------------------------------*/
+  function createNewChat() {
+    handleStop(false)
       .then(() => {
-        this.props.dispatch(setConversation([]));
-        this.props.dispatch(setThread(""));
+        dispatch(setConversation([]));
+        dispatch(setThread(""));
         browserHistory.push({
           pathname: "/chatbot/",
           search: "",
         });
-        this.setState({
-          showSuggestions: true,
-          atBottom: true,
-          atTop: true,
-          dynamicAnswer: "",
-          dynamicVariant: "",
-          reader: undefined,
-        });
+        setShowSuggestions(true);
+        setDynamicAnswer("");
+        setDynamicVariant("");
+        setReader(undefined);
+        setAtBottom(true);
+        setAtTop(true);
         window.scrollTo(0, 0);
         return;
       })
@@ -147,35 +139,64 @@ class FrevaGPT extends React.Component {
       });
   }
 
-  handleUserInput(e) {
-    this.setState({ userInput: e.target.value });
+  function toggleBotSelect() {
+    setHideBotModelList(!hideBotModelList);
   }
 
-  async handleKeyDown(e) {
+  async function getOldThread(thread) {
+    const queryObject = { thread_id: thread };
+    const response = await fetchWithAuth(
+      `/api/chatbot/getthread?` + queryString.stringify(queryObject)
+    );
+
+    if (response.status >= 200 && response.status <= 299) {
+      const variantArray = await response.json();
+      dispatch(setConversation(variantArray));
+    } else {
+      dispatch(setThread(""));
+      dispatch(
+        setConversation([
+          {
+            variant: "InvalidThread",
+            content:
+              "The thread id is invalid or the thread doesn't exist anymore.",
+          },
+        ])
+      );
+    }
+  }
+
+  /*-----------------------------------------------------------------------------------------------
+  *                                       User interaction methods
+  -----------------------------------------------------------------------------------------------*/
+  function handleUserInput(e) {
+    setUserInput(e.target.value);
+  }
+
+  async function handleKeyDown(e) {
     if (e.key === "Enter" && !isEmpty(e.target.value.trim())) {
       e.preventDefault(); // preventing to add a new line within textare when sending request by pressing enter
-      this.handleSubmit(e.target.value);
+      handleSubmit(e.target.value);
     }
   }
 
-  async submitUserInput() {
-    const userInput = this.state.userInput;
-
+  async function submitUserInput() {
     if (!isEmpty(userInput.trim())) {
-      await this.handleSubmit(userInput);
+      await handleSubmit(userInput);
     }
-
-    this.setState({ userInput: "" });
+    setUserInput("");
   }
 
-  async handleSubmit(input) {
-    this.props.dispatch(addElement({ variant: "User", content: input }));
-    this.setState({ showSuggestions: false, userInput: "", loading: true });
+  async function handleSubmit(input) {
+    dispatch(addElement({ variant: "User", content: input }));
+    setShowSuggestions(false);
+    setUserInput("");
+    setLoading(true);
 
     try {
-      await this.fetchData(input);
+      await fetchData(input);
     } catch (err) {
-      this.props.dispatch(
+      dispatch(
         addElement({
           variant: "FrontendError",
           content: "An error occured during rendering!",
@@ -184,14 +205,35 @@ class FrevaGPT extends React.Component {
       // eslint-disable-next-line no-console
       console.error(err);
     }
-    this.setState({ loading: false });
+    setLoading(false);
   }
 
-  async fetchData(input) {
+  async function handleStop(dispatchStopMessage = true) {
+    // stop of thread only possible if a thread id is given
+    if (reader) {
+      await reader.cancel();
+    }
+    const queryObject = { thread_id: thread };
+    if (thread) {
+      await fetchWithAuth(
+        `/api/chatbot/stop?` + queryString.stringify(queryObject)
+      );
+    }
+
+    setLoading(false);
+    setReader(undefined);
+    if (dispatchStopMessage) {
+      dispatch(
+        addElement({ variant: "UserStop", content: "Request stopped manually" })
+      );
+    }
+  }
+
+  async function fetchData(input) {
     const queryObject = {
       input,
-      thread_id: this.props.frevaGPT.thread,
-      chatbot: this.state.botModel,
+      thread_id: thread,
+      chatbot: botModel,
     };
 
     // response of a new bot request is streamed
@@ -200,8 +242,8 @@ class FrevaGPT extends React.Component {
     ); //, signal);
 
     if (response.ok) {
-      const reader = response.body.getReader();
-      this.setState({ reader });
+      const localReader = response.body.getReader();
+      setReader(localReader);
       const decoder = new TextDecoder("utf-8");
 
       let buffer = "";
@@ -210,7 +252,7 @@ class FrevaGPT extends React.Component {
       // eslint-disable-next-line no-constant-condition
       while (true) {
         // eslint-disable-next-line no-await-in-loop
-        const { done, value } = await reader.read();
+        const { done, value } = await localReader.read();
         if (done) {
           break;
         }
@@ -241,9 +283,10 @@ class FrevaGPT extends React.Component {
               if (Object.keys(varObj).length !== 0) {
                 // if object has not same variant, add answer to conversation and override object
                 if (varObj.variant !== jsonBuffer.variant) {
-                  this.props.dispatch(addElement(varObj));
-                  this.lastVariant.current = varObj.variant;
-                  this.setState({ dynamicAnswer: "", dynamicVariant: "" });
+                  dispatch(addElement(varObj));
+                  lastVariant.current = varObj.variant;
+                  setDynamicAnswer("");
+                  setDynamicVariant("");
                   varObj = jsonBuffer;
                 } else {
                   // if object has same variant, add content
@@ -254,16 +297,12 @@ class FrevaGPT extends React.Component {
                   ) {
                     varObj.content[0] =
                       varObj.content[0] + jsonBuffer.content[0];
-                    this.setState({
-                      dynamicAnswer: varObj.content[0],
-                      dynamicVariant: varObj.variant,
-                    });
+                    setDynamicAnswer(varObj.content[0]);
+                    setDynamicVariant(varObj.variant);
                   } else {
                     varObj.content = varObj.content + jsonBuffer.content;
-                    this.setState({
-                      dynamicAnswer: varObj.content,
-                      dynamicVariant: varObj.variant,
-                    });
+                    setDynamicAnswer(varObj.content);
+                    setDynamicVariant(varObj.variant);
                   }
                 }
               } else {
@@ -271,17 +310,15 @@ class FrevaGPT extends React.Component {
                 varObj = jsonBuffer;
 
                 // set thread id
-                if (
-                  this.props.frevaGPT.thread === "" &&
-                  varObj.variant === "ServerHint"
-                ) {
+                if (thread === "" && varObj.variant === "ServerHint") {
                   try {
-                    this.props.dispatch(
-                      setThread(JSON.parse(varObj.content).thread_id)
-                    );
+                    const currentThreadId = JSON.parse(
+                      varObj.content
+                    ).thread_id;
+                    dispatch(setThread(currentThreadId));
                     browserHistory.push({
                       pathname: "/chatbot/",
-                      search: `?thread_id=${this.props.frevaGPT.thread}`,
+                      search: `?thread_id=${currentThreadId}`,
                     });
                   } catch (err) {
                     // handle warning
@@ -298,7 +335,7 @@ class FrevaGPT extends React.Component {
                 !subBuffer.includes("ServerHint") &&
                 !subBuffer.includes("Code")
               ) {
-                this.props.dispatch(
+                dispatch(
                   addElement({
                     variant: "FrontendError",
                     content: "Incomplete message received.",
@@ -310,7 +347,7 @@ class FrevaGPT extends React.Component {
         }
       }
     } else {
-      this.props.dispatch(
+      dispatch(
         addElement({
           variant: "ServerError",
           content: response.statusText,
@@ -319,77 +356,26 @@ class FrevaGPT extends React.Component {
     }
   }
 
-  async getOldThread(thread) {
-    const queryObject = { thread_id: thread };
-    const response = await fetchWithAuth(
-      `/api/chatbot/getthread?` + queryString.stringify(queryObject)
-    );
-
-    if (response.status >= 200 && response.status <= 299) {
-      const variantArray = await response.json();
-      this.props.dispatch(setConversation(variantArray));
-    } else {
-      this.props.dispatch(setThread(""));
-      this.props.dispatch(
-        setConversation([
-          {
-            variant: "InvalidThread",
-            content:
-              "The thread id is invalid or the thread doesn't exist anymore.",
-          },
-        ])
-      );
-    }
-  }
-
-  async handleStop(dispatchStopMessage = true) {
-    // stop of thread only possible if a thread id is given
-    if (this.state.reader) {
-      await this.state.reader.cancel();
-    }
-    const queryObject = { thread_id: this.props.frevaGPT.thread };
-    if (this.props.frevaGPT.thread) {
-      await fetchWithAuth(
-        `/api/chatbot/stop?` + queryString.stringify(queryObject)
-      );
-    }
-
-    this.setState({ loading: false, reader: undefined });
-    if (dispatchStopMessage) {
-      this.props.dispatch(
-        addElement({ variant: "UserStop", content: "Request stopped manually" })
-      );
-    }
-  }
-
-  toggleBotSelect() {
-    this.setState({ hideBotModelList: !this.state.hideBotModelList });
-  }
-
-  setPosition() {
+  /*-----------------------------------------------------------------------------------------------
+  *                                     
+  -----------------------------------------------------------------------------------------------*/
+  function setPosition() {
     const position = getPosition();
-    this.setState({
-      atBottom: position.atBottom,
-      atTop: position.atTop,
-    });
+    setAtBottom(position.atBottom);
+    setAtTop(position.atTop);
   }
 
-  resizeInputField() {
-    const inputField = document.getElementById("inputField");
-    const style = inputField.style;
-
-    style.height = inputField.style.minHeight = "auto";
-    style.minHeight = `${Math.min(inputField.scrollHeight, parseInt(inputField.style.maxHeight))}px`;
-    style.height = `${inputField.scrollHeight}px`;
-  }
-
-  scrollDown() {
-    if (chatExceedsWindow() && this.state.atBottom) {
+  function scrollDown() {
+    if (chatExceedsWindow() && atBottom) {
       scrollToChatBottom();
     }
   }
 
-  renderAlert() {
+  /*-----------------------------------------------------------------------------------------------
+  *                                         Render functions
+  -----------------------------------------------------------------------------------------------*/
+  /*------------------------------------- Small content snippets --------------------------------*/
+  function renderAlert() {
     return (
       <Alert key="botError" variant="danger">
         The bot is currently not available. Please retry later.
@@ -397,83 +383,16 @@ class FrevaGPT extends React.Component {
     );
   }
 
-  renderSuggestions() {
+  function renderChatSpinner() {
     return (
       <>
-        {this.state.showSuggestions ? (
-          <>
-            {botSuggestions.map((element) => {
-              return (
-                <div key={`${element}-div`} className="col-md-3 mb-2">
-                  <OverlayTrigger
-                    key={`${element}-tooltip`}
-                    overlay={<Tooltip>{element}</Tooltip>}
-                  >
-                    <Button
-                      className="h-100 w-100"
-                      variant="outline-secondary"
-                      onClick={() => this.handleSubmit(element)}
-                    >
-                      {truncate(element)}
-                    </Button>
-                  </OverlayTrigger>
-                </div>
-              );
-            })}
-          </>
-        ) : null}
-      </>
-    );
-  }
-
-  renderBotInput() {
-    return (
-      <Col id="botInput">
-        <InputGroup className="mb-2 pb-2">
-          <FormControl
-            as="textarea"
-            id="inputField"
-            rows={1}
-            value={this.state.userInput}
-            onChange={(e) => {
-              this.handleUserInput(e);
-              this.resizeInputField();
-            }}
-            onKeyDown={this.handleKeyDown}
-            placeholder="Ask a question"
-          />
-          {this.state.loading ? (
-            <Button
-              variant="outline-danger"
-              onClick={this.handleStop}
-              className="d-flex align-items-center"
-            >
-              <FaStop />
-            </Button>
-          ) : (
-            <Button
-              variant="outline-success"
-              onClick={this.submitUserInput}
-              className="d-flex align-items-center"
-            >
-              <FaPlay />
-            </Button>
-          )}
-        </InputGroup>
-      </Col>
-    );
-  }
-
-  renderChatSpinner() {
-    return (
-      <>
-        {this.state.loading && !this.state.dynamicAnswer ? (
+        {loading && !dynamicAnswer ? (
           <Row className="mb-3">
             <Col md={3}>
               <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light d-flex flex-row align-items-center">
                 <Spinner size="sm" />
                 <span className="ms-2">
-                  {this.lastVariant.current === "Code"
+                  {lastVariant.current === "Code"
                     ? "Executing..."
                     : "Thinking..."}
                 </span>
@@ -485,7 +404,7 @@ class FrevaGPT extends React.Component {
     );
   }
 
-  renderScrollButtons() {
+  function renderScrollButtons() {
     // here also no suitable solutions using bootstrap found -> need for better solution
     const scrollButtonStyle = {
       zIndex: 10,
@@ -502,10 +421,10 @@ class FrevaGPT extends React.Component {
           className="d-flex flex-row justify-content-end"
         >
           <div className="d-flex flex-column">
-            {!this.state.atTop ? (
+            {!atTop ? (
               <Button
                 variant="secondary"
-                className={!this.state.atBottom ? "mb-2" : ""}
+                className={!atBottom ? "mb-2" : ""}
                 onClick={() =>
                   document
                     .getElementById("chatContainer")
@@ -516,7 +435,7 @@ class FrevaGPT extends React.Component {
               </Button>
             ) : null}
 
-            {!this.state.atBottom ? (
+            {!atBottom ? (
               <Button variant="secondary" onClick={() => scrollToChatBottom()}>
                 <FaArrowDown />
               </Button>
@@ -527,7 +446,98 @@ class FrevaGPT extends React.Component {
     );
   }
 
-  renderBotContent() {
+  /*---------------------------------------- Bot components -------------------------------------*/
+  function renderBotHeader() {
+    return (
+      <div className="d-flex justify-content-between mb-2">
+        <Form.Select
+          value={botModel}
+          onChange={(e) => {
+            setBotModel(e.target.value);
+          }}
+          className="me-1"
+          placeholder="Model"
+          hidden={hideBotModelList}
+        >
+          {botModelList.map((model) => {
+            return <option key={model}>{model}</option>;
+          })}
+        </Form.Select>
+        <Button onClick={createNewChat} variant="info">
+          NewChat
+        </Button>
+      </div>
+    );
+  }
+
+  function renderSuggestions() {
+    return (
+      <>
+        {showSuggestions ? (
+          <>
+            {botSuggestions.map((element) => {
+              return (
+                <div key={`${element}-div`} className="col-md-3 mb-2">
+                  <OverlayTrigger
+                    key={`${element}-tooltip`}
+                    overlay={<Tooltip>{element}</Tooltip>}
+                  >
+                    <Button
+                      className="h-100 w-100"
+                      variant="outline-secondary"
+                      onClick={() => handleSubmit(element)}
+                    >
+                      {truncate(element)}
+                    </Button>
+                  </OverlayTrigger>
+                </div>
+              );
+            })}
+          </>
+        ) : null}
+      </>
+    );
+  }
+
+  function renderBotInput() {
+    return (
+      <Col id="botInput">
+        <InputGroup className="mb-2 pb-2">
+          <FormControl
+            as="textarea"
+            id="inputField"
+            rows={1}
+            value={userInput}
+            onChange={(e) => {
+              handleUserInput(e);
+              resizeInputField();
+            }}
+            onKeyDown={handleKeyDown}
+            placeholder="Ask a question"
+          />
+          {loading ? (
+            <Button
+              variant="outline-danger"
+              onClick={handleStop}
+              className="d-flex align-items-center"
+            >
+              <FaStop />
+            </Button>
+          ) : (
+            <Button
+              variant="outline-success"
+              onClick={submitUserInput}
+              className="d-flex align-items-center"
+            >
+              <FaPlay />
+            </Button>
+          )}
+        </InputGroup>
+      </Col>
+    );
+  }
+
+  function renderBotContent() {
     const windowHeight = document.documentElement.clientHeight * 0.8;
 
     // better solution needed (wasn't able to find any suitable bootstrap class -> need of fixed height for overflow-auto -> scrolling)
@@ -545,7 +555,7 @@ class FrevaGPT extends React.Component {
           md={9}
           className={
             "d-flex flex-column " +
-            (this.state.showSuggestions
+            (showSuggestions
               ? "justify-content-start"
               : "justify-content-between")
           }
@@ -554,90 +564,56 @@ class FrevaGPT extends React.Component {
           <Row
             className="overflow-auto position-relative"
             id="chatContainer"
-            onScroll={debounce(this.setPosition, 100)}
+            onScroll={debounce(setPosition, 100)}
           >
             <Col md={12}>
-              <ChatBlock onScrollDown={this.scrollDown} />
+              <ChatBlock onScrollDown={scrollDown} />
 
               <PendingAnswerComponent
-                content={this.state.dynamicAnswer}
-                variant={this.state.dynamicVariant}
-                atBottom={this.state.atBottom}
-                ref={{
-                  lastVariant: this.lastVariant,
-                }}
+                content={dynamicAnswer}
+                variant={dynamicVariant}
+                atBottom={atBottom}
+                ref={{ lastVariant }}
               />
 
-              {this.renderChatSpinner()}
+              {renderChatSpinner()}
             </Col>
-            {this.renderScrollButtons()}
+            {renderScrollButtons()}
           </Row>
 
           <Row>
-            {this.renderSuggestions()}
-            {this.renderBotInput()}
+            {renderSuggestions()}
+            {renderBotInput()}
           </Row>
         </Col>
       </>
     );
   }
 
-  renderBotHeader() {
-    return (
-      <div className="d-flex justify-content-between mb-2">
-        <Form.Select
-          value={this.botModel}
-          onChange={(e) => {
-            this.setState({ botModel: e.target.value });
-          }}
-          className="me-1"
-          placeholder="Model"
-          hidden={this.state.hideBotModelList}
-        >
-          {this.state.botModelList.map((model) => {
-            return <option key={model}>{model}</option>;
-          })}
-        </Form.Select>
-        <Button onClick={this.createNewChat} variant="info">
-          NewChat
-        </Button>
-      </div>
-    );
-  }
-
-  render() {
+  /*---------------------------------------------------------------------------------------------*/
+  function render() {
     return (
       <Container>
         <Row>
           <div className="d-flex justify-content-between">
-            <h2 onClick={this.toggleBotSelect}>FrevaGPT</h2>
+            <h2 onClick={toggleBotSelect}>FrevaGPT</h2>
 
-            {this.state.botOkay ? this.renderBotHeader() : null}
+            {botOkay ? renderBotHeader() : null}
           </div>
 
-          {this.state.botOkay === undefined ? (
+          {botOkay === undefined ? (
             <Spinner />
-          ) : this.state.botOkay ? (
-            this.renderBotContent()
+          ) : botOkay ? (
+            renderBotContent()
           ) : (
-            this.renderAlert()
+            renderAlert()
           )}
         </Row>
       </Container>
     );
   }
+
+  return render();
 }
 
-FrevaGPT.propTypes = {
-  frevaGPT: PropTypes.shape({
-    thread: PropTypes.string,
-    conversation: PropTypes.array,
-  }),
-  dispatch: PropTypes.func.isRequired,
-};
-
-const mapStateToProps = (state) => ({
-  frevaGPT: state.frevaGPTReducer,
-});
-
-export default connect(mapStateToProps)(FrevaGPT);
+export default FrevaGPT;

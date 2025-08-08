@@ -23,6 +23,7 @@ function ChatBlock() {
   const conversation = useSelector(
     (state) => state.frevaGPTReducer.conversation
   );
+  const showCode = useSelector((state) => state.frevaGPTReducer.showCode);
 
   function enlargeImage(imageString) {
     setShowModal(true);
@@ -83,7 +84,7 @@ function ChatBlock() {
     } else {
       return (
         <Col md={constants.BOT_COLUMN_STYLE} key={`${index}-code`}>
-          <CodeBlock content={element} />
+          <CodeBlock showCode={showCode} content={element} />
         </Col>
       );
     }

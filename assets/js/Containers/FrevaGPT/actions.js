@@ -21,6 +21,13 @@ export function setBotModel(botModel) {
   };
 }
 
+export function toggleShowCode(showCode) {
+  return {
+    type: "TOGGLE_SHOW_CODE",
+    payload: !showCode,
+  };
+}
+
 export const addElement = (element) => (dispatch) => {
   dispatch({
     type: constants.ADD_ELEMENT,

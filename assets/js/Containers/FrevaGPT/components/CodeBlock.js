@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, Collapse, Button } from "react-bootstrap";
 import { FaAngleDown, FaAngleUp } from "react-icons/fa";
 
@@ -12,11 +12,15 @@ import PropTypes from "prop-types";
 
 import { formatCode } from "../utils";
 
-function CodeBlock({ content }) {
-  const [showCode, setShowCode] = useState(true);
+function CodeBlock({ showCode, content }) {
+  useEffect(() => {
+    setLocalShowCode(showCode);
+  }, [showCode]);
+
+  const [localShowCode, setLocalShowCode] = useState();
 
   function toggleShowCode() {
-    setShowCode(!showCode);
+    setLocalShowCode(!localShowCode);
   }
 
   function extractElements(content, variant) {
@@ -36,7 +40,7 @@ function CodeBlock({ content }) {
           Analyzed
         </span>
         <span>
-          {showCode ? (
+          {localShowCode ? (
             <FaAngleUp className="color" />
           ) : (
             <FaAngleDown className="color" />
@@ -44,7 +48,7 @@ function CodeBlock({ content }) {
         </span>
       </Button>
 
-      <Collapse in={showCode} className="mt-2">
+      <Collapse in={localShowCode} className="mt-2">
         <Card className="shadow-sm">
           <Card.Header style={{ backgroundColor: "#eee" }}>python</Card.Header>
 
@@ -82,6 +86,7 @@ function CodeBlock({ content }) {
 }
 
 CodeBlock.propTypes = {
+  showCode: PropTypes.bool,
   content: PropTypes.array,
 };
 

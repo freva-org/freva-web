@@ -4,6 +4,7 @@ const frevaGPTInitialState = {
   conversation: [],
   thread: "",
   botModel: "",
+  showCode: true,
 };
 
 export const frevaGPTReducer = (state = frevaGPTInitialState, action) => {
@@ -14,6 +15,8 @@ export const frevaGPTReducer = (state = frevaGPTInitialState, action) => {
       return { ...state, thread: action.payload };
     case constants.SET_BOT_MODEL:
       return { ...state, botModel: action.payload };
+    case constants.TOGGLE_SHOW_CODE:
+      return { ...state, showCode: action.payload };
     case constants.ADD_ELEMENT:
       return {
         ...state,

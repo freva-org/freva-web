@@ -82,7 +82,7 @@ class ChatBlock extends React.Component {
             onClick={() => this.enlargeImage(element.content)}
             className="d-flex align-items-center"
           >
-            <FaExpand />
+            <FaExpand className="color" />
           </Button>
         </div>
       </div>

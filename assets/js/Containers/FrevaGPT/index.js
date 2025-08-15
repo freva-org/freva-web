@@ -180,11 +180,6 @@ class FrevaGPT extends React.Component {
       }
     );
 
-    //eslint-disable-next-line no-console
-    if (chatExceedsWindow()) {
-      this.setState({ showScrollButtons: true });
-    }
-
     try {
       await this.fetchData(input);
     } catch (err) {
@@ -255,6 +250,9 @@ class FrevaGPT extends React.Component {
                 // if object has not same variant, add answer to conversation and override object
                 if (varObj.variant !== jsonBuffer.variant) {
                   this.props.dispatch(addElement(varObj));
+                  if (chatExceedsWindow()) {
+                    this.setState({ showScrollButtons: true });
+                  }
                   this.lastVariant.current = varObj.variant;
                   this.setState({ dynamicAnswer: "", dynamicVariant: "" });
                   varObj = jsonBuffer;
@@ -560,7 +558,9 @@ class FrevaGPT extends React.Component {
 
               {this.renderChatSpinner()}
 
-              <div style={{ height: emptyDivHeight }}></div>
+              {this.state.loading ? (
+                <div style={{ height: emptyDivHeight }}></div>
+              ) : null}
             </Col>
             {this.renderScrollButtons()}
           </Row>

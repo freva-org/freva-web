@@ -18,10 +18,19 @@ function BotInput({ loading, handleSubmit, handleStop }) {
   }
 
   async function handleKeyDown(e) {
-    if (e.key === "Enter" && !isEmpty(e.target.value.trim())) {
+    const originalEvent = e.originalEvent || e.nativeEvent;
+    if (
+      (originalEvent.code === "Enter" ||
+        originalEvent.code === "NumpadEnter") &&
+      !originalEvent.shiftKey
+    ) {
       e.preventDefault(); // preventing to add a new line within textare when sending request by pressing enter
-      handleSubmit(e.target.value);
-      setUserInput("");
+      if (!loading) {
+        if (!isEmpty(e.target.value.trim())) {
+          handleSubmit(e.target.value);
+          setUserInput("");
+        }
+      }
     }
   }
 

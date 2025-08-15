@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Card, Collapse, Button } from "react-bootstrap";
-import { FaAngleDown, FaAngleUp } from "react-icons/fa";
+import { FaAngleDown, FaAngleUp, FaRegCopy } from "react-icons/fa";
 
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import {
@@ -10,6 +10,8 @@ import {
 
 import PropTypes from "prop-types";
 
+import ClipboardToast from "../../../Components/ClipboardToast";
+
 import { formatCode } from "../utils";
 
 function CodeBlock({ showCode, content }) {
@@ -18,6 +20,7 @@ function CodeBlock({ showCode, content }) {
   }, [showCode]);
 
   const [localShowCode, setLocalShowCode] = useState();
+  const [showToast, setShowToast] = useState(false);
 
   function toggleShowCode() {
     setLocalShowCode(!localShowCode);
@@ -27,61 +30,81 @@ function CodeBlock({ showCode, content }) {
     return content.filter((elem) => elem.variant === variant);
   }
 
+  function copyCode() {
+    const code = extractElements(content, "Code").map((codeElement) => {
+      return formatCode("Code", codeElement.content[0]);
+    });
+    navigator.clipboard.writeText(code);
+    setShowToast(true);
+  }
+
   return (
-    <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
-      <Button
-        variant="link"
-        className="m-0 p-0 d-inline-flex text-decoration-none"
-        onClick={() => {
-          toggleShowCode();
-        }}
-      >
-        <span style={{ fontWeight: "bold" }} className="color">
-          Analyzed
-        </span>
-        <span>
-          {localShowCode ? (
-            <FaAngleUp className="color" />
-          ) : (
-            <FaAngleDown className="color" />
-          )}
-        </span>
-      </Button>
+    <>
+      <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
+        <Button
+          variant="link"
+          className="m-0 p-0 d-inline-flex text-decoration-none"
+          onClick={() => {
+            toggleShowCode();
+          }}
+        >
+          <span style={{ fontWeight: "bold" }} className="color">
+            Analyzed
+          </span>
+          <span>
+            {localShowCode ? (
+              <FaAngleUp className="color" />
+            ) : (
+              <FaAngleDown className="color" />
+            )}
+          </span>
+        </Button>
 
-      <Collapse in={localShowCode} className="mt-2">
-        <Card className="shadow-sm">
-          <Card.Header style={{ backgroundColor: "#eee" }}>python</Card.Header>
+        <Collapse in={localShowCode} className="mt-2">
+          <Card className="shadow-sm">
+            <Card.Header style={{ backgroundColor: "#eee" }}>
+              <div className="d-flex justify-content-between align-items-center">
+                python
+                <Button variant="link" onClick={copyCode}>
+                  <span>
+                    <FaRegCopy className="color" />
+                  </span>
+                </Button>
+              </div>
+            </Card.Header>
 
-          {extractElements(content, "Code").map((codeElement) => {
-            return (
-              <Card.Body
-                className="p-0 m-0 border-bottom"
-                key={`${codeElement.content[1]}-code`}
-                style={{ backgroundColor: "#fafafa" }}
-              >
-                <SyntaxHighlighter language="python" style={oneLight}>
-                  {formatCode("Code", codeElement.content[0])}
-                </SyntaxHighlighter>
-              </Card.Body>
-            );
-          })}
+            {extractElements(content, "Code").map((codeElement) => {
+              return (
+                <Card.Body
+                  className="p-0 m-0 border-bottom"
+                  key={`${codeElement.content[1]}-code`}
+                  style={{ backgroundColor: "#fafafa" }}
+                >
+                  <SyntaxHighlighter language="python" style={oneLight}>
+                    {formatCode("Code", codeElement.content[0])}
+                  </SyntaxHighlighter>
+                </Card.Body>
+              );
+            })}
 
-          {extractElements(content, "CodeOutput").map((codeElement) => {
-            return (
-              <Card.Footer
-                className="p-0 m-0"
-                key={`${codeElement.content[1]}-codeoutput`}
-                style={{ backgroundColor: "#263238", fontSize: "0.72em" }}
-              >
-                <SyntaxHighlighter language="python" style={materialDark}>
-                  {formatCode("CodeOutput", codeElement.content[0])}
-                </SyntaxHighlighter>
-              </Card.Footer>
-            );
-          })}
-        </Card>
-      </Collapse>
-    </Card>
+            {extractElements(content, "CodeOutput").map((codeElement) => {
+              return (
+                <Card.Footer
+                  className="p-0 m-0"
+                  key={`${codeElement.content[1]}-codeoutput`}
+                  style={{ backgroundColor: "#263238", fontSize: "0.72em" }}
+                >
+                  <SyntaxHighlighter language="python" style={materialDark}>
+                    {formatCode("CodeOutput", codeElement.content[0])}
+                  </SyntaxHighlighter>
+                </Card.Footer>
+              );
+            })}
+          </Card>
+        </Collapse>
+      </Card>
+      <ClipboardToast show={showToast} setShow={setShowToast} />
+    </>
   );
 }
 

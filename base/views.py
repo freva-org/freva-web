@@ -1,9 +1,11 @@
+import base64
 import glob
+import json
 import logging
 import os
 import time
 from urllib.parse import urlencode, urlparse, urlunparse
-import json
+
 import requests
 from django.conf import settings
 from django.contrib.auth import authenticate, login
@@ -16,7 +18,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from evaluation_system.misc import config
-import base64
+
 from base.models import UIMessages
 from django_evaluation.monitor import _restart
 

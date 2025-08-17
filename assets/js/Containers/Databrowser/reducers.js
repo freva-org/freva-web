@@ -87,11 +87,11 @@ export const databrowserReducer = (state = databrowserInitialState, action) => {
       return { ...state, metadata: action.metadata };
     case constants.SET_FLAVOURS: {
       const flavourDetails = action.payload.flavours || [];
-      const flavourNames = flavourDetails.map(f => f.flavour_name);
+      const flavourNames = flavourDetails.map((f) => f.flavour_name);
       return {
         ...state,
         flavours: flavourNames,
-        flavourDetails
+        flavourDetails,
       };
     }
     case constants.LOAD_FILES:

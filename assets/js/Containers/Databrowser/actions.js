@@ -9,15 +9,17 @@ import { prepareSearchParams } from "./utils";
 
 const getTokenFromCookie = () => {
   const cookieString = document.cookie;
-  const hasAuthCookie = cookieString.includes('freva_auth_token=');
+  const hasAuthCookie = cookieString.includes("freva_auth_token=");
 
   if (!hasAuthCookie) {
     return null;
   }
   try {
-    const startIndex = cookieString.indexOf('freva_auth_token=');
-    let cookieValue = cookieString.substring(startIndex + 'freva_auth_token='.length);
-    const semicolonIndex = cookieValue.indexOf(';');
+    const startIndex = cookieString.indexOf("freva_auth_token=");
+    let cookieValue = cookieString.substring(
+      startIndex + "freva_auth_token=".length
+    );
+    const semicolonIndex = cookieValue.indexOf(";");
     if (semicolonIndex !== -1) {
       cookieValue = cookieValue.substring(0, semicolonIndex);
     }
@@ -34,11 +36,11 @@ const getTokenFromCookie = () => {
 
 const getAuthHeaders = () => {
   const tokenData = getTokenFromCookie();
-  const csrfToken = getCookie('csrftoken');
+  const csrfToken = getCookie("csrftoken");
   const headers = {
-    'X-CSRFToken': csrfToken,
-    'Accept': 'application/json',
-    'Content-Type': 'application/json',
+    "X-CSRFToken": csrfToken,
+    Accept: "application/json",
+    "Content-Type": "application/json",
   };
 
   if (tokenData?.access_token) {
@@ -95,7 +97,9 @@ export const addFlavour = (flavourData) => async (dispatch) => {
   if (response.status >= 400) {
     const err = await response.json();
     if (response.status === 403) {
-      throw new Error(err.detail || "You don't have permission to add flavours");
+      throw new Error(
+        err.detail || "You don't have permission to add flavours"
+      );
     } else if (response.status === 409) {
       throw new Error(err.detail || "A flavour with this name already exists");
     } else if (response.status === 400) {
@@ -109,31 +113,35 @@ export const addFlavour = (flavourData) => async (dispatch) => {
   return result;
 };
 
-export const deleteFlavour = (flavourName, isGlobal = false) => async (dispatch) => {
-  const url = `/api/freva-nextgen/databrowser/flavours/${encodeURIComponent(flavourName)}/${isGlobal ? '?is_global=true' : ''}`;
+export const deleteFlavour =
+  (flavourName, isGlobal = false) =>
+  async (dispatch) => {
+    const url = `/api/freva-nextgen/databrowser/flavours/${encodeURIComponent(flavourName)}/${isGlobal ? "?is_global=true" : ""}`;
 
-  const response = await fetch(url, {
-    method: "DELETE",
-    credentials: "same-origin",
-    headers: getAuthHeaders(),
-  });
+    const response = await fetch(url, {
+      method: "DELETE",
+      credentials: "same-origin",
+      headers: getAuthHeaders(),
+    });
 
-  if (response.status >= 400) {
-    const err = await response.json();
-    if (response.status === 403) {
-      throw new Error(err.detail || "You don't have permission to delete this flavour");
-    } else if (response.status === 404) {
-      throw new Error(err.detail || "Flavour not found");
-    } else if (response.status === 409) {
-      throw new Error(err.detail || "Cannot delete built-in flavour");
+    if (response.status >= 400) {
+      const err = await response.json();
+      if (response.status === 403) {
+        throw new Error(
+          err.detail || "You don't have permission to delete this flavour"
+        );
+      } else if (response.status === 404) {
+        throw new Error(err.detail || "Flavour not found");
+      } else if (response.status === 409) {
+        throw new Error(err.detail || "Cannot delete built-in flavour");
+      }
+      throw new Error(err.detail || "Failed to delete flavour");
     }
-    throw new Error(err.detail || "Failed to delete flavour");
-  }
 
-  const result = await response.json();
-  await dispatch(setFlavours());
-  return result;
-};
+    const result = await response.json();
+    await dispatch(setFlavours());
+    return result;
+  };
 
 export const loadFiles = (location) => async (dispatch) => {
   dispatch({ type: constants.SET_FILE_LOADING });

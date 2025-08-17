@@ -116,7 +116,7 @@ export const addFlavour = (flavourData) => async (dispatch) => {
 export const deleteFlavour =
   (flavourName, isGlobal = false) =>
   async (dispatch) => {
-    const url = `/api/freva-nextgen/databrowser/flavours${encodeURIComponent(flavourName)}/${isGlobal ? "?is_global=true" : "?is_global=false"}`;
+    const url = `/api/freva-nextgen/databrowser/flavours/${encodeURIComponent(flavourName)}${isGlobal ? "?is_global=true" : "?is_global=false"}`;
 
     const response = await fetch(url, {
       method: "DELETE",

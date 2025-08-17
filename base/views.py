@@ -38,26 +38,8 @@ LOGIN_URL = '/api/freva-nextgen/auth/v2/login'
 def set_token_cookie(response, token_data):
     """
     Set secure token cookies;
-    - HttpOnly cookie for refresh token (server-side only)
     - Separate cookie for access token (JavaScript accessible).
     """
-    refresh_cookie_data = {
-        'refresh_token': token_data['refresh_token'],
-        'refresh_expires': token_data['refresh_expires'],
-    }
-
-    json_string = json.dumps(refresh_cookie_data, separators=(',', ':'))
-    encoded_refresh = base64.b64encode(json_string.encode('utf-8')).decode('ascii')
-
-    response.set_cookie(
-        'freva_refresh_token',
-        encoded_refresh,
-        max_age=token_data['refresh_expires'] - int(time.time()),
-        httponly=True,
-        secure=True,
-        samesite='Strict'
-    )
-
     access_cookie_data = {
         'access_token': token_data['access_token'],
         'token_type': 'Bearer',

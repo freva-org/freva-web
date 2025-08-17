@@ -62,7 +62,7 @@ export const setMetadata = (metadata) => ({
 });
 
 export const setFlavours = () => async (dispatch) => {
-  return fetch("/api/freva-nextgen/databrowser/flavours/", {
+  return fetch("/api/freva-nextgen/databrowser/flavours", {
     credentials: "same-origin",
     headers: getAuthHeaders(),
   })
@@ -87,7 +87,7 @@ export const setFlavours = () => async (dispatch) => {
 };
 
 export const addFlavour = (flavourData) => async (dispatch) => {
-  const response = await fetch("/api/freva-nextgen/databrowser/flavours/", {
+  const response = await fetch("/api/freva-nextgen/databrowser/flavours", {
     method: "POST",
     credentials: "same-origin",
     headers: getAuthHeaders(),
@@ -116,7 +116,7 @@ export const addFlavour = (flavourData) => async (dispatch) => {
 export const deleteFlavour =
   (flavourName, isGlobal = false) =>
   async (dispatch) => {
-    const url = `/api/freva-nextgen/databrowser/flavours/${encodeURIComponent(flavourName)}/${isGlobal ? "?is_global=true" : ""}`;
+    const url = `/api/freva-nextgen/databrowser/flavours/${encodeURIComponent(flavourName)}/${isGlobal ? "?is_global=true" : "?is_global=false"}`;
 
     const response = await fetch(url, {
       method: "DELETE",

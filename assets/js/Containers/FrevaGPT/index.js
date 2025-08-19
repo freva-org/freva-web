@@ -20,7 +20,14 @@ import {
 import { browserHistory } from "react-router";
 import { isEmpty, debounce } from "lodash";
 
-import { FaStop, FaPlay, FaArrowDown, FaArrowUp } from "react-icons/fa";
+import {
+  FaStop,
+  FaPlay,
+  FaArrowDown,
+  FaArrowUp,
+  FaRegThumbsUp,
+  FaRegThumbsDown,
+} from "react-icons/fa";
 
 import queryString from "query-string";
 
@@ -53,6 +60,8 @@ class FrevaGPT extends React.Component {
     this.setPosition = this.setPosition.bind(this);
     this.resizeInputField = this.resizeInputField.bind(this);
     this.scrollDown = this.scrollDown.bind(this);
+    this.toggleThumpStatus = this.toggleThumpStatus.bind(this);
+    this.toggleShowDisclaimer = this.toggleShowDisclaimer.bind(this);
 
     this.state = {
       loading: false,
@@ -67,6 +76,9 @@ class FrevaGPT extends React.Component {
       atBottom: false,
       atTop: true,
       reader: undefined,
+      thumpsUp: false,
+      thumpsDown: false,
+      showDisclaimer: false,
     };
 
     this.lastVariant = React.createRef("User");
@@ -398,6 +410,30 @@ class FrevaGPT extends React.Component {
     }
   }
 
+  toggleThumpStatus(variant) {
+    let status;
+
+    if (variant === "up") {
+      this.setState({ thumpsUp: !this.state.thumpsUp });
+
+      // set thumpDown to false, when up is activated
+      if (!status) {
+        this.setState({ thumpsDown: false });
+      }
+    } else {
+      this.setState({ thumpsDown: !this.state.thumpsDown });
+
+      // set thumpsUp to false, when down is activated
+      if (!status) {
+        this.setState({ thumpsUp: false });
+      }
+    }
+  }
+
+  toggleShowDisclaimer() {
+    this.setState({ showDisclaimer: !this.state.showDisclaimer });
+  }
+
   renderAlert() {
     return (
       <Alert key="botError" variant="danger">
@@ -536,6 +572,26 @@ class FrevaGPT extends React.Component {
     );
   }
 
+  renderFeedback() {
+    return (
+      <Col md={11} className="d-flex justify-content-end">
+        <Button
+          variant={this.state.thumpsDown ? "danger" : "outline-danger"}
+          style={{ marginRight: "5px" }}
+          onClick={() => this.toggleThumpStatus("down")}
+        >
+          <FaRegThumbsDown />
+        </Button>
+        <Button
+          variant={this.state.thumpsUp ? "success" : "outline-success"}
+          onClick={() => this.toggleThumpStatus("up")}
+        >
+          <FaRegThumbsUp />
+        </Button>
+      </Col>
+    );
+  }
+
   renderBotContent() {
     const windowHeight = document.documentElement.clientHeight * 0.8;
 
@@ -546,6 +602,15 @@ class FrevaGPT extends React.Component {
 
     return (
       <>
+        {this.state.showDisclaimer ? (
+          <Alert key="disclaimer" variant="danger">
+            <span className="fw-bold">Disclaimer:</span> The bot is a test
+            instance and may contain some bugs. If you encounter any, please
+            report them using the contact form. Please be aware that the bot
+            forwards all requests and data to OpenAI in order to process them.
+          </Alert>
+        ) : null}
+
         <Col md={3}>
           <SidePanel />
         </Col>
@@ -578,6 +643,7 @@ class FrevaGPT extends React.Component {
               />
 
               {this.renderChatSpinner()}
+              {this.renderFeedback()}
             </Col>
             {this.renderScrollButtons()}
           </Row>
@@ -607,6 +673,13 @@ class FrevaGPT extends React.Component {
             return <option key={model}>{model}</option>;
           })}
         </Form.Select>
+        <Button
+          onClick={this.toggleShowDisclaimer}
+          className="me-1"
+          hidden={this.state.hideBotModelList}
+        >
+          {this.state.showDisclaimer ? "Hide disclaimer" : "Show disclaimer"}
+        </Button>
         <Button onClick={this.createNewChat} variant="info">
           NewChat
         </Button>

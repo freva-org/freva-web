@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Card, OverlayTrigger, Tooltip } from "react-bootstrap";
 
-import { browserHistory } from "react-router";
+import { isEmpty } from "lodash";
 
 import { fetchWithAuth } from "../utils";
 
+import ThreadPanel from "./ThreadPanel";
+
 function SidePanel() {
   const [threads, setThreads] = useState([]);
+  const [favorites, setFavorites] = useState([]);
 
   useEffect(() => {
     async function getHistory() {
@@ -20,38 +22,22 @@ function SidePanel() {
       }
     }
 
+    async function getFavorites() {
+      setFavorites([]);
+    }
+
     getHistory();
+    getFavorites();
   }, []);
 
-  function changeToThread(thread) {
-    browserHistory.push({
-      pathname: "/chatbot/",
-      search: `?thread_id=${thread}`,
-    });
-  }
-
   return (
-    <Card className="mb-3 shadow-sm">
-      <Card.Header className="outline-secondary border-0 p-3 rounded-top text-start card-header shadow-sm">
-        Previous chats
-      </Card.Header>
-      <Card.Body className="p-3 py-2">
-        {threads.map((element) => {
-          return (
-            <div key={element.thread_id} className="mb-2 text-truncate color">
-              <OverlayTrigger
-                key={`${element.thread_id}-tooltip`}
-                overlay={<Tooltip>{element.topic}</Tooltip>}
-              >
-                <a href="" onClick={() => changeToThread(element.thread_id)}>
-                  {element.topic}
-                </a>
-              </OverlayTrigger>
-            </div>
-          );
-        })}
-      </Card.Body>
-    </Card>
+    <>
+      {!isEmpty(favorites) ? (
+        <ThreadPanel threads={favorites} title="Favorite chats" />
+      ) : null}
+
+      <ThreadPanel threads={threads} title="Chats" />
+    </>
   );
 }
 

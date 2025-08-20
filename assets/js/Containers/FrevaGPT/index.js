@@ -18,7 +18,7 @@ import ScrollButtons from "./components/ScrollButtons";
 import BotUnavailableAlert from "./components/BotUnavailableAlert";
 import PendingAnswerComponent from "./components/PendingAnswerComponent";
 
-import { fetchWithAuth, successfulPing } from "./utils";
+import { fetchWithAuth, successfulPing, chatExceedsWindow } from "./utils";
 
 import { setThread, setConversation, addElement } from "./actions";
 
@@ -53,6 +53,7 @@ function FrevaGPT() {
   const [loading, setLoading] = useState(false);
   const [botOkay, setBotOkay] = useState(undefined);
   const [showSuggestions, setShowSuggestions] = useState(true);
+  const [showScrollButtons, setShowScrollButtons] = useState(false);
 
   const lastVariant = useRef("User");
 
@@ -77,6 +78,7 @@ function FrevaGPT() {
         setDynamicAnswer("");
         setDynamicVariant("");
         setReader(undefined);
+        setShowScrollButtons(false);
         window.scrollTo(0, 0);
         return;
       })
@@ -209,6 +211,9 @@ function FrevaGPT() {
                 if (varObj.variant !== jsonBuffer.variant) {
                   dispatch(addElement(varObj));
                   lastVariant.current = varObj.variant;
+                  if (chatExceedsWindow()) {
+                    setShowScrollButtons(true);
+                  }
                   setDynamicAnswer("");
                   setDynamicVariant("");
                   varObj = jsonBuffer;
@@ -285,6 +290,9 @@ function FrevaGPT() {
   -----------------------------------------------------------------------------------------------*/
   function renderBotContent() {
     const windowHeight = document.documentElement.clientHeight * 0.8;
+    const emptyDivHeight = showSuggestions
+      ? 0
+      : document.documentElement.clientHeight * 0.5;
 
     // better solution needed (wasn't able to find any suitable bootstrap class -> need of fixed height for overflow-auto -> scrolling)
     const chatWindow = {
@@ -322,8 +330,9 @@ function FrevaGPT() {
                 dynamicAnswer={dynamicAnswer}
                 ref={{ lastVariant }}
               />
+              {loading ? <div style={{ height: emptyDivHeight }}></div> : null}
             </Col>
-            <ScrollButtons />
+            {showScrollButtons ? <ScrollButtons /> : null}
           </Row>
 
           <Row>

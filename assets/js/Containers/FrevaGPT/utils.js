@@ -28,57 +28,9 @@ export function formatCode(mode, data) {
   return codeSnippets;
 }
 
-export async function getAuthToken() {
-  try {
-    const response = await fetch("/get-current-token/");
-    const data = await response.json();
-    return data.success ? `Bearer ${data.token_data.access_token}` : null;
-  } catch (e) {
-    return null;
-  }
-}
-
-export async function fetchWithAuth(url, options = {}) {
-  const token = await getAuthToken();
-  const headers = { ...options.headers };
-  if (token) {
-    headers["X-Freva-User-Token"] = token;
-  }
-  return fetch(url, { ...options, headers });
-}
-
-export const truncate = (value) => {
+export function truncate(value) {
   const trunc = value.substring(0, 32) + "\u2026";
   return trunc;
-};
-
-export function getPosition() {
-  const container = document.querySelector("#chatContainer");
-  const position = {};
-
-  position.atBottom =
-    container.scrollTop + container.clientHeight >=
-    container.scrollHeight - 200;
-  position.atTop = container.scrollTop < 50;
-
-  return position;
-}
-
-export function chatExceedsWindow() {
-  const wholeWindowHeight = document.documentElement.clientHeight * 0.8;
-  const inputHeight = document.getElementById("botInput").clientHeight;
-  const chatHeight = document.getElementById("chatContainer").scrollHeight;
-
-  const chatExceedsWindowHeight = wholeWindowHeight - inputHeight < chatHeight;
-
-  return chatExceedsWindowHeight;
-}
-
-export function scrollToChatBottom() {
-  document.getElementById("chatContainer").scrollTo({
-    top: document.getElementById("chatContainer").scrollHeight,
-    behavior: "smooth",
-  });
 }
 
 export function resizeInputField() {
@@ -103,4 +55,52 @@ export async function successfulPing() {
   }
 
   return pingSuccessful;
+}
+
+/*-------------------------------------------------------------------------------------------------
+ *                                  Authentication related functions
+-------------------------------------------------------------------------------------------------*/
+export async function getAuthToken() {
+  try {
+    const response = await fetch("/get-current-token/");
+    const data = await response.json();
+    return data.success ? `Bearer ${data.token_data.access_token}` : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function fetchWithAuth(url, options = {}) {
+  const token = await getAuthToken();
+  const headers = { ...options.headers };
+  if (token) {
+    headers["X-Freva-User-Token"] = token;
+  }
+  return fetch(url, { ...options, headers });
+}
+
+/*-------------------------------------------------------------------------------------------------
+ *                                  Scrolling related functions
+-------------------------------------------------------------------------------------------------*/
+export function chatExceedsWindow() {
+  const wholeWindowHeight = document.documentElement.clientHeight * 0.8;
+  const inputHeight = document.getElementById("botInput").clientHeight;
+  const chatHeight = document.getElementById("chatContainer").scrollHeight;
+
+  const chatExceedsWindowHeight = wholeWindowHeight - inputHeight < chatHeight;
+
+  return chatExceedsWindowHeight;
+}
+
+export function scrollToChatBottom() {
+  document.getElementById("chatContainer").scrollTo({
+    top: document.getElementById("chatContainer").scrollHeight,
+    behavior: "smooth",
+  });
+}
+
+export function scrollToChatTop() {
+  document
+    .getElementById("chatContainer")
+    .scrollTo({ top: 0, behavior: "smooth" });
 }

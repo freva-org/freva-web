@@ -65,7 +65,6 @@ function BotHeader({ createNewChat }) {
           <Button onClick={() => createNewChat()} variant="info">
             <FaRegCommentAlt /> New Chat
           </Button>
-          
         </div>
       ) : null}
     </div>

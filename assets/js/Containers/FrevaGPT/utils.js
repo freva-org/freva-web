@@ -28,6 +28,38 @@ export function formatCode(mode, data) {
   return codeSnippets;
 }
 
+export function truncate(value) {
+  const trunc = value.substring(0, 32) + "\u2026";
+  return trunc;
+}
+
+export function resizeInputField() {
+  const inputField = document.getElementById("inputField");
+  const style = inputField.style;
+
+  style.height = inputField.style.minHeight = "auto";
+  style.minHeight = `${Math.min(inputField.scrollHeight, parseInt(inputField.style.maxHeight))}px`;
+  style.height = `${inputField.scrollHeight}px`;
+}
+
+export async function successfulPing() {
+  let pingSuccessful = false;
+
+  try {
+    const response = await fetchWithAuth("/api/chatbot/ping");
+    if (response.status === 200) {
+      pingSuccessful = true;
+    }
+  } catch (err) {
+    pingSuccessful = false;
+  }
+
+  return pingSuccessful;
+}
+
+/*-------------------------------------------------------------------------------------------------
+ *                                  Authentication related functions
+-------------------------------------------------------------------------------------------------*/
 export async function getAuthToken() {
   try {
     const response = await fetch("/get-current-token/");
@@ -47,23 +79,9 @@ export async function fetchWithAuth(url, options = {}) {
   return fetch(url, { ...options, headers });
 }
 
-export const truncate = (value) => {
-  const trunc = value.substring(0, 32) + "\u2026";
-  return trunc;
-};
-
-export function getPosition() {
-  const container = document.querySelector("#chatContainer");
-  const position = {};
-
-  position.atBottom =
-    container.scrollTop + container.clientHeight >=
-    container.scrollHeight - 200;
-  position.atTop = container.scrollTop < 50;
-
-  return position;
-}
-
+/*-------------------------------------------------------------------------------------------------
+ *                                  Scrolling related functions
+-------------------------------------------------------------------------------------------------*/
 export function chatExceedsWindow() {
   const wholeWindowHeight = document.documentElement.clientHeight * 0.8;
   const inputHeight = document.getElementById("botInput").clientHeight;
@@ -79,4 +97,10 @@ export function scrollToChatBottom() {
     top: document.getElementById("chatContainer").scrollHeight,
     behavior: "smooth",
   });
+}
+
+export function scrollToChatTop() {
+  document
+    .getElementById("chatContainer")
+    .scrollTo({ top: 0, behavior: "smooth" });
 }

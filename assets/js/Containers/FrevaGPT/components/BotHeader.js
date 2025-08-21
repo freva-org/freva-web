@@ -5,6 +5,8 @@ import { Button, Form } from "react-bootstrap";
 
 import PropTypes from "prop-types";
 
+import { FaRegCommentAlt } from "react-icons/fa";
+
 import { setBotModel } from "../actions";
 
 import { fetchWithAuth, successfulPing } from "../utils";
@@ -61,8 +63,9 @@ function BotHeader({ createNewChat }) {
             })}
           </Form.Select>
           <Button onClick={() => createNewChat()} variant="info">
-            NewChat
+            <FaRegCommentAlt /> New Chat
           </Button>
+          
         </div>
       ) : null}
     </div>

@@ -28,15 +28,38 @@ export function formatCode(mode, data) {
   return codeSnippets;
 }
 
-export const truncate = (value) => {
+export function truncate(value) {
   const trunc = value.substring(0, 32) + "\u2026";
   return trunc;
-};
+}
+
+export function resizeInputField() {
+  const inputField = document.getElementById("inputField");
+  const style = inputField.style;
+
+  style.height = inputField.style.minHeight = "auto";
+  style.minHeight = `${Math.min(inputField.scrollHeight, parseInt(inputField.style.maxHeight))}px`;
+  style.height = `${inputField.scrollHeight}px`;
+}
+
+export async function successfulPing() {
+  let pingSuccessful = false;
+
+  try {
+    const response = await fetchWithAuth("/api/chatbot/ping");
+    if (response.status === 200) {
+      pingSuccessful = true;
+    }
+  } catch (err) {
+    pingSuccessful = false;
+  }
+
+  return pingSuccessful;
+}
 
 /*-------------------------------------------------------------------------------------------------
  *                                  Authentication related functions
 -------------------------------------------------------------------------------------------------*/
-
 export async function getAuthToken() {
   try {
     const response = await fetch("/get-current-token/");
@@ -59,7 +82,6 @@ export async function fetchWithAuth(url, options = {}) {
 /*-------------------------------------------------------------------------------------------------
  *                                  Scrolling related functions
 -------------------------------------------------------------------------------------------------*/
-
 export function chatExceedsWindow() {
   const wholeWindowHeight = document.documentElement.clientHeight * 0.8;
   const inputHeight = document.getElementById("botInput").clientHeight;

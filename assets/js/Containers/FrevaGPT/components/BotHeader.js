@@ -5,13 +5,12 @@ import { Button, Form } from "react-bootstrap";
 
 import PropTypes from "prop-types";
 
-import { setBotModel, toggleShowCode } from "../actions";
+import { setBotModel } from "../actions";
 
 import { fetchWithAuth, successfulPing } from "../utils";
 
 function BotHeader({ createNewChat }) {
   const botModel = useSelector((state) => state.frevaGPTReducer.botModel);
-  const showCode = useSelector((state) => state.frevaGPTReducer.showCode);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -61,13 +60,6 @@ function BotHeader({ createNewChat }) {
               return <option key={model}>{model}</option>;
             })}
           </Form.Select>
-          <Button
-            className="mx-2"
-            onClick={() => dispatch(toggleShowCode(showCode))}
-            variant={showCode ? "outline-secondary" : "secondary"}
-          >
-            {showCode ? "Hide code" : "Show code"}
-          </Button>
           <Button onClick={() => createNewChat()} variant="info">
             NewChat
           </Button>

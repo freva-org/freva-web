@@ -23,27 +23,31 @@ import { fetchWithAuth, successfulPing, chatExceedsWindow } from "./utils";
 import { setThread, setConversation, addElement } from "./actions";
 
 function FrevaGPT() {
-  useEffect(async () => {
-    // if thread giving on mounting the component, set thread within store
-    const givenQueryParams = browserHistory.getCurrentLocation().query;
-    if (
-      Object.hasOwn(givenQueryParams, "thread_id") &&
-      !isEmpty(givenQueryParams.thread_id)
-    ) {
-      dispatch(setThread(givenQueryParams.thread_id));
+  useEffect(() => {
+    async function initializeBot() {
+      // if thread giving on mounting the component, set thread within store
+      const givenQueryParams = browserHistory.getCurrentLocation().query;
+      if (
+        Object.hasOwn(givenQueryParams, "thread_id") &&
+        !isEmpty(givenQueryParams.thread_id)
+      ) {
+        dispatch(setThread(givenQueryParams.thread_id));
 
-      // request content of old thread if threa_id is given
-      setLoading(true);
-      await getOldThread(givenQueryParams.thread_id);
-      setLoading(false);
-      setShowSuggestions(false);
+        // request content of old thread if threa_id is given
+        setLoading(true);
+        await getOldThread(givenQueryParams.thread_id);
+        setLoading(false);
+        setShowSuggestions(false);
+      }
+
+      if (await successfulPing()) {
+        setBotOkay(true);
+      } else {
+        setBotOkay(false);
+      }
     }
 
-    if (await successfulPing()) {
-      setBotOkay(true);
-    } else {
-      setBotOkay(false);
-    }
+    initializeBot();
   }, []);
 
   const [dynamicAnswer, setDynamicAnswer] = useState("");

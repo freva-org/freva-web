@@ -14,20 +14,24 @@ function BotHeader({ createNewChat }) {
   const showCode = useSelector((state) => state.frevaGPTReducer.showCode);
   const dispatch = useDispatch();
 
-  useEffect(async () => {
-    const getBotModels = async () => {
-      const response = await fetchWithAuth(`/api/chatbot/availablechatbots?`);
-      if (response.ok) {
-        setBotModelList(await response.json());
-      } else {
-        setBotModelList(["No model information available."]);
-      }
-    };
+  useEffect(() => {
+    async function fetchBotModels() {
+      const getBotModels = async () => {
+        const response = await fetchWithAuth(`/api/chatbot/availablechatbots?`);
+        if (response.ok) {
+          setBotModelList(await response.json());
+        } else {
+          setBotModelList(["No model information available."]);
+        }
+      };
 
-    if (await successfulPing()) {
-      setBotOkay(true);
-      await getBotModels();
+      if (await successfulPing()) {
+        setBotOkay(true);
+        await getBotModels();
+      }
     }
+
+    fetchBotModels();
   }, []);
 
   const [botOkay, setBotOkay] = useState(undefined);

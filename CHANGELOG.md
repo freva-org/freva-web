@@ -21,7 +21,7 @@ All notable changes to this project will be documented in this file.
 - Internal auth hotfix
 - Getting the Freva RestAPI link through STAC-API self-link
 - Protect the main layout from the changes that are coing through SPA
-- 
+- Decode the first name and last name before inserting to MariaDB
 
 ## [v2506.0.1]
 ## Fixes

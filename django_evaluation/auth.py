@@ -11,6 +11,7 @@ from django.contrib.auth.models import User
 
 from base.views import ensure_url_scheme
 from django_evaluation.utils import sync_mail_users
+from unidecode import unidecode
 
 logger = logging.getLogger(__name__)
 
@@ -61,8 +62,8 @@ class OIDCAuthorizationCodeBackend(BaseBackend):
                 # Update user info without changing model structure
                 # for satisfying the User model requirements (Freva-legacy)
                 user.email = user_info.get("email", "")
-                user.last_name = user_info.get("last_name", "")
-                user.first_name = user_info.get("first_name", "")
+                user.last_name = unidecode(user_info.get("last_name", ""))
+                user.first_name = unidecode(user_info.get("first_name", ""))
                 user.save()
                 # Store user info in session for later use
                 # authentication and authorization checks

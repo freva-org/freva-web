@@ -8,10 +8,10 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth.models import User
+from unidecode import unidecode
 
 from base.views import ensure_url_scheme
 from django_evaluation.utils import sync_mail_users
-from unidecode import unidecode
 
 logger = logging.getLogger(__name__)
 

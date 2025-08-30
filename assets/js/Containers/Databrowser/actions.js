@@ -8,24 +8,21 @@ import * as constants from "./constants";
 import { prepareSearchParams } from "./utils";
 
 const getTokenFromCookie = () => {
-  const cookieString = document.cookie;
-  const hasAuthCookie = cookieString.includes("freva_auth_token=");
+  const cookies = document.cookie.split(";");
+  const authCookie = cookies.find((cookie) =>
+    cookie.trim().startsWith(constants.TEMP_FREVA_AUTH_TOKEN)
+  );
 
-  if (!hasAuthCookie) {
+  if (!authCookie) {
     return null;
   }
+
   try {
-    const startIndex = cookieString.indexOf("freva_auth_token=");
-    let cookieValue = cookieString.substring(
-      startIndex + "freva_auth_token=".length
-    );
-    const semicolonIndex = cookieValue.indexOf(";");
-    if (semicolonIndex !== -1) {
-      cookieValue = cookieValue.substring(0, semicolonIndex);
-    }
+    let cookieValue = authCookie.substring(authCookie.indexOf("=") + 1);
     if (cookieValue.startsWith('"') && cookieValue.endsWith('"')) {
       cookieValue = cookieValue.slice(1, -1);
     }
+
     const decodedJson = atob(cookieValue);
     const tokenData = JSON.parse(decodedJson);
     return tokenData;
@@ -87,7 +84,7 @@ export const setFlavours = () => async (dispatch) => {
 };
 
 export const addFlavour = (flavourData) => async (dispatch) => {
-  const response = await fetch("/api/freva-nextgen/databrowser/flavours", {
+  const response = await fetch("/api/freva-nextgen/databrowser/flavours/", {
     method: "POST",
     credentials: "same-origin",
     headers: getAuthHeaders(),

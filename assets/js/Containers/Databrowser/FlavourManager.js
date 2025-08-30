@@ -19,6 +19,8 @@ import {
   FaExclamationTriangle,
 } from "react-icons/fa";
 
+import { AVAILABLE_FACETS } from "./constants";
+
 class FlavourManager extends Component {
   constructor(props) {
     super(props);
@@ -31,29 +33,9 @@ class FlavourManager extends Component {
       flavourToDelete: null,
       // IMPORTANR: Modal form state; in case, if we added new facets, we need to re-construct the form
       flavourName: "",
-      facetMappings: {
-        project: "",
-        model: "",
-        experiment: "",
-        variable: "",
-        institute: "",
-        time_frequency: "",
-        cmor_table: "",
-        ensemble: "",
-        fs_type: "",
-        grid_label: "",
-        product: "",
-        realm: "",
-        time_aggregation: "",
-        dataset: "",
-        driving_model: "",
-        format: "",
-        grid_id: "",
-        level_type: "",
-        rcm_name: "",
-        rcm_version: "",
-        user: "",
-      },
+      facetMappings: Object.fromEntries(
+        AVAILABLE_FACETS.map((facet) => [facet.key, ""])
+      ),
       isGlobal: false,
       modalError: "",
       modalLoading: false,
@@ -108,29 +90,9 @@ class FlavourManager extends Component {
       // Reset the form on success and close the modal
       this.setState({
         flavourName: "",
-        facetMappings: {
-          project: "",
-          model: "",
-          experiment: "",
-          variable: "",
-          institute: "",
-          time_frequency: "",
-          cmor_table: "",
-          ensemble: "",
-          fs_type: "",
-          grid_label: "",
-          product: "",
-          realm: "",
-          time_aggregation: "",
-          dataset: "",
-          driving_model: "",
-          format: "",
-          grid_id: "",
-          level_type: "",
-          rcm_name: "",
-          rcm_version: "",
-          user: "",
-        },
+        facetMappings: Object.fromEntries(
+          AVAILABLE_FACETS.map((facet) => [facet.key, ""])
+        ),
         isGlobal: false,
         modalError: "",
         showAddFlavourModal: false,
@@ -230,15 +192,7 @@ class FlavourManager extends Component {
       return false;
     }
 
-    const currentUser = this.props.currentUser || "unknown";
-    const isAdmin = this.props.isAdmin || false;
-
-    return (
-      flavour.owner === currentUser ||
-      (isAdmin && flavour.owner === "global") ||
-      flavour.owner === "global" ||
-      flavour.owner !== "global"
-    );
+    return true;
   }
 
   canAddFlavour() {
@@ -524,30 +478,6 @@ class FlavourManager extends Component {
   }
 
   renderAddFlavourModal() {
-    const availableFacets = [
-      { key: "project", label: "Project" },
-      { key: "model", label: "Model" },
-      { key: "experiment", label: "Experiment" },
-      { key: "variable", label: "Variable" },
-      { key: "institute", label: "Institute" },
-      { key: "time_frequency", label: "Time Frequency" },
-      { key: "cmor_table", label: "CMOR Table" },
-      { key: "ensemble", label: "Ensemble" },
-      { key: "fs_type", label: "File System Type" },
-      { key: "grid_label", label: "Grid Label" },
-      { key: "product", label: "Product" },
-      { key: "realm", label: "Realm" },
-      { key: "time_aggregation", label: "Time Aggregation" },
-      { key: "dataset", label: "Dataset" },
-      { key: "driving_model", label: "Driving Model" },
-      { key: "format", label: "Format" },
-      { key: "grid_id", label: "Grid ID" },
-      { key: "level_type", label: "Level Type" },
-      { key: "rcm_name", label: "RCM Name" },
-      { key: "rcm_version", label: "RCM Version" },
-      { key: "user", label: "User" },
-    ];
-
     const handleBackdropClick = (e) => {
       if (e.target === e.currentTarget) {
         this.setState({ showAddFlavourModal: false });
@@ -840,7 +770,7 @@ class FlavourManager extends Component {
                     }}
                   >
                     <Row>
-                      {availableFacets.map((facet) => (
+                      {AVAILABLE_FACETS.map((facet) => (
                         <Col md={4} key={facet.key} className="mb-2">
                           <Form.Group>
                             <Form.Label

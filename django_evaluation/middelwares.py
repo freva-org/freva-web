@@ -1,5 +1,7 @@
 """middleware for handling OAuth2 token refresh and plugin reloading."""
 
+import base64
+import json
 import logging
 import time
 
@@ -10,7 +12,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from evaluation_system.api import plugin_manager as pm
 
-from base.views import TOKEN_URL
+from base.views import TOKEN_URL, set_token_cookie
 
 logger = logging.getLogger(__name__)
 
@@ -35,21 +37,50 @@ class OIDCTokenRefreshMiddleware:
             return self.get_response(request)
 
         # Check if user is authenticated and has tokens in session
+        token_refreshed = False
+
         if (request.user.is_authenticated and 
             'access_token' in request.session and 
             'refresh_token' in request.session):
 
             # Only check token expiry, don't refresh immediately
             if self._is_token_expired_or_expiring_soon(request):
-                # Check if we recently attempted a refresh
                 if not self._is_refresh_on_cooldown(request):
-                    if not self._refresh_token(request):
-                        # Refresh failed, logout user and redirect to login
+                    refresh_result = self._refresh_token(request)
+                    if refresh_result is False:
                         logger.warning(f"Token refresh failed for user {request.user.username}, logging out")
                         logout(request)
                         return HttpResponseRedirect("/")
+                    elif refresh_result is True:
+                        token_refreshed = True
 
-        return self.get_response(request)
+        response = self.get_response(request)
+
+        # update cookies with refreshed tokens
+        if token_refreshed and request.user.is_authenticated:
+            self._update_token_cookie(response, request)
+
+        return response
+    def _update_token_cookie(self, response, request):
+        """
+        Update token cookies with refreshed data
+        """
+        try:
+            access_token = request.session.get('access_token')
+            refresh_token = request.session.get('refresh_token')
+            expires = request.session.get('token_expires')
+            refresh_expires = request.session.get('refresh_expires')
+
+            if access_token and expires:
+                token_data = {
+                    'access_token': access_token,
+                    'refresh_token': refresh_token,
+                    'expires': expires,
+                    'refresh_expires': refresh_expires
+                }
+                response = set_token_cookie(response, token_data)
+        except Exception as e:
+            logger.warning(f"Failed to update token cookies: {e}")
 
     def _is_token_expired_or_expiring_soon(self, request):
         """

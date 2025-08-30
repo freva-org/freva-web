@@ -9,7 +9,6 @@ import {
   Alert,
   OverlayTrigger,
   Tooltip,
-  Form,
   Collapse,
 } from "react-bootstrap";
 import {
@@ -31,6 +30,8 @@ import {
   loadFiles,
   updateFacetSelection,
   setFlavours,
+  addFlavour,
+  deleteFlavour,
 } from "./actions";
 import TimeRangeSelector from "./TimeRangeSelector";
 import FilesPanel from "./FilesPanel";
@@ -45,6 +46,7 @@ import { FacetPanel } from "./FacetPanel";
 import { prepareSearchParams } from "./utils";
 import CatalogExportDropdown from "./CatalogExportDropdown";
 import BBoxSelector from "./BBoxSelector";
+import FlavourManager from "./FlavourManager";
 
 class Databrowser extends React.Component {
   constructor(props) {
@@ -52,15 +54,16 @@ class Databrowser extends React.Component {
     this.clickFacet = this.clickFacet.bind(this);
     this.renderFacetBadges = this.renderFacetBadges.bind(this);
     this.createCatalogLink = this.createCatalogLink.bind(this);
+    this.clickFlavour = this.clickFlavour.bind(this);
     const firstViewPort =
       localStorage.FrevaDatabrowserViewPort ?? ViewTypes.RESULT_CENTERED;
     localStorage.FrevaDatabrowserViewPort = firstViewPort;
+
     this.state = {
       viewPort: firstViewPort,
       additionalFacetsVisible: false,
     };
   }
-
   /**
    * On mount we load all facets and files to display
    * Also load the metadata.js script
@@ -90,7 +93,6 @@ class Databrowser extends React.Component {
       );
     document.body.appendChild(script);
   }
-
   componentDidUpdate(prevProps) {
     if (prevProps.location.search !== this.props.location.search) {
       this.props.dispatch(loadFiles(this.props.location));
@@ -201,6 +203,7 @@ class Databrowser extends React.Component {
         );
       });
   }
+
   dropBBoxSelection() {
     const currentLocation = this.props.location.pathname;
     const {
@@ -397,7 +400,6 @@ class Databrowser extends React.Component {
     const facetPanels = this.renderFacetPanels();
     const additionalFacetPanels = this.renderAdditionalFacets();
     const isFacetCentered = this.state.viewPort === ViewTypes.FACET_CENTERED;
-    const flavour = this.props.location.query.flavour;
 
     return (
       <Container>
@@ -410,32 +412,15 @@ class Databrowser extends React.Component {
               )}
             </h2>
             <div className="d-flex justify-content-between mb-2">
-              <div className="position-relative me-1">
-                <Form.Select
-                  aria-label="Flavour selection"
-                  className="me-1"
-                  value={flavour}
-                  onChange={(x) => {
-                    this.clickFlavour(x.target.value);
-                  }}
-                >
-                  {this.props.databrowser.flavours.map((x) => {
-                    return <option key={x}>{x}</option>;
-                  })}
-                </Form.Select>
-                <small
-                  className="position-absolute text-muted"
-                  style={{
-                    top: "-7px",
-                    left: "2px",
-                    backgroundColor: "white",
-                    padding: "0 4px",
-                    fontSize: "0.7rem",
-                  }}
-                >
-                  flavour
-                </small>
-              </div>
+              <FlavourManager
+                flavourDetails={this.props.databrowser.flavourDetails}
+                currentFlavour={this.props.location.query.flavour}
+                defaultFlavour={DEFAULT_FLAVOUR}
+                dispatch={this.props.dispatch}
+                addFlavour={addFlavour}
+                deleteFlavour={deleteFlavour}
+                onFlavourClick={this.clickFlavour}
+              />
 
               <CatalogExportDropdown
                 disabled={
@@ -544,6 +529,7 @@ Databrowser.propTypes = {
     facets: PropTypes.object,
     files: PropTypes.array,
     flavours: PropTypes.array,
+    flavourDetails: PropTypes.array,
     fileLoading: PropTypes.bool,
     facetLoading: PropTypes.bool,
     facetMapping: PropTypes.object,

@@ -17,6 +17,7 @@ ALLOWED_HOSTS : str
 CSRF_TRUSTED_ORIGINS : str
 FREVA_BIN: str
 STAC_BROWSER: 0|1
+DEFAULT_FLAVOUR: str
 """
 
 import logging
@@ -154,6 +155,7 @@ IMPRINT = web_config.get("imprint") or [
 HOMEPAGE_HEADING = web_config.get("homepage_heading") or "Lorem ipsum dolor."
 ABOUT_US_TEXT = web_config.get("about_us_text") or "Hello world, this is freva."
 CONTACTS = web_config.get("contacts") or ["freva@dkrz.de"]
+DEFAULT_FLAVOUR = web_config.get("DEFAULT_FLAVOUR", "freva")
 if isinstance(CONTACTS, str):
     CONTACTS = [c for c in CONTACTS.split(",") if c.strip()]
 ##########

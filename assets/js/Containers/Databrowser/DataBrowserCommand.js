@@ -56,6 +56,7 @@ function DataBrowserCommandImpl(props) {
   }
 
   function getFullCliCommand(dateSelectorToCli, bboxSelectorToCli) {
+    const effectiveFlavour = props.selectedFlavour || constants.DEFAULT_FLAVOUR;
     return (
       "freva-client databrowser data-search " +
       (props.minDate ? `time=${props.minDate}to${props.maxDate} ` : "") +
@@ -74,15 +75,14 @@ function DataBrowserCommandImpl(props) {
       (bboxSelectorToCli && props.minLon
         ? ` --bbox-select ${bboxSelectorToCli}`
         : "") +
-      (props.selectedFlavour !== constants.DEFAULT_FLAVOUR
-        ? ` --flavour ${props.selectedFlavour}`
-        : "")
+      (effectiveFlavour !== "freva" ? ` --flavour ${effectiveFlavour}` : "")
     ).trimEnd();
   }
 
   function renderCLICommand() {
     const dateSelectorToCli = getCliTimeSelector();
     const bboxSelectorToCli = getCliBBoxSelector();
+    const effectiveFlavour = props.selectedFlavour || constants.DEFAULT_FLAVOUR;
 
     return (
       <pre className="mb-1" style={{ whiteSpace: "pre-wrap" }}>
@@ -124,10 +124,9 @@ function DataBrowserCommandImpl(props) {
             <span className="fw-bold">{bboxSelectorToCli}</span>
           </React.Fragment>
         )}
-        {props.selectedFlavour !== constants.DEFAULT_FLAVOUR && (
+        {effectiveFlavour !== "freva" && (
           <React.Fragment>
-            &nbsp;--flavour{" "}
-            <span className="fw-bold">{props.selectedFlavour}</span>
+            &nbsp;--flavour <span className="fw-bold">{effectiveFlavour}</span>
           </React.Fragment>
         )}
       </pre>
@@ -136,9 +135,11 @@ function DataBrowserCommandImpl(props) {
 
   function getFullPythonCommand(dateSelectorToCli, bboxSelectorToCli) {
     let args = [];
-
-    if (props.selectedFlavour !== constants.DEFAULT_FLAVOUR) {
-      args.push(`flavour="${props.selectedFlavour}"`);
+    const effectiveFlavour = props.selectedFlavour || constants.DEFAULT_FLAVOUR;
+    // if it's only freva, we don't need to specify flavour=, in
+    // all other cases we do
+    if (effectiveFlavour !== "freva") {
+      args.push(`flavour="${effectiveFlavour}"`);
     }
 
     args = [

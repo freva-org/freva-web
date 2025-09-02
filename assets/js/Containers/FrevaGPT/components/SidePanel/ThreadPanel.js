@@ -31,13 +31,17 @@ function ThreadPanel({ threads, title }) {
       const response = await fetchWithAuth(`/api/chatbot/getuserthreads`, {signal}).then(res => {
         if (res.ok) {
           const values = res.json();
-          setFilteredThreads(values);
+          return values;
+        } else {
+          return [];
         }
       }).catch(err => {
-        if (signal.aborted) {
+        if (signal.aborted && err instanceof DOMException && err.name === "AbortError") {
           return
         }
       })
+
+      setFilteredThreads(response);
     }*/
 
     searchThreads();

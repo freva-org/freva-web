@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
 
 import { Card, FormControl, Row } from "react-bootstrap";
+
+import { debounce } from "lodash";
 
 import { fetchWithAuth } from "../../utils";
 
@@ -11,42 +13,22 @@ function ThreadPanel({ threads, title }) {
   const [filteredThreads, setFilteredThreads] = useState([]);
   const [query, setQuery] = useState("");
 
-  //const controller = new AbortController();
-  //const signal = controller.signal;
-
   useEffect(() => {
-    async function searchThreads() {
-      setFilteredThreads([]);
-      const response = await fetchWithAuth(`/api/chatbot/getuserthreads`);
-
-      if (response.ok) {
-        const values = await response.json();
-        setFilteredThreads(values);
-      }
-    }
-
-    /*async function searchThreads() {
-      setFilteredThreads([]);
-
-      const response = await fetchWithAuth(`/api/chatbot/getuserthreads`, {signal}).then(res => {
-        if (res.ok) {
-          const values = res.json();
-          return values;
-        } else {
-          return [];
-        }
-      }).catch(err => {
-        if (signal.aborted && err instanceof DOMException && err.name === "AbortError") {
-          return
-        }
-      })
-
-      setFilteredThreads(response);
-    }*/
-
-    searchThreads();
-    //return () => controller.abort();
+    search();
   }, [query]);
+
+  async function searchThreads() {
+    setFilteredThreads([]);
+    // TODO: use search endpoint with actual query values
+    const response = await fetchWithAuth(`/api/chatbot/getuserthreads`);
+
+    if (response.ok) {
+      const values = await response.json();
+      setFilteredThreads(values);
+    }
+  }
+
+  const search = useCallback(debounce(searchThreads, 200), []);
 
   const threadStyle = {
     maxHeight: document.documentElement.clientHeight * 0.45,

@@ -1,42 +1,23 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 
 import { Card, FormControl, Row } from "react-bootstrap";
 
-import { debounce } from "lodash";
-
-import { fetchWithAuth } from "../../utils";
+import useThreadSearch from "../../customHooks/useThreadSearch";
 
 import ThreadLink from "./ThreadLink";
 
 function ThreadPanel({ threads, title }) {
-  const [filteredThreads, setFilteredThreads] = useState([]);
   const [query, setQuery] = useState("");
-
-  useEffect(() => {
-    search();
-  }, [query]);
-
-  async function searchThreads() {
-    setFilteredThreads([]);
-    // TODO: use search endpoint with actual query values
-    const response = await fetchWithAuth(`/api/chatbot/getuserthreads`);
-
-    if (response.ok) {
-      const values = await response.json();
-      setFilteredThreads(values);
-    }
-  }
-
-  const search = useCallback(debounce(searchThreads, 200), []);
-
-  const threadStyle = {
-    maxHeight: document.documentElement.clientHeight * 0.45,
-  };
+  const { filteredThreads } = useThreadSearch(query);
 
   function handleSearchInput(e) {
     setQuery(e.target.value);
   }
+
+  const threadStyle = {
+    maxHeight: document.documentElement.clientHeight * 0.45,
+  };
 
   return (
     <Card className="my-2 shadow-sm">

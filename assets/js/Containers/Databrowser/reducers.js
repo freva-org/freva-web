@@ -19,7 +19,7 @@ const databrowserInitialState = {
   fileLoading: false,
   flavours: ["freva"],
   flavourDetails: [],
-  selectedFlavour: constants.DEFAULT_FLAVOUR,
+  selectedFlavour: window.EFFECTIVE_DEFAULT_FLAVOUR,
 };
 
 export const databrowserReducer = (state = databrowserInitialState, action) => {
@@ -68,6 +68,7 @@ export const databrowserReducer = (state = databrowserInitialState, action) => {
         myMinLat = databrowserInitialState.minLat;
         myMaxLat = databrowserInitialState.maxLat;
       }
+      console.log("Reducer flavour:", flavour + " default:", databrowserInitialState.selectedFlavour);
       return {
         ...state,
         selectedFacets: { ...queryObject },
@@ -80,7 +81,7 @@ export const databrowserReducer = (state = databrowserInitialState, action) => {
         maxLon: myMaxLon,
         minLat: myMinLat,
         maxLat: myMaxLat,
-        selectedFlavour: flavour || databrowserInitialState.selectedFlavour,
+        selectedFlavour: flavour || databrowserInitialState.selectedFlavour
       };
     }
     case constants.SET_METADATA:

@@ -79,7 +79,7 @@ class OIDCLoginView(View):
 
         params = {
             'redirect_uri': callback_url,
-            'prompt': 'login'
+            'prompt': 'none'
         }
 
         proxy_path = f"/api/freva-nextgen/auth/v2/login?{urlencode(params)}"

@@ -84,7 +84,7 @@ export const setFlavours = () => async (dispatch) => {
 };
 
 export const addFlavour = (flavourData) => async (dispatch) => {
-  const response = await fetch("/api/freva-nextgen/databrowser/flavours/", {
+  const response = await fetch("/api/freva-nextgen/databrowser/flavours", {
     method: "POST",
     credentials: "same-origin",
     headers: getAuthHeaders(),

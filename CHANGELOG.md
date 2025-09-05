@@ -3,6 +3,16 @@
 
 
 All notable changes to this project will be documented in this file.
+## [v2509.0.0]
+## Added
+- Add a functionality to add, remove, and list the custom flavours, from new API endpoint of the Freva-rest
+- Adopted scrolling in FrevaGPT
+
+## Changed
+- changed the logic of the default_flavour to handle edge cases in Custom Flavour
+- change the prompt from `login` to `none` in redirect callback authorization
+- Refactor FrevaGPT components
+
 
 ## [v2507.0.0]
 ## Added

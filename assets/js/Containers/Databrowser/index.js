@@ -43,7 +43,7 @@ import {
   STREAM_CATALOGUE_MAXIMUM,
 } from "./constants";
 import { FacetPanel } from "./FacetPanel";
-import { prepareSearchParams } from "./utils";
+import { prepareSearchParams, verifyAndSetDefaultFlavour } from "./utils";
 import CatalogExportDropdown from "./CatalogExportDropdown";
 import BBoxSelector from "./BBoxSelector";
 import FlavourManager from "./FlavourManager";
@@ -69,9 +69,20 @@ class Databrowser extends React.Component {
    * Also load the metadata.js script
    */
   componentDidMount() {
-    this.props.dispatch(setFlavours());
-    this.props.dispatch(loadFiles(this.props.location));
-    this.props.dispatch(updateFacetSelection(this.props.location.query));
+    // load flavours, verify default, ensure loadFiles() runs (either success or fallback),
+    // then update facet selection exactly once.
+    this.props
+      .dispatch(setFlavours())
+      .then(() => verifyAndSetDefaultFlavour())
+      .then(() => this.props.dispatch(loadFiles(this.props.location)))
+      .catch(() => {
+        return this.props.dispatch(loadFiles(this.props.location));
+      })
+      .then(() =>
+        this.props.dispatch(updateFacetSelection(this.props.location.query))
+      )
+      .catch(() => {});
+
     const script = document.createElement("script");
     script.src = "/static/js/metadata.js";
     script.async = true;
@@ -400,7 +411,6 @@ class Databrowser extends React.Component {
     const facetPanels = this.renderFacetPanels();
     const additionalFacetPanels = this.renderAdditionalFacets();
     const isFacetCentered = this.state.viewPort === ViewTypes.FACET_CENTERED;
-
     return (
       <Container>
         <Row>
@@ -415,7 +425,9 @@ class Databrowser extends React.Component {
               <FlavourManager
                 flavourDetails={this.props.databrowser.flavourDetails}
                 currentFlavour={this.props.location.query.flavour}
-                defaultFlavour={DEFAULT_FLAVOUR}
+                defaultFlavour={
+                  window.EFFECTIVE_DEFAULT_FLAVOUR || DEFAULT_FLAVOUR
+                }
                 dispatch={this.props.dispatch}
                 addFlavour={addFlavour}
                 deleteFlavour={deleteFlavour}

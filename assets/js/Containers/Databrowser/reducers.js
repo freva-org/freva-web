@@ -19,7 +19,7 @@ const databrowserInitialState = {
   fileLoading: false,
   flavours: ["freva"],
   flavourDetails: [],
-  selectedFlavour: constants.DEFAULT_FLAVOUR,
+  selectedFlavour: window.EFFECTIVE_DEFAULT_FLAVOUR,
 };
 
 export const databrowserReducer = (state = databrowserInitialState, action) => {

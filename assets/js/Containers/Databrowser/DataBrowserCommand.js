@@ -56,7 +56,10 @@ function DataBrowserCommandImpl(props) {
   }
 
   function getFullCliCommand(dateSelectorToCli, bboxSelectorToCli) {
-    const effectiveFlavour = props.selectedFlavour || constants.DEFAULT_FLAVOUR;
+    const effectiveFlavour =
+      props.selectedFlavour ||
+      window.EFFECTIVE_DEFAULT_FLAVOUR ||
+      constants.DEFAULT_FLAVOUR;
     return (
       "freva-client databrowser data-search " +
       (props.minDate ? `time=${props.minDate}to${props.maxDate} ` : "") +
@@ -82,7 +85,10 @@ function DataBrowserCommandImpl(props) {
   function renderCLICommand() {
     const dateSelectorToCli = getCliTimeSelector();
     const bboxSelectorToCli = getCliBBoxSelector();
-    const effectiveFlavour = props.selectedFlavour || constants.DEFAULT_FLAVOUR;
+    const effectiveFlavour =
+      props.selectedFlavour ||
+      window.EFFECTIVE_DEFAULT_FLAVOUR ||
+      constants.DEFAULT_FLAVOUR;
 
     return (
       <pre className="mb-1" style={{ whiteSpace: "pre-wrap" }}>
@@ -135,7 +141,10 @@ function DataBrowserCommandImpl(props) {
 
   function getFullPythonCommand(dateSelectorToCli, bboxSelectorToCli) {
     let args = [];
-    const effectiveFlavour = props.selectedFlavour || constants.DEFAULT_FLAVOUR;
+    const effectiveFlavour =
+      props.selectedFlavour ||
+      window.EFFECTIVE_DEFAULT_FLAVOUR ||
+      constants.DEFAULT_FLAVOUR;
     // if it's only freva, we don't need to specify flavour=, in
     // all other cases we do
     if (effectiveFlavour !== "freva") {

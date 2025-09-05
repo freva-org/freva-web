@@ -72,17 +72,17 @@ class Databrowser extends React.Component {
     // load flavours, verify default, ensure loadFiles() runs (either success or fallback),
     // then update facet selection exactly once.
     this.props
-    .dispatch(setFlavours())
-    .then(() => verifyAndSetDefaultFlavour())
-    .then(() => this.props.dispatch(loadFiles(this.props.location)))
-    .catch(() => {
-      return this.props.dispatch(loadFiles(this.props.location));
-    })
-    .then(() =>
-      this.props.dispatch(updateFacetSelection(this.props.location.query))
-    )
-    .catch(() => {});
-  
+      .dispatch(setFlavours())
+      .then(() => verifyAndSetDefaultFlavour())
+      .then(() => this.props.dispatch(loadFiles(this.props.location)))
+      .catch(() => {
+        return this.props.dispatch(loadFiles(this.props.location));
+      })
+      .then(() =>
+        this.props.dispatch(updateFacetSelection(this.props.location.query))
+      )
+      .catch(() => {});
+
     const script = document.createElement("script");
     script.src = "/static/js/metadata.js";
     script.async = true;
@@ -411,8 +411,6 @@ class Databrowser extends React.Component {
     const facetPanels = this.renderFacetPanels();
     const additionalFacetPanels = this.renderAdditionalFacets();
     const isFacetCentered = this.state.viewPort === ViewTypes.FACET_CENTERED;
-    // eslint-disable-next-line no-console
-    console.log(window.EFFECTIVE_DEFAULT_FLAVOUR || DEFAULT_FLAVOUR)
     return (
       <Container>
         <Row>
@@ -427,7 +425,9 @@ class Databrowser extends React.Component {
               <FlavourManager
                 flavourDetails={this.props.databrowser.flavourDetails}
                 currentFlavour={this.props.location.query.flavour}
-                defaultFlavour={window.EFFECTIVE_DEFAULT_FLAVOUR || DEFAULT_FLAVOUR}
+                defaultFlavour={
+                  window.EFFECTIVE_DEFAULT_FLAVOUR || DEFAULT_FLAVOUR
+                }
                 dispatch={this.props.dispatch}
                 addFlavour={addFlavour}
                 deleteFlavour={deleteFlavour}

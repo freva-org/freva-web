@@ -18,6 +18,7 @@ urlpatterns = [
     url(r"^logout$", base.views.logout_view, name="logout"),
     url(r"^refresh-token/$", base.views.manual_refresh_token, name="get_refresh_token"),
     url(r"^get-current-token/$", base.views.collect_current_token, name="collect_current_token"),
+    url(r"^offline-login/$", base.views.OIDCOfflineLoginView.as_view(), name="oidc_offline_login"),
     url(r"^wiki$", base.views.wiki, name="wiki"),
     url(r"^contact$", base.views.contact, name="contact"),
     url(r"^restart$", base.views.restart, name="restart"),

@@ -11,7 +11,7 @@ from django.conf import settings
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -88,21 +88,21 @@ class OIDCLoginView(View):
 
 
 class OIDCCallbackView(View):
-    """
-    Handle the callback from OIDC provider after user authentication.
-    """
-
+    """callback view handling the OAuth2 response from freva-rest"""
     def get(self, request):
-        """
-        Handle the authorization code callback and exchange for tokens.
-        """
         code = request.GET.get('code')
+
+        is_offline_request = 'return_after_cli_token' in request.session
+
         if not code:
             logger.error("No authorization code received in callback")
-            return render(request, 'base/home.html', {
-                'login_failed': True,
-                'error_message': 'Authentication failed - no authorization code received.'
-            })
+            if is_offline_request:
+                return HttpResponse('<script>window.close();</script>')
+            else:
+                return render(request, 'base/home.html', {
+                    'login_failed': True,
+                    'error_message': 'Authentication failed - no authorization code received.'
+                })
 
         try:
             callback_url = request.build_absolute_uri('/callback')
@@ -113,47 +113,86 @@ class OIDCCallbackView(View):
             headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
             response = requests.post(TOKEN_URL, headers=headers, data=data, timeout=10)
+            
             if response.status_code == 200:
                 token_data = response.json()
-                # Store tokens in session
-                request.session['access_token'] = token_data['access_token']
-                request.session['refresh_token'] = token_data['refresh_token']
-                request.session['token_expires'] = token_data['expires']
-                request.session['refresh_expires'] = token_data['refresh_expires']
 
-                # Authenticate user
-                user = authenticate(request=request, access_token=token_data['access_token'])
-                if user:
-                    login(request, user)
-                    next_url = request.session.pop('login_next', '/')
+                # OFFLINE TOKEN FLOW - Download and close tab
+                if is_offline_request:                    
+                    formatted_token = {
+                        "access_token": token_data.get('access_token'),
+                        "refresh_token": token_data.get('refresh_token'),
+                        "token_type": token_data.get('token_type', 'Bearer'),
+                        "expires": token_data.get('expires'),
+                        "refresh_expires": token_data.get('refresh_expires'),
+                        "scope": token_data.get('scope', 'openid profile offline_access')
+                    }
 
-                    if url_has_allowed_host_and_scheme(next_url, allowed_hosts=request.get_host()):
-                        response = HttpResponseRedirect(next_url)
-                    else:
-                        response = HttpResponseRedirect('/')
+                    return HttpResponse(f'''
+                    <!DOCTYPE html>
+                    <html>
+                    <head><title>CLI Token</title></head>
+                    <body>
+                        <script>
+                            const tokenData = {json.dumps(formatted_token)};
+                            const blob = new Blob([JSON.stringify(tokenData, null, 2)], {{type: 'application/json'}});
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = '.offline_token.json';
+                            document.body.appendChild(a);
+                            a.click();
+                            // Close immediately after download
+                            window.close();
+                        </script>
+                    </body>
+                    </html>
+                    ''')
 
-                    response = set_token_cookie(response, token_data)
-                    return response
+                # REGULAR LOGIN FLOW
                 else:
-                    logger.error("User authentication failed despite valid token")
-                    return render(request, 'base/home.html', {
-                        'login_failed': True,
-                        'error_message': 'Authentication failed - could not authenticate user.'
-                    })
+                    request.session['access_token'] = token_data['access_token']
+                    request.session['refresh_token'] = token_data['refresh_token']
+                    request.session['token_expires'] = token_data['expires']
+                    request.session['refresh_expires'] = token_data['refresh_expires']
+
+                    user = authenticate(request=request, access_token=token_data['access_token'])
+                    if user:
+                        login(request, user)
+                        next_url = request.session.pop('login_next', '/')
+
+                        if url_has_allowed_host_and_scheme(next_url, allowed_hosts=request.get_host()):
+                            response = HttpResponseRedirect(next_url)
+                        else:
+                            response = HttpResponseRedirect('/')
+
+                        response = set_token_cookie(response, token_data)
+                        return response
+                    else:
+                        logger.error("User authentication failed despite valid token")
+                        return render(request, 'base/home.html', {
+                            'login_failed': True,
+                            'error_message': 'Authentication failed - could not authenticate user.'
+                        })
             else:
                 logger.error(f"Token exchange failed: {response.status_code} - {response.text}")
-                return render(request, 'base/home.html', {
-                    'login_failed': True,
-                    'error_message': 'Authentication failed - token exchange failed.'
-                })
+                if is_offline_request:
+                    return HttpResponse('<script>window.close();</script>')
+                else:
+                    return render(request, 'base/home.html', {
+                        'login_failed': True,
+                        'error_message': 'Authentication failed - token exchange failed.'
+                    })
 
         except Exception as e:
             logger.exception(f"Callback processing failed: {e}")
-            return render(request, 'base/home.html', {
-                'login_failed': True,
-                'error_message': 'Authentication failed - please try again.'
-            })
-
+            if is_offline_request:
+                return HttpResponse('<script>window.close();</script>')
+            else:
+                return render(request, 'base/home.html', {
+                    'login_failed': True,
+                    'error_message': 'Authentication failed - please try again.'
+                })
 
 def home(request):
     """Default view for the root - authorization through session."""
@@ -443,3 +482,24 @@ def stacbrowser(request):
         }
     }
     return render(request, 'stacbrowser.html', context)
+
+class OIDCOfflineLoginView(View):
+    """
+    Store current URL and initiate offline token flow
+    """
+    def get(self, request):
+        current_url = request.META.get('HTTP_REFERER', '/')
+        request.session['return_after_cli_token'] = current_url
+        request.session.modified = True
+
+        callback_url = request.build_absolute_uri('/callback')
+
+        params = {
+            'redirect_uri': callback_url,
+            'offline_access': 'true',
+            'prompt': 'none'
+        }
+
+        proxy_path = f"/api/freva-nextgen/auth/v2/login?{urlencode(params)}"
+        full_login_url = request.build_absolute_uri(proxy_path)
+        return HttpResponseRedirect(full_login_url)

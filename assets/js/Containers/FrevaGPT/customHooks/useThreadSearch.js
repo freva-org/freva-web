@@ -2,6 +2,8 @@ import { useEffect, useState, useCallback } from "react";
 
 import { debounce, isEmpty } from "lodash";
 
+import queryString from "query-string";
+
 import { fetchWithAuth } from "../utils";
 
 export default function useThreadSearch(query) {
@@ -21,8 +23,15 @@ export default function useThreadSearch(query) {
   async function filterThreads() {
     setFilteredThreadsLoading(true);
     setFilteredThreads([]);
-    // TODO: use search endpoint with actual query values
-    const response = await fetchWithAuth(`/api/chatbot/getuserthreads`);
+
+    const queryParameter = {
+      num_threads: 30,
+      query,
+    };
+
+    const response = await fetchWithAuth(
+      `/api/chatbot/searchthreads?` + queryString.stringify(queryParameter)
+    );
 
     if (response.ok) {
       const values = await response.json();

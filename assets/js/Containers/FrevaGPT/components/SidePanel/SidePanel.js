@@ -22,11 +22,13 @@ function SidePanel() {
   useEffect(() => {
     async function getHistory() {
       setThreadsLoading(true);
-      const response = await fetchWithAuth(`/api/chatbot/getuserthreads`);
+      const response = await fetchWithAuth(
+        `/api/chatbot/getuserthreads?num_threads=30`
+      );
 
       if (response.ok) {
         const values = await response.json();
-        setThreads(values);
+        setThreads(values[0]);
       }
       setThreadsLoading(false);
     }
@@ -47,7 +49,7 @@ function SidePanel() {
   }
 
   const threadStyle = {
-    maxHeight: document.documentElement.clientHeight * 0.45,
+    maxHeight: document.documentElement.clientHeight * 0.5,
   };
 
   return (

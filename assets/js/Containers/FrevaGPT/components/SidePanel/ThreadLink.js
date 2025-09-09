@@ -5,6 +5,8 @@ import { browserHistory } from "react-router";
 
 import { isEmpty } from "lodash";
 
+import queryString from "query-string";
+
 import {
   OverlayTrigger,
   Tooltip,
@@ -18,7 +20,9 @@ import {
 
 import { FaEllipsisH, FaEdit } from "react-icons/fa";
 
-function ThreadLink({ element }) {
+import { fetchWithAuth } from "../../utils";
+
+function ThreadLink({ element, onChangeName }) {
   const [showOptions, setShowOptions] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [topic, setTopic] = useState(element.topic);
@@ -34,11 +38,23 @@ function ThreadLink({ element }) {
     setTopic(e.target.value);
   }
 
-  function renameThread() {
+  async function renameThread() {
     // TODO: add backend call to change topic of thread
     if (!isEmpty(topic) && topic !== element.topic) {
-      //request change to backend
-      //change in frontend -> re-request or manual change?
+      const queryParameter = {
+        thread_id: element.thread_id,
+        topic,
+      };
+
+      const response = await fetchWithAuth(
+        `/api/chatbot/setthreadtopic?` + queryString.stringify(queryParameter)
+      );
+
+      if (response.ok) {
+        onChangeName({ id: element.thread_id, topic });
+      } else {
+        // todo: handle fail
+      }
     }
     setShowModal(false);
   }
@@ -119,6 +135,7 @@ function ThreadLink({ element }) {
 
 ThreadLink.propTypes = {
   element: PropTypes.object,
+  onChangeName: PropTypes.func,
 };
 
 export default ThreadLink;

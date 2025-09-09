@@ -48,6 +48,15 @@ function SidePanel() {
     setQuery(e.target.value);
   }
 
+  function updateThreadName(thread_details) {
+    const threadListCopy = structuredClone(threads);
+    const threadIndex = threadListCopy.findIndex(
+      (elem) => elem.thread_id === thread_details.id
+    );
+    threadListCopy[threadIndex].topic = thread_details.topic;
+    setThreads(threadListCopy);
+  }
+
   const threadStyle = {
     maxHeight: document.documentElement.clientHeight * 0.5,
   };
@@ -84,7 +93,11 @@ function SidePanel() {
                   })
                 : threads.map((element) => {
                     return (
-                      <ThreadLink key={element.thread_id} element={element} />
+                      <ThreadLink
+                        key={element.thread_id}
+                        element={element}
+                        onChangeName={updateThreadName}
+                      />
                     );
                   })}
             </Row>

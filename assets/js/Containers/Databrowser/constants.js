@@ -54,6 +54,11 @@ export const AVAILABLE_FACETS = [
   { key: "rcm_name", label: "RCM Name" },
   { key: "rcm_version", label: "RCM Version" },
   { key: "user", label: "User" },
+  { key: "time", label: "Time" },
+  { key: "bbox", label: "Bounding Box" },
+  { key: "processing_level", label: "Processing Level" },
+  { key: "future", label: "Future" },
+  { key: "future_id", label: "Future ID" },
 ];
 
 export const TEMP_FREVA_AUTH_TOKEN = "freva_auth_token=";

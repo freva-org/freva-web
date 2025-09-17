@@ -35,6 +35,8 @@ export default function useThreadSearch(query) {
 
     if (response.ok) {
       const values = await response.json();
+      //eslint-disable-next-line no-console
+      console.log(values);
       setFilteredThreads(values);
     }
 
@@ -43,5 +45,5 @@ export default function useThreadSearch(query) {
 
   const search = useCallback(debounce(filterThreads, 200), []);
 
-  return { filteredThreads, filteredThreadsLoading };
+  return { filteredThreads, filteredThreadsLoading, setFilteredThreads };
 }

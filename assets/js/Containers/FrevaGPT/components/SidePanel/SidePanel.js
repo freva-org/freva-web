@@ -10,14 +10,15 @@ import useThreadSearch from "../../customHooks/useThreadSearch";
 
 import TextPlaceholder from "../Snippets/TextPlaceholder";
 
-import ThreadLink from "./ThreadLink";
+import ThreadList from "./ThreadList";
 
 function SidePanel() {
   const [threads, setThreads] = useState([]);
   const [threadsLoading, setThreadsLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
-  const { filteredThreads, filteredThreadsLoading } = useThreadSearch(query);
+  const { filteredThreads, filteredThreadsLoading, setFilteredThreads } =
+    useThreadSearch(query);
 
   useEffect(() => {
     async function getHistory() {
@@ -48,15 +49,6 @@ function SidePanel() {
     setQuery(e.target.value);
   }
 
-  function updateThreadName(thread_details) {
-    const threadListCopy = structuredClone(threads);
-    const threadIndex = threadListCopy.findIndex(
-      (elem) => elem.thread_id === thread_details.id
-    );
-    threadListCopy[threadIndex].topic = thread_details.topic;
-    setThreads(threadListCopy);
-  }
-
   const threadStyle = {
     maxHeight: document.documentElement.clientHeight * 0.5,
   };
@@ -85,21 +77,14 @@ function SidePanel() {
             </Row>
           ) : (
             <Row className="overflow-auto" style={threadStyle}>
-              {!isEmpty(filteredThreads)
-                ? filteredThreads.map((element) => {
-                    return (
-                      <ThreadLink key={element.thread_id} element={element} />
-                    );
-                  })
-                : threads.map((element) => {
-                    return (
-                      <ThreadLink
-                        key={element.thread_id}
-                        element={element}
-                        onChangeName={updateThreadName}
-                      />
-                    );
-                  })}
+              <ThreadList
+                threadList={
+                  !isEmpty(filteredThreads) ? filteredThreads : threads
+                }
+                setThreadList={
+                  !isEmpty(filteredThreads) ? setFilteredThreads : setThreads
+                }
+              />
             </Row>
           )}
         </Card.Body>

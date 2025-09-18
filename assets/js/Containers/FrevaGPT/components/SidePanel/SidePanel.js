@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 
 import { Card, FormControl, Row } from "react-bootstrap";
 
@@ -22,7 +22,18 @@ function SidePanel() {
   const { filteredThreads, filteredThreadsLoading, setFilteredThreads } =
     useThreadSearch(query);
 
+  const lastThreadRef = useRef();
+  const observer = new IntersectionObserver((entries) => {
+    const entry = entries[0];
+
+    if (entry.isIntersecting) {
+      //eslint-disable-next-line no-console
+      console.log("entry: ", entry);
+    }
+  });
+
   useEffect(() => {
+    observer.observe(lastThreadRef.current);
     async function getHistory() {
       setThreadsLoading(true);
       const response = await fetchWithAuth(
@@ -86,6 +97,7 @@ function SidePanel() {
               ? renderThreads(filteredThreads, setFilteredThreads)
               : renderThreads(threads, setThreads)}
             {loading ? <TextPlaceholder /> : null}
+            <div ref={lastThreadRef} className="p-1"></div>
           </Row>
         </Card.Body>
       </Card>

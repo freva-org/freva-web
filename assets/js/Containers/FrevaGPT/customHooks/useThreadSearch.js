@@ -25,7 +25,7 @@ export default function useThreadSearch(query) {
     setFilteredThreads([]);
 
     const queryParameter = {
-      num_threads: 30,
+      num_threads: 20,
       query,
     };
 
@@ -43,7 +43,7 @@ export default function useThreadSearch(query) {
     setFilteredThreadsLoading(false);
   }
 
-  const search = useCallback(debounce(filterThreads, 200), []);
+  const search = useCallback(debounce(filterThreads, 500), []);
 
   return { filteredThreads, filteredThreadsLoading, setFilteredThreads };
 }

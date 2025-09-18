@@ -11,14 +11,12 @@ import {
   OverlayTrigger,
   Tooltip,
   Badge,
-  ListGroup,
-  Popover,
   Modal,
   Button,
   FormControl,
 } from "react-bootstrap";
 
-import { FaEllipsisH, FaEdit } from "react-icons/fa";
+import { FaPen } from "react-icons/fa";
 
 import { fetchWithAuth } from "../../utils";
 
@@ -59,21 +57,6 @@ function ThreadLink({ element, onChangeName }) {
     setShowModal(false);
   }
 
-  const popover = (
-    <Popover id="popover-basic">
-      <ListGroup>
-        <ListGroup.Item
-          action
-          className="d-flex align-items-center"
-          onClick={() => setShowModal(true)}
-        >
-          <FaEdit style={{ marginRight: "5px" }} />
-          Rename
-        </ListGroup.Item>
-      </ListGroup>
-    </Popover>
-  );
-
   return (
     <>
       <div
@@ -94,11 +77,13 @@ function ThreadLink({ element, onChangeName }) {
           </a>
         </OverlayTrigger>
         {showOptions ? (
-          <OverlayTrigger trigger="click" placement="right" overlay={popover}>
-            <Badge bg="secondary" as="button">
-              <FaEllipsisH />
-            </Badge>
-          </OverlayTrigger>
+          <Badge
+            bg="secondary"
+            style={{ cursor: "pointer" }}
+            onClick={() => setShowModal(true)}
+          >
+            <FaPen />
+          </Badge>
         ) : null}
       </div>
 

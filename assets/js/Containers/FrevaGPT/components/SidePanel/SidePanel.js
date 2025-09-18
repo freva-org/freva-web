@@ -13,10 +13,12 @@ import TextPlaceholder from "../Snippets/TextPlaceholder";
 import ThreadList from "./ThreadList";
 
 function SidePanel() {
+  const [loading, setLoading] = useState(true);
+
   const [threads, setThreads] = useState([]);
   const [threadsLoading, setThreadsLoading] = useState(true);
+
   const [query, setQuery] = useState("");
-  const [loading, setLoading] = useState(true);
   const { filteredThreads, filteredThreadsLoading, setFilteredThreads } =
     useThreadSearch(query);
 
@@ -53,6 +55,14 @@ function SidePanel() {
     maxHeight: document.documentElement.clientHeight * 0.5,
   };
 
+  function renderThreads(list, setter) {
+    if (!loading && isEmpty(list)) {
+      return <p>No chats found</p>;
+    } else {
+      return <ThreadList threadList={list} setThreadList={setter} />;
+    }
+  }
+
   return (
     <>
       <Card className="my-2 shadow-sm">
@@ -71,22 +81,12 @@ function SidePanel() {
             />
           </div>
 
-          {loading ? (
-            <Row className="overflow-auto" style={threadStyle}>
-              <TextPlaceholder />
-            </Row>
-          ) : (
-            <Row className="overflow-auto" style={threadStyle}>
-              <ThreadList
-                threadList={
-                  !isEmpty(filteredThreads) ? filteredThreads : threads
-                }
-                setThreadList={
-                  !isEmpty(filteredThreads) ? setFilteredThreads : setThreads
-                }
-              />
-            </Row>
-          )}
+          <Row className="overflow-auto" style={threadStyle}>
+            {query
+              ? renderThreads(filteredThreads, setFilteredThreads)
+              : renderThreads(threads, setThreads)}
+            {loading ? <TextPlaceholder /> : null}
+          </Row>
         </Card.Body>
       </Card>
     </>

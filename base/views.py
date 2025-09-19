@@ -256,7 +256,7 @@ def request_offline_token(request):
         params = {
             'redirect_uri': callback_url,
             'offline_access': 'true',
-            'prompt': 'login'
+            'prompt': 'none'
         }
 
         proxy_path = f"/api/freva-nextgen/auth/v2/login?{urlencode(params)}"

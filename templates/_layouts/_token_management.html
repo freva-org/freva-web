@@ -149,7 +149,6 @@
         transform: translateY(-1px);
     }
 
-
     /* Token Management Modal Styles */
     .token-modal {
         display: none;
@@ -455,7 +454,7 @@
             </a>
         </li>
     </ul>
-    
+
     <!-- Hidden logout form -->
     <form action="{% url 'base:logout' %}" method="post" id="hidden-logout-form" style="display: none;">
         {% csrf_token %}

@@ -1,12 +1,11 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 
 import { Card, FormControl, Row } from "react-bootstrap";
 
 import { isEmpty } from "lodash";
 
-import { fetchWithAuth } from "../../utils";
-
 import useThreadSearch from "../../customHooks/useThreadSearch";
+import useGeneralThreads from "../../customHooks/useGeneralThreads";
 
 import TextPlaceholder from "../Snippets/TextPlaceholder";
 
@@ -15,47 +14,50 @@ import ThreadList from "./ThreadList";
 function SidePanel() {
   const [loading, setLoading] = useState(true);
 
-  const [threads, setThreads] = useState([]);
-  const [threadsLoading, setThreadsLoading] = useState(true);
+  // unfiltered threads for default display
+  const { threads, setThreads, threadsLoading, setPageNumber } =
+    useGeneralThreads();
 
+  // filtered threads based on query
   const [query, setQuery] = useState("");
-  const { filteredThreads, filteredThreadsLoading, setFilteredThreads } =
-    useThreadSearch(query);
+  const {
+    filteredThreads,
+    setFilteredThreads,
+    filteredThreadsLoading,
+    setFilteredPageNumber,
+  } = useThreadSearch(query);
 
-  const lastThreadRef = useRef();
-  const observer = new IntersectionObserver((entries) => {
-    const entry = entries[0];
-
-    if (entry.isIntersecting) {
-      //eslint-disable-next-line no-console
-      console.log("entry: ", entry);
-    }
-  });
-
-  useEffect(() => {
-    observer.observe(lastThreadRef.current);
-    async function getHistory() {
-      setThreadsLoading(true);
-      const response = await fetchWithAuth(
-        `/api/chatbot/getuserthreads?num_threads=30`
-      );
-
-      if (response.ok) {
-        const values = await response.json();
-        setThreads(values[0]);
+  const observer = useRef();
+  const lastThreadRef = useCallback(
+    // !!!!!!!!!!!!!! hanlde last page load load bugging!
+    (node) => {
+      if (loading) {
+        return;
       }
-      setThreadsLoading(false);
-    }
-
-    getHistory();
-  }, []);
+      if (observer.current) {
+        observer.current.disconnect();
+      }
+      observer.current = new IntersectionObserver((entries) => {
+        // TODO: handle if results list is very short and ref visible (maybe already handled by hasMore)
+        if (entries[0].isIntersecting) {
+          if (query) {
+            setFilteredPageNumber(
+              (prevFilteredPageNumber) => prevFilteredPageNumber + 1
+            );
+          } else {
+            setPageNumber((prevPageNumber) => prevPageNumber + 1);
+          }
+        }
+      });
+      if (node) {
+        observer.current.observe(node);
+      }
+    },
+    [loading]
+  );
 
   useEffect(() => {
-    if (!isEmpty(query)) {
-      setLoading(filteredThreadsLoading);
-    } else {
-      setLoading(threadsLoading);
-    }
+    setLoading(!isEmpty(query) ? filteredThreadsLoading : threadsLoading);
   }, [threadsLoading, filteredThreadsLoading, query]);
 
   function handleSearchInput(e) {

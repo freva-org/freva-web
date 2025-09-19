@@ -1,3 +1,7 @@
+import queryString from "query-string";
+
+import * as constants from "./constants";
+
 export function replaceLinebreaks(data) {
   const formattedData = data.split("\\n").join("\n");
   return formattedData;
@@ -42,19 +46,9 @@ export function resizeInputField() {
   style.height = `${inputField.scrollHeight}px`;
 }
 
-export async function successfulPing() {
-  let pingSuccessful = false;
-
-  try {
-    const response = await fetchWithAuth("/api/chatbot/ping");
-    if (response.status === 200) {
-      pingSuccessful = true;
-    }
-  } catch (err) {
-    pingSuccessful = false;
-  }
-
-  return pingSuccessful;
+function isLastPage(totalNumber, currentPageNumber) {
+  const totalPageNumber = totalNumber % constants.THREAD_NUMBER;
+  return currentPageNumber === totalPageNumber - 1;
 }
 
 /*-------------------------------------------------------------------------------------------------
@@ -77,6 +71,66 @@ export async function fetchWithAuth(url, options = {}) {
     headers["X-Freva-User-Token"] = token;
   }
   return fetch(url, { ...options, headers });
+}
+
+/*-------------------------------------------------------------------------------------------------
+ *                                        Endpoint requests
+-------------------------------------------------------------------------------------------------*/
+export async function successfulPing() {
+  let pingSuccessful = false;
+
+  try {
+    const response = await fetchWithAuth("/api/chatbot/ping");
+    if (response.status === 200) {
+      pingSuccessful = true;
+    }
+  } catch (err) {
+    pingSuccessful = false;
+  }
+
+  return pingSuccessful;
+}
+
+export async function requestUserThreads(page, query) {
+  const returnValues = { threads: [], hasMore: false };
+  let response;
+  const queryParameter = {
+    num_threads: constants.THREAD_NUMBER,
+    page,
+  };
+
+  if (query) {
+    queryParameter.query = query;
+    response = await fetchWithAuth(
+      `/api/chatbot/searchthreads?` + queryString.stringify(queryParameter)
+    );
+  } else {
+    response = await fetchWithAuth(
+      `/api/chatbot/getuserthreads?` + queryString.stringify(queryParameter)
+    );
+  }
+
+  if (response.ok) {
+    const values = await response.json();
+    returnValues.threads = values[0]; // waiting for adaptation of searchthreads endpoint
+    returnValues.hasMore = !isLastPage(values[1], page);
+  }
+
+  return returnValues;
+}
+
+export async function handleThreadsRequest(
+  page,
+  query,
+  setLoading,
+  setThreads,
+  setHasMore
+) {
+  setLoading(true);
+  const response = await requestUserThreads(page, query ? query : undefined);
+  setThreads((prevThreads) => [...prevThreads, ...response.threads]);
+  setHasMore(response.hasMore);
+  setLoading(false);
 }
 
 /*-------------------------------------------------------------------------------------------------

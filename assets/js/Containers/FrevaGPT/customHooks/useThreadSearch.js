@@ -2,13 +2,13 @@ import { useEffect, useState, useCallback } from "react";
 
 import { debounce, isEmpty } from "lodash";
 
-import queryString from "query-string";
-
-import { fetchWithAuth } from "../utils";
+import { handleThreadsRequest } from "../utils";
 
 export default function useThreadSearch(query) {
   const [filteredThreads, setFilteredThreads] = useState([]);
   const [filteredThreadsLoading, setFilteredThreadsLoading] = useState(true);
+  const [filteredHasMore, setFilteredHasMore] = useState(false);
+  const [filteredPageNumber, setFilteredPageNumber] = useState(1);
 
   useEffect(() => {
     setFilteredThreads([]);
@@ -16,34 +16,39 @@ export default function useThreadSearch(query) {
 
   useEffect(() => {
     if (!isEmpty(query)) {
-      search();
+      search(query); //handle no results (so that not unfiltered threads are shown)
     }
   }, [query]);
 
-  async function filterThreads() {
-    setFilteredThreadsLoading(true);
-    setFilteredThreads([]);
-
-    const queryParameter = {
-      num_threads: 20,
-      query,
-    };
-
-    const response = await fetchWithAuth(
-      `/api/chatbot/searchthreads?` + queryString.stringify(queryParameter)
-    );
-
-    if (response.ok) {
-      const values = await response.json();
-      //eslint-disable-next-line no-console
-      console.log(values);
-      setFilteredThreads(values);
+  useEffect(() => {
+    if (filteredHasMore) {
+      handleThreadsRequest(
+        filteredPageNumber,
+        query,
+        setFilteredThreadsLoading,
+        setFilteredThreads,
+        setFilteredHasMore
+      );
     }
+  }, [filteredPageNumber]);
 
-    setFilteredThreadsLoading(false);
-  }
+  const search = useCallback(
+    debounce((input) => {
+      handleThreadsRequest(
+        0,
+        input,
+        setFilteredThreadsLoading,
+        setFilteredThreads,
+        setFilteredHasMore
+      );
+    }, 1000),
+    []
+  );
 
-  const search = useCallback(debounce(filterThreads, 500), []);
-
-  return { filteredThreads, filteredThreadsLoading, setFilteredThreads };
+  return {
+    filteredThreads,
+    setFilteredThreads,
+    filteredThreadsLoading,
+    setFilteredPageNumber,
+  };
 }

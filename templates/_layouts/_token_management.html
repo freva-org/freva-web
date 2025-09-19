@@ -18,6 +18,23 @@
         align-items: center;
         gap: 10px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .user-dropdown-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s ease;
+    }
+
+    .user-dropdown-btn:hover::before {
+        left: 100%;
     }
 
     .user-dropdown-btn:hover {
@@ -28,15 +45,34 @@
         box-shadow: 0 4px 16px rgba(0,0,0,0.2);
     }
 
+    .user-dropdown-btn:focus {
+        color: white;
+        box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
+        outline: none;
+    }
+
     .user-dropdown-menu {
         background: rgba(255, 255, 255, 0.95);
         backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.2);
         border-radius: 12px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.12),
+            0 2px 8px rgba(0, 0, 0, 0.08),
+            inset 0 1px 0 rgba(255, 255, 255, 0.4);
         padding: 8px;
         margin-top: 8px;
         min-width: 200px;
+        overflow: hidden;
+        transform: translateY(-10px);
+        opacity: 0;
+        transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    .user-dropdown-menu.show {
+        transform: translateY(0);
+        opacity: 1;
     }
 
     .user-dropdown-menu .dropdown-item {
@@ -49,13 +85,49 @@
         gap: 12px;
         border-radius: 8px;
         margin: 2px 0;
-        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .user-dropdown-menu .dropdown-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, {% settings_val 'MAIN_COLOR' %}20, {% settings_val 'MAIN_COLOR' %}10);
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        border-radius: 8px;
+    }
+
+    .user-dropdown-menu .dropdown-item:hover::before {
+        opacity: 1;
     }
 
     .user-dropdown-menu .dropdown-item:hover {
         color: {% settings_val 'MAIN_COLOR' %};
-        background: linear-gradient(135deg, {% settings_val 'MAIN_COLOR' %}20, {% settings_val 'MAIN_COLOR' %}10);
         transform: translateX(4px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .user-dropdown-menu .dropdown-item i {
+        font-size: 16px;
+        width: 20px;
+        text-align: center;
+        transition: transform 0.2s ease;
+        position: relative;
+        z-index: 1;
+    }
+
+    .user-dropdown-menu .dropdown-item:hover i {
+        transform: scale(1.1);
+    }
+
+    .user-dropdown-menu .dropdown-item span {
+        position: relative;
+        z-index: 1;
     }
 
     .user-dropdown-menu .dropdown-divider {
@@ -63,9 +135,306 @@
         border: none;
         height: 1px;
         background: linear-gradient(90deg, transparent, rgba(0,0,0,0.1), transparent);
+        position: relative;
+    }
+
+    .user-dropdown-menu .dropdown-divider::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+        transform: translateY(-1px);
+    }
+
+
+    /* Token Management Modal Styles */
+    .token-modal {
+        display: none;
+        position: fixed;
+        z-index: 1050;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+    }
+
+    .token-modal.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    .token-modal-content {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        width: 100%;
+        max-width: 700px;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        scroll-behavior: smooth;
+    }
+
+    .token-header {
+        background: {% settings_val 'MAIN_COLOR' %};
+        color: white;
+        padding: 16px 20px;
+        position: relative;
+    }
+
+    .token-header h1 {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 2px;
+    }
+
+    .token-header p {
+        opacity: 0.9;
+        font-size: 12px;
+        margin: 0;
+    }
+
+    .token-close-btn {
+        position: absolute;
+        top: 16px;
+        right: 20px;
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+    }
+
+    .token-close-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    .token-section {
+        padding: 16px 20px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .token-status {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .token-label {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1e293b;
+    }
+
+    .token-status-info {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: #059669;
+        background: #dcfce7;
+        padding: 4px 8px;
+        border-radius: 6px;
+    }
+
+    .token-status-info.generated {
+        color: #059669;
+        background: #dcfce7;
+    }
+
+    .token-status-info.ready {
+        color: #2563eb;
+        background: #dbeafe;
+    }
+
+    .token-status-info.expired {
+        color: #dc2626;
+        background: #fecaca;
+    }
+
+    .token-display {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 12px;
+        position: relative;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .token-scroll-hint {
+        position: absolute;
+        top: 4px;
+        right: 8px;
+        color: #6b7280;
+        font-size: 9px;
+        opacity: 0.6;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .token-info {
+        background: #1e293b;
+        color: #e2e8f0;
+        padding: 12px;
+        border-radius: 8px;
+        font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+        font-size: 11px;
+        line-height: 1.4;
+        overflow-x: auto;
+        overflow-y: auto;
+        min-height: 175px;
+        max-height: 225px;
+        position: relative;
+        word-break: break-all;
+        white-space: pre-wrap;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .token-info.has-content {
+        text-align: left;
+        align-items: flex-start;
+        justify-content: flex-start;
+    }
+
+    .token-placeholder {
+        color: #6b7280;
+        font-style: italic;
+    }
+
+    /* Custom scrollbar for token display */
+    .token-info::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    .token-info::-webkit-scrollbar-track {
+        background: #374151;
+        border-radius: 4px;
+    }
+
+    .token-info::-webkit-scrollbar-thumb {
+        background: #6b7280;
+        border-radius: 4px;
+    }
+
+    .token-info::-webkit-scrollbar-thumb:hover {
+        background: #9ca3af;
+    }
+
+    .token-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 12px;
+        justify-content: center;
+    }
+
+    .token-btn {
+        background: {% settings_val 'MAIN_COLOR' %};
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: background 0.2s;
+        min-width: 80px;
+    }
+
+    .token-btn:hover {
+        background: {% settings_val 'HOVER_COLOR' %};
+    }
+
+    .token-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .spinner {
+        border: 2px solid #f3f4f6;
+        border-top: 2px solid {% settings_val 'MAIN_COLOR' %};
+        border-radius: 50%;
+        width: 16px;
+        height: 16px;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 991px) {
+        .token-modal-content {
+            margin: 10px;
+            max-height: 95vh;
+        }
+
+        .token-section {
+            padding: 12px 16px;
+        }
+
+        .token-actions {
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .token-btn {
+            width: 100%;
+        }
+
+        .user-dropdown {
+            position: static;
+        }
+
+        .user-dropdown-menu {
+            min-width: 160px;
+            position: fixed !important;
+            top: auto !important;
+            right: auto !important;
+            left: auto !important;
+            transform: none !important;
+            z-index: 9999 !important;
+            margin-top: 8px;
+        }
+
+        .token-info {
+            min-height: 300px;
+            max-height: 400px;
+        }
     }
 </style>
 
+<!-- User Dropdown Menu -->
 <div class="dropdown user-dropdown" data-user-authenticated="true">
     <button class="btn user-dropdown-btn dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
         <i class="fas fa-user-circle"></i>
@@ -73,9 +442,9 @@
     </button>
     <ul class="dropdown-menu dropdown-menu-end user-dropdown-menu" aria-labelledby="userDropdown">
         <li>
-            <a class="dropdown-item" href="#" onclick="requestCLITokenInNewTab(); return false;">
+            <a class="dropdown-item" href="#" onclick="openTokenModal(); return false;">
                 <i class="fas fa-key"></i>
-                Long-lived Token
+                Generate Py/CLI Token
             </a>
         </li>
         <li><hr class="dropdown-divider"></li>
@@ -87,13 +456,291 @@
         </li>
     </ul>
     
+    <!-- Hidden logout form -->
     <form action="{% url 'base:logout' %}" method="post" id="hidden-logout-form" style="display: none;">
         {% csrf_token %}
     </form>
 </div>
 
+<!-- Token Management Modal -->
+<div class="token-modal" id="tokenModal">
+    <div class="token-modal-content">
+        <div class="token-header">
+            <h1>Offline Freva API Token</h1>
+            <p>Generate token for Python/CLI access</p>
+            <button class="token-close-btn" onclick="closeTokenModal()">×</button>
+        </div>
+
+        <div class="token-section">
+            <div class="token-status">
+                <div class="token-label">Offline Token:</div>
+                <div id="tokenStatus" class="token-status-info ready">
+                    <span><i class="fas fa-info-circle"></i></span>
+                    <span id="statusText">Authenticating...</span>
+                </div>
+            </div>
+
+            <div class="token-display">
+                <div class="token-info" id="tokenInfo">
+                    <div class="token-placeholder" id="tokenValue">
+                        <div class="spinner"></div>
+                        Authenticating and generating your offline token...
+                    </div>
+                </div>
+
+                <div class="token-actions">
+                    <button class="token-btn" id="copyBtn" onclick="copyToken()" disabled style="opacity: 0.5;">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Token Management JavaScript -->
 <script>
-function requestCLITokenInNewTab() {
-    window.open('{% url "base:oidc_offline_login" %}', '_blank');
-}
+    let currentOfflineToken = null;
+    let authWindow = null;
+    function openTokenModal() {
+        document.getElementById('tokenModal').classList.add('show');
+        document.body.style.overflow = 'hidden';
+
+        // Reset state and automatically start token generation
+        currentOfflineToken = null;
+        enableTokenActions(false);
+        updateTokenStatus('ready', 'Authenticating...');
+        setTimeout(requestAndDownloadToken, 500);
+    }
+
+    function closeTokenModal() {
+        document.getElementById('tokenModal').classList.remove('show');
+        document.body.style.overflow = 'auto';
+        // IMPORTANT: Close auth window if still open
+        if (authWindow && !authWindow.closed) {
+            authWindow.close();
+            authWindow = null;
+        }
+    }
+
+    function updateTokenStatus(status, text) {
+        const statusElement = document.getElementById('tokenStatus');
+        const statusText = document.getElementById('statusText');
+
+        statusElement.className = `token-status-info ${status}`;
+        statusText.textContent = text;
+    }
+
+    function enableTokenActions(enable = true) {
+        const copyBtn = document.getElementById('copyBtn');
+
+        copyBtn.disabled = !enable;
+
+        if (enable) {
+            copyBtn.style.opacity = '1';
+        } else {
+            copyBtn.style.opacity = '0.5';
+        }
+    }
+
+    function displayToken(tokenData) {
+        const tokenDisplay = document.getElementById('tokenValue');
+        const tokenInfo = document.getElementById('tokenInfo');
+
+        // TODO: human-readable formatting of token with ISO timestamps
+        // is very useful for users to see expiry times but we should
+        // not include these in the copied/downloaded token
+        const formattedToken = {
+            "access_token": tokenData.access_token,
+            "refresh_token": tokenData.refresh_token,
+            "token_type": tokenData.token_type,
+            "expires_at": new Date(tokenData.expires * 1000).toISOString(),
+            "expires": tokenData.expires,
+            "refresh_expires_at": new Date(tokenData.refresh_expires * 1000).toISOString(),
+            "refresh_expires": tokenData.refresh_expires,
+            "scope": tokenData.scope
+        };
+
+        const jsonString = JSON.stringify(formattedToken, null, 2);
+        tokenDisplay.textContent = jsonString;
+        tokenInfo.classList.add('has-content');
+        updateTokenStatus('generated', 'Token downloaded successfully');
+        enableTokenActions(true);
+        downloadTokenFile(tokenData);
+    }
+
+    async function requestAndDownloadToken() {
+        updateTokenStatus('ready', 'Initiating authentication...');
+
+        try {
+            // offline token initiation
+            const response = await fetch('{% url "base:request_offline_token" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCsrfToken(),
+                    'Content-Type': 'application/json',
+                },
+            });
+            const data = await response.json();
+
+            if (data.success && data.auth_url) {
+                updateTokenStatus('ready', 'Opening authentication window...');
+
+                // authentication window
+                const windowFeatures = 'width=600,height=700,scrollbars=yes,resizable=yes,toolbar=no,location=no,directories=no,status=no,menubar=no';
+                authWindow = window.open(data.auth_url, 'frevaAuth', windowFeatures);
+
+                if (!authWindow) {
+                    throw new Error('Failed to open authentication window. Please allow popups for this site.');
+                }
+                updateTokenStatus('ready', 'Please complete authentication in the popup window...');
+
+                // Listen for messages from the popup window
+                const messageHandler = (event) => {
+                    if (event.data && event.data.type === 'OFFLINE_TOKEN_SUCCESS') {
+                        // Remove the message listener
+                        window.removeEventListener('message', messageHandler);
+                        // Process data
+                        currentOfflineToken = event.data.tokenData;
+                        displayToken(currentOfflineToken);
+                        // Clean up auth window reference
+                        authWindow = null;
+                    }
+                };
+                // Adding message listener
+                window.addEventListener('message', messageHandler);
+                const monitorWindow = () => {
+                    if (authWindow && authWindow.closed) {
+                        window.removeEventListener('message', messageHandler);
+                        // Check if we got a token, if not show error
+                        if (!currentOfflineToken) {
+                            updateTokenStatus('expired', 'Authentication cancelled');
+                            resetToInitialState('Authentication was cancelled. Please try again.', 3000);
+                        }
+                        authWindow = null;
+                        return;
+                    }
+                    // Continue monitoring
+                    setTimeout(monitorWindow, 500);
+                };
+                setTimeout(monitorWindow, 500);
+            } else {
+                throw new Error(data.error || 'Failed to initiate token generation');
+            }
+
+        } catch (error) {
+            console.error('Token generation failed:', error);
+            updateTokenStatus('expired', 'Failed to get token');
+            resetToInitialState('Failed to generate token. Please try again.', 3000);
+        }
+    }
+
+    function resetToInitialState(message, delay = 0) {
+        const tokenDisplay = document.getElementById('tokenValue');
+        const tokenInfo = document.getElementById('tokenInfo');
+
+        setTimeout(() => {
+            tokenDisplay.innerHTML = `<div class="token-placeholder">${message}</div>`;
+            tokenInfo.classList.remove('has-content');
+            updateTokenStatus('ready', 'Click "Generate Py/CLI Token" to try again');
+            currentOfflineToken = null;
+            enableTokenActions(false);
+        }, delay);
+    }
+
+    function downloadTokenFile(tokenData) {
+        // Create the token object for download (without display formatting)
+        const tokenForDownload = {
+            "access_token": tokenData.access_token,
+            "refresh_token": tokenData.refresh_token,
+            "token_type": tokenData.token_type,
+            "expires": tokenData.expires,
+            "refresh_expires": tokenData.refresh_expires,
+            "scope": tokenData.scope
+        };
+
+        const blob = new Blob([JSON.stringify(tokenForDownload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = '.offline_token.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function getCsrfToken() {
+        const cookieValue = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('csrftoken='));
+        return cookieValue ? cookieValue.split('=')[1] : '{{ csrf_token }}';
+    }
+
+    function copyToken() {
+        if (!currentOfflineToken) return;
+
+        const btn = document.getElementById('copyBtn');
+        const originalHTML = btn.innerHTML;
+        // Create the token object for copying (without display formatting)
+        const tokenData = {
+            "access_token": currentOfflineToken.access_token,
+            "refresh_token": currentOfflineToken.refresh_token,
+            "token_type": currentOfflineToken.token_type,
+            "expires": currentOfflineToken.expires,
+            "refresh_expires": currentOfflineToken.refresh_expires,
+            "scope": currentOfflineToken.scope
+        };
+
+        // Create temporary textarea element
+        const textarea = document.createElement('textarea');
+        textarea.value = JSON.stringify(tokenData, null, 2);
+        document.body.appendChild(textarea);
+        textarea.select();
+        textarea.setSelectionRange(0, 99999);
+        try {
+            const successful = document.execCommand('copy');
+            if (successful) {
+                btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                btn.style.background = '#10b981';
+
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.style.background = '{% settings_val "MAIN_COLOR" %}';
+                }, 2000);
+            } else {
+                throw new Error('Copy command failed');
+            }
+        } catch (err) {
+            console.error('Could not copy text: ', err);
+            btn.innerHTML = '<i class="fas fa-times"></i> Failed';
+            btn.style.background = '#dc2626';
+
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.style.background = '{% settings_val "MAIN_COLOR" %}';
+            }, 2000);
+        }
+        // Clean up
+        document.body.removeChild(textarea);
+    }
+    // Close modal when clicking outside
+    document.addEventListener('click', function(e) {
+        const modal = document.getElementById('tokenModal');
+        if (e.target === modal) {
+            closeTokenModal();
+        }
+    });
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeTokenModal();
+        }
+    });
+    // close auth window if open
+    window.addEventListener('beforeunload', function() {
+        if (authWindow && !authWindow.closed) {
+            authWindow.close();
+        }
+    });
 </script>

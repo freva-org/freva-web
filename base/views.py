@@ -92,7 +92,7 @@ class OIDCCallbackView(View):
     def get(self, request):
         code = request.GET.get('code')
 
-        is_offline_request = 'return_after_cli_token' in request.session
+        is_offline_request = 'request_offline_token' in request.session
 
         if not code:
             logger.error("No authorization code received in callback")
@@ -117,8 +117,11 @@ class OIDCCallbackView(View):
             if response.status_code == 200:
                 token_data = response.json()
 
-                # OFFLINE TOKEN FLOW - Download and close tab
-                if is_offline_request:                    
+                # OFFLINE TOKEN FLOW - Return HTML with postMessage to parent window
+                if is_offline_request:
+                    # Clean up session
+                    request.session.pop('request_offline_token', None)
+
                     formatted_token = {
                         "access_token": token_data.get('access_token'),
                         "refresh_token": token_data.get('refresh_token'),
@@ -131,18 +134,16 @@ class OIDCCallbackView(View):
                     return HttpResponse(f'''
                     <!DOCTYPE html>
                     <html>
-                    <head><title>CLI Token</title></head>
+                    <head><title>Token Retrieved</title></head>
                     <body>
                         <script>
                             const tokenData = {json.dumps(formatted_token)};
-                            const blob = new Blob([JSON.stringify(tokenData, null, 2)], {{type: 'application/json'}});
-                            const url = URL.createObjectURL(blob);
-                            const a = document.createElement('a');
-                            a.href = url;
-                            a.download = '.offline_token.json';
-                            document.body.appendChild(a);
-                            a.click();
-                            // Close immediately after download
+                            if (window.opener) {{
+                                window.opener.postMessage({{
+                                    type: 'OFFLINE_TOKEN_SUCCESS',
+                                    tokenData: tokenData
+                                }}, '*');
+                            }}
                             window.close();
                         </script>
                     </body>
@@ -177,7 +178,7 @@ class OIDCCallbackView(View):
             else:
                 logger.error(f"Token exchange failed: {response.status_code} - {response.text}")
                 if is_offline_request:
-                    return HttpResponse('<script>window.close();</script>')
+                    return JsonResponse({'success': False, 'error': 'Token exchange failed'})
                 else:
                     return render(request, 'base/home.html', {
                         'login_failed': True,
@@ -187,7 +188,7 @@ class OIDCCallbackView(View):
         except Exception as e:
             logger.exception(f"Callback processing failed: {e}")
             if is_offline_request:
-                return HttpResponse('<script>window.close();</script>')
+                return JsonResponse({'success': False, 'error': 'Authentication failed'})
             else:
                 return render(request, 'base/home.html', {
                     'login_failed': True,
@@ -235,88 +236,40 @@ def logout_view(request):
 
 
 @csrf_exempt
-def manual_refresh_token(request):
+def request_offline_token(request):
     """
-    API endpoint for MANUAL token refresh (called by frontend).
-    This is separate from automatic middleware refresh. (Re-New token button)
+    API endpoint to initiate offline token request.
+    Since offline token is accessible only via login
+    OIDC flow, we redirect to the login endpoint
     """
     if request.method != 'POST':
         return JsonResponse({'error': 'Method not allowed'}, status=405)
-    
+
     if not request.user.is_authenticated:
         return JsonResponse({'error': 'Not authenticated'}, status=401)
-    
-    refresh_token = request.session.get('refresh_token')
-    # the following condition is necessary to ensure that the refresh token is available
-    # and not expired before proceeding with the refresh logic. Otherwise user cannot
-    # manually refresh the token.
-    if not refresh_token:
-        return JsonResponse({'error': 'No refresh token available'}, status=400)
-    
-    refresh_expires = request.session.get('refresh_expires')
-    if refresh_expires and int(time.time()) >= refresh_expires:
-        return JsonResponse({'error': 'Refresh token expired'}, status=401)
-    
-    # cooldown logic same as middleware
-    last_refresh_attempt = request.session.get('last_refresh_attempt', 0)
-    current_time = int(time.time())
-    if (current_time - last_refresh_attempt) < 30: #30s buffer
-        return JsonResponse({'error': 'Please wait before refreshing again'}, status=429)
-    
-    # To prevent concurrent refresh attempts
-    refresh_key = f"refreshing_token_{request.session.session_key}"
-    if request.session.get(refresh_key):
-        return JsonResponse({'error': 'Token refresh already in progress'}, status=429)
-    
+
     try:
-        # store refresh attempt time
-        request.session['last_refresh_attempt'] = current_time
-        request.session[refresh_key] = True
+        # Set session flag for offline token request
+        request.session['request_offline_token'] = True
         request.session.modified = True
-        
-        data = {'refresh-token': refresh_token}
-        headers = {"Content-Type": "application/x-www-form-urlencoded"}
+        callback_url = request.build_absolute_uri('/callback')
+        params = {
+            'redirect_uri': callback_url,
+            'offline_access': 'true',
+            'prompt': 'login'
+        }
 
-        logger.info(f"Manual token refresh requested for user {request.user.username}")
-        response = requests.post(TOKEN_URL, headers=headers, data=data, timeout=10)
+        proxy_path = f"/api/freva-nextgen/auth/v2/login?{urlencode(params)}"
+        auth_url = request.build_absolute_uri(proxy_path)
 
-        if response.status_code == 200:
-            token_data = response.json()
-
-            # Update session with new tokens
-            request.session['access_token'] = token_data['access_token']
-            request.session['refresh_token'] = token_data['refresh_token']
-            request.session['token_expires'] = token_data['expires']
-            request.session['refresh_expires'] = token_data['refresh_expires']
-            # pop last_refresh_attempt to reset cooldown
-            request.session.pop('last_refresh_attempt', None)
-            request.session.modified = True
-
-            logger.info(f"Manual token refresh successful for user {request.user.username}")
-            # initi response to set cookie, then return JSON
-            json_response = JsonResponse({
-                'success': True,
-                'access_token': token_data['access_token'],
-                'expires': token_data['expires'],
-                'expires_in': token_data['expires'] - int(time.time()),
-                'message': 'Token refreshed successfully'
-            })
-            json_response = set_token_cookie(json_response, token_data)
-            return json_response
-        else:
-            logger.error(f"Manual token refresh failed: {response.status_code} - {response.text}")
-            return JsonResponse({
-                'error': f'Token refresh failed: {response.status_code}',
-                'details': response.text
-            }, status=400)
+        return JsonResponse({
+            'success': True,
+            'auth_url': auth_url
+        })
 
     except Exception as e:
-        logger.exception(f"Manual token refresh error for user {request.user.username}: {e}")
+        logger.exception(f"Offline token request failed: {e}")
         return JsonResponse({'error': 'Internal server error'}, status=500)
-    finally:
-        # pop the refresh lock
-        request.session.pop(refresh_key, None)
-        request.session.modified = True
 
 
 @csrf_exempt
@@ -482,24 +435,3 @@ def stacbrowser(request):
         }
     }
     return render(request, 'stacbrowser.html', context)
-
-class OIDCOfflineLoginView(View):
-    """
-    Store current URL and initiate offline token flow
-    """
-    def get(self, request):
-        current_url = request.META.get('HTTP_REFERER', '/')
-        request.session['return_after_cli_token'] = current_url
-        request.session.modified = True
-
-        callback_url = request.build_absolute_uri('/callback')
-
-        params = {
-            'redirect_uri': callback_url,
-            'offline_access': 'true',
-            'prompt': 'none'
-        }
-
-        proxy_path = f"/api/freva-nextgen/auth/v2/login?{urlencode(params)}"
-        full_login_url = request.build_absolute_uri(proxy_path)
-        return HttpResponseRedirect(full_login_url)

@@ -77,8 +77,12 @@ function isLastPage(totalNumber, currentPageNumber) {
    * @param {number} currentPageNumber - Current page number to compare to total number of pages
    * @return {boolean} Boolean indicating if current page is last page
    */
-  const totalPageNumber = totalNumber % constants.THREAD_NUMBER;
-  return currentPageNumber === totalPageNumber - 1;
+  if (totalNumber === 0) {
+    return true;
+  } else {
+    const totalPageNumber = Math.ceil(totalNumber / constants.THREAD_NUMBER);
+    return currentPageNumber === totalPageNumber - 1;
+  }
 }
 
 /*-------------------------------------------------------------------------------------------------
@@ -189,6 +193,9 @@ export async function handleThreadsRequest(
    * are more results) (boolean)
    */
   setLoading(true);
+  if (page === 0) {
+    setThreads([]);
+  }
   const response = await requestUserThreads(page, query ? query : undefined);
   setThreads((prevThreads) => [...prevThreads, ...response.threads]);
   setHasMore(response.hasMore);

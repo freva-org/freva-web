@@ -8,7 +8,7 @@ export default function useThreadSearch(query) {
   const [filteredThreads, setFilteredThreads] = useState([]);
   const [filteredThreadsLoading, setFilteredThreadsLoading] = useState(true);
   const [filteredHasMore, setFilteredHasMore] = useState(false);
-  const [filteredPageNumber, setFilteredPageNumber] = useState(1);
+  const [filteredPageNumber, setFilteredPageNumber] = useState(0);
 
   useEffect(() => {
     setFilteredThreads([]);
@@ -16,7 +16,7 @@ export default function useThreadSearch(query) {
 
   useEffect(() => {
     if (!isEmpty(query)) {
-      search(query); //handle no results (so that not unfiltered threads are shown)
+      search(query);
     }
   }, [query]);
 

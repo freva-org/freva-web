@@ -6,7 +6,7 @@ export default function useGeneralThreads() {
   const [threads, setThreads] = useState([]);
   const [threadsLoading, setThreadsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
-  const [pageNumber, setPageNumber] = useState(1);
+  const [pageNumber, setPageNumber] = useState(0);
 
   useEffect(() => {
     handleThreadsRequest(

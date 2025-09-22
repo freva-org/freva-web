@@ -29,7 +29,6 @@ function SidePanel() {
 
   const observer = useRef();
   const lastThreadRef = useCallback(
-    // !!!!!!!!!!!!!! hanlde last page load load bugging!
     (node) => {
       if (loading) {
         return;
@@ -38,7 +37,6 @@ function SidePanel() {
         observer.current.disconnect();
       }
       observer.current = new IntersectionObserver((entries) => {
-        // TODO: handle if results list is very short and ref visible (maybe already handled by hasMore)
         if (entries[0].isIntersecting) {
           if (query) {
             setFilteredPageNumber(

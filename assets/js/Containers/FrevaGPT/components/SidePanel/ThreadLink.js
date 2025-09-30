@@ -61,8 +61,8 @@ function ThreadLink({ element, onChangeName }) {
     <>
       <div
         className="mb-2 color d-flex justify-content-between"
-        onMouseEnter={() => setShowOptions(true)}
-        onMouseLeave={() => setShowOptions(false)}
+        onMouseOver={() => setShowOptions(true)}
+        onMouseOut={() => setShowOptions(false)}
       >
         <OverlayTrigger
           key={`${element.thread_id}-tooltip`}

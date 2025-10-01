@@ -98,8 +98,8 @@ def reverse_proxy(request, path):
             headers['Authorization'] = f'Bearer {access_token}'
     
     try:
+        all_parameters = get_all_parameters(query_string)
         if request.method == "GET":
-            all_parameters = get_all_parameters(query_string)
             response = requests.request(
                 method="GET",
                 url=api_url,
@@ -113,6 +113,7 @@ def reverse_proxy(request, path):
                 method=request.method,
                 url=api_url,
                 data=request.body,
+                params=all_parameters,
                 headers=headers,
                 timeout=100,
             )

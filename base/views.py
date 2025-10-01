@@ -402,6 +402,14 @@ def restart(request):
 
     return render(request, "base/home.html")
 
+@login_required()
+def token_health_check(request):
+    """
+    An endpoint to trigger token refresh middleware.
+    Returns only success status, instead of making the
+    token data available to JS.
+    """
+    return JsonResponse({'status': 'ok'})
 
 @login_required()
 def stacbrowser(request):

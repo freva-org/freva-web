@@ -64,9 +64,12 @@ def stac_catalogue(request, flavour, unique_key):
         f"{settings.DATA_BROWSER_HOST}/api/freva-nextgen/databrowser/stac-catalogue/{flavour}/{unique_key}",
     )
 
-def flavours_all_methods(request):
+def flavours_all_methods(request, flavour_name=None):
     """Handle ALL requests to flavours endpoint"""
-    api_url = f"{settings.DATA_BROWSER_HOST}/api/freva-nextgen/databrowser/flavours/"
+    if flavour_name:
+        api_url = f"{settings.DATA_BROWSER_HOST}/api/freva-nextgen/databrowser/flavours/{flavour_name}"
+    else:
+        api_url = f"{settings.DATA_BROWSER_HOST}/api/freva-nextgen/databrowser/flavours"
     return reverse_proxy(request, api_url)
 def get_all_parameters(query_string):
     query_dict = QueryDict(query_string)

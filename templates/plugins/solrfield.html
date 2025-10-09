@@ -14,6 +14,8 @@
 
 <script>
   $(document).ready(function() {
+    (function() {
+      let lastInputTerm = "";
       $("#{{ attrs.id }}").select2({
           {% if not editable %}
               minimumResultsForSearch: -1,
@@ -46,6 +48,7 @@
 
               url: function (term, page) {
                   term=term.replace('/','');
+                  lastInputTerm = term;
                   const tmp_data = {
                       facets : '{{facet}}'
                   };
@@ -63,11 +66,12 @@
               results: function (data, page) { // parse the results into the format expected by Select2.
                   const res_data = [];
                   $.each(data['facets']['{{facet}}'], function(index,value){
-                      if(index%2 == 0){
+                      if(index%2 == 0 && value.toLowerCase().includes(lastInputTerm.toLowerCase())){
                           const tmp = {'id': value,'text': value};
                           res_data.push(tmp);
                       }
                   });
+                  lastInputTerm = "";
                   return {results: res_data};
               },
 
@@ -81,5 +85,6 @@
               }
           },
       });
+    })()
   });
 </script>

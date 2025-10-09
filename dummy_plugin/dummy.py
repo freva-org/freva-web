@@ -6,7 +6,7 @@ from pathlib import Path
 from subprocess import PIPE, run
 
 from evaluation_system.api.parameters import (
-    Directory,
+    SolrField,
     Float,
     InputDirectory,
     Integer,
@@ -47,6 +47,16 @@ class DummyPlugin(PluginAbstract):
             options={"tas": "tas", "pr": "pr"},
             help="An input variable",
         ),
+        SolrField(
+            name="project",
+            mandatory=False,
+            facet="project",
+            help=(
+                "Select the project to use (e.g. cmip6, cordex)"
+            ),
+            max_items=1,
+            default="cmip6",
+        )
     )
     _runs: list = []
     _template = "${number} - $something - $other"

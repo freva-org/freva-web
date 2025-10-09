@@ -6,12 +6,12 @@ from pathlib import Path
 from subprocess import PIPE, run
 
 from evaluation_system.api.parameters import (
-    SolrField,
     Float,
     InputDirectory,
     Integer,
     ParameterDictionary,
     SelectField,
+    SolrField,
     String,
 )
 from evaluation_system.api.plugin import PluginAbstract

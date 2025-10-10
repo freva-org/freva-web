@@ -42,7 +42,6 @@
       $.getJSON(metadataUrl())
         .done(buildLocalChoices)
         .fail(function() {
-          console.warn("metadata fetch failed for {{facet}}");
           localChoices = [];
         });
 
@@ -97,5 +96,6 @@
               }
           },
       });
+    })()
   });
 </script>

@@ -4,12 +4,12 @@ import PropTypes from "prop-types";
 import ThreadLink from "./ThreadLink";
 
 export default function ThreadList({ threadList, setThreadList }) {
-  function updateThreadName(thread_details) {
+  function updateThreadName(threadDetails) {
     const threadListCopy = structuredClone(threadList);
     const threadIndex = threadListCopy.findIndex(
-      (elem) => elem.thread_id === thread_details.id
+      (elem) => elem.thread_id === threadDetails.id
     );
-    threadListCopy[threadIndex].topic = thread_details.topic;
+    threadListCopy[threadIndex].topic = threadDetails.topic;
     setThreadList(threadListCopy);
   }
 

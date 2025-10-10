@@ -76,7 +76,7 @@ function SidePanel() {
 
   return (
     <>
-      <Card className="my-2 shadow-sm">
+      <Card className="shadow-sm">
         <Card.Header className="outline-secondary border-0 p-3 rounded-top text-start card-header shadow-sm">
           Chats
         </Card.Header>

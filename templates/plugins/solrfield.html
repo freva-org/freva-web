@@ -3,7 +3,7 @@
 <input
   type="hidden"
   class="col-md-12 col-xs-12 {{attrs.class}}"
-  value="{% if value %}{{ value|safe }}{%endif%}"
+  value="{% if value %}{{ value|safe }}{% endif %}"
   id="{{ attrs.id }}"
   name="{{name}}"
   style="margin: 0px; padding: 0px"
@@ -14,65 +14,81 @@
 
 <script>
   $(document).ready(function() {
-      $("#{{ attrs.id }}").select2({
+      var $el = $("#{{ attrs.id }}");
+      var isMultiple = ('{{multiple}}' === 'True');
+      var localChoices = [];
+      var MAX_RESULTS = 200;
+
+      function metadataUrl() {
+          const tmp_data = { facets : '{{facet}}' };
+          const tmp_data2 = getActiveFacets('{{facet}}','{{group}}');
+          let res = '/api/freva-nextgen/databrowser/metadata-search/freva/file?';
+          $.each(tmp_data, function(index, value){
+              res += index+'='+value+'&';
+          });
+          res += tmp_data2 + '{{predefined_facets|dict_to_url}}';
+          if (res.slice(-1) === "&") res = res.slice(0, -1);
+          return res;
+      }
+
+      function buildLocalChoices(data) {
+          localChoices = [];
+          var facetArr = (data && data['facets'] && data['facets']['{{facet}}']) || [];
+          $.each(facetArr, function(index, value){
+              if (index % 2 === 0) localChoices.push({ id: value, text: value });
+          });
+      }
+
+      $.getJSON(metadataUrl())
+        .done(buildLocalChoices)
+        .fail(function() {
+          console.warn("metadata fetch failed for {{facet}}");
+          localChoices = [];
+        });
+
+      $el.select2({
           {% if not editable %}
               minimumResultsForSearch: -1,
           {% endif %}
           placeholder: "Select a {{ facet }}",
           allowClear: true,
           initSelection : function (element, callback) {
-              if('{{multiple}}'=='True'){
-                  var data = [];
-                  var vals = element.val().split(",")
-                  $.each(vals, function(key,value){
-                      data.push({
-                          id: value,
-                          text: value
-                      });
+              var v = element.val();
+              if (isMultiple) {
+                  if (!v) { callback([]); return; }
+                  var out = [];
+                  v.split(",").forEach(function(val){
+                      var match = localChoices.find(function(it){ return it.id === val || it.text === val; });
+                      if (match) out.push(match); else out.push({ id: val, text: val });
                   });
+                  callback(out);
               } else {
-                  var data = {id: element.val(), text: element.val()};
+                  if (!v) { callback(null); return; }
+                  var match = localChoices.find(function(it){ return it.id === v || it.text === v; });
+                  if (match) callback(match); else callback({ id: v, text: v });
               }
-              callback(data);
           },
           {% if multiple %}
               multiple:true,
           {%endif%}
 
-          ajax: { // instead of writing the function to execute the request we use Select2's convenient helper
-              dataType: 'json',
-              cache: true,
-              delay: 250, // Delay before making the AJAX request (in milliseconds)
-
-              url: function (term, page) {
-                  term=term.replace('/','');
-                  const tmp_data = {
-                      facets : '{{facet}}'
-                  };
-                  const tmp_data2 = getActiveFacets('{{facet}}','{{group}}');
-                  let res = '/api/freva-nextgen/databrowser/metadata-search/freva/file?';
-                  $.each(tmp_data, function(index, value){
-                      res += index+'='+value+'&';
-                  });
-                  res += tmp_data2 + '{{predefined_facets|dict_to_url}}';
-                  if (res.slice(-1) === "&") {
-                    res = res.slice(0, -1)
-                  }
-                  return res;
-              },
-              results: function (data, page) { // parse the results into the format expected by Select2.
-                  const res_data = [];
-                  $.each(data['facets']['{{facet}}'], function(index,value){
-                      if(index%2 == 0){
-                          const tmp = {'id': value,'text': value};
-                          res_data.push(tmp);
+          query: function(q) {
+              var term = (q.term || "").toLowerCase();
+              var results = [];
+              if (!term) {
+                  results = localChoices.slice(0, MAX_RESULTS);
+              } else {
+                  for (var i = 0; i < localChoices.length; i++) {
+                      var item = localChoices[i];
+                      if (item.text && item.text.toLowerCase().indexOf(term) !== -1) {
+                          results.push(item);
+                          if (results.length >= MAX_RESULTS) break;
                       }
-                  });
-                  return {results: res_data};
-              },
-
+                  }
+              }
+              q.callback({ results: results });
           },
-          //Allow manually entered text in drop down.
+
           createSearchChoice:function(term, data) {
               if ( $(data).filter( function() {
                   return this.text.localeCompare(term) === 0;

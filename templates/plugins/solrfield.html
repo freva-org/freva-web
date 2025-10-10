@@ -3,7 +3,7 @@
 <input
   type="hidden"
   class="col-md-12 col-xs-12 {{attrs.class}}"
-  value="{% if value %}{{ value|safe }}{% endif %}"
+  value="{% if value %}{{ value|safe }}{%endif%}"
   id="{{ attrs.id }}"
   name="{{name}}"
   style="margin: 0px; padding: 0px"
@@ -14,80 +14,91 @@
 
 <script>
   $(document).ready(function() {
-      var $el = $("#{{ attrs.id }}");
-      var isMultiple = ('{{multiple}}' === 'True');
-      var localChoices = [];
-      var MAX_RESULTS = 200;
-
-      function metadataUrl() {
+    (function() {
+      let cachedData = null;
+      let isFetching = false;
+      let pendingCallbacks = [];
+      
+      function fetchData(callback) {
+          if (cachedData) {
+              callback(cachedData);
+              return;
+          }
+          
+          pendingCallbacks.push(callback);
+          if (isFetching) return;
+          
+          isFetching = true;
           const tmp_data = { facets : '{{facet}}' };
           const tmp_data2 = getActiveFacets('{{facet}}','{{group}}');
-          let res = '/api/freva-nextgen/databrowser/metadata-search/freva/file?';
+          let url = '/api/freva-nextgen/databrowser/metadata-search/freva/file?';
           $.each(tmp_data, function(index, value){
-              res += index+'='+value+'&';
+              url += index+'='+value+'&';
           });
-          res += tmp_data2 + '{{predefined_facets|dict_to_url}}';
-          if (res.slice(-1) === "&") res = res.slice(0, -1);
-          return res;
+          url += tmp_data2 + '{{predefined_facets|dict_to_url}}';
+          if (url.slice(-1) === "&") url = url.slice(0, -1);
+          
+          $.getJSON(url)
+              .done(function(data) {
+                  cachedData = data;
+                  while (pendingCallbacks.length > 0) {
+                      pendingCallbacks.shift()(data);
+                  }
+              })
+              .fail(function() {
+                  while (pendingCallbacks.length > 0) {
+                      pendingCallbacks.shift()(null);
+                  }
+              })
+              .always(function() {
+                  isFetching = false;
+              });
       }
-
-      function buildLocalChoices(data) {
-          localChoices = [];
-          var facetArr = (data && data['facets'] && data['facets']['{{facet}}']) || [];
-          $.each(facetArr, function(index, value){
-              if (index % 2 === 0) localChoices.push({ id: value, text: value });
-          });
-      }
-
-      $.getJSON(metadataUrl())
-        .done(buildLocalChoices)
-        .fail(function() {
-          localChoices = [];
-        });
-
-      $el.select2({
+      
+      $("#{{ attrs.id }}").select2({
           {% if not editable %}
               minimumResultsForSearch: -1,
           {% endif %}
           placeholder: "Select a {{ facet }}",
           allowClear: true,
           initSelection : function (element, callback) {
-              var v = element.val();
-              if (isMultiple) {
-                  if (!v) { callback([]); return; }
-                  var out = [];
-                  v.split(",").forEach(function(val){
-                      var match = localChoices.find(function(it){ return it.id === val || it.text === val; });
-                      if (match) out.push(match); else out.push({ id: val, text: val });
+              if('{{multiple}}'=='True'){
+                  var data = [];
+                  var vals = element.val().split(",")
+                  $.each(vals, function(key,value){
+                      data.push({
+                          id: value,
+                          text: value
+                      });
                   });
-                  callback(out);
               } else {
-                  if (!v) { callback(null); return; }
-                  var match = localChoices.find(function(it){ return it.id === v || it.text === v; });
-                  if (match) callback(match); else callback({ id: v, text: v });
+                  var data = {id: element.val(), text: element.val()};
               }
+              callback(data);
           },
           {% if multiple %}
               multiple:true,
           {%endif%}
 
           query: function(q) {
-              var term = (q.term || "").toLowerCase();
-              var results = [];
-              if (!term) {
-                  results = localChoices.slice(0, MAX_RESULTS);
-              } else {
-                  for (var i = 0; i < localChoices.length; i++) {
-                      var item = localChoices[i];
-                      if (item.text && item.text.toLowerCase().indexOf(term) !== -1) {
-                          results.push(item);
-                          if (results.length >= MAX_RESULTS) break;
-                      }
+              var term = (q.term || "").replace('/','').toLowerCase();
+              
+              fetchData(function(data) {
+                  if (!data) {
+                      q.callback({ results: [] });
+                      return;
                   }
-              }
-              q.callback({ results: results });
+                  
+                  const res_data = [];
+                  $.each(data['facets']['{{facet}}'], function(index,value){
+                      if(index%2 == 0 && (!term || value.toLowerCase().includes(term))){
+                          res_data.push({'id': value,'text': value});
+                      }
+                  });
+                  q.callback({results: res_data});
+              });
           },
-
+          
           createSearchChoice:function(term, data) {
               if ( $(data).filter( function() {
                   return this.text.localeCompare(term) === 0;
@@ -95,6 +106,11 @@
                   return {id:term, text:term};
               }
           },
+      });
+      
+      $("#{{ attrs.id }}").on('select2-close select2:close', function() {
+          cachedData = null;
+          pendingCallbacks = [];
       });
     })()
   });

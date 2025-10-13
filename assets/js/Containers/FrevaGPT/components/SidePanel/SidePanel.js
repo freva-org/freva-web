@@ -74,8 +74,11 @@ function SidePanel({ showThreadHistory, setShowThreadHistory }) {
 
   return (
     <Offcanvas show={showThreadHistory} onHide={setShowThreadHistory}>
+      <Offcanvas.Header closeButton>
+        <Offcanvas.Title>Chat History</Offcanvas.Title>
+      </Offcanvas.Header>
       <Offcanvas.Header>
-        <Card className="mb-2 w-100">
+        <Card className="w-100">
           <Card.Body>
             <Card.Title>Search</Card.Title>
             <FormControl

@@ -10,7 +10,6 @@ import queryString from "query-string";
 import {
   OverlayTrigger,
   Tooltip,
-  Badge,
   Modal,
   Button,
   FormControl,
@@ -21,7 +20,6 @@ import { FaPen } from "react-icons/fa";
 import { fetchWithAuth } from "../../utils";
 
 function ThreadLink({ element, onChangeName }) {
-  const [showOptions, setShowOptions] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [topic, setTopic] = useState(element.topic);
 
@@ -59,11 +57,7 @@ function ThreadLink({ element, onChangeName }) {
 
   return (
     <>
-      <div
-        className="mb-2 color d-flex justify-content-between"
-        onMouseOver={() => setShowOptions(true)}
-        onMouseOut={() => setShowOptions(false)}
-      >
+      <div className="mb-2 color d-flex justify-content-between">
         <OverlayTrigger
           key={`${element.thread_id}-tooltip`}
           overlay={<Tooltip>{element.topic}</Tooltip>}
@@ -76,15 +70,12 @@ function ThreadLink({ element, onChangeName }) {
             {element.topic}
           </a>
         </OverlayTrigger>
-        {showOptions ? (
-          <Badge
-            bg="secondary"
+        <div className="w-5">
+          <FaPen
             style={{ cursor: "pointer" }}
             onClick={() => setShowModal(true)}
-          >
-            <FaPen />
-          </Badge>
-        ) : null}
+          />
+        </div>
       </div>
 
       <Modal

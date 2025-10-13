@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 
-import { Card, FormControl, Row } from "react-bootstrap";
+import { FormControl, Offcanvas, Card } from "react-bootstrap";
+
+import PropTypes from "prop-types";
 
 import { isEmpty } from "lodash";
 
@@ -11,7 +13,7 @@ import TextPlaceholder from "../Snippets/TextPlaceholder";
 
 import ThreadList from "./ThreadList";
 
-function SidePanel() {
+function SidePanel({ showThreadHistory, setShowThreadHistory }) {
   const [loading, setLoading] = useState(true);
 
   // unfiltered threads for default display
@@ -62,10 +64,6 @@ function SidePanel() {
     setQuery(e.target.value);
   }
 
-  const threadStyle = {
-    maxHeight: document.documentElement.clientHeight * 0.5,
-  };
-
   function renderThreads(list, setter) {
     if (!loading && isEmpty(list)) {
       return <p>No chats found</p>;
@@ -75,13 +73,11 @@ function SidePanel() {
   }
 
   return (
-    <>
-      <Card className="shadow-sm">
-        <Card.Header className="outline-secondary border-0 p-3 rounded-top text-start card-header shadow-sm">
-          Chats
-        </Card.Header>
-        <Card.Body className="p-3 py-2">
-          <div>
+    <Offcanvas show={showThreadHistory} onHide={setShowThreadHistory}>
+      <Offcanvas.Header>
+        <Card className="mb-2 w-100">
+          <Card.Body>
+            <Card.Title>Search</Card.Title>
             <FormControl
               className="my-2"
               id="search"
@@ -90,19 +86,29 @@ function SidePanel() {
               onChange={handleSearchInput}
               value={query}
             />
-          </div>
+          </Card.Body>
+        </Card>
+      </Offcanvas.Header>
 
-          <Row className="overflow-auto" style={threadStyle}>
+      <Offcanvas.Body>
+        <Card>
+          <Card.Body>
+            <Card.Title>{query ? "Filtered History" : "History"}</Card.Title>
             {query
               ? renderThreads(filteredThreads, setFilteredThreads)
               : renderThreads(threads, setThreads)}
             {loading ? <TextPlaceholder /> : null}
             <div ref={lastThreadRef} className="p-1"></div>
-          </Row>
-        </Card.Body>
-      </Card>
-    </>
+          </Card.Body>
+        </Card>
+      </Offcanvas.Body>
+    </Offcanvas>
   );
 }
+
+SidePanel.propTypes = {
+  showThreadHistory: PropTypes.bool,
+  setShowThreadHistory: PropTypes.func,
+};
 
 export default SidePanel;

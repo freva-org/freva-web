@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import PropTypes from "prop-types";
 
 import { browserHistory } from "react-router";
@@ -8,20 +8,26 @@ import { isEmpty } from "lodash";
 import queryString from "query-string";
 
 import {
-  OverlayTrigger,
-  Tooltip,
   Modal,
   Button,
   FormControl,
+  ListGroup,
+  Col,
+  Row,
 } from "react-bootstrap";
 
 import { FaPen } from "react-icons/fa";
 
 import { fetchWithAuth } from "../../utils";
+import useHoverThread from "../../customHooks/useHoverThread";
 
 function ThreadLink({ element, onChangeName }) {
   const [showModal, setShowModal] = useState(false);
   const [topic, setTopic] = useState(element.topic);
+  const ref = useRef(null);
+  const [hovered, setHovered] = useState(false);
+
+  useHoverThread({ hovered, setHovered, ref });
 
   function changeToThread(thread) {
     browserHistory.push({
@@ -57,26 +63,25 @@ function ThreadLink({ element, onChangeName }) {
 
   return (
     <>
-      <div className="mb-2 color d-flex justify-content-between">
-        <OverlayTrigger
-          key={`${element.thread_id}-tooltip`}
-          overlay={<Tooltip>{element.topic}</Tooltip>}
-        >
-          <a
-            href=""
-            className="text-truncate"
-            onClick={() => changeToThread(element.thread_id)}
-          >
-            {element.topic}
-          </a>
-        </OverlayTrigger>
-        <div className="w-5">
-          <FaPen
-            style={{ cursor: "pointer" }}
-            onClick={() => setShowModal(true)}
-          />
-        </div>
-      </div>
+      <ListGroup.Item ref={ref} onMouseEnter={() => setHovered(true)}>
+        <Row>
+          <Col>
+            <a href="" onClick={() => changeToThread(element.thread_id)}>
+              {element.topic}
+            </a>
+          </Col>
+          {hovered ? (
+            <Col
+              md={1}
+              role="button"
+              className="align-content-center color"
+              onClick={() => setShowModal(true)}
+            >
+              <FaPen />
+            </Col>
+          ) : null}
+        </Row>
+      </ListGroup.Item>
 
       <Modal
         size="s"

@@ -15,7 +15,46 @@
 <script>
   $(document).ready(function() {
     (function() {
-      let lastInputTerm = "";
+      let cachedData = null;
+      let isFetching = false;
+      let pendingCallbacks = [];
+      
+      function fetchData(callback) {
+          if (cachedData) {
+              callback(cachedData);
+              return;
+          }
+          
+          pendingCallbacks.push(callback);
+          if (isFetching) return;
+          
+          isFetching = true;
+          const tmp_data = { facets : '{{facet}}' };
+          const tmp_data2 = getActiveFacets('{{facet}}','{{group}}');
+          let url = '/api/freva-nextgen/databrowser/metadata-search/freva/file?';
+          $.each(tmp_data, function(index, value){
+              url += index+'='+value+'&';
+          });
+          url += tmp_data2 + '{{predefined_facets|dict_to_url}}';
+          if (url.slice(-1) === "&") url = url.slice(0, -1);
+          
+          $.getJSON(url)
+              .done(function(data) {
+                  cachedData = data;
+                  while (pendingCallbacks.length > 0) {
+                      pendingCallbacks.shift()(data);
+                  }
+              })
+              .fail(function() {
+                  while (pendingCallbacks.length > 0) {
+                      pendingCallbacks.shift()(null);
+                  }
+              })
+              .always(function() {
+                  isFetching = false;
+              });
+      }
+      
       $("#{{ attrs.id }}").select2({
           {% if not editable %}
               minimumResultsForSearch: -1,
@@ -41,42 +80,25 @@
               multiple:true,
           {%endif%}
 
-          ajax: { // instead of writing the function to execute the request we use Select2's convenient helper
-              dataType: 'json',
-              cache: true,
-              delay: 250, // Delay before making the AJAX request (in milliseconds)
-
-              url: function (term, page) {
-                  term=term.replace('/','');
-                  lastInputTerm = term;
-                  const tmp_data = {
-                      facets : '{{facet}}'
-                  };
-                  const tmp_data2 = getActiveFacets('{{facet}}','{{group}}');
-                  let res = '/api/freva-nextgen/databrowser/metadata-search/freva/file?';
-                  $.each(tmp_data, function(index, value){
-                      res += index+'='+value+'&';
-                  });
-                  res += tmp_data2 + '{{predefined_facets|dict_to_url}}';
-                  if (res.slice(-1) === "&") {
-                    res = res.slice(0, -1)
+          query: function(q) {
+              var term = (q.term || "").replace('/','').toLowerCase();
+              
+              fetchData(function(data) {
+                  if (!data) {
+                      q.callback({ results: [] });
+                      return;
                   }
-                  return res;
-              },
-              results: function (data, page) { // parse the results into the format expected by Select2.
+                  
                   const res_data = [];
                   $.each(data['facets']['{{facet}}'], function(index,value){
-                      if(index%2 == 0 && value.toLowerCase().includes(lastInputTerm.toLowerCase())){
-                          const tmp = {'id': value,'text': value};
-                          res_data.push(tmp);
+                      if(index%2 == 0 && (!term || value.toLowerCase().includes(term))){
+                          res_data.push({'id': value,'text': value});
                       }
                   });
-                  lastInputTerm = "";
-                  return {results: res_data};
-              },
-
+                  q.callback({results: res_data});
+              });
           },
-          //Allow manually entered text in drop down.
+          
           createSearchChoice:function(term, data) {
               if ( $(data).filter( function() {
                   return this.text.localeCompare(term) === 0;
@@ -84,6 +106,11 @@
                   return {id:term, text:term};
               }
           },
+      });
+      
+      $("#{{ attrs.id }}").on('select2-close select2:close', function() {
+          cachedData = null;
+          pendingCallbacks = [];
       });
     })()
   });

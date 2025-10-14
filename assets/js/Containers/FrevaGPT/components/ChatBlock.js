@@ -56,13 +56,12 @@ function ChatBlock({ onFetchEditedData }) {
   }
 
   function getConversationVariantsUntilIndex(input, index) {
-
     // only start new request if content was altered
     if (!isEmpty(input)) {
-      const variantArray = conversation.map(elem => elem.variant)
-      const variantListUntilInput = variantArray.slice(0, index)
-      
-      onFetchEditedData(input, variantListUntilInput)
+      const variantArray = conversation.map((elem) => elem.variant);
+      const variantListUntilInput = variantArray.slice(0, index);
+
+      onFetchEditedData(input, variantListUntilInput);
     }
   }
 

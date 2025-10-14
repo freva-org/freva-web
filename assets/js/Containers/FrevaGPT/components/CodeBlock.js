@@ -21,7 +21,7 @@ function CodeBlock({ showCode, content }) {
   useEffect(() => {
     setLocalShowCode(showCode);
   }, [showCode]);
-  
+
   const [localShowCode, setLocalShowCode] = useState();
   const [showToast, setShowToast] = useState(false);
 

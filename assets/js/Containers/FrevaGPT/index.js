@@ -168,7 +168,7 @@ function FrevaGPT() {
       input,
       thread_id: thread,
       chatbot: botModel,
-      chatvariants
+      chatvariants,
     };
 
     // response of a new bot request is streamed
@@ -326,7 +326,7 @@ function FrevaGPT() {
         >
           <Row className="overflow-auto position-relative" id="chatContainer">
             <Col md={12}>
-              <ChatBlock onFetchEditedData={handleSubmit}/>
+              <ChatBlock onFetchEditedData={handleSubmit} />
 
               <PendingAnswerComponent
                 content={dynamicAnswer}

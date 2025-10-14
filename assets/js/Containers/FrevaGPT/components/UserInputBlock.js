@@ -20,7 +20,7 @@ class UserInputBlock extends React.Component {
     this.state = {
       showEditBar: false,
       renderInput: false,
-      editedInput: ""
+      editedInput: "",
     };
   }
 
@@ -44,7 +44,7 @@ class UserInputBlock extends React.Component {
   }
 
   handleEdit(e) {
-    this.setState({editedInput: e.target.value});
+    this.setState({ editedInput: e.target.value });
   }
 
   renderUserInputCard() {
@@ -59,7 +59,9 @@ class UserInputBlock extends React.Component {
           className="shadow-sm card-body border-0 border-bottom"
           style={{ backgroundColor: "#eee" }}
         >
-          {this.state.editedInput ? this.state.editedInput : this.props.content.content}
+          {this.state.editedInput
+            ? this.state.editedInput
+            : this.props.content.content}
         </Card>
         <div className="w-100 d-flex justify-content-end p-0 h-5">
           <Button
@@ -109,7 +111,15 @@ class UserInputBlock extends React.Component {
             >
               Cancel
             </Button>
-            <Button variant="info" onClick={() => {this.props.onSend(this.state.editedInput, this.props.index); this.setState({renderInput: false})}}>Send</Button>
+            <Button
+              variant="info"
+              onClick={() => {
+                this.props.onSend(this.state.editedInput, this.props.index);
+                this.setState({ renderInput: false });
+              }}
+            >
+              Send
+            </Button>
           </div>
         </Card>
         <div className="w-100 d-flex justify-content-end p-0">

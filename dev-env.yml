@@ -43,6 +43,7 @@ dependencies:
     - types-requests
     - types-toml
     - hurry.filesize
+    - unidecode
   - pygtail
   - pylint
   - pyjwt

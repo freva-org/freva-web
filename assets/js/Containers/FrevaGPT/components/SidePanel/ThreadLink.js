@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 
 import { browserHistory } from "react-router";
@@ -26,8 +26,23 @@ function ThreadLink({ element, onChangeName }) {
   const [topic, setTopic] = useState(element.topic);
   const ref = useRef(null);
   const [hovered, setHovered] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showEditButton, setShowEditButton] = useState(false);
 
   useHoverThread({ hovered, setHovered, ref });
+
+  useEffect(() => {
+    const minWidth = 768; // Minimum width for desktop devices
+    setIsMobile(window.innerWidth < minWidth || screen.width < minWidth);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile) {
+      setShowEditButton(true); // alsway show edit button on mobile devices
+    } else {
+      setShowEditButton(hovered); // only show edit button on hover for desktop devices
+    }
+  }, [isMobile, hovered]);
 
   function changeToThread(thread) {
     browserHistory.push({
@@ -70,7 +85,8 @@ function ThreadLink({ element, onChangeName }) {
               {element.topic}
             </a>
           </Col>
-          {hovered ? (
+
+          {showEditButton ? (
             <Col
               md={1}
               role="button"

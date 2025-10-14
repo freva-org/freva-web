@@ -54,7 +54,9 @@ jobs:
         run: |
           npm install
           npm run build-production
+          make setup-stacbrowser
           rm -fr node_modules
+          rm -rf stac-browser
 
       - name: Create .dockerignore-based release tarball
         run: |

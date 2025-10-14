@@ -18,7 +18,8 @@ const databrowserInitialState = {
   facetLoading: false,
   fileLoading: false,
   flavours: ["freva"],
-  selectedFlavour: constants.DEFAULT_FLAVOUR,
+  flavourDetails: [],
+  selectedFlavour: window.EFFECTIVE_DEFAULT_FLAVOUR,
 };
 
 export const databrowserReducer = (state = databrowserInitialState, action) => {
@@ -84,8 +85,15 @@ export const databrowserReducer = (state = databrowserInitialState, action) => {
     }
     case constants.SET_METADATA:
       return { ...state, metadata: action.metadata };
-    case constants.SET_FLAVOURS:
-      return { ...state, flavours: action.payload.flavours };
+    case constants.SET_FLAVOURS: {
+      const flavourDetails = action.payload.flavours || [];
+      const flavourNames = flavourDetails.map((f) => f.flavour_name);
+      return {
+        ...state,
+        flavours: flavourNames,
+        flavourDetails,
+      };
+    }
     case constants.LOAD_FILES:
       return {
         ...state,

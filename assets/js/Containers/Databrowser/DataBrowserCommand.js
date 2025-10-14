@@ -56,11 +56,12 @@ function DataBrowserCommandImpl(props) {
   }
 
   function getFullCliCommand(dateSelectorToCli, bboxSelectorToCli) {
+    const effectiveFlavour =
+      props.selectedFlavour ||
+      window.EFFECTIVE_DEFAULT_FLAVOUR ||
+      constants.DEFAULT_FLAVOUR;
     return (
-      "freva databrowser " +
-      (props.selectedFlavour !== constants.DEFAULT_FLAVOUR
-        ? `--flavour ${props.selectedFlavour} `
-        : "") +
+      "freva-client databrowser data-search " +
       (props.minDate ? `time=${props.minDate}to${props.maxDate} ` : "") +
       (props.minLon
         ? `bbox=${props.minLon},${props.maxLon},${props.minLat},${props.maxLat} `
@@ -76,20 +77,22 @@ function DataBrowserCommandImpl(props) {
         : "") +
       (bboxSelectorToCli && props.minLon
         ? ` --bbox-select ${bboxSelectorToCli}`
-        : "")
+        : "") +
+      (effectiveFlavour !== "freva" ? ` --flavour ${effectiveFlavour}` : "")
     ).trimEnd();
   }
 
   function renderCLICommand() {
     const dateSelectorToCli = getCliTimeSelector();
     const bboxSelectorToCli = getCliBBoxSelector();
+    const effectiveFlavour =
+      props.selectedFlavour ||
+      window.EFFECTIVE_DEFAULT_FLAVOUR ||
+      constants.DEFAULT_FLAVOUR;
 
     return (
       <pre className="mb-1" style={{ whiteSpace: "pre-wrap" }}>
-        freva databrowser
-        {props.selectedFlavour !== constants.DEFAULT_FLAVOUR
-          ? ` --flavour ${props.selectedFlavour}`
-          : ""}
+        freva-client databrowser data-search
         {props.minDate && (
           <React.Fragment>
             &nbsp;time=
@@ -127,15 +130,25 @@ function DataBrowserCommandImpl(props) {
             <span className="fw-bold">{bboxSelectorToCli}</span>
           </React.Fragment>
         )}
+        {effectiveFlavour !== "freva" && (
+          <React.Fragment>
+            &nbsp;--flavour <span className="fw-bold">{effectiveFlavour}</span>
+          </React.Fragment>
+        )}
       </pre>
     );
   }
 
   function getFullPythonCommand(dateSelectorToCli, bboxSelectorToCli) {
     let args = [];
-
-    if (props.selectedFlavour !== constants.DEFAULT_FLAVOUR) {
-      args.push(`flavour="${props.selectedFlavour}"`);
+    const effectiveFlavour =
+      props.selectedFlavour ||
+      window.EFFECTIVE_DEFAULT_FLAVOUR ||
+      constants.DEFAULT_FLAVOUR;
+    // if it's only freva, we don't need to specify flavour=, in
+    // all other cases we do
+    if (effectiveFlavour !== "freva") {
+      args.push(`flavour="${effectiveFlavour}"`);
     }
 
     args = [
@@ -162,13 +175,15 @@ function DataBrowserCommandImpl(props) {
       }
     }
 
-    return `freva.databrowser(${args.join(", ")})`;
+    return `freva_client.databrowser(${args.join(", ")})`;
   }
 
-  function renderPythonCommand(dateSelectorToCli) {
+  function renderPythonCommand() {
+    const dateSelectorToCli = getCliTimeSelector();
+    const bboxSelectorToCli = getCliBBoxSelector();
     return (
       <pre className="mb-1" style={{ whiteSpace: "pre-wrap" }}>
-        {getFullPythonCommand(dateSelectorToCli)}
+        {getFullPythonCommand(dateSelectorToCli, bboxSelectorToCli)}
       </pre>
     );
   }
@@ -228,7 +243,7 @@ function DataBrowserCommandImpl(props) {
           </div>
         </div>
         {mode === Modes.CLI && renderCLICommand()}
-        {mode === Modes.PYTHON && renderPythonCommand(dateSelectorToCli)}
+        {mode === Modes.PYTHON && renderPythonCommand()}
       </Card>
       <ClipboardToast show={showToast} setShow={setShowToast} />
     </React.Fragment>

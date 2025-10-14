@@ -3,6 +3,36 @@
 
 
 All notable changes to this project will be documented in this file.
+## [v2509.0.0]
+## Added
+- Add a functionality to add, remove, and list the custom flavours, from new API endpoint of the Freva-rest
+- Adopted scrolling in FrevaGPT
+
+## Changed
+- changed the logic of the default_flavour to handle edge cases in Custom Flavour
+- change the prompt from `login` to `none` in redirect callback authorization
+- Refactor FrevaGPT components
+
+
+## [v2507.0.0]
+## Added
+- STAC Browser as a SPA
+- Local ssh feature where the core lib is running on the same machin
+- add development env for production chatbot
+
+## Changed
+- Turn token button into user dropdown button
+- Change the Freva databrowser command display based on the neew freva-client
+- After token expiration, user redirected to the home page instead of login page
+- Help page stays always, the last item on the navbar
+- Change the Sing-on text dynamic color to fixed white
+
+## Fixed
+- Internal auth hotfix
+- Getting the Freva RestAPI link through STAC-API self-link
+- Protect the main layout from the changes that are coing through SPA
+- Decode the first name and last name before inserting to MariaDB
+
 ## [v2506.0.1]
 ## Fixes
 - Try to get information on the user via SSSD

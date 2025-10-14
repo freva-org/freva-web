@@ -19,6 +19,7 @@ dependencies:
   - pygtail
   - redis-py
   - toml
+  - unidecode
   - pip:
       - django-datatable-view
       - django-templated-email
@@ -27,3 +28,4 @@ dependencies:
       - django-bootstrap-v5
       - django-model-utils
       - djproxy
+

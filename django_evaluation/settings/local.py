@@ -15,7 +15,7 @@ REDIS_PORT : str
 SERVER_EMAIL : str
 ALLOWED_HOSTS : str
 CSRF_TRUSTED_ORIGINS : str
-FREVA_BIN: str
+FREVA_ENV: str
 STAC_BROWSER: 0|1
 DEFAULT_FLAVOUR: str
 """
@@ -276,8 +276,8 @@ VENV_PYTHON_DIR = "/usr/bin/python3"
 # Path to miklip-logo
 MIKLIP_LOGO = STATIC_URL + "img/miklip-logo.png"
 LOAD_MODULE = " "
-FREVA_BIN = os.environ.get("FREVA_BIN", os.path.join(sys.exec_prefix, "bin"))
-NCDUMP_BINARY = os.path.join(FREVA_BIN, "metadata-inspector") + " --html"
+FREVA_ENV = os.environ.get("FREVA_ENV", sys.exec_prefix)
+NCDUMP_BINARY = os.path.join(FREVA_ENV, "metadata-inspector") + " --html"
 
 SHELL_IN_A_BOX = "/shell/"
 WEBPACK_LOADER = {

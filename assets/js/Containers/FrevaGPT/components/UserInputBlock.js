@@ -8,6 +8,8 @@ import PropTypes from "prop-types";
 
 import { resizeInputField } from "../utils";
 
+import { USER_INPUT_STYLE } from "../constants";
+
 function UserInputBlock({ content, index, onSend }) {
   const [showEditBar, setShowEditBar] = useState(false);
   const [renderInput, setRenderInput] = useState(false);
@@ -17,90 +19,71 @@ function UserInputBlock({ content, index, onSend }) {
     setEditedInput(e.target.value);
   }
 
-  function renderUserInputCard() {
+  function renderInputComponent() {
     return (
-      <Col
-        md={{ span: 10, offset: 2 }}
-        key={`${index}-user`}
-        onMouseEnter={() => setShowEditBar(true)}
-        onMouseLeave={() => setShowEditBar(false)}
-      >
-        <Card
-          className="shadow-sm card-body border-0 border-bottom"
-          style={{ backgroundColor: "#eee" }}
-        >
-          {editedInput ? editedInput : content.content}
-        </Card>
-        <div className="w-100 d-flex justify-content-end p-0 h-5">
+      <>
+        <FormControl
+          as="textarea"
+          id={`UserInputField-${index}`}
+          className="mb-2"
+          defaultValue={content.content}
+          onChange={(e) => {
+            handleEdit(e);
+            resizeInputField(`UserInputField-${index}`);
+          }}
+        />
+        <div className="w-100 d-flex justify-content-end">
           <Button
-            variant="link"
-            className="d-flex align-items-center"
-            onClick={() => setRenderInput(true)}
-          >
-            {showEditBar ? <FaEdit /> : <FaEdit className="opacity-0" />}
-          </Button>
-        </div>
-      </Col>
-    );
-  }
-
-  function renderUserInputField() {
-    return (
-      <Col
-        md={{ span: 10, offset: 2 }}
-        key={`${index}-user`}
-        onMouseEnter={() => setShowEditBar(true)}
-        onMouseLeave={() => setShowEditBar(false)}
-      >
-        <Card
-          className="shadow-sm card-body border-0 border-bottom"
-          style={{ backgroundColor: "#eee" }}
-        >
-          <FormControl
-            as="textarea"
-            id={`UserInputField-${index}`}
-            className="mb-2"
-            defaultValue={content.content}
-            onChange={(e) => {
-              handleEdit(e);
-              resizeInputField(`UserInputField-${index}`);
+            variant="secondary"
+            className="me-1"
+            onClick={() => {
+              setRenderInput(false);
+              setShowEditBar(false);
             }}
-          />
-          <div className="w-100 d-flex justify-content-end">
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setRenderInput(false);
-                setShowEditBar(false);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="info"
-              onClick={() => {
-                onSend(editedInput, index);
-                setRenderInput(false);
-              }}
-            >
-              Send
-            </Button>
-          </div>
-        </Card>
-        <div className="w-100 d-flex justify-content-end p-0">
-          <Button
-            variant="link"
-            className="d-flex align-items-center"
-            onClick={() => setRenderInput(true)}
           >
-            <FaEdit className="opacity-0" />
+            Cancel
+          </Button>
+          <Button
+            variant="info"
+            onClick={() => {
+              onSend(editedInput, index);
+              setRenderInput(false);
+            }}
+          >
+            Send
           </Button>
         </div>
-      </Col>
+      </>
     );
   }
 
-  return <>{renderInput ? renderUserInputField() : renderUserInputCard()}</>;
+  return (
+    <Col
+      md={USER_INPUT_STYLE}
+      key={`${index}-user`}
+      onMouseEnter={() => setShowEditBar(true)}
+      onMouseLeave={() => setShowEditBar(false)}
+    >
+      <Card
+        className="shadow-sm card-body border-0 border-bottom"
+        style={{ backgroundColor: "#eee" }}
+      >
+        {renderInput
+          ? renderInputComponent()
+          : editedInput
+            ? editedInput
+            : content.content}
+      </Card>
+
+      <div className="w-100 d-flex justify-content-end p-0 h-5">
+        <FaEdit
+          onClick={() => setRenderInput(true)}
+          role="button"
+          className={showEditBar ? "color mt-2" : "color mt-2 opacity-0"}
+        />
+      </div>
+    </Col>
+  );
 }
 
 UserInputBlock.propTypes = {

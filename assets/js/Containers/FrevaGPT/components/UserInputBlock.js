@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 import { Col, Card, Button, FormControl } from "react-bootstrap";
 
@@ -6,87 +6,51 @@ import { FaEdit } from "react-icons/fa";
 
 import PropTypes from "prop-types";
 
-class UserInputBlock extends React.Component {
-  constructor(props) {
-    super(props);
+import { resizeInputField } from "../utils";
 
-    this.showEditBar = this.showEditBar.bind(this);
-    this.hideEditBar = this.hideEditBar.bind(this);
-    this.renderUserInputCard = this.renderUserInputCard.bind(this);
-    this.renderUserInputField = this.renderUserInputField.bind(this);
-    this.resizeInputField = this.resizeInputField.bind(this);
-    this.handleEdit = this.handleEdit.bind(this);
+function UserInputBlock({ content, index, onSend }) {
+  const [showEditBar, setShowEditBar] = useState(false);
+  const [renderInput, setRenderInput] = useState(false);
+  const [editedInput, setEditedInput] = useState("");
 
-    this.state = {
-      showEditBar: false,
-      renderInput: false,
-      editedInput: "",
-    };
+  function handleEdit(e) {
+    setEditedInput(e.target.value);
   }
 
-  showEditBar() {
-    this.setState({ showEditBar: true });
-  }
-
-  hideEditBar() {
-    setTimeout(() => {
-      this.setState({ showEditBar: false });
-    }, 500);
-  }
-
-  resizeInputField(id) {
-    const inputField = document.getElementById(id);
-    const style = inputField.style;
-
-    style.height = inputField.style.minHeight = "auto";
-    style.minHeight = `${Math.min(inputField.scrollHeight, parseInt(inputField.style.maxHeight))}px`;
-    style.height = `${inputField.scrollHeight}px`;
-  }
-
-  handleEdit(e) {
-    this.setState({ editedInput: e.target.value });
-  }
-
-  renderUserInputCard() {
+  function renderUserInputCard() {
     return (
       <Col
         md={{ span: 10, offset: 2 }}
-        key={`${this.props.index}-user`}
-        onMouseEnter={this.showEditBar}
-        onMouseLeave={this.hideEditBar}
+        key={`${index}-user`}
+        onMouseEnter={() => setShowEditBar(true)}
+        onMouseLeave={() => setShowEditBar(false)}
       >
         <Card
           className="shadow-sm card-body border-0 border-bottom"
           style={{ backgroundColor: "#eee" }}
         >
-          {this.state.editedInput
-            ? this.state.editedInput
-            : this.props.content.content}
+          {editedInput ? editedInput : content.content}
         </Card>
         <div className="w-100 d-flex justify-content-end p-0 h-5">
           <Button
             variant="link"
             className="d-flex align-items-center"
-            onClick={() => this.setState({ renderInput: true })}
+            onClick={() => setRenderInput(true)}
           >
-            {this.state.showEditBar ? (
-              <FaEdit />
-            ) : (
-              <FaEdit className="opacity-0" />
-            )}
+            {showEditBar ? <FaEdit /> : <FaEdit className="opacity-0" />}
           </Button>
         </div>
       </Col>
     );
   }
 
-  renderUserInputField() {
+  function renderUserInputField() {
     return (
       <Col
         md={{ span: 10, offset: 2 }}
-        key={`${this.props.index}-user`}
-        onMouseEnter={this.showEditBar}
-        onMouseLeave={this.hideEditBar}
+        key={`${index}-user`}
+        onMouseEnter={() => setShowEditBar(true)}
+        onMouseLeave={() => setShowEditBar(false)}
       >
         <Card
           className="shadow-sm card-body border-0 border-bottom"
@@ -94,28 +58,29 @@ class UserInputBlock extends React.Component {
         >
           <FormControl
             as="textarea"
-            id={`UserInputField-${this.props.index}`}
+            id={`UserInputField-${index}`}
             className="mb-2"
-            defaultValue={this.props.content.content}
+            defaultValue={content.content}
             onChange={(e) => {
-              this.handleEdit(e);
-              this.resizeInputField(`UserInputField-${this.props.index}`);
+              handleEdit(e);
+              resizeInputField(`UserInputField-${index}`);
             }}
           />
           <div className="w-100 d-flex justify-content-end">
             <Button
               variant="secondary"
-              onClick={() =>
-                this.setState({ renderInput: false, showEditBar: false })
-              }
+              onClick={() => {
+                setRenderInput(false);
+                setShowEditBar(false);
+              }}
             >
               Cancel
             </Button>
             <Button
               variant="info"
               onClick={() => {
-                this.props.onSend(this.state.editedInput, this.props.index);
-                this.setState({ renderInput: false });
+                onSend(editedInput, index);
+                setRenderInput(false);
               }}
             >
               Send
@@ -126,7 +91,7 @@ class UserInputBlock extends React.Component {
           <Button
             variant="link"
             className="d-flex align-items-center"
-            onClick={() => this.setState({ renderInput: true })}
+            onClick={() => setRenderInput(true)}
           >
             <FaEdit className="opacity-0" />
           </Button>
@@ -135,15 +100,7 @@ class UserInputBlock extends React.Component {
     );
   }
 
-  render() {
-    return (
-      <>
-        {this.state.renderInput
-          ? this.renderUserInputField()
-          : this.renderUserInputCard()}
-      </>
-    );
-  }
+  return <>{renderInput ? renderUserInputField() : renderUserInputCard()}</>;
 }
 
 UserInputBlock.propTypes = {

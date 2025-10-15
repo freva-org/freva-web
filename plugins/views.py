@@ -163,7 +163,7 @@ def setup(request, plugin_name, row_id=None):
             # Get modules and files to source
             config.reloadConfiguration()
             eval_str = f"EVALUATION_SYSTEM_CONFIG_FILE={config.CONFIG_FILE}"
-            exe_path = f"PATH={settings.FREVA_BIN}:$PATH"
+            exe_env = f"LD_LIBRARY_PATH={settings.FREVA_ENV}/lib:$LD_LIBRARY_PATH PATH=$PATH:{settings.FREVA_ENV}/bin"
 
             if "EVALUATION_SYSTEM_PLUGINS_%s" % request.user in os.environ:
                 plugin_str = os.environ[
@@ -191,7 +191,7 @@ def setup(request, plugin_name, row_id=None):
             if scheduler_options:
                 cmd.append(sched_opts_str)
             command = " ".join(cmd)
-            ssh_cmd = f'bash -c "{eval_str} {exe_path} {export_user_plugin} freva-plugin {command}"'
+            ssh_cmd = f'bash -c "{eval_str} {exe_env} {export_user_plugin} freva-plugin {command}"'
             logging.info(ssh_cmd)
 
             # finally send the ssh call

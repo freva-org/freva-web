@@ -8,7 +8,7 @@ import { isEmpty } from "lodash";
 
 import PropTypes from "prop-types";
 
-import { resizeInputField } from "../utils";
+import { resizeInputField } from "../../utils";
 
 function BotInput({ loading, handleSubmit, handleStop }) {
   const [userInput, setUserInput] = useState("");

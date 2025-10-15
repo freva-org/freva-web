@@ -12,9 +12,9 @@ import { FaExpand } from "react-icons/fa";
 
 import PropTypes from "prop-types";
 
-import { replaceLinebreaks } from "../utils";
+import { replaceLinebreaks } from "../../utils";
 
-import * as constants from "../constants";
+import * as constants from "../../constants";
 
 import CodeBlock from "./CodeBlock";
 import UserInputBlock from "./UserInputBlock";

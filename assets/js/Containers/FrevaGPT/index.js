@@ -8,15 +8,15 @@ import { isEmpty } from "lodash";
 
 import queryString from "query-string";
 
-import BotHeader from "./components/BotHeader";
-import ChatBlock from "./components/ChatBlock";
+import BotHeader from "./components/ChatComponents/BotHeader";
+import ChatBlock from "./components/ChatComponents/ChatBlock";
 import SidePanel from "./components/SidePanel/SidePanel";
-import Suggestions from "./components/Suggestions";
-import BotInput from "./components/BotInput";
+import Suggestions from "./components/ChatComponents/Suggestions";
+import BotInput from "./components/ChatComponents/BotInput";
 import BotLoadingSpinner from "./components/Snippets/BotLoadingSpinner";
 import ScrollButtons from "./components/Snippets/ScrollButtons";
 import BotUnavailableAlert from "./components/Snippets/BotUnavailableAlert";
-import PendingAnswerComponent from "./components/PendingAnswerComponent";
+import PendingAnswerComponent from "./components/ChatComponents/PendingAnswerComponent";
 
 import { fetchWithAuth, successfulPing, chatExceedsWindow } from "./utils";
 

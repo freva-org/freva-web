@@ -4,9 +4,9 @@ import { Button, Tooltip, OverlayTrigger } from "react-bootstrap";
 
 import PropTypes from "prop-types";
 
-import { botSuggestions } from "../constants";
+import { botSuggestions } from "../../constants";
 
-import { truncate } from "../utils";
+import { truncate } from "../../utils";
 
 function Suggestions({ handleSubmit }) {
   return (

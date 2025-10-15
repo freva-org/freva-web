@@ -6,9 +6,9 @@ import { FaEdit } from "react-icons/fa";
 
 import PropTypes from "prop-types";
 
-import { resizeInputField } from "../utils";
+import { resizeInputField } from "../../utils";
 
-import { USER_INPUT_STYLE } from "../constants";
+import { USER_INPUT_STYLE } from "../../constants";
 
 function UserInputBlock({ content, index, onSend }) {
   const [showEditBar, setShowEditBar] = useState(false);

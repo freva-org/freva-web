@@ -77,10 +77,9 @@ function SidePanel({ showThreadHistory, setShowThreadHistory }) {
       <Offcanvas.Header closeButton>
         <Offcanvas.Title>Chat History</Offcanvas.Title>
       </Offcanvas.Header>
-      <Offcanvas.Header>
+      <Offcanvas.Body>
         <Card className="w-100">
-          <Card.Body>
-            <Card.Title>Search</Card.Title>
+          <Card.Header>
             <FormControl
               className="my-2"
               id="search"
@@ -89,12 +88,7 @@ function SidePanel({ showThreadHistory, setShowThreadHistory }) {
               onChange={handleSearchInput}
               value={query}
             />
-          </Card.Body>
-        </Card>
-      </Offcanvas.Header>
-
-      <Offcanvas.Body>
-        <Card>
+          </Card.Header>
           <Card.Body>
             <Card.Title>{query ? "Filtered History" : "History"}</Card.Title>
             {query

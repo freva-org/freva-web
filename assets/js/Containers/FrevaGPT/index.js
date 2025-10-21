@@ -10,7 +10,7 @@ import queryString from "query-string";
 
 import BotHeader from "./components/BotHeader";
 import ChatBlock from "./components/ChatBlock";
-//import SidePanel from "./components/SidePanel/SidePanel";
+import SidePanel from "./components/SidePanel/SidePanel";
 import Suggestions from "./components/Suggestions";
 import BotInput from "./components/BotInput";
 import BotLoadingSpinner from "./components/Snippets/BotLoadingSpinner";
@@ -21,7 +21,6 @@ import PendingAnswerComponent from "./components/PendingAnswerComponent";
 import { fetchWithAuth, successfulPing, chatExceedsWindow } from "./utils";
 
 import { setThread, setConversation, addElement } from "./actions";
-import SidePanel from "./components/SidePanel/SidePanel";
 
 function FrevaGPT() {
   useEffect(() => {

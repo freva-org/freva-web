@@ -34,17 +34,20 @@ def ensure_url_scheme(url, default_scheme='http'):
 
 TOKEN_URL = ensure_url_scheme(settings.FREVA_REST_URL).rstrip('/') + '/api/freva-nextgen/auth/v2/token'
 LOGIN_URL = '/api/freva-nextgen/auth/v2/login'
+DEFAULT_SCOPES = getattr(settings, 'OIDC_DEFAULT_SCOPES', 'openid profile email')
 
 def set_token_cookie(response, token_data):
     """
     Set secure token cookies;
     - Separate cookie for access token (JavaScript accessible).
     """
+    scope = token_data.get('scope', DEFAULT_SCOPES)
+
     access_cookie_data = {
         'access_token': token_data['access_token'],
         'token_type': 'Bearer',
         'expires': token_data['expires'],
-        'scope': 'openid profile'
+        'scope': scope
     }
 
     json_string = json.dumps(access_cookie_data, separators=(',', ':'))
@@ -79,7 +82,8 @@ class OIDCLoginView(View):
 
         params = {
             'redirect_uri': callback_url,
-            'prompt': 'none'
+            'prompt': 'none',
+            'scope': DEFAULT_SCOPES
         }
 
         proxy_path = f"/api/freva-nextgen/auth/v2/login?{urlencode(params)}"
@@ -121,14 +125,14 @@ class OIDCCallbackView(View):
                 if is_offline_request:
                     # Clean up session
                     request.session.pop('request_offline_token', None)
-
+                    
                     formatted_token = {
                         "access_token": token_data.get('access_token'),
                         "refresh_token": token_data.get('refresh_token'),
                         "token_type": token_data.get('token_type', 'Bearer'),
                         "expires": token_data.get('expires'),
                         "refresh_expires": token_data.get('refresh_expires'),
-                        "scope": token_data.get('scope', 'openid profile offline_access')
+                        "scope": token_data.get('scope', DEFAULT_SCOPES or 'openid profile offline_access email')
                     }
 
                     return HttpResponse(f'''
@@ -291,6 +295,7 @@ def collect_current_token(request):
     refresh_token = request.session.get('refresh_token')
     expires = request.session.get('token_expires')
     refresh_expires = request.session.get('refresh_expires')
+    scope = request.session.get('token_scope', DEFAULT_SCOPES)
 
     if access_token:
         token_data = {
@@ -299,7 +304,7 @@ def collect_current_token(request):
             'expires': expires,
             'refresh_expires': refresh_expires,
             'token_type': "Bearer",
-            'scope': "openid profile"
+            'scope': scope
         }
 
         return JsonResponse({

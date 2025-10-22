@@ -7,14 +7,7 @@ import { isEmpty } from "lodash";
 
 import queryString from "query-string";
 
-import {
-  Modal,
-  Button,
-  FormControl,
-  ListGroup,
-  Col,
-  Row,
-} from "react-bootstrap";
+import { Modal, Button, FormControl, ListGroup } from "react-bootstrap";
 
 import { FaPen } from "react-icons/fa";
 
@@ -78,25 +71,38 @@ function ThreadLink({ element, onChangeName }) {
 
   return (
     <>
-      <ListGroup.Item ref={ref} onMouseEnter={() => setHovered(true)}>
-        <Row>
-          <Col>
-            <a href="" onClick={() => changeToThread(element.thread_id)}>
+      <ListGroup.Item
+        className="px-0"
+        ref={ref}
+        onMouseEnter={() => setHovered(true)}
+      >
+        <div className="d-flex justify-content-between align-items-center">
+          <div>
+            <a
+              href=""
+              className="forced-textwrap"
+              onClick={() => changeToThread(element.thread_id)}
+            >
               {element.topic}
             </a>
-          </Col>
+          </div>
 
-          {showEditButton ? (
-            <Col
-              md={1}
-              role="button"
-              className="align-content-center color"
-              onClick={() => setShowModal(true)}
-            >
-              <FaPen />
-            </Col>
-          ) : null}
-        </Row>
+          {
+            showEditButton ? (
+              <div
+                role="button"
+                className="align-content-center color"
+                onClick={() => setShowModal(true)}
+              >
+                <FaPen />
+              </div>
+            ) : (
+              <div className="align-content-center opacity-0">
+                <FaPen />
+              </div>
+            ) /* invisible icon to avoid layout shift */
+          }
+        </div>
       </ListGroup.Item>
 
       <Modal

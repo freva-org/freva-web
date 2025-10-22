@@ -3,6 +3,18 @@
 
 
 All notable changes to this project will be documented in this file.
+## [v2510.0.0]
+## Added
+- Add threads history sidebar for the chatbot
+
+## Changed
+- Change token management approach from short-live token to long-lived token
+- Change the thread history sidebar style to offcanvas
+
+## Fixed
+- Fix a bug in SolrField dropdown related to fetch
+- Fix an issue in flavor management regarding the default flavour
+
 ## [v2509.0.0]
 ## Added
 - Add a functionality to add, remove, and list the custom flavours, from new API endpoint of the Freva-rest

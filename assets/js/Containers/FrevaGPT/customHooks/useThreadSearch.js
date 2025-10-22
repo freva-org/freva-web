@@ -16,9 +16,27 @@ export default function useThreadSearch(query) {
 
   useEffect(() => {
     if (!isEmpty(query)) {
+      setFilteredThreadsLoading(true);
+      setFilteredThreads([]);
+      setFilteredPageNumber(0);
       search(query);
+    } else {
+      // when query is cleared, clear results and stop loading
+      setFilteredThreads([]);
+      setFilteredThreadsLoading(false);
+      setFilteredHasMore(false);
+      setFilteredPageNumber(0);
     }
   }, [query]);
+
+  // cancel any pending debounced calls when the component unmounts
+  useEffect(() => {
+    return () => {
+      if (search && typeof search.cancel === "function") {
+        search.cancel();
+      }
+    };
+  }, [search]);
 
   useEffect(() => {
     if (filteredHasMore) {

@@ -52,7 +52,7 @@ export function truncate(value) {
    * @param {string} value - String to truncate
    * @returns {string} Truncated string
    */
-  const trunc = value.substring(0, 32) + "\u2026";
+  const trunc = value.substring(0, 42) + "\u2026";
   return trunc;
 }
 

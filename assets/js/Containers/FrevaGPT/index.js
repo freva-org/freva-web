@@ -62,6 +62,7 @@ function FrevaGPT() {
   const lastVariant = useRef("User");
 
   const thread = useSelector((state) => state.frevaGPTReducer.thread);
+  const [showThreadHistory, setShowThreadHistory] = useState(false);
   const botModel = useSelector((state) => state.frevaGPTReducer.botModel);
 
   const dispatch = useDispatch();
@@ -305,12 +306,12 @@ function FrevaGPT() {
 
     return (
       <>
-        <Col md={3}>
-          <SidePanel />
-        </Col>
-
+        <SidePanel
+          showThreadHistory={showThreadHistory}
+          setShowThreadHistory={setShowThreadHistory}
+        />
         <Col
-          md={9}
+          md={12}
           className={
             "d-flex flex-column " +
             (showSuggestions
@@ -359,7 +360,11 @@ function FrevaGPT() {
     return (
       <Container>
         <Row>
-          <BotHeader createNewChat={createNewChat} />
+          <BotHeader
+            createNewChat={createNewChat}
+            showThreadHistory={showThreadHistory}
+            setShowThreadHistory={setShowThreadHistory}
+          />
           {botOkay === undefined ? (
             <Spinner />
           ) : botOkay ? (

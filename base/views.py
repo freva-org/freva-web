@@ -41,27 +41,15 @@ def set_token_cookie(response, token_data):
     Set secure token cookies;
     - Separate cookie for access token (JavaScript accessible).
     """
-    scope = token_data.get('scope', DEFAULT_SCOPES)
-
-    access_cookie_data = {
-        'access_token': token_data['access_token'],
-        'token_type': 'Bearer',
-        'expires': token_data['expires'],
-        'scope': scope
-    }
-
-    json_string = json.dumps(access_cookie_data, separators=(',', ':'))
-    encoded_access = base64.b64encode(json_string.encode('utf-8')).decode('ascii')
-
+    max_age = token_data['expires'] - int(time.time())
     response.set_cookie(
         'freva_auth_token',
-        encoded_access,
-        max_age=token_data['expires'] - int(time.time()),
+        token_data['access_token'],
+        max_age=max_age,
         httponly=False,
         secure=True,
         samesite='Strict'
     )
-
     return response
 
 class OIDCLoginView(View):

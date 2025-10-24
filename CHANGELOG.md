@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ## Added
 - Add logout option. To end user session.
 
+## Fixed
+- Fix an issue in the Chatbot #119
+- Fix an issue regading storing the cookies
 
 ## [v2510.0.0]
 ## Added
@@ -18,8 +21,7 @@ All notable changes to this project will be documented in this file.
 ## Fixed
 - Fix a bug in SolrField dropdown related to fetch
 - Fix an issue in flavor management regarding the default flavour
-- Fix an issue in the Chatbot #119
-- Fix an issue regading storing the cookies
+
 
 
 ## [v2509.0.0]

@@ -10,10 +10,13 @@ All notable changes to this project will be documented in this file.
 ## Changed
 - Change token management approach from short-live token to long-lived token
 - Change the thread history sidebar style to offcanvas
+- Change the logout strategy to a backend-driven method
 
 ## Fixed
 - Fix a bug in SolrField dropdown related to fetch
 - Fix an issue in flavor management regarding the default flavour
+- Fix an issue in the Chatbot #119
+
 
 ## [v2509.0.0]
 ## Added

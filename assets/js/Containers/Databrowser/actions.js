@@ -18,14 +18,16 @@ const getTokenFromCookie = () => {
   }
 
   try {
-    let cookieValue = authCookie.substring(authCookie.indexOf("=") + 1);
+    let cookieValue = authCookie.substring(authCookie.indexOf("=") + 1).trim();
+
     if (cookieValue.startsWith('"') && cookieValue.endsWith('"')) {
       cookieValue = cookieValue.slice(1, -1);
     }
 
-    const decodedJson = atob(cookieValue);
-    const tokenData = JSON.parse(decodedJson);
-    return tokenData;
+    return {
+      access_token: cookieValue,
+      token_type: "Bearer",
+    };
   } catch (error) {
     return null;
   }

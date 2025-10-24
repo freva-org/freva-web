@@ -1,5 +1,7 @@
 import queryString from "query-string";
 
+import { isEmpty } from "lodash";
+
 import * as constants from "./constants";
 
 export function replaceLinebreaks(data) {
@@ -167,8 +169,10 @@ export async function requestUserThreads(page, query) {
 
   if (response.ok) {
     const values = await response.json();
-    returnValues.threads = values[0];
-    returnValues.hasMore = !isLastPage(values[1], page);
+    if (Array.isArray(values) && !isEmpty(values)) {
+      returnValues.threads = values[0];
+      returnValues.hasMore = !isLastPage(values[1], page);
+    }
   }
 
   return returnValues;

@@ -1,8 +1,11 @@
 # Changelog
 
-
-
 All notable changes to this project will be documented in this file.
+## [v2510.1.0]
+## Added
+- Add logout option. To end user session.
+
+
 ## [v2510.0.0]
 ## Added
 - Add threads history sidebar for the chatbot

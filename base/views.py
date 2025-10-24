@@ -221,21 +221,21 @@ def home(request):
 
 def logout_view(request):
     """
-    Logout view - clear session and Django auth.
+    Logout view - clear Django session AND OIDC session.
     """
-    # Clear all authentication-related session data (OIDC backend logout)
-    auth_keys = ['access_token', 'refresh_token', 'token_expires', 
-                'refresh_expires', 'user_info']
-    for key in auth_keys:
-        request.session.pop(key, None)
-
-    # Django backend logout
+    
+    request.session.flush()
     auth_logout(request)
+    
+    logout_url = "/api/freva-nextgen/auth/v2/logout"
+    post_logout_redirect = request.build_absolute_uri('/')
+    
+    params = {'post_logout_redirect_uri': post_logout_redirect}
 
-    response = HttpResponseRedirect("/")
-    # clear cookies set by Freva
+    response = HttpResponseRedirect(f"{logout_url}?{urlencode(params)}")
     response.delete_cookie('freva_auth_token', path='/', samesite='Strict')
     response.delete_cookie('freva_refresh_token', path='/', samesite='Strict')
+    
     return response
 
 

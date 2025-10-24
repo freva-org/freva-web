@@ -16,6 +16,7 @@ import BotInput from "./components/BotInput";
 import BotLoadingSpinner from "./components/Snippets/BotLoadingSpinner";
 import ScrollButtons from "./components/Snippets/ScrollButtons";
 import BotUnavailableAlert from "./components/Snippets/BotUnavailableAlert";
+import FeedbackButtons from "./components/Snippets/FeedbackButtons";
 import PendingAnswerComponent from "./components/PendingAnswerComponent";
 
 import { fetchWithAuth, successfulPing, chatExceedsWindow } from "./utils";
@@ -338,6 +339,7 @@ function FrevaGPT() {
               {loading ? <div style={{ height: emptyDivHeight }}></div> : null}
             </Col>
             {showScrollButtons ? <ScrollButtons /> : null}
+            <FeedbackButtons />
           </Row>
 
           <Row>

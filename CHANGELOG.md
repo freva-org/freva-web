@@ -16,6 +16,7 @@ All notable changes to this project will be documented in this file.
 - Fix a bug in SolrField dropdown related to fetch
 - Fix an issue in flavor management regarding the default flavour
 - Fix an issue in the Chatbot #119
+- Fix an issue regading storing the cookies
 
 
 ## [v2509.0.0]

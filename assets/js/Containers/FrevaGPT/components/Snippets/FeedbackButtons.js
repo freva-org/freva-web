@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 
+import { isEmpty } from "lodash";
+
 import { Col } from "react-bootstrap";
 import { IconContext } from "react-icons";
 import {
@@ -12,37 +14,37 @@ import {
 export default function FeedbackButtons() {
   const [thumb, setThumb] = useState();
 
-  const thumbsUp = {
-    color: "green",
-    size: 20,
-    className: "me-1",
+  const thumbValues = {
+    thumbsUp: {
+      color: "green",
+      size: 20,
+      className: "me-1",
+    },
+    thumbsDown: {
+      color: "red",
+      size: 20,
+    },
   };
 
-  const thumbsDown = {
-    color: "red",
-    size: 20,
-  };
+  const ThumbsUpIcon = thumb === "up" ? FaThumbsUp : FaRegThumbsUp;
+  const ThumbsDownIcon = thumb === "down" ? FaThumbsDown : FaRegThumbsDown;
 
-  function handleThumb(value) {
-    setThumb(value);
+  function handleFeedback(value) {
+    if (!isEmpty(thumb) && thumb === value) {
+      setThumb("");
+    } else {
+      setThumb(value);
+    }
     // send feedback to backend
   }
 
   return (
     <Col md={11} className="d-flex justify-content-end mb-5">
-      <IconContext.Provider value={thumbsUp}>
-        {thumb === "up" ? (
-          <FaThumbsUp />
-        ) : (
-          <FaRegThumbsUp onClick={() => handleThumb("up")} role="button" />
-        )}
+      <IconContext.Provider value={thumbValues.thumbsUp}>
+        <ThumbsUpIcon onClick={() => handleFeedback("up")} role="button" />
       </IconContext.Provider>
-      <IconContext.Provider value={thumbsDown}>
-        {thumb === "down" ? (
-          <FaThumbsDown />
-        ) : (
-          <FaRegThumbsDown onClick={() => handleThumb("down")} role="button" />
-        )}
+      <IconContext.Provider value={thumbValues.thumbsDown}>
+        <ThumbsDownIcon onClick={() => handleFeedback("down")} role="button" />
       </IconContext.Provider>
     </Col>
   );

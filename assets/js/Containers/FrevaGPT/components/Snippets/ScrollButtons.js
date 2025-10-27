@@ -4,7 +4,7 @@ import { Col, Button } from "react-bootstrap";
 
 import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 
-import { scrollToChatBottom } from "../utils";
+import { scrollToChatBottom } from "../../utils";
 
 function ScrollButtons() {
   // here also no suitable solutions using bootstrap found -> need for better solution

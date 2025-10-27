@@ -92,6 +92,19 @@ function FrevaGPT() {
       });
   }
 
+  function createEditedChat() {
+    dispatch(setConversation([]));
+    dispatch(setThread(""));
+    browserHistory.push({
+      pathname: "/chatbot/",
+      search: "",
+    });
+    setShowSuggestions(false);
+    setDynamicAnswer("");
+    setDynamicVariant("");
+    setReader(undefined);
+  }
+
   async function getOldThread(thread) {
     const queryObject = { thread_id: thread };
     const response = await fetchWithAuth(
@@ -125,6 +138,7 @@ function FrevaGPT() {
 
     try {
       if (chatvariants) {
+        createEditedChat();
         await fetchData(input, chatvariants);
       } else {
         await fetchData(input, []);
@@ -168,7 +182,7 @@ function FrevaGPT() {
       input,
       thread_id: thread,
       chatbot: botModel,
-      chatvariants,
+      chatvariants: chatvariants.toString(), //backend requires string of comma-seperated values
     };
 
     // response of a new bot request is streamed

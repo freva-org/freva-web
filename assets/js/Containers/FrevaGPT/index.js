@@ -338,8 +338,8 @@ function FrevaGPT() {
               />
               {loading ? <div style={{ height: emptyDivHeight }}></div> : null}
             </Col>
+            {!loading && !showSuggestions ? <FeedbackButtons /> : null}
             {showScrollButtons ? <ScrollButtons /> : null}
-            <FeedbackButtons />
           </Row>
 
           <Row>

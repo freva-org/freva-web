@@ -105,19 +105,29 @@ class FlavourManager extends Component {
     this.setState({ modalLoading: true });
     try {
       let result;
+      const nameChanged = this.state.editMode &&
+        this.state.flavourName !== this.state.originalFlavourName;
+      const currentlySelected = this.props.currentFlavour === this.state.originalFlavourName;
+
       if (this.state.editMode) {
         const updateData = {
           mapping,
           is_global: this.state.isGlobal,
         };
         // Reset the form on success and close the modal
-        if (this.state.flavourName !== this.state.originalFlavourName) {
+        if (nameChanged) {
           updateData.flavour_name = this.state.flavourName;
         }
 
         result = await this.props.dispatch(
           this.props.updateFlavour(this.state.originalFlavourName, updateData)
         );
+
+        // Important: If the name was changed and this flavour is 
+        // currently selected, we update the URL
+        if (nameChanged && currentlySelected) {
+          this.props.onFlavourClick(this.state.flavourName);
+        }
       } else {
         result = await this.props.dispatch(
           this.props.addFlavour({

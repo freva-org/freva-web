@@ -232,7 +232,23 @@ function FrevaGPT() {
               if (Object.keys(varObj).length !== 0) {
                 // if object has not same variant, add answer to conversation and override object
                 if (varObj.variant !== jsonBuffer.variant) {
-                  dispatch(addElement(varObj));
+                  //eslint-disable-next-line no-console
+                  if (varObj.variant === "ServerHint") {
+                    try {
+                      const currentThreadId = JSON.parse(
+                        varObj.content
+                      ).thread_id;
+                      dispatch(setThread(currentThreadId));
+                      browserHistory.push({
+                        pathname: "/chatbot/",
+                        search: `?thread_id=${currentThreadId}`,
+                      });
+                    } catch (err) {
+                      // handle warning
+                    }
+                  } else {
+                    dispatch(addElement(varObj));
+                  }
                   lastVariant.current = varObj.variant;
                   if (chatExceedsWindow()) {
                     setShowScrollButtons(true);
@@ -282,7 +298,6 @@ function FrevaGPT() {
               break;
             } catch (err) {
               // ServerHints and CodeBlocks include nested JSON Objects
-              // eslint-disable-next-line no-console
               if (
                 !subBuffer.includes("ServerHint") &&
                 !subBuffer.includes("Code")

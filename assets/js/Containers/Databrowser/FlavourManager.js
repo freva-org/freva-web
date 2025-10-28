@@ -105,9 +105,11 @@ class FlavourManager extends Component {
     this.setState({ modalLoading: true });
     try {
       let result;
-      const nameChanged = this.state.editMode &&
+      const nameChanged =
+        this.state.editMode &&
         this.state.flavourName !== this.state.originalFlavourName;
-      const currentlySelected = this.props.currentFlavour === this.state.originalFlavourName;
+      const currentlySelected =
+        this.props.currentFlavour === this.state.originalFlavourName;
 
       if (this.state.editMode) {
         const updateData = {
@@ -123,7 +125,7 @@ class FlavourManager extends Component {
           this.props.updateFlavour(this.state.originalFlavourName, updateData)
         );
 
-        // Important: If the name was changed and this flavour is 
+        // Important: If the name was changed and this flavour is
         // currently selected, we update the URL
         if (nameChanged && currentlySelected) {
           this.props.onFlavourClick(this.state.flavourName);

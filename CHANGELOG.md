@@ -1,6 +1,13 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [v2510.2.0]
+## Added
+- Add an ability to edit the custom flavours
+
+## Fixed
+Fix an issue regarding the race condition on the startup of Django and MariaDB
+
 ## [v2510.1.0]
 ## Added
 - Add logout option. To end user session.

@@ -7,6 +7,43 @@ import * as globalStateConstants from "../App/constants";
 import * as constants from "./constants";
 import { prepareSearchParams } from "./utils";
 
+const refreshTokenIfNeeded = async () => {
+  try {
+    // request triggers middleware to refresh token if needed
+    const response = await fetch("/api/token-health/", {
+      credentials: "same-origin",
+      method: "GET",
+    });
+    return response.ok;
+  } catch (error) {
+    return false;
+  }
+};
+
+const parseErrorDetail = (error) => {
+  // Helper function to parse error details
+  try {
+    // If error.detail is an array of validation errors
+    if (Array.isArray(error.detail)) {
+      return error.detail
+        .map((err) => {
+          const field = err.loc ? err.loc.join(".") : "field";
+          const msg = err.msg || "validation error";
+          return `${field}: ${msg}`;
+        })
+        .join("; ");
+    }
+    // If error.detail is a string
+    if (typeof error.detail === "string") {
+      return error.detail;
+    }
+    // Fallback
+    return error.detail || error.message || "An error occurred";
+  } catch {
+    return "An error occurred";
+  }
+};
+
 const getTokenFromCookie = () => {
   const cookies = document.cookie.split(";");
   const authCookie = cookies.find((cookie) =>
@@ -84,27 +121,45 @@ export const setFlavours = () => async (dispatch) => {
       });
     });
 };
-
 export const addFlavour = (flavourData) => async (dispatch) => {
-  const response = await fetch("/api/freva-nextgen/databrowser/flavours", {
-    method: "POST",
-    credentials: "same-origin",
-    headers: getAuthHeaders(),
-    body: JSON.stringify(flavourData),
-  });
+  await refreshTokenIfNeeded();
+
+  const response = await fetch(
+    "/api/freva-nextgen/databrowser/flavours?_method=post",
+    {
+      method: "POST",
+      credentials: "same-origin",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(flavourData),
+    }
+  );
 
   if (response.status >= 400) {
     const err = await response.json();
-    if (response.status === 403) {
-      throw new Error(
-        err.detail || "You don't have permission to add flavours"
-      );
-    } else if (response.status === 409) {
-      throw new Error(err.detail || "A flavour with this name already exists");
-    } else if (response.status === 400) {
-      throw new Error(err.detail || "Invalid flavour data provided");
+    throw new Error(parseErrorDetail(err));
+  }
+
+  const result = await response.json();
+  await dispatch(setFlavours());
+  return result;
+};
+
+export const updateFlavour = (flavourName, flavourData) => async (dispatch) => {
+  await refreshTokenIfNeeded();
+
+  const response = await fetch(
+    `/api/freva-nextgen/databrowser/flavours/${encodeURIComponent(flavourName)}?_method=put`,
+    {
+      method: "PUT",
+      credentials: "same-origin",
+      headers: getAuthHeaders(),
+      body: JSON.stringify(flavourData),
     }
-    throw new Error(err.detail || "Failed to add flavour");
+  );
+
+  if (response.status >= 400) {
+    const err = await response.json();
+    throw new Error(parseErrorDetail(err));
   }
 
   const result = await response.json();

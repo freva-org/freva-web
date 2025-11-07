@@ -1,8 +1,36 @@
 # Changelog
 
-
-
 All notable changes to this project will be documented in this file.
+## [v2510.2.0]
+## Added
+- Add an ability to edit the custom flavours
+
+## Fixed
+Fix an issue regarding the race condition on the startup of Django and MariaDB
+
+## [v2510.1.0]
+## Added
+- Add logout option. To end user session.
+
+## Fixed
+- Fix an issue in the Chatbot #119
+- Fix an issue regading storing the cookies
+
+## [v2510.0.0]
+## Added
+- Add threads history sidebar for the chatbot
+
+## Changed
+- Change token management approach from short-live token to long-lived token
+- Change the thread history sidebar style to offcanvas
+- Change the logout strategy to a backend-driven method
+
+## Fixed
+- Fix a bug in SolrField dropdown related to fetch
+- Fix an issue in flavor management regarding the default flavour
+
+
+
 ## [v2509.0.0]
 ## Added
 - Add a functionality to add, remove, and list the custom flavours, from new API endpoint of the Freva-rest

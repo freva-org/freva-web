@@ -11,7 +11,7 @@ from django.conf import settings
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -34,31 +34,22 @@ def ensure_url_scheme(url, default_scheme='http'):
 
 TOKEN_URL = ensure_url_scheme(settings.FREVA_REST_URL).rstrip('/') + '/api/freva-nextgen/auth/v2/token'
 LOGIN_URL = '/api/freva-nextgen/auth/v2/login'
+DEFAULT_SCOPES = getattr(settings, 'OIDC_DEFAULT_SCOPES', 'openid profile email')
 
 def set_token_cookie(response, token_data):
     """
     Set secure token cookies;
     - Separate cookie for access token (JavaScript accessible).
     """
-    access_cookie_data = {
-        'access_token': token_data['access_token'],
-        'token_type': 'Bearer',
-        'expires': token_data['expires'],
-        'scope': 'openid profile'
-    }
-
-    json_string = json.dumps(access_cookie_data, separators=(',', ':'))
-    encoded_access = base64.b64encode(json_string.encode('utf-8')).decode('ascii')
-
+    max_age = token_data['expires'] - int(time.time())
     response.set_cookie(
         'freva_auth_token',
-        encoded_access,
-        max_age=token_data['expires'] - int(time.time()),
+        token_data['access_token'],
+        max_age=max_age,
         httponly=False,
         secure=True,
         samesite='Strict'
     )
-
     return response
 
 class OIDCLoginView(View):
@@ -79,7 +70,8 @@ class OIDCLoginView(View):
 
         params = {
             'redirect_uri': callback_url,
-            'prompt': 'none'
+            'prompt': 'none',
+            'scope': DEFAULT_SCOPES
         }
 
         proxy_path = f"/api/freva-nextgen/auth/v2/login?{urlencode(params)}"
@@ -88,21 +80,21 @@ class OIDCLoginView(View):
 
 
 class OIDCCallbackView(View):
-    """
-    Handle the callback from OIDC provider after user authentication.
-    """
-
+    """callback view handling the OAuth2 response from freva-rest"""
     def get(self, request):
-        """
-        Handle the authorization code callback and exchange for tokens.
-        """
         code = request.GET.get('code')
+
+        is_offline_request = 'request_offline_token' in request.session
+
         if not code:
             logger.error("No authorization code received in callback")
-            return render(request, 'base/home.html', {
-                'login_failed': True,
-                'error_message': 'Authentication failed - no authorization code received.'
-            })
+            if is_offline_request:
+                return HttpResponse('<script>window.close();</script>')
+            else:
+                return render(request, 'base/home.html', {
+                    'login_failed': True,
+                    'error_message': 'Authentication failed - no authorization code received.'
+                })
 
         try:
             callback_url = request.build_absolute_uri('/callback')
@@ -113,47 +105,87 @@ class OIDCCallbackView(View):
             headers = {"Content-Type": "application/x-www-form-urlencoded"}
 
             response = requests.post(TOKEN_URL, headers=headers, data=data, timeout=10)
+            
             if response.status_code == 200:
                 token_data = response.json()
-                # Store tokens in session
-                request.session['access_token'] = token_data['access_token']
-                request.session['refresh_token'] = token_data['refresh_token']
-                request.session['token_expires'] = token_data['expires']
-                request.session['refresh_expires'] = token_data['refresh_expires']
 
-                # Authenticate user
-                user = authenticate(request=request, access_token=token_data['access_token'])
-                if user:
-                    login(request, user)
-                    next_url = request.session.pop('login_next', '/')
+                # OFFLINE TOKEN FLOW - Return HTML with postMessage to parent window
+                if is_offline_request:
+                    # Clean up session
+                    request.session.pop('request_offline_token', None)
+                    
+                    formatted_token = {
+                        "access_token": token_data.get('access_token'),
+                        "refresh_token": token_data.get('refresh_token'),
+                        "token_type": token_data.get('token_type', 'Bearer'),
+                        "expires": token_data.get('expires'),
+                        "refresh_expires": token_data.get('refresh_expires'),
+                        "scope": token_data.get('scope', DEFAULT_SCOPES or 'openid profile offline_access email')
+                    }
 
-                    if url_has_allowed_host_and_scheme(next_url, allowed_hosts=request.get_host()):
-                        response = HttpResponseRedirect(next_url)
-                    else:
-                        response = HttpResponseRedirect('/')
+                    return HttpResponse(f'''
+                    <!DOCTYPE html>
+                    <html>
+                    <head><title>Token Retrieved</title></head>
+                    <body>
+                        <script>
+                            const tokenData = {json.dumps(formatted_token)};
+                            if (window.opener) {{
+                                window.opener.postMessage({{
+                                    type: 'OFFLINE_TOKEN_SUCCESS',
+                                    tokenData: tokenData
+                                }}, '*');
+                            }}
+                            window.close();
+                        </script>
+                    </body>
+                    </html>
+                    ''')
 
-                    response = set_token_cookie(response, token_data)
-                    return response
+                # REGULAR LOGIN FLOW
                 else:
-                    logger.error("User authentication failed despite valid token")
-                    return render(request, 'base/home.html', {
-                        'login_failed': True,
-                        'error_message': 'Authentication failed - could not authenticate user.'
-                    })
+                    request.session['access_token'] = token_data['access_token']
+                    request.session['refresh_token'] = token_data['refresh_token']
+                    request.session['token_expires'] = token_data['expires']
+                    request.session['refresh_expires'] = token_data['refresh_expires']
+
+                    user = authenticate(request=request, access_token=token_data['access_token'])
+                    if user:
+                        login(request, user)
+                        next_url = request.session.pop('login_next', '/')
+
+                        if url_has_allowed_host_and_scheme(next_url, allowed_hosts=request.get_host()):
+                            response = HttpResponseRedirect(next_url)
+                        else:
+                            response = HttpResponseRedirect('/')
+
+                        response = set_token_cookie(response, token_data)
+                        return response
+                    else:
+                        logger.error("User authentication failed despite valid token")
+                        return render(request, 'base/home.html', {
+                            'login_failed': True,
+                            'error_message': 'Authentication failed - could not authenticate user.'
+                        })
             else:
                 logger.error(f"Token exchange failed: {response.status_code} - {response.text}")
-                return render(request, 'base/home.html', {
-                    'login_failed': True,
-                    'error_message': 'Authentication failed - token exchange failed.'
-                })
+                if is_offline_request:
+                    return JsonResponse({'success': False, 'error': 'Token exchange failed'})
+                else:
+                    return render(request, 'base/home.html', {
+                        'login_failed': True,
+                        'error_message': 'Authentication failed - token exchange failed.'
+                    })
 
         except Exception as e:
             logger.exception(f"Callback processing failed: {e}")
-            return render(request, 'base/home.html', {
-                'login_failed': True,
-                'error_message': 'Authentication failed - please try again.'
-            })
-
+            if is_offline_request:
+                return JsonResponse({'success': False, 'error': 'Authentication failed'})
+            else:
+                return render(request, 'base/home.html', {
+                    'login_failed': True,
+                    'error_message': 'Authentication failed - please try again.'
+                })
 
 def home(request):
     """Default view for the root - authorization through session."""
@@ -177,107 +209,59 @@ def home(request):
 
 def logout_view(request):
     """
-    Logout view - clear session and Django auth.
+    Logout view - clear Django session AND OIDC session.
     """
-    # Clear all authentication-related session data (OIDC backend logout)
-    auth_keys = ['access_token', 'refresh_token', 'token_expires', 
-                'refresh_expires', 'user_info']
-    for key in auth_keys:
-        request.session.pop(key, None)
-
-    # Django backend logout
+    
+    request.session.flush()
     auth_logout(request)
+    
+    logout_url = "/api/freva-nextgen/auth/v2/logout"
+    post_logout_redirect = request.build_absolute_uri('/')
+    
+    params = {'post_logout_redirect_uri': post_logout_redirect}
 
-    response = HttpResponseRedirect("/")
-    # clear cookies set by Freva
+    response = HttpResponseRedirect(f"{logout_url}?{urlencode(params)}")
     response.delete_cookie('freva_auth_token', path='/', samesite='Strict')
     response.delete_cookie('freva_refresh_token', path='/', samesite='Strict')
+    
     return response
 
 
 @csrf_exempt
-def manual_refresh_token(request):
+def request_offline_token(request):
     """
-    API endpoint for MANUAL token refresh (called by frontend).
-    This is separate from automatic middleware refresh. (Re-New token button)
+    API endpoint to initiate offline token request.
+    Since offline token is accessible only via login
+    OIDC flow, we redirect to the login endpoint
     """
     if request.method != 'POST':
         return JsonResponse({'error': 'Method not allowed'}, status=405)
-    
+
     if not request.user.is_authenticated:
         return JsonResponse({'error': 'Not authenticated'}, status=401)
-    
-    refresh_token = request.session.get('refresh_token')
-    # the following condition is necessary to ensure that the refresh token is available
-    # and not expired before proceeding with the refresh logic. Otherwise user cannot
-    # manually refresh the token.
-    if not refresh_token:
-        return JsonResponse({'error': 'No refresh token available'}, status=400)
-    
-    refresh_expires = request.session.get('refresh_expires')
-    if refresh_expires and int(time.time()) >= refresh_expires:
-        return JsonResponse({'error': 'Refresh token expired'}, status=401)
-    
-    # cooldown logic same as middleware
-    last_refresh_attempt = request.session.get('last_refresh_attempt', 0)
-    current_time = int(time.time())
-    if (current_time - last_refresh_attempt) < 30: #30s buffer
-        return JsonResponse({'error': 'Please wait before refreshing again'}, status=429)
-    
-    # To prevent concurrent refresh attempts
-    refresh_key = f"refreshing_token_{request.session.session_key}"
-    if request.session.get(refresh_key):
-        return JsonResponse({'error': 'Token refresh already in progress'}, status=429)
-    
+
     try:
-        # store refresh attempt time
-        request.session['last_refresh_attempt'] = current_time
-        request.session[refresh_key] = True
+        # Set session flag for offline token request
+        request.session['request_offline_token'] = True
         request.session.modified = True
-        
-        data = {'refresh-token': refresh_token}
-        headers = {"Content-Type": "application/x-www-form-urlencoded"}
+        callback_url = request.build_absolute_uri('/callback')
+        params = {
+            'redirect_uri': callback_url,
+            'offline_access': 'true',
+            'prompt': 'none'
+        }
 
-        logger.info(f"Manual token refresh requested for user {request.user.username}")
-        response = requests.post(TOKEN_URL, headers=headers, data=data, timeout=10)
+        proxy_path = f"/api/freva-nextgen/auth/v2/login?{urlencode(params)}"
+        auth_url = request.build_absolute_uri(proxy_path)
 
-        if response.status_code == 200:
-            token_data = response.json()
-
-            # Update session with new tokens
-            request.session['access_token'] = token_data['access_token']
-            request.session['refresh_token'] = token_data['refresh_token']
-            request.session['token_expires'] = token_data['expires']
-            request.session['refresh_expires'] = token_data['refresh_expires']
-            # pop last_refresh_attempt to reset cooldown
-            request.session.pop('last_refresh_attempt', None)
-            request.session.modified = True
-
-            logger.info(f"Manual token refresh successful for user {request.user.username}")
-            # initi response to set cookie, then return JSON
-            json_response = JsonResponse({
-                'success': True,
-                'access_token': token_data['access_token'],
-                'expires': token_data['expires'],
-                'expires_in': token_data['expires'] - int(time.time()),
-                'message': 'Token refreshed successfully'
-            })
-            json_response = set_token_cookie(json_response, token_data)
-            return json_response
-        else:
-            logger.error(f"Manual token refresh failed: {response.status_code} - {response.text}")
-            return JsonResponse({
-                'error': f'Token refresh failed: {response.status_code}',
-                'details': response.text
-            }, status=400)
+        return JsonResponse({
+            'success': True,
+            'auth_url': auth_url
+        })
 
     except Exception as e:
-        logger.exception(f"Manual token refresh error for user {request.user.username}: {e}")
+        logger.exception(f"Offline token request failed: {e}")
         return JsonResponse({'error': 'Internal server error'}, status=500)
-    finally:
-        # pop the refresh lock
-        request.session.pop(refresh_key, None)
-        request.session.modified = True
 
 
 @csrf_exempt
@@ -299,6 +283,7 @@ def collect_current_token(request):
     refresh_token = request.session.get('refresh_token')
     expires = request.session.get('token_expires')
     refresh_expires = request.session.get('refresh_expires')
+    scope = request.session.get('token_scope', DEFAULT_SCOPES)
 
     if access_token:
         token_data = {
@@ -307,7 +292,7 @@ def collect_current_token(request):
             'expires': expires,
             'refresh_expires': refresh_expires,
             'token_type': "Bearer",
-            'scope': "openid profile"
+            'scope': scope
         }
 
         return JsonResponse({
@@ -402,6 +387,14 @@ def restart(request):
 
     return render(request, "base/home.html")
 
+@login_required()
+def token_health_check(request):
+    """
+    An endpoint to trigger token refresh middleware.
+    Returns only success status, instead of making the
+    token data available to JS.
+    """
+    return JsonResponse({'status': 'ok'})
 
 @login_required()
 def stacbrowser(request):

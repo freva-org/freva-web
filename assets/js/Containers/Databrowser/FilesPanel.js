@@ -113,21 +113,26 @@ function FilesPanelImpl(props) {
         throw new Error("Empty zarr URL returned from server");
       }
 
-      if (!zarrUrl.startsWith("http://") && !zarrUrl.startsWith("https://")) {
-        throw new Error(
-          `Invalid zarr URL received. Please check if the data-portal proxy is configured.`
-        );
-      }
+      const getPathFromUrl = (url) => {
+        try {
+          const urlObj = new URL(url);
+          return urlObj.pathname;
+        } catch {
+          return url;
+        }
+      };
+
+      const relativeZarrUrl = getPathFromUrl(zarrUrl);
 
       setZarrUrl(zarrUrl);
 
-      // Step 2: Use the returned zarr URL directly to get metadata
+      // Step 2:  Use the returned zarr URL directly to get metadata
       const metadataHeaders = {
         ...headers,
         Accept: "text/html",
       };
 
-      const metadataUrl = `${zarrUrl}/view`;
+      const metadataUrl = `${relativeZarrUrl}/view`;
 
       const metadataResponse = await fetch(metadataUrl, {
         method: "GET",

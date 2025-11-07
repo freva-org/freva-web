@@ -17,6 +17,7 @@ import {
   FaTrash,
   FaPlus,
   FaExclamationTriangle,
+  FaEdit,
 } from "react-icons/fa";
 
 import { AVAILABLE_FACETS } from "./constants";
@@ -27,11 +28,12 @@ class FlavourManager extends Component {
 
     this.state = {
       additionalFacetsVisible: false,
-      showAddFlavourModal: false,
+      showFlavourModal: false,
+      editMode: false,
+      originalFlavourName: "",
       deleteMode: false,
       showDeleteConfirmModal: false,
       flavourToDelete: null,
-      // IMPORTANR: Modal form state; in case, if we added new facets, we need to re-construct the form
       flavourName: "",
       facetMappings: Object.fromEntries(
         AVAILABLE_FACETS.map((facet) => [facet.key, ""])
@@ -44,8 +46,9 @@ class FlavourManager extends Component {
       toastVariant: "success",
     };
 
-    this.handleAddFlavour = this.handleAddFlavour.bind(this);
+    this.handleSubmitFlavour = this.handleSubmitFlavour.bind(this);
     this.handleDeleteFlavour = this.handleDeleteFlavour.bind(this);
+    this.handleEditFlavour = this.handleEditFlavour.bind(this);
   }
 
   showToast(message, variant = "success") {
@@ -57,14 +60,36 @@ class FlavourManager extends Component {
     setTimeout(() => this.setState({ showToast: false }), 3000);
   }
 
-  async handleAddFlavour(e) {
+  handleEditFlavour(flavourDetail, event) {
+    if (event) {
+      event.stopPropagation();
+    }
+
+    const mappings = Object.fromEntries(
+      AVAILABLE_FACETS.map((facet) => [
+        facet.key,
+        flavourDetail.mapping[facet.key] || "",
+      ])
+    );
+
+    this.setState({
+      showFlavourModal: true,
+      editMode: true,
+      originalFlavourName: flavourDetail.flavour_name,
+      flavourName: flavourDetail.flavour_name,
+      facetMappings: mappings,
+      isGlobal: flavourDetail.owner === "global",
+      modalError: "",
+    });
+  }
+
+  async handleSubmitFlavour(e) {
     e.preventDefault();
     if (!this.state.flavourName.trim()) {
       this.setState({ modalError: "Flavour name is required" });
       return;
     }
 
-    // Building the mapping from user-input form data
     const mapping = {};
     Object.entries(this.state.facetMappings).forEach(([key, value]) => {
       if (value.trim()) {
@@ -79,15 +104,49 @@ class FlavourManager extends Component {
 
     this.setState({ modalLoading: true });
     try {
-      await this.props.dispatch(
-        this.props.addFlavour({
-          flavour_name: this.state.flavourName,
+      let result;
+      const nameChanged =
+        this.state.editMode &&
+        this.state.flavourName !== this.state.originalFlavourName;
+      const currentlySelected =
+        this.props.currentFlavour === this.state.originalFlavourName;
+
+      if (this.state.editMode) {
+        const updateData = {
           mapping,
           is_global: this.state.isGlobal,
-        })
-      );
+        };
+        // Reset the form on success and close the modal
+        if (nameChanged) {
+          updateData.flavour_name = this.state.flavourName;
+        }
 
-      // Reset the form on success and close the modal
+        result = await this.props.dispatch(
+          this.props.updateFlavour(this.state.originalFlavourName, updateData)
+        );
+
+        // Important: If the name was changed and this flavour is
+        // currently selected, we update the URL
+        if (nameChanged && currentlySelected) {
+          this.props.onFlavourClick(this.state.flavourName);
+        }
+      } else {
+        result = await this.props.dispatch(
+          this.props.addFlavour({
+            flavour_name: this.state.flavourName,
+            mapping,
+            is_global: this.state.isGlobal,
+          })
+        );
+      }
+
+      const message =
+        result?.status ||
+        (this.state.editMode
+          ? "Flavour updated successfully!"
+          : "Flavour added successfully!");
+      this.showToast(message, "success");
+
       this.setState({
         flavourName: "",
         facetMappings: Object.fromEntries(
@@ -95,15 +154,14 @@ class FlavourManager extends Component {
         ),
         isGlobal: false,
         modalError: "",
-        showAddFlavourModal: false,
+        showFlavourModal: false,
+        editMode: false,
+        originalFlavourName: "",
       });
-
-      this.showToast("Flavour added successfully!", "success");
     } catch (err) {
-      const canAdd = this.canAddFlavour();
-      const message = canAdd
-        ? err.message || "Failed to add flavour"
-        : "You don't have permission to add flavours";
+      const message =
+        err.message ||
+        `Failed to ${this.state.editMode ? "update" : "add"} flavour`;
       this.setState({ modalError: message });
       this.showToast(message, "danger");
     } finally {
@@ -116,8 +174,6 @@ class FlavourManager extends Component {
       event.stopPropagation();
     }
 
-    // TODO: we need to still think if window.confirm is better here
-    // or we need to use a modal
     this.setState({
       showDeleteConfirmModal: true,
       flavourToDelete: { name: flavourName, isGlobal },
@@ -150,8 +206,6 @@ class FlavourManager extends Component {
         this.props.deleteFlavour(flavourName, isGlobal)
       );
 
-      // IMPORTANT: If the flavour being deleted is the current one, reset to default
-      // to `freva`
       const currentFlavour =
         this.props.currentFlavour || this.props.defaultFlavour;
       if (currentFlavour === flavourName) {
@@ -173,7 +227,6 @@ class FlavourManager extends Component {
           message = "You don't have permission to delete this flavour";
         }
       } else {
-        // To keep the code clean, we shown the API web service message if available
         const serverMessage = err.message || "";
         if (serverMessage.toLowerCase().includes("create")) {
           message = "Failed to delete flavour - insufficient permissions";
@@ -196,9 +249,6 @@ class FlavourManager extends Component {
   }
 
   canAddFlavour() {
-    // TODO: For now, we allow everyone to try adding flavours
-    // The server will handle the actual permission check.
-    // we might in the future want to restrict this to admins only
     return true;
   }
 
@@ -241,6 +291,21 @@ class FlavourManager extends Component {
           }
           .dropdown-toggle-custom:focus {
             box-shadow: 0 0 0 0.2rem rgba(3, 105, 161, 0.25) !important;
+          }
+          .flavour-action-btn {
+            transition: all 0.2s ease;
+          }
+          .flavour-action-btn:hover {
+            transform: scale(1.3);
+          }
+          .custom-dropdown-item:not(.active) .flavour-action-btn.edit-btn:hover {
+            color: #0369a1 !important;
+          }
+          .custom-dropdown-item:not(.active) .flavour-action-btn.delete-btn:hover {
+            color: #dc2626 !important;
+          }
+          .custom-dropdown-item.active .flavour-action-btn:hover {
+            color: white !important;
           }
         `}</style>
 
@@ -300,7 +365,7 @@ class FlavourManager extends Component {
                         paddingRight:
                           this.state.deleteMode &&
                           this.canDeleteFlavour(flavourDetail)
-                            ? "50px"
+                            ? "75px"
                             : "16px",
                         fontSize: "0.9rem",
                       }}
@@ -321,29 +386,68 @@ class FlavourManager extends Component {
 
                     {this.state.deleteMode &&
                       this.canDeleteFlavour(flavourDetail) && (
-                        <Button
-                          variant="link"
-                          size="sm"
-                          className="position-absolute text-danger p-0"
-                          onClick={(e) =>
-                            this.handleDeleteFlavour(
-                              flavourDetail.flavour_name,
-                              flavourDetail.owner === "global",
-                              e
-                            )
-                          }
-                          title="Delete flavour"
+                        <div
+                          className="position-absolute"
                           style={{
                             right: "12px",
                             top: "50%",
                             transform: "translateY(-50%)",
-                            width: "20px",
-                            height: "20px",
-                            fontSize: "0.8rem",
+                            display: "flex",
+                            gap: "4px",
                           }}
                         >
-                          <FaTrash />
-                        </Button>
+                          <Button
+                            variant="link"
+                            size="sm"
+                            className="p-0 flavour-action-btn edit-btn"
+                            onClick={(e) =>
+                              this.handleEditFlavour(flavourDetail, e)
+                            }
+                            title="Edit flavour"
+                            style={{
+                              width: "20px",
+                              height: "20px",
+                              fontSize: "0.8rem",
+                              color:
+                                flavour === flavourDetail.flavour_name
+                                  ? "white"
+                                  : "#0369a1",
+                            }}
+                            onMouseEnter={(e) => {
+                              if (flavour !== flavourDetail.flavour_name) {
+                                e.currentTarget.style.color = "#0369a1";
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              e.currentTarget.style.color =
+                                flavour === flavourDetail.flavour_name
+                                  ? "white"
+                                  : "#0369a1";
+                            }}
+                          >
+                            <FaEdit />
+                          </Button>
+                          <Button
+                            variant="link"
+                            size="sm"
+                            className="p-0 text-danger flavour-action-btn delete-btn"
+                            onClick={(e) =>
+                              this.handleDeleteFlavour(
+                                flavourDetail.flavour_name,
+                                flavourDetail.owner === "global",
+                                e
+                              )
+                            }
+                            title="Delete flavour"
+                            style={{
+                              width: "20px",
+                              height: "20px",
+                              fontSize: "0.8rem",
+                            }}
+                          >
+                            <FaTrash />
+                          </Button>
+                        </div>
                       )}
                   </div>
                 ))}
@@ -351,7 +455,19 @@ class FlavourManager extends Component {
                 <Dropdown.Divider />
 
                 <Dropdown.Item
-                  onClick={() => this.setState({ showAddFlavourModal: true })}
+                  onClick={() =>
+                    this.setState({
+                      showFlavourModal: true,
+                      editMode: false,
+                      originalFlavourName: "",
+                      flavourName: "",
+                      facetMappings: Object.fromEntries(
+                        AVAILABLE_FACETS.map((facet) => [facet.key, ""])
+                      ),
+                      isGlobal: false,
+                      modalError: "",
+                    })
+                  }
                   className="text-success"
                   style={{ fontSize: "0.9rem" }}
                 >
@@ -371,7 +487,7 @@ class FlavourManager extends Component {
                   style={{ fontSize: "0.9rem" }}
                 >
                   <FaTrash className="me-2" style={{ fontSize: "0.8rem" }} />
-                  {this.state.deleteMode ? "Cancel Delete" : "Delete Mode"}
+                  {this.state.deleteMode ? "Cancel Edit" : "Edit Mode"}
                 </Dropdown.Item>
               </Dropdown.Menu>
             </Dropdown>
@@ -477,20 +593,17 @@ class FlavourManager extends Component {
     );
   }
 
-  renderAddFlavourModal() {
+  renderFlavourModal() {
     const handleBackdropClick = (e) => {
       if (e.target === e.currentTarget) {
-        this.setState({ showAddFlavourModal: false });
+        this.setState({ showFlavourModal: false });
       }
     };
 
-    if (!this.state.showAddFlavourModal) {
+    if (!this.state.showFlavourModal) {
       return null;
     }
-    // TODO: all header and style of the modal comes from
-    // token modal. we might change the naming on the
-    // token modal to shared or something else to be able to
-    // reuse the modal styling
+
     return (
       <div className="token-modal show" onClick={handleBackdropClick}>
         <div
@@ -509,15 +622,21 @@ class FlavourManager extends Component {
             }}
           >
             <h1>
-              <FaPlus className="me-2" style={{ fontSize: "18px" }} />
-              Flavour Management
+              {this.state.editMode ? (
+                <FaEdit className="me-2" style={{ fontSize: "18px" }} />
+              ) : (
+                <FaPlus className="me-2" style={{ fontSize: "18px" }} />
+              )}
+              {this.state.editMode ? "Edit Flavour" : "Flavour Management"}
             </h1>
             <p>
-              Create and manage data flavours for customized search experiences
+              {this.state.editMode
+                ? "Update your flavour configuration"
+                : "Create and manage data flavours for customized search experiences"}
             </p>
             <button
               className="token-close-btn"
-              onClick={() => this.setState({ showAddFlavourModal: false })}
+              onClick={() => this.setState({ showFlavourModal: false })}
             >
               ×
             </button>
@@ -559,16 +678,14 @@ class FlavourManager extends Component {
               </div>
             )}
 
-            {/* Add Flavour Form */}
             <div>
               <div className="token-status mb-3">
                 <div className="token-label" style={{ fontSize: "18px" }}>
-                  Add New Flavour:
+                  {this.state.editMode ? "Edit Flavour:" : "Add New Flavour:"}
                 </div>
               </div>
-
-              <Form onSubmit={this.handleAddFlavour}>
-                {/* Toggle and Flavour Row */}
+              {/* Toggle and Flavour Row */}
+              <Form onSubmit={this.handleSubmitFlavour}>
                 <Row className="mb-3">
                   <Col md={12}>
                     <div
@@ -578,7 +695,6 @@ class FlavourManager extends Component {
                         gap: "16px",
                       }}
                     >
-                      {/* Toggle on Left */}
                       <div
                         style={{
                           display: "flex",
@@ -588,6 +704,7 @@ class FlavourManager extends Component {
                           maxWidth: "100px",
                         }}
                       >
+                        {/* Toggle on Left */}
                         <div
                           style={{
                             display: "flex",
@@ -601,11 +718,16 @@ class FlavourManager extends Component {
                             border: `2px solid ${this.state.isGlobal ? "#0ea5e9" : "#e2e8f0"}`,
                             borderRadius: "10px",
                             transition: "all 0.3s ease",
-                            cursor: "pointer",
+                            cursor: this.state.editMode
+                              ? "not-allowed"
+                              : "pointer",
+                            opacity: this.state.editMode ? 0.6 : 1,
                           }}
-                          onClick={() =>
-                            this.setState({ isGlobal: !this.state.isGlobal })
-                          }
+                          onClick={() => {
+                            if (!this.state.editMode) {
+                              this.setState({ isGlobal: !this.state.isGlobal });
+                            }
+                          }}
                         >
                           {/* Toggle Icon Display */}
                           <div
@@ -639,7 +761,6 @@ class FlavourManager extends Component {
                             )}
                           </div>
 
-                          {/* Toggle Text */}
                           <span
                             style={{
                               fontSize: "11px",
@@ -652,7 +773,6 @@ class FlavourManager extends Component {
                           >
                             {this.state.isGlobal ? "Global" : "Personal"}
                           </span>
-
                           {/* Toggle Switch */}
                           <div
                             style={{
@@ -702,7 +822,6 @@ class FlavourManager extends Component {
                           </div>
                         </div>
                       </div>
-
                       {/* Flavour Input */}
                       <div style={{ flex: 1 }}>
                         <Form.Group>
@@ -732,7 +851,6 @@ class FlavourManager extends Component {
                             required
                           />
 
-                          {/* Toggle Helper text */}
                           <div
                             style={{
                               fontSize: "11px",
@@ -826,7 +944,6 @@ class FlavourManager extends Component {
               </Form>
             </div>
           </div>
-
           {/* Add Flavour Footer Buttons */}
           <div
             style={{
@@ -841,7 +958,7 @@ class FlavourManager extends Component {
               <button
                 type="button"
                 className="token-btn"
-                onClick={() => this.setState({ showAddFlavourModal: false })}
+                onClick={() => this.setState({ showFlavourModal: false })}
                 style={{
                   background: "#6b7280",
                   fontSize: "14px",
@@ -854,7 +971,7 @@ class FlavourManager extends Component {
                 type="submit"
                 className="token-btn"
                 disabled={this.state.modalLoading}
-                onClick={this.handleAddFlavour}
+                onClick={this.handleSubmitFlavour}
                 style={{
                   opacity: this.state.modalLoading ? 0.6 : 1,
                   cursor: this.state.modalLoading ? "not-allowed" : "pointer",
@@ -875,12 +992,16 @@ class FlavourManager extends Component {
                         marginRight: "6px",
                       }}
                     />
-                    Adding...
+                    {this.state.editMode ? "Updating..." : "Adding..."}
                   </>
                 ) : (
                   <>
-                    <FaPlus style={{ fontSize: "12px" }} />
-                    Add Flavour
+                    {this.state.editMode ? (
+                      <FaEdit style={{ fontSize: "12px" }} />
+                    ) : (
+                      <FaPlus style={{ fontSize: "12px" }} />
+                    )}
+                    {this.state.editMode ? " Update Flavour" : " Add Flavour"}
                   </>
                 )}
               </button>
@@ -895,9 +1016,8 @@ class FlavourManager extends Component {
     return (
       <>
         {this.renderFlavourDropdown()}
-        {/* Add Flavour Modal */}
-        {this.renderAddFlavourModal()}
-        {/* Delete Confirmation Modal */}
+        {/* Flavour Modal */}
+        {this.renderFlavourModal()}
         {this.renderDeleteConfirmModal()}
         {/* Toast notifications */}
         <div className="position-fixed top-0 end-0 p-3" style={{ zIndex: 11 }}>
@@ -929,6 +1049,7 @@ FlavourManager.propTypes = {
   isAdmin: PropTypes.bool,
   dispatch: PropTypes.func.isRequired,
   addFlavour: PropTypes.func.isRequired,
+  updateFlavour: PropTypes.func.isRequired,
   deleteFlavour: PropTypes.func.isRequired,
   onFlavourClick: PropTypes.func.isRequired,
 };

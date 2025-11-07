@@ -1,8 +1,6 @@
 {% load settingstags %}
 
-<!-- Token Management CSS -->
 <style>
-    /* Styles for authentication dropdown */
     .user-dropdown {
         position: relative;
     }
@@ -151,7 +149,6 @@
         transform: translateY(-1px);
     }
 
-
     /* Token Management Modal Styles */
     .token-modal {
         display: none;
@@ -247,7 +244,7 @@
         color: #1e293b;
     }
 
-    .token-expiry {
+    .token-status-info {
         display: flex;
         align-items: center;
         gap: 6px;
@@ -258,12 +255,17 @@
         border-radius: 6px;
     }
 
-    .token-expiry.warning {
-        color: #d97706;
-        background: #fef3c7;
+    .token-status-info.generated {
+        color: #059669;
+        background: #dcfce7;
     }
 
-    .token-expiry.danger {
+    .token-status-info.ready {
+        color: #2563eb;
+        background: #dbeafe;
+    }
+
+    .token-status-info.expired {
         color: #dc2626;
         background: #fecaca;
     }
@@ -306,6 +308,21 @@
         word-break: break-all;
         white-space: pre-wrap;
         flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .token-info.has-content {
+        text-align: left;
+        align-items: flex-start;
+        justify-content: flex-start;
+    }
+
+    .token-placeholder {
+        color: #6b7280;
+        font-style: italic;
     }
 
     /* Custom scrollbar for token display */
@@ -356,6 +373,11 @@
         background: {% settings_val 'HOVER_COLOR' %};
     }
 
+    .token-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
     .spinner {
         border: 2px solid #f3f4f6;
         border-top: 2px solid {% settings_val 'MAIN_COLOR' %};
@@ -375,7 +397,7 @@
             margin: 10px;
             max-height: 95vh;
         }
-        
+
         .token-section {
             padding: 12px 16px;
         }
@@ -384,7 +406,7 @@
             flex-direction: column;
             gap: 8px;
         }
-        
+
         .token-btn {
             width: 100%;
         }
@@ -421,7 +443,7 @@
         <li>
             <a class="dropdown-item" href="#" onclick="openTokenModal(); return false;">
                 <i class="fas fa-key"></i>
-                Token Management
+                Generate Py/CLI Token
             </a>
         </li>
         <li><hr class="dropdown-divider"></li>
@@ -432,7 +454,7 @@
             </a>
         </li>
     </ul>
-    
+
     <!-- Hidden logout form -->
     <form action="{% url 'base:logout' %}" method="post" id="hidden-logout-form" style="display: none;">
         {% csrf_token %}
@@ -443,36 +465,31 @@
 <div class="token-modal" id="tokenModal">
     <div class="token-modal-content">
         <div class="token-header">
-            <h1>Freva API Token</h1>
-            <p>Secure access to FREVA API resources</p>
+            <h1>Offline Freva API Token</h1>
+            <p>Generate token for Python/CLI access</p>
             <button class="token-close-btn" onclick="closeTokenModal()">×</button>
         </div>
 
         <div class="token-section">
             <div class="token-status">
-                <div class="token-label">Token:</div>
-                <div id="tokenExpiry" class="token-expiry">
-                    <span><i class="fas fa-clock"></i></span>
-                    <span id="expiryText">Loading...</span>
+                <div class="token-label">Offline Token:</div>
+                <div id="tokenStatus" class="token-status-info ready">
+                    <span><i class="fas fa-info-circle"></i></span>
+                    <span id="statusText">Authenticating...</span>
                 </div>
             </div>
-            
+
             <div class="token-display">
                 <div class="token-info" id="tokenInfo">
-                    <div id="tokenValue">
-                        Loading token...
+                    <div class="token-placeholder" id="tokenValue">
+                        <div class="spinner"></div>
+                        Authenticating and generating your offline token...
                     </div>
                 </div>
-                
+
                 <div class="token-actions">
-                    <button class="token-btn" onclick="copyToken()">
+                    <button class="token-btn" id="copyBtn" onclick="copyToken()" disabled style="opacity: 0.5;">
                         <i class="fas fa-copy"></i> Copy
-                    </button>
-                    <button class="token-btn" onclick="downloadToken()">
-                        <i class="fas fa-download"></i> Download
-                    </button>
-                    <button class="token-btn" onclick="refreshToken()">
-                        <i class="fas fa-rotate-right"></i> Re-new Token
                     </button>
                 </div>
             </div>
@@ -480,272 +497,58 @@
     </div>
 </div>
 
-<!-- Token Management js -->
+<!-- Token Management JavaScript -->
 <script>
-    class TokenManager {
-        constructor() {
-            this.refreshInProgress = false;
-            this.refreshPromise = null;
-            this.currentTokenData = null;
-            this.expiryInterval = null;
-            this.autoRefreshTimer = null;
-            this.init();
-        }
-
-        init() {
-            // Listen for visibility changes to refresh when tab becomes active
-            document.addEventListener('visibilitychange', () => {
-                if (!document.hidden && this.isAuthenticated()) {
-                    this.checkAndRefreshToken();
-                }
-            });
-
-            // Intercept fetch requests to automatically refresh tokens
-            this.interceptFetch();
-            
-            // Set up logout cleanup
-            this.setupLogoutCleanup();
-        }
-
-        setupLogoutCleanup() {
-            // Watch for logout form submission
-            const logoutForm = document.getElementById('hidden-logout-form');
-            if (logoutForm) {
-                logoutForm.addEventListener('submit', () => {
-                    this.cleanup();
-                });
-            }
-
-            // Watch for beforeunload (page navigation/refresh)
-            window.addEventListener('beforeunload', () => {
-                this.cleanup();
-            });
-        }
-
-        cleanup() {            
-            if (this.expiryInterval) {
-                clearInterval(this.expiryInterval);
-                this.expiryInterval = null;
-            }
-            
-            if (this.autoRefreshTimer) {
-                clearInterval(this.autoRefreshTimer);
-                this.autoRefreshTimer = null;
-            }
-            
-            // Clear token data
-            this.currentTokenData = null;
-            
-            // Reset refresh state
-            this.refreshInProgress = false;
-            this.refreshPromise = null;
-        }
-
-        stopAutoRefresh() {
-            if (this.autoRefreshTimer) {
-                clearInterval(this.autoRefreshTimer);
-                this.autoRefreshTimer = null;
-            }
-        }
-
-        isAuthenticated() {
-            return document.querySelector('[data-user-authenticated="true"]') !== null;
-        }
-
-        getCurrentTokenExpiry() {
-            const expiryElement = document.getElementById('expiryText');
-            if (!expiryElement) return null;
-            
-            const expiryText = expiryElement.textContent;
-            if (expiryText.includes('Expires in')) {
-                const timeMatch = expiryText.match(/(\d{2}):(\d{2}):(\d{2})/);
-                if (timeMatch) {
-                    const hours = parseInt(timeMatch[1]);
-                    const minutes = parseInt(timeMatch[2]);
-                    const seconds = parseInt(timeMatch[3]);
-                    return hours * 3600 + minutes * 60 + seconds;
-                }
-            }
-            return null;
-        }
-
-        async checkAndRefreshToken() {
-            const expirySeconds = this.getCurrentTokenExpiry();
-            
-            if (expirySeconds !== null && expirySeconds < 120) {
-                await this.refreshToken();
-            }
-        }
-
-        async refreshToken() {
-            if (this.refreshInProgress) {
-                return this.refreshPromise;
-            }
-
-            this.refreshInProgress = true;
-            this.refreshPromise = this._performRefresh();
-
-            try {
-                const result = await this.refreshPromise;
-                return result;
-            } finally {
-                this.refreshInProgress = false;
-                this.refreshPromise = null;
-            }
-        }
-
-        async _performRefresh() {
-            try {
-                const response = await fetch('{% url "base:get_refresh_token" %}', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': this.getCsrfToken(),
-                        'Content-Type': 'application/json',
-                    },
-                });
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    throw new Error('Session expired - please login again');
-                }
-
-                const data = await response.json();
-
-                if (data.success) {
-                    console.log('Token refreshed successfully');
-
-                    if (this.currentTokenData && typeof displayToken === 'function') {
-                        this.currentTokenData.access_token = data.access_token;
-                        this.currentTokenData.expires = data.expires;
-                        displayToken(this.currentTokenData);
-                        startExpiryTimer(data.expires);
-                    }
-
-                    return { success: true, data };
-                } else {
-                    throw new Error(data.error || 'Token refresh failed');
-                }
-            } catch (error) {
-                console.error('Token refresh failed:', error);
-                
-                if (error.message.includes('expired') || error.message.includes('invalid')) {
-                    setTimeout(() => this.redirectToLogin(), 2000);
-                }
-
-                return { success: false, error: error.message };
-            }
-        }
-
-        redirectToLogin() {
-            const currentPath = window.location.pathname;
-            const loginUrl = `{% url "base:oidc_login" %}?next=${encodeURIComponent(currentPath)}`;
-            window.location.href = loginUrl;
-        }
-
-        getCsrfToken() {
-            const cookieValue = document.cookie
-                .split('; ')
-                .find(row => row.startsWith('csrftoken='));
-            return cookieValue ? cookieValue.split('=')[1] : '{{ csrf_token }}';
-        }
-
-        interceptFetch() {
-            const originalFetch = window.fetch;
-            const self = this;
-
-            window.fetch = async function(...args) {
-                try {
-                    let response = await originalFetch.apply(window, args);
-                    
-                    if (response.status === 401 && self.isAuthenticated()) {
-                        const refreshResult = await self.refreshToken();
-
-                        if (refreshResult.success) {
-                            response = await originalFetch.apply(window, args);
-                        } else {
-                            self.redirectToLogin();
-                        }
-                    }
-                    return response;
-                } catch (error) {
-                    console.error('Fetch error:', error);
-                    throw error;
-                }
-            };
-        }
-    }
-
-    // Initialize token manager when DOM is loaded
-    let tokenManager;
-    let currentTokenData = null;
-    let expiryInterval = null;
-
-    document.addEventListener('DOMContentLoaded', function() {
-        tokenManager = new TokenManager();
-        window.tokenManager = tokenManager;
-    });
-
+    let currentOfflineToken = null;
+    let authWindow = null;
     function openTokenModal() {
-        if (currentTokenData?.refresh_expires && 
-            Math.floor(Date.now() / 1000) >= currentTokenData.refresh_expires) {
-            alert('Session expired. Redirecting...');
-            window.location.href = '/login/';
-            return;
-        }
         document.getElementById('tokenModal').classList.add('show');
-        loadTokenData();
+        document.body.style.overflow = 'hidden';
+
+        // Reset state and automatically start token generation
+        currentOfflineToken = null;
+        enableTokenActions(false);
+        updateTokenStatus('ready', 'Authenticating...');
+        setTimeout(requestAndDownloadToken, 500);
     }
 
     function closeTokenModal() {
         document.getElementById('tokenModal').classList.remove('show');
         document.body.style.overflow = 'auto';
-        if (expiryInterval) {
-            clearInterval(expiryInterval);
+        // IMPORTANT: Close auth window if still open
+        if (authWindow && !authWindow.closed) {
+            authWindow.close();
+            authWindow = null;
         }
     }
 
-    function loadTokenData() {
-        fetch('{% url "base:collect_current_token" %}', {
-            method: 'GET',
-            headers: {
-                'X-CSRFToken': getCsrfToken(),
-                'Content-Type': 'application/json',
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success && data.token_data) {
-                currentTokenData = data.token_data;
-                displayToken(currentTokenData);
-                startExpiryTimer(currentTokenData.expires);
+    function updateTokenStatus(status, text) {
+        const statusElement = document.getElementById('tokenStatus');
+        const statusText = document.getElementById('statusText');
 
-                if (window.tokenManager) {
-                    window.tokenManager.currentTokenData = currentTokenData;
-                }
-            } else {
-                document.getElementById('tokenValue').textContent = 'No token available - please refresh';
-            }
-        })
-        .catch(error => {
-            console.error('Failed to load token data:', error);
-            document.getElementById('tokenValue').textContent = 'Error loading token - please refresh';
-        });
+        statusElement.className = `token-status-info ${status}`;
+        statusText.textContent = text;
     }
 
-    function getCsrfToken() {
-        const cookieValue = document.cookie
-            .split('; ')
-            .find(row => row.startsWith('csrftoken='));
-        return cookieValue ? cookieValue.split('=')[1] : '{{ csrf_token }}';
+    function enableTokenActions(enable = true) {
+        const copyBtn = document.getElementById('copyBtn');
+
+        copyBtn.disabled = !enable;
+
+        if (enable) {
+            copyBtn.style.opacity = '1';
+        } else {
+            copyBtn.style.opacity = '0.5';
+        }
     }
 
     function displayToken(tokenData) {
         const tokenDisplay = document.getElementById('tokenValue');
-        
-        // expires_at and refresh_expires_at are in human-readable format
-        // to make it easier for users to understand. But I think we need
-        // to keep the original timestamps since one user might copy the
-        // token directly from display without the copy button and use it
-        // in the CLI and Python
+        const tokenInfo = document.getElementById('tokenInfo');
+
+        // TODO: human-readable formatting of token with ISO timestamps
+        // is very useful for users to see expiry times but we should
+        // not include these in the copied/downloaded token
         const formattedToken = {
             "access_token": tokenData.access_token,
             "refresh_token": tokenData.refresh_token,
@@ -756,90 +559,148 @@
             "refresh_expires": tokenData.refresh_expires,
             "scope": tokenData.scope
         };
-        
-        // Format as pretty JSON
+
         const jsonString = JSON.stringify(formattedToken, null, 2);
         tokenDisplay.textContent = jsonString;
+        tokenInfo.classList.add('has-content');
+        updateTokenStatus('generated', 'Token downloaded successfully');
+        enableTokenActions(true);
+        downloadTokenFile(tokenData);
     }
 
-    function startExpiryTimer(expiresTimestamp) {
-        if (expiryInterval) clearInterval(expiryInterval);
-        
-        function updateTimer() {
-            const now = Math.floor(Date.now() / 1000);
-            const timeLeft = expiresTimestamp - now;
+    async function requestAndDownloadToken() {
+        updateTokenStatus('ready', 'Initiating authentication...');
 
-            if (timeLeft <= 0) {
-                document.getElementById('expiryText').textContent = 'Token expired';
-                document.getElementById('tokenExpiry').className = 'token-expiry danger';
-                clearInterval(expiryInterval);
-                return;
-            }
+        try {
+            // offline token initiation
+            const response = await fetch('{% url "base:request_offline_token" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCsrfToken(),
+                    'Content-Type': 'application/json',
+                },
+            });
+            const data = await response.json();
 
-            let timeString;
+            if (data.success && data.auth_url) {
+                updateTokenStatus('ready', 'Opening authentication window...');
 
-            // If more than 24 hours, show in days and hours
-            if (timeLeft >= 86400) {
-                const days = Math.floor(timeLeft / 86400);
-                const hours = Math.floor((timeLeft % 86400) / 3600);
-                if (days === 1) {
-                    timeString = hours > 0 ? `1 day, ${hours}h` : '1 day';
-                } else {
-                    timeString = hours > 0 ? `${days} days, ${hours}h` : `${days} days`;
+                // authentication window
+                const windowFeatures = 'width=600,height=700,scrollbars=yes,resizable=yes,toolbar=no,location=no,directories=no,status=no,menubar=no';
+                authWindow = window.open(data.auth_url, 'frevaAuth', windowFeatures);
+
+                if (!authWindow) {
+                    throw new Error('Failed to open authentication window. Please allow popups for this site.');
                 }
+                updateTokenStatus('ready', 'Please complete authentication in the popup window...');
+
+                // Listen for messages from the popup window
+                const messageHandler = (event) => {
+                    if (event.data && event.data.type === 'OFFLINE_TOKEN_SUCCESS') {
+                        // Remove the message listener
+                        window.removeEventListener('message', messageHandler);
+                        // Process data
+                        currentOfflineToken = event.data.tokenData;
+                        displayToken(currentOfflineToken);
+                        // Clean up auth window reference
+                        authWindow = null;
+                    }
+                };
+                // Adding message listener
+                window.addEventListener('message', messageHandler);
+                const monitorWindow = () => {
+                    if (authWindow && authWindow.closed) {
+                        window.removeEventListener('message', messageHandler);
+                        // Check if we got a token, if not show error
+                        if (!currentOfflineToken) {
+                            updateTokenStatus('expired', 'Authentication cancelled');
+                            resetToInitialState('Authentication was cancelled. Please try again.', 3000);
+                        }
+                        authWindow = null;
+                        return;
+                    }
+                    // Continue monitoring
+                    setTimeout(monitorWindow, 500);
+                };
+                setTimeout(monitorWindow, 500);
             } else {
-                // Less than 24 hours, show in HH:MM:SS format
-                const hours = Math.floor(timeLeft / 3600);
-                const minutes = Math.floor((timeLeft % 3600) / 60);
-                const seconds = timeLeft % 60;
-                timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                throw new Error(data.error || 'Failed to initiate token generation');
             }
 
-            document.getElementById('expiryText').textContent = `Expires in ${timeString}`;
-
-            const expiryElement = document.getElementById('tokenExpiry');
-            // TODO: the following logic needs to be improved
-            if (timeLeft < 3600) { // Less than 1 hour
-                expiryElement.className = 'token-expiry danger';
-            } else if (timeLeft < 14400) { // Less than 4 hours
-                expiryElement.className = 'token-expiry warning';
-            } else {
-                expiryElement.className = 'token-expiry';
-            }
+        } catch (error) {
+            console.error('Token generation failed:', error);
+            updateTokenStatus('expired', 'Failed to get token');
+            resetToInitialState('Failed to generate token. Please try again.', 3000);
         }
+    }
 
-        updateTimer();
-        expiryInterval = setInterval(updateTimer, 1000);
+    function resetToInitialState(message, delay = 0) {
+        const tokenDisplay = document.getElementById('tokenValue');
+        const tokenInfo = document.getElementById('tokenInfo');
+
+        setTimeout(() => {
+            tokenDisplay.innerHTML = `<div class="token-placeholder">${message}</div>`;
+            tokenInfo.classList.remove('has-content');
+            updateTokenStatus('ready', 'Click "Generate Py/CLI Token" to try again');
+            currentOfflineToken = null;
+            enableTokenActions(false);
+        }, delay);
+    }
+
+    function downloadTokenFile(tokenData) {
+        // Create the token object for download (without display formatting)
+        const tokenForDownload = {
+            "access_token": tokenData.access_token,
+            "refresh_token": tokenData.refresh_token,
+            "token_type": tokenData.token_type,
+            "expires": tokenData.expires,
+            "refresh_expires": tokenData.refresh_expires,
+            "scope": tokenData.scope
+        };
+
+        const blob = new Blob([JSON.stringify(tokenForDownload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = '.offline_token.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    function getCsrfToken() {
+        const cookieValue = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('csrftoken='));
+        return cookieValue ? cookieValue.split('=')[1] : '{{ csrf_token }}';
     }
 
     function copyToken() {
-        if (!currentTokenData) return;
+        if (!currentOfflineToken) return;
 
-        const btn = event.target;
+        const btn = document.getElementById('copyBtn');
         const originalHTML = btn.innerHTML;
-
-        const TokenData = {
-            "access_token": currentTokenData.access_token,
-            "refresh_token": currentTokenData.refresh_token, 
-            "token_type": currentTokenData.token_type,
-            "expires": currentTokenData.expires,
-            "refresh_expires": currentTokenData.refresh_expires,
-            "scope": currentTokenData.scope
+        // Create the token object for copying (without display formatting)
+        const tokenData = {
+            "access_token": currentOfflineToken.access_token,
+            "refresh_token": currentOfflineToken.refresh_token,
+            "token_type": currentOfflineToken.token_type,
+            "expires": currentOfflineToken.expires,
+            "refresh_expires": currentOfflineToken.refresh_expires,
+            "scope": currentOfflineToken.scope
         };
 
         // Create temporary textarea element
         const textarea = document.createElement('textarea');
-        textarea.value = JSON.stringify(TokenData, null, 2);
+        textarea.value = JSON.stringify(tokenData, null, 2);
         document.body.appendChild(textarea);
-
-        // Select and copy the text
         textarea.select();
-        textarea.setSelectionRange(0, 99999); // mobile compatibility
-
+        textarea.setSelectionRange(0, 99999);
         try {
             const successful = document.execCommand('copy');
             if (successful) {
-                btn.innerHTML = '<i class="fas fa-check"></i> Copied All!';
+                btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
                 btn.style.background = '#10b981';
 
                 setTimeout(() => {
@@ -859,98 +720,26 @@
                 btn.style.background = '{% settings_val "MAIN_COLOR" %}';
             }, 2000);
         }
-        
         // Clean up
         document.body.removeChild(textarea);
     }
-
-    function downloadToken() {
-        if (!currentTokenData) return;
-        
-        const TokenData = {
-            "access_token": currentTokenData.access_token,
-            "refresh_token": currentTokenData.refresh_token,
-            "token_type": currentTokenData.token_type, 
-            "expires": currentTokenData.expires,
-            "refresh_expires": currentTokenData.refresh_expires,
-            "scope": currentTokenData.scope
-        };
-        
-        const blob = new Blob([JSON.stringify(TokenData, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = '.token.json';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }
-
-    function refreshToken() {
-        const btn = event.target;
-        const originalHTML = btn.innerHTML;
-        btn.innerHTML = '<div class="spinner"></div> Refreshing...';
-        btn.disabled = true;
-        window.tokenManager.refreshToken()
-            .then(result => {
-                if (result.success) {
-                    loadTokenData(); // This will fetch the latest session data
-                    btn.innerHTML = '<i class="fas fa-check"></i> Refreshed';
-                    btn.style.background = '#10b981';
-                    // Reset button after success, 2s buffer
-                    setTimeout(() => {
-                        btn.innerHTML = originalHTML;
-                        btn.style.background = '{% settings_val "MAIN_COLOR" %}';
-                        btn.disabled = false;
-                    }, 2000);
-                } else {
-                    throw new Error(result.error);
-                }
-            })
-            .catch(error => {
-                console.error('Token refresh failed:', error);
-                const isAuthError = error.message.toLowerCase().includes('expired') || 
-                                error.message.toLowerCase().includes('session');
-                if (isAuthError) {
-                    btn.innerHTML = 'Session Expired';
-                    setTimeout(() => {
-                        closeTokenModal();
-                        window.location.href = '/login/';
-                    }, 2000);
-                } else {
-                    btn.innerHTML = '<i class="fas fa-times"></i> Failed';
-                    btn.style.background = '#dc2626';
-                    // Reset button after failure, 2s buffer
-                    setTimeout(() => {
-                        btn.innerHTML = originalHTML;
-                        btn.style.background = '{% settings_val "MAIN_COLOR" %}';
-                        btn.disabled = false;
-                    }, 2000);
-                }
-            });
-    }
-
-    // Close modal when clicking outside of token modal
+    // Close modal when clicking outside
     document.addEventListener('click', function(e) {
         const modal = document.getElementById('tokenModal');
         if (e.target === modal) {
             closeTokenModal();
         }
     });
-
-    // Close modal with Escape key.
-    // it might be changed based on user preferences
+    // Close modal with Escape key
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             closeTokenModal();
         }
     });
-
-    // Cleanup when user logs out
-    function logout() {
-        if (window.tokenManager) {
-            window.tokenManager.stopAutoRefresh();
+    // close auth window if open
+    window.addEventListener('beforeunload', function() {
+        if (authWindow && !authWindow.closed) {
+            authWindow.close();
         }
-    }
+    });
 </script>

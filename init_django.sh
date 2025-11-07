@@ -7,6 +7,11 @@ if [ "${DEBUG:-0}" = "1" ]; then
     LOG_LEVEL="debug"
 fi
 
+until python manage.py migrate --check 2>/dev/null; do
+    echo "Waiting for database..."
+    sleep 2
+done
+
 python manage.py makemigrations base
 python manage.py migrate --fake-initial --noinput
 python manage.py migrate --fake contenttypes

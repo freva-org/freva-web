@@ -1,6 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 
+import { ListGroup } from "react-bootstrap";
+
 import ThreadLink from "./ThreadLink";
 
 export default function ThreadList({ threadList, setThreadList }) {
@@ -14,7 +16,7 @@ export default function ThreadList({ threadList, setThreadList }) {
   }
 
   return (
-    <>
+    <ListGroup variant="flush">
       {threadList.map((element) => {
         return (
           <ThreadLink
@@ -24,7 +26,7 @@ export default function ThreadList({ threadList, setThreadList }) {
           />
         );
       })}
-    </>
+    </ListGroup>
   );
 }
 

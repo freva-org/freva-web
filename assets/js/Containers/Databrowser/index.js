@@ -32,6 +32,7 @@ import {
   setFlavours,
   addFlavour,
   deleteFlavour,
+  updateFlavour,
 } from "./actions";
 import TimeRangeSelector from "./TimeRangeSelector";
 import FilesPanel from "./FilesPanel";
@@ -431,6 +432,7 @@ class Databrowser extends React.Component {
                 dispatch={this.props.dispatch}
                 addFlavour={addFlavour}
                 deleteFlavour={deleteFlavour}
+                updateFlavour={updateFlavour}
                 onFlavourClick={this.clickFlavour}
               />
 

@@ -25,6 +25,11 @@ if int(os.environ.get("DEV_MODE", "0")) == 1:
             flavours_all_methods,
             name="flavours_no_slash",
         ),
+        url(
+            r"^api/freva-nextgen/databrowser/flavours/(?P<flavour_name>[^/]+)$",
+            flavours_all_methods,
+            name="flavours_with_name",
+        ),
         path(
             r"api/freva-nextgen/databrowser/<path:url>/",
             DataBrowserProxy.as_view(),

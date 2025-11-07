@@ -177,6 +177,113 @@ function FrevaGPT() {
     }
   }
 
+  function addThreadToUrl(dataObject) {
+    try {
+      const currentThreadId = JSON.parse(dataObject.content).thread_id;
+      dispatch(setThread(currentThreadId));
+      browserHistory.push({
+        pathname: "/chatbot/",
+        search: `?thread_id=${currentThreadId}`,
+      });
+    } catch (err) {
+      // handle warning
+    }
+  }
+
+  async function handleResponseStream(response) {
+    const localReader = response.body.getReader();
+    setReader(localReader);
+    const decoder = new TextDecoder("utf-8");
+
+    let buffer = "";
+    let varObj = {};
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      // eslint-disable-next-line no-await-in-loop
+      const { done, value } = await localReader.read();
+      if (done) {
+        break;
+      }
+
+      const decodedValues = decoder.decode(value);
+      buffer = buffer + decodedValues;
+
+      let foundSomething = true;
+
+      while (foundSomething) {
+        foundSomething = false;
+
+        for (let bufferIndex = 0; bufferIndex < buffer.length; bufferIndex++) {
+          if (buffer[bufferIndex] !== "}") {
+            continue;
+          }
+          const subBuffer = buffer.slice(0, bufferIndex + 1);
+
+          try {
+            const jsonBuffer = JSON.parse(subBuffer);
+            buffer = buffer.slice(bufferIndex + 1); // shorten string by already evaluated string
+
+            // object is not empty so compare variants
+            if (Object.keys(varObj).length !== 0) {
+              // if object has not same variant, add answer to conversation and override object
+              if (varObj.variant !== jsonBuffer.variant) {
+                //eslint-disable-next-line no-console
+                if (varObj.variant === "ServerHint") {
+                  addThreadToUrl(varObj);
+                } else {
+                  dispatch(addElement(varObj));
+                }
+                lastVariant.current = varObj.variant;
+                if (chatExceedsWindow()) {
+                  setShowScrollButtons(true);
+                }
+                setDynamicAnswer("");
+                setDynamicVariant("");
+                varObj = jsonBuffer;
+              } else {
+                // if object has same variant, add content
+                // eslint-disable-next-line no-lonely-if
+                switch (varObj.variant) {
+                  case "Code":
+                  case "CodeOutput":
+                    varObj.content[0] =
+                      varObj.content[0] + jsonBuffer.content[0];
+                    setDynamicAnswer(varObj.content[0]);
+                    break;
+
+                  default:
+                    varObj.content = varObj.content + jsonBuffer.content;
+                    setDynamicAnswer(varObj.content);
+                }
+                setDynamicVariant(varObj.variant);
+              }
+            } else {
+              // object is empty so add content
+              varObj = jsonBuffer;
+            }
+
+            foundSomething = true;
+            break;
+          } catch (err) {
+            // ServerHints and CodeBlocks include nested JSON Objects
+            if (
+              !subBuffer.includes("ServerHint") &&
+              !subBuffer.includes("Code")
+            ) {
+              dispatch(
+                addElement({
+                  variant: "FrontendError",
+                  content: "Incomplete message received.",
+                })
+              );
+            }
+          }
+        }
+      }
+    }
+  }
+
   async function fetchData(input, chatvariants) {
     const queryObject = {
       input,
@@ -190,137 +297,17 @@ function FrevaGPT() {
       `/api/chatbot/streamresponse?` + queryString.stringify(queryObject)
     ); //, signal);
 
-    if (response.ok) {
-      const localReader = response.body.getReader();
-      setReader(localReader);
-      const decoder = new TextDecoder("utf-8");
-
-      let buffer = "";
-      let varObj = {};
-
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        // eslint-disable-next-line no-await-in-loop
-        const { done, value } = await localReader.read();
-        if (done) {
-          break;
-        }
-
-        const decodedValues = decoder.decode(value);
-        buffer = buffer + decodedValues;
-
-        let foundSomething = true;
-
-        while (foundSomething) {
-          foundSomething = false;
-
-          for (
-            let bufferIndex = 0;
-            bufferIndex < buffer.length;
-            bufferIndex++
-          ) {
-            if (buffer[bufferIndex] !== "}") {
-              continue;
-            }
-            const subBuffer = buffer.slice(0, bufferIndex + 1);
-
-            try {
-              const jsonBuffer = JSON.parse(subBuffer);
-              buffer = buffer.slice(bufferIndex + 1); // shorten string by already evaluated string
-
-              // object is not empty so compare variants
-              if (Object.keys(varObj).length !== 0) {
-                // if object has not same variant, add answer to conversation and override object
-                if (varObj.variant !== jsonBuffer.variant) {
-                  //eslint-disable-next-line no-console
-                  if (varObj.variant === "ServerHint") {
-                    try {
-                      const currentThreadId = JSON.parse(
-                        varObj.content
-                      ).thread_id;
-                      dispatch(setThread(currentThreadId));
-                      browserHistory.push({
-                        pathname: "/chatbot/",
-                        search: `?thread_id=${currentThreadId}`,
-                      });
-                    } catch (err) {
-                      // handle warning
-                    }
-                  } else {
-                    dispatch(addElement(varObj));
-                  }
-                  lastVariant.current = varObj.variant;
-                  if (chatExceedsWindow()) {
-                    setShowScrollButtons(true);
-                  }
-                  setDynamicAnswer("");
-                  setDynamicVariant("");
-                  varObj = jsonBuffer;
-                } else {
-                  // if object has same variant, add content
-                  // eslint-disable-next-line no-lonely-if
-                  if (
-                    varObj.variant === "Code" ||
-                    varObj.variant === "CodeOutput"
-                  ) {
-                    varObj.content[0] =
-                      varObj.content[0] + jsonBuffer.content[0];
-                    setDynamicAnswer(varObj.content[0]);
-                    setDynamicVariant(varObj.variant);
-                  } else {
-                    varObj.content = varObj.content + jsonBuffer.content;
-                    setDynamicAnswer(varObj.content);
-                    setDynamicVariant(varObj.variant);
-                  }
-                }
-              } else {
-                // object is empty so add content
-                varObj = jsonBuffer;
-
-                // set thread id
-                if (thread === "" && varObj.variant === "ServerHint") {
-                  try {
-                    const currentThreadId = JSON.parse(
-                      varObj.content
-                    ).thread_id;
-                    dispatch(setThread(currentThreadId));
-                    browserHistory.push({
-                      pathname: "/chatbot/",
-                      search: `?thread_id=${currentThreadId}`,
-                    });
-                  } catch (err) {
-                    // handle warning
-                  }
-                }
-              }
-
-              foundSomething = true;
-              break;
-            } catch (err) {
-              // ServerHints and CodeBlocks include nested JSON Objects
-              if (
-                !subBuffer.includes("ServerHint") &&
-                !subBuffer.includes("Code")
-              ) {
-                dispatch(
-                  addElement({
-                    variant: "FrontendError",
-                    content: "Incomplete message received.",
-                  })
-                );
-              }
-            }
-          }
-        }
-      }
-    } else {
+    if (!response.ok) {
       dispatch(
         addElement({
           variant: "ServerError",
           content: response.statusText,
         })
       );
+      return;
     }
+
+    await handleResponseStream(response);
   }
 
   /*-----------------------------------------------------------------------------------------------

@@ -27,7 +27,7 @@ function FilesPanelImpl(props) {
   const [filename, setFilename] = useState(null);
   const [zarrUrl, setZarrUrl] = useState(null);
   const [showPathInput, setShowPathInput] = useState(false);
-  const [pathInput, setPathInput] = useState('');
+  const [pathInput, setPathInput] = useState("");
 
   function setPageOffset(offset) {
     const currentLocation = props.location.pathname;
@@ -76,9 +76,8 @@ function FilesPanelImpl(props) {
         Authorization: `Bearer ${tokenData.access_token}`,
       };
 
-
       // Step 1: we use convert endpoint to be able to even
-      // publush the zarr-endpoint arbitrary paths that are 
+      // publush the zarr-endpoint arbitrary paths that are
       // indexed in the search backend.
       const queryParams = new URLSearchParams({
         path: fn,
@@ -94,7 +93,9 @@ function FilesPanelImpl(props) {
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Failed to create zarr endpoint: ${errorText || response.statusText}`);
+        throw new Error(
+          `Failed to create zarr endpoint: ${errorText || response.statusText}`
+        );
       }
 
       const data = await response.json();
@@ -109,8 +110,10 @@ function FilesPanelImpl(props) {
         throw new Error("Empty zarr URL returned from server");
       }
 
-      if (!zarrUrl.startsWith('http://') && !zarrUrl.startsWith('https://')) {
-        throw new Error(`Invalid zarr URL received. Please check if the data-portal proxy is configured.`);
+      if (!zarrUrl.startsWith("http://") && !zarrUrl.startsWith("https://")) {
+        throw new Error(
+          `Invalid zarr URL received. Please check if the data-portal proxy is configured.`
+        );
       }
 
       setZarrUrl(zarrUrl);
@@ -143,7 +146,6 @@ function FilesPanelImpl(props) {
         status: NcDumpDialogState.READY,
         error: null,
       });
-
     } catch (error) {
       let errorMessage = error.message;
 
@@ -152,9 +154,10 @@ function FilesPanelImpl(props) {
       } else if (error.message.includes("Failed to fetch")) {
         errorMessage = "Network error. Please check your connection.";
       } else if (error.message.includes("service not able to publish")) {
-        errorMessage = "Zarr streaming service is not enabled. Please contact your administrator.";
+        errorMessage =
+          "Zarr streaming service is not enabled. Please contact your administrator.";
       } else if (error.message.includes("Failed to get zarr URL")) {
-        errorMessage = `Cannot create zarr endpoint: ${error.message.split(': ')[1] || error.message}`;
+        errorMessage = `Cannot create zarr endpoint: ${error.message.split(": ")[1] || error.message}`;
       }
       // TODO: further error message parsing regarind zarr streaming can be done here
 
@@ -176,7 +179,7 @@ function FilesPanelImpl(props) {
           <button
             className="btn btn-sm btn-outline-primary"
             onClick={() => setShowPathInput(!showPathInput)}
-            style={{ fontSize: '13px' }}
+            style={{ fontSize: "13px" }}
           >
             <i className="fas fa-folder-open me-1"></i>
             Inspect Path
@@ -195,9 +198,12 @@ function FilesPanelImpl(props) {
       {showPathInput && (
         <div
           className="mb-3 p-3 border rounded"
-          style={{ backgroundColor: '#f9fafb' }}
+          style={{ backgroundColor: "#f9fafb" }}
         >
-          <label className="form-label mb-2" style={{ fontSize: '14px', fontWeight: '500' }}>
+          <label
+            className="form-label mb-2"
+            style={{ fontSize: "14px", fontWeight: "500" }}
+          >
             <i className="fas fa-file me-1"></i>
             Enter file path to inspect metadata:
           </label>
@@ -209,7 +215,7 @@ function FilesPanelImpl(props) {
               value={pathInput}
               onChange={(e) => setPathInput(e.target.value)}
               onKeyPress={(e) => {
-                if (e.key === 'Enter' && pathInput.trim()) {
+                if (e.key === "Enter" && pathInput.trim()) {
                   setFilename(pathInput.trim());
                   setShowDialog(true);
                   setShowPathInput(false);

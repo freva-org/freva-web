@@ -12,7 +12,7 @@ from django.conf import settings
 from django.urls import path
 from django.urls import re_path as url
 
-from .proxyviews import DataBrowserProxy
+from .proxyviews import DataBrowserProxy, DataPortalProxy
 from .views import databrowser, flavours_all_methods
 
 urlpatterns = [
@@ -29,5 +29,10 @@ if int(os.environ.get("DEV_MODE", "0")) == 1:
             r"api/freva-nextgen/databrowser/<path:url>/",
             DataBrowserProxy.as_view(),
             name="databrowser_proxy",
+        ),
+        path(
+            r"api/freva-nextgen/data-portal/<path:url>",
+            DataPortalProxy.as_view(),
+            name="data_portal_proxy",
         ),
     ])

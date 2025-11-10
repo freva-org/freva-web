@@ -11,3 +11,11 @@ class DataBrowserProxy(HttpProxy):
 
     base_url = urljoin(settings.DATA_BROWSER_HOST, "/api/freva-nextgen/databrowser/")
     reverse_urls = [("/api/freva-nextgen/databrowser/", settings.DATA_BROWSER_HOST)]
+
+
+class DataPortalProxy(HttpProxy):
+    """A reverse proxy to forward requests to the data-portal API."""
+
+    base_url = urljoin(settings.DATA_BROWSER_HOST, "/api/freva-nextgen/data-portal/")
+    reverse_urls = [("/api/freva-nextgen/data-portal/", settings.DATA_BROWSER_HOST)]
+    

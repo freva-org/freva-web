@@ -16,7 +16,6 @@ from plugins.views_api import (
     PluginsList,
     SendMailToDeveloper,
 )
-from solr.views_api import ncdump
 
 admin.autodiscover()
 
@@ -48,7 +47,6 @@ urlpatterns = [
         SendMailToDeveloper.as_view(),
         name="api-mail-to-developer",
     ),
-    url(r"^api/solr/ncdump/$", ncdump, name="api-ncdump"),
     url(
         r"^api/history/result-browser/$",
         ResultFacets.as_view(),

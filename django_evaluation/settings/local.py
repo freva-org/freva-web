@@ -278,7 +278,6 @@ VENV_PYTHON_DIR = "/usr/bin/python3"
 MIKLIP_LOGO = STATIC_URL + "img/miklip-logo.png"
 LOAD_MODULE = " "
 FREVA_BIN = os.environ.get("FREVA_BIN", os.path.join(sys.exec_prefix, "bin"))
-NCDUMP_BINARY = os.path.join(FREVA_BIN, "metadata-inspector") + " --html"
 
 SHELL_IN_A_BOX = "/shell/"
 WEBPACK_LOADER = {

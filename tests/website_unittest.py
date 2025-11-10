@@ -104,13 +104,6 @@ class EvaluationSystemWeb(unittest.TestCase):
         elem = self.driver.find_element_by_css_selector("span.ncdump")
         elem.click()
 
-        # test ncdump functionality
-        elem = self.driver.find_element_by_id("password_temp")
-        elem.send_keys(self.pw + Keys.RETURN)
-        elem = self.driver.find_element_by_css_selector("pre")
-        elem = self.driver.find_element_by_class_name("close")
-        elem.click()
-
         # test variable title
         self.driver.find_element_by_class_name("facet_clear").click()
         self.click_link("variable")

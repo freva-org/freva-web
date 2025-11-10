@@ -15,6 +15,10 @@ class NcdumpDialog extends React.Component {
     this.state = {
       pathInput: props.file || "",
     };
+    this.state = {
+      pathInput: props.file || "",
+      copied: false,
+    };
     this.handleBackdropClick = this.handleBackdropClick.bind(this);
     this.handleInspect = this.handleInspect.bind(this);
   }
@@ -222,16 +226,15 @@ class NcdumpDialog extends React.Component {
                       >
                         {zarrUrl}
                       </code>
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: "6px",
-                        marginLeft: "auto",
-                      }}
-                    >
                       <button
-                        onClick={() => navigator.clipboard.writeText(zarrUrl)}
+                        onClick={() => {
+                          navigator.clipboard.writeText(zarrUrl);
+                          this.setState({ copied: true });
+                          setTimeout(
+                            () => this.setState({ copied: false }),
+                            2000
+                          );
+                        }}
                         className="btn btn-sm"
                         style={{
                           padding: "4px 10px",
@@ -240,28 +243,14 @@ class NcdumpDialog extends React.Component {
                           border: "1px solid #d1d5db",
                           borderRadius: "4px",
                           color: "#374151",
+                          flexShrink: 0,
                         }}
-                        title="Copy"
+                        title={this.state.copied ? "Copied!" : "Copy Zarr URL"}
                       >
-                        <i className="fas fa-copy"></i>
+                        <i
+                          className={`fas fa-${this.state.copied ? "check" : "copy"}`}
+                        ></i>
                       </button>
-                      <a
-                        href={zarrUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="btn btn-sm"
-                        style={{
-                          padding: "4px 10px",
-                          fontSize: "11px",
-                          backgroundColor: "white",
-                          border: "1px solid #d1d5db",
-                          borderRadius: "4px",
-                          color: "#374151",
-                        }}
-                        title="Open"
-                      >
-                        <i className="fas fa-external-link-alt"></i>
-                      </a>
                     </div>
                   </div>
                 )}

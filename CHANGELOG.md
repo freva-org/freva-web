@@ -1,6 +1,11 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+
+## [v2510.3.0]
+## Changed
+- switch the ncdump approach, from metadata-inspektor to zarr-streaming
+
 ## [v2510.2.0]
 ## Added
 - Add an ability to edit the custom flavours

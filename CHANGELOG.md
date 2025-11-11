@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v2510.3.1]
+## Fixed
+- an issue regarding the ncdump refresh token has been fixed
+## Changed
+- The metdata.js with some German variable names has been updated.
+
 ## [v2510.3.0]
 ## Changed
 - switch the ncdump approach, from metadata-inspektor to zarr-streaming

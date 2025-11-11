@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 ## [v2510.3.2]
 ### Fixed
-- do not check for DB availability via `python migrate --check`
+- avoid getting stuck in django bootstrap while waiting for DB connection.
 
 ## [v2510.3.1]
 ### Fixed

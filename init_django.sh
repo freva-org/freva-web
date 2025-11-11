@@ -8,9 +8,27 @@ if [ "${DEBUG:-0}" = "1" ]; then
     LOG_LEVEL="debug"
 fi
 
-python manage.py makemigrations base
-python manage.py migrate --fake-initial --noinput
-python manage.py migrate --fake contenttypes
+wait_for_db(){
+    MAX_ATTEMPTS="${MAX_ATTEMPTS:-60}"
+    SLEEP_SECONDS="${SLEEP_SECONDS:-2}"
+
+    i=1
+    while [ "$i" -le "$MAX_ATTEMPTS" ]; do
+        if python manage.py makemigrations base ;then
+            return 0
+        fi
+        echo "Django migration failed (attempt $attempt). Retrying in ${SLEEP_SECONDS}s..."
+        attempt=$((attempt + 1))
+        sleep "$SLEEP_SECONDS"
+    done
+    echo "Django bootstrap failed after $MAX_ATTEMPTS attempts."
+    return 1
+}
+if ! wait_for_db; then
+    exit 1
+fi
+python manage.py migrate --fake-initial --noinput && \
+python manage.py migrate --fake contenttypes && \
 python manage.py collectstatic --noinput
 
 # Create superuser if not exists

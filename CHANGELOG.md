@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 ## [v2510.3.2]
 ### Fixed
-- avoid getting stuck if startup if `python migrate --check` fails.
+- do not check for DB availability via `python migrate --check`
 
 ## [v2510.3.1]
 ### Fixed

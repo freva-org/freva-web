@@ -16,6 +16,18 @@ import Pagination from "../../Components/Pagination";
 
 import { BATCH_SIZE, TEMP_FREVA_AUTH_TOKEN } from "./constants";
 
+async function refreshTokenIfNeeded() {
+  try {
+    const response = await fetch("/api/token-health/", {
+      credentials: "same-origin",
+      method: "GET",
+    });
+    return response.ok;
+  } catch (error) {
+    return false;
+  }
+}
+
 function FilesPanelImpl(props) {
   const { files, numFiles, fileLoading } = props.databrowser;
   const [showDialog, setShowDialog] = useState(false);
@@ -65,6 +77,7 @@ function FilesPanelImpl(props) {
   }
 
   async function loadNcdump(fn) {
+    await refreshTokenIfNeeded();
     setNcDump({ status: NcDumpDialogState.LOADING, output: null, error: null });
 
     try {

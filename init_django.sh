@@ -8,22 +8,24 @@ if [ "${DEBUG:-0}" = "1" ]; then
     LOG_LEVEL="debug"
 fi
 
-wait_for_db(){
-    MAX_ATTEMPTS="${MAX_ATTEMPTS:-60}"
-    SLEEP_SECONDS="${SLEEP_SECONDS:-2}"
+wait_for_db() {
+    MAX_ATTEMPTS="${MAX_ATTEMPTS:-20}"
+    SLEEP_SECONDS="${SLEEP_SECONDS:-5}"
 
-    i=1
-    while [ "$i" -le "$MAX_ATTEMPTS" ]; do
-        if python manage.py makemigrations base ;then
+    for i in $(seq 1 "$MAX_ATTEMPTS"); do
+        echo "[$i/$MAX_ATTEMPTS] Checking database readiness..."
+        if python manage.py makemigrations base; then
+            echo "Database reachable and Django setup succeeded."
             return 0
         fi
-        echo "Django migration failed (attempt $attempt). Retrying in ${SLEEP_SECONDS}s..."
-        attempt=$((attempt + 1))
+        echo "Database not ready yet, retrying in ${SLEEP_SECONDS}s..."
         sleep "$SLEEP_SECONDS"
     done
-    echo "Django bootstrap failed after $MAX_ATTEMPTS attempts."
+
+    echo "Timed out waiting for database connection." >&2
     return 1
 }
+
 if ! wait_for_db; then
     exit 1
 fi

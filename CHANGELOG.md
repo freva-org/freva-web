@@ -1,6 +1,9 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [v2510.3.3]
+### Fixed
+- fix typo
 ## [v2510.3.2]
 ### Fixed
 - avoid getting stuck in django bootstrap while waiting for DB connection.

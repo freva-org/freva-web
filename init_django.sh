@@ -1,5 +1,6 @@
 #!/bin/bash
 set -u -o nounset -o pipefail -o errexit
+export PATH=/opt/conda/envs/freva-web/bin:$PATH
 
 LOG_DIR=${API_LOG_DIR:-/data/logs}
 LOG_LEVEL="info"
@@ -7,14 +8,27 @@ if [ "${DEBUG:-0}" = "1" ]; then
     LOG_LEVEL="debug"
 fi
 
-until python manage.py migrate --check 2>/dev/null; do
-    echo "Waiting for database..."
-    sleep 2
-done
+wait_for_db(){
+    MAX_ATTEMPTS="${MAX_ATTEMPTS:-60}"
+    SLEEP_SECONDS="${SLEEP_SECONDS:-2}"
 
-python manage.py makemigrations base
-python manage.py migrate --fake-initial --noinput
-python manage.py migrate --fake contenttypes
+    i=1
+    while [ "$i" -le "$MAX_ATTEMPTS" ]; do
+        if python manage.py makemigrations base ;then
+            return 0
+        fi
+        echo "Django migration failed (attempt $attempt). Retrying in ${SLEEP_SECONDS}s..."
+        attempt=$((attempt + 1))
+        sleep "$SLEEP_SECONDS"
+    done
+    echo "Django bootstrap failed after $MAX_ATTEMPTS attempts."
+    return 1
+}
+if ! wait_for_db; then
+    exit 1
+fi
+python manage.py migrate --fake-initial --noinput && \
+python manage.py migrate --fake contenttypes && \
 python manage.py collectstatic --noinput
 
 # Create superuser if not exists

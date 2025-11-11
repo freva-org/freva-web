@@ -1,5 +1,6 @@
 #!/bin/bash
 set -u -o nounset -o pipefail -o errexit
+export PATH=/opt/conda/envs/freva-web/bin:$PATH
 
 LOG_DIR=${API_LOG_DIR:-/data/logs}
 LOG_LEVEL="info"
@@ -7,11 +8,29 @@ if [ "${DEBUG:-0}" = "1" ]; then
     LOG_LEVEL="debug"
 fi
 
-until python manage.py migrate --check 2>/dev/null; do
-    echo "Waiting for database..."
-    sleep 2
-done
+wait_for_migrations() {
+    MAX_ATTEMPTS="${MAX_ATTEMPTS:-60}"      # 60 * 2s = 120s
+    SLEEP_SECONDS="${SLEEP_SECONDS:-2}"
 
+    i=1
+    while [ "$i" -le "$MAX_ATTEMPTS" ]; do
+        if python manage.py migrate --check >/dev/null 2>&1; then
+            echo "Database reachable and migrations are up-to-date."
+            return 0
+        fi
+
+        echo "[$i/$MAX_ATTEMPTS] Waiting for database / migrations..."
+        i=$((i + 1))
+        sleep "$SLEEP_SECONDS"
+    done
+
+    echo "ERROR: Timed out waiting for database / migrations to be ready." >&2
+    return 1
+}
+
+if ! wait_for_migrations; then
+     exit 1
+fi
 python manage.py makemigrations base
 python manage.py migrate --fake-initial --noinput
 python manage.py migrate --fake contenttypes

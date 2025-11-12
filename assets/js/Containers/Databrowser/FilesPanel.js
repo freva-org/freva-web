@@ -76,7 +76,10 @@ function FilesPanelImpl(props) {
     }
   }
 
-  async function loadNcdump(fn) {
+  async function loadNcdump(fn, retryCount = 0) {
+    const MAX_RETRIES = 20;
+    const RETRY_DELAY = 2000;
+
     await refreshTokenIfNeeded();
     setNcDump({ status: NcDumpDialogState.LOADING, output: null, error: null });
 
@@ -95,12 +98,8 @@ function FilesPanelImpl(props) {
       // Step 1: we use convert endpoint to be able to even
       // publush the zarr-endpoint arbitrary paths that are
       // indexed in the search backend.
-      const queryParams = new URLSearchParams({
-        path: fn,
-      });
-
+      const queryParams = new URLSearchParams({ path: fn });
       const convertUrl = `/api/freva-nextgen/data-portal/zarr/convert?${queryParams}`;
-
       const response = await fetch(convertUrl, {
         method: "GET",
         credentials: "same-origin",
@@ -115,17 +114,11 @@ function FilesPanelImpl(props) {
       }
 
       const data = await response.json();
-
       if (!data.urls || data.urls.length === 0) {
         throw new Error("No zarr URL returned from server");
       }
 
       const zarrUrl = data.urls[0];
-
-      if (!zarrUrl || zarrUrl.length === 0) {
-        throw new Error("Empty zarr URL returned from server");
-      }
-
       const getPathFromUrl = (url) => {
         try {
           const urlObj = new URL(url);
@@ -136,15 +129,10 @@ function FilesPanelImpl(props) {
       };
 
       const relativeZarrUrl = getPathFromUrl(zarrUrl);
-
       setZarrUrl(zarrUrl);
 
-      // Step 2:  Use the returned zarr URL directly to get metadata
-      const metadataHeaders = {
-        ...headers,
-        Accept: "text/html",
-      };
-
+      // Step 2: Get metadata with retry logic
+      const metadataHeaders = { ...headers, Accept: "text/html" };
       const metadataUrl = `${relativeZarrUrl}/view`;
 
       const metadataResponse = await fetch(metadataUrl, {
@@ -152,6 +140,23 @@ function FilesPanelImpl(props) {
         credentials: "same-origin",
         headers: metadataHeaders,
       });
+
+      // Handle 503 (processing/waiting states)
+      if (metadataResponse.status === 503) {
+        const errorText = await metadataResponse.text();
+        // retriable state
+        if (
+          (errorText.includes("processing") || errorText.includes("waiting")) &&
+          retryCount < MAX_RETRIES
+        ) {
+          // Retry after delay
+          await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+          return loadNcdump(fn, retryCount + 1);
+        }
+
+        // If it's "finished, failed" or max retries reached
+        throw new Error(errorText || "Service unavailable");
+      }
 
       if (!metadataResponse.ok) {
         const errorText = await metadataResponse.text();
@@ -161,7 +166,6 @@ function FilesPanelImpl(props) {
       // IMPORTANT: Get the xarray HTML directly from backend,
       // no need to be processed in frontend.
       const htmlOutput = await metadataResponse.text();
-
       setNcDump({
         output: htmlOutput,
         status: NcDumpDialogState.READY,
@@ -177,8 +181,6 @@ function FilesPanelImpl(props) {
       } else if (error.message.includes("service not able to publish")) {
         errorMessage =
           "Zarr streaming service is not enabled. Please contact your administrator.";
-      } else if (error.message.includes("Failed to get zarr URL")) {
-        errorMessage = `Cannot create zarr endpoint: ${error.message.split(": ")[1] || error.message}`;
       }
       // TODO: further error message parsing regarind zarr streaming can be done here
 

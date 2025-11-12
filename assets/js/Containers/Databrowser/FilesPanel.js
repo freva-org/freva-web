@@ -172,16 +172,18 @@ function FilesPanelImpl(props) {
         const errorText = await metadataResponse.text();
 
         // retriable state check
-        if ((errorText.includes("processing") || errorText.includes("waiting"))
-            && retryCount < MAX_RETRIES) {
+        if (
+          (errorText.includes("processing") || errorText.includes("waiting")) &&
+          retryCount < MAX_RETRIES
+        ) {
           setNcDump({
             status: NcDumpDialogState.LOADING,
             output: null,
-            error: null
+            error: null,
           });
 
           // Wait before retrying
-          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+          await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
           return loadNcdump(fn, retryCount + 1);
         }
 
@@ -205,7 +207,7 @@ function FilesPanelImpl(props) {
       });
     } catch (error) {
       // Ignore abort errors since it's alreadt cancelled)
-      if (error.name === 'AbortError') {
+      if (error.name === "AbortError") {
         return;
       }
 

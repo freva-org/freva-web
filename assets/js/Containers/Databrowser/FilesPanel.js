@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Tooltip, OverlayTrigger, Button } from "react-bootstrap";
@@ -15,6 +15,9 @@ import { getCookie } from "../../utils";
 import Pagination from "../../Components/Pagination";
 
 import { BATCH_SIZE, TEMP_FREVA_AUTH_TOKEN } from "./constants";
+
+const MAX_RETRIES = 20;
+const RETRY_DELAY = 2000;
 
 async function refreshTokenIfNeeded() {
   try {
@@ -40,6 +43,9 @@ function FilesPanelImpl(props) {
   const [zarrUrl, setZarrUrl] = useState(null);
   const [showPathInput, setShowPathInput] = useState(false);
   const [pathInput, setPathInput] = useState("");
+
+  // handle cancellation
+  const abortControllerRef = useRef(null);
 
   function setPageOffset(offset) {
     const currentLocation = props.location.pathname;
@@ -76,8 +82,18 @@ function FilesPanelImpl(props) {
     }
   }
 
-  async function loadNcdump(fn) {
+  async function loadNcdump(fn, retryCount = 0) {
+    // flush any previous request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
+
     await refreshTokenIfNeeded();
+    if (signal.aborted) {
+      return;
+    }
     setNcDump({ status: NcDumpDialogState.LOADING, output: null, error: null });
 
     try {
@@ -105,6 +121,7 @@ function FilesPanelImpl(props) {
         method: "GET",
         credentials: "same-origin",
         headers,
+        signal,
       });
 
       if (!response.ok) {
@@ -122,10 +139,6 @@ function FilesPanelImpl(props) {
 
       const zarrUrl = data.urls[0];
 
-      if (!zarrUrl || zarrUrl.length === 0) {
-        throw new Error("Empty zarr URL returned from server");
-      }
-
       const getPathFromUrl = (url) => {
         try {
           const urlObj = new URL(url);
@@ -139,7 +152,7 @@ function FilesPanelImpl(props) {
 
       setZarrUrl(zarrUrl);
 
-      // Step 2:  Use the returned zarr URL directly to get metadata
+      // Step 2: Get metadata with retry logic
       const metadataHeaders = {
         ...headers,
         Accept: "text/html",
@@ -151,7 +164,38 @@ function FilesPanelImpl(props) {
         method: "GET",
         credentials: "same-origin",
         headers: metadataHeaders,
+        signal,
       });
+
+      // Handle 503 (processing/waiting states)
+      if (metadataResponse.status === 503) {
+        const errorText = await metadataResponse.text();
+
+        // retriable state check
+        if (
+          (errorText.includes("processing") || errorText.includes("waiting")) &&
+          retryCount < MAX_RETRIES
+        ) {
+          if (signal.aborted) {
+            return;
+          }
+          setNcDump({
+            status: NcDumpDialogState.LOADING,
+            output: null,
+            error: null,
+          });
+
+          // Wait before retrying
+          await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+          if (signal.aborted) {
+            return;
+          }
+          return loadNcdump(fn, retryCount + 1);
+        }
+
+        // If it's "finished, failed" or max retries reached
+        throw new Error(errorText || "Service unavailable");
+      }
 
       if (!metadataResponse.ok) {
         const errorText = await metadataResponse.text();
@@ -168,6 +212,11 @@ function FilesPanelImpl(props) {
         error: null,
       });
     } catch (error) {
+      // Ignore abort errors since it's alreadt cancelled)
+      if (error.name === "AbortError") {
+        return;
+      }
+
       let errorMessage = error.message;
 
       if (error.message.includes("Authentication")) {
@@ -295,6 +344,10 @@ function FilesPanelImpl(props) {
         file={filename}
         zarrUrl={zarrUrl}
         onClose={() => {
+          // Cancel any pending request when closing
+          if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+          }
           setShowDialog(false);
           setZarrUrl(null);
           setNcDump({

@@ -176,6 +176,9 @@ function FilesPanelImpl(props) {
           (errorText.includes("processing") || errorText.includes("waiting")) &&
           retryCount < MAX_RETRIES
         ) {
+          if (signal.aborted) {
+            return;
+          }
           setNcDump({
             status: NcDumpDialogState.LOADING,
             output: null,
@@ -184,6 +187,9 @@ function FilesPanelImpl(props) {
 
           // Wait before retrying
           await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+          if (signal.aborted) {
+            return;
+          }
           return loadNcdump(fn, retryCount + 1);
         }
 

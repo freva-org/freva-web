@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { Tooltip, OverlayTrigger, Button } from "react-bootstrap";
@@ -15,6 +15,9 @@ import { getCookie } from "../../utils";
 import Pagination from "../../Components/Pagination";
 
 import { BATCH_SIZE, TEMP_FREVA_AUTH_TOKEN } from "./constants";
+
+const MAX_RETRIES = 20;
+const RETRY_DELAY = 2000;
 
 async function refreshTokenIfNeeded() {
   try {
@@ -40,6 +43,9 @@ function FilesPanelImpl(props) {
   const [zarrUrl, setZarrUrl] = useState(null);
   const [showPathInput, setShowPathInput] = useState(false);
   const [pathInput, setPathInput] = useState("");
+
+  // handle cancellation
+  const abortControllerRef = useRef(null);
 
   function setPageOffset(offset) {
     const currentLocation = props.location.pathname;
@@ -77,10 +83,17 @@ function FilesPanelImpl(props) {
   }
 
   async function loadNcdump(fn, retryCount = 0) {
-    const MAX_RETRIES = 20;
-    const RETRY_DELAY = 2000;
+    // flush any previous request
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+    const signal = abortControllerRef.current.signal;
 
     await refreshTokenIfNeeded();
+    if (signal.aborted) {
+      return;
+    }
     setNcDump({ status: NcDumpDialogState.LOADING, output: null, error: null });
 
     try {
@@ -98,12 +111,17 @@ function FilesPanelImpl(props) {
       // Step 1: we use convert endpoint to be able to even
       // publush the zarr-endpoint arbitrary paths that are
       // indexed in the search backend.
-      const queryParams = new URLSearchParams({ path: fn });
+      const queryParams = new URLSearchParams({
+        path: fn,
+      });
+
       const convertUrl = `/api/freva-nextgen/data-portal/zarr/convert?${queryParams}`;
+
       const response = await fetch(convertUrl, {
         method: "GET",
         credentials: "same-origin",
         headers,
+        signal,
       });
 
       if (!response.ok) {
@@ -114,11 +132,13 @@ function FilesPanelImpl(props) {
       }
 
       const data = await response.json();
+
       if (!data.urls || data.urls.length === 0) {
         throw new Error("No zarr URL returned from server");
       }
 
       const zarrUrl = data.urls[0];
+
       const getPathFromUrl = (url) => {
         try {
           const urlObj = new URL(url);
@@ -129,28 +149,39 @@ function FilesPanelImpl(props) {
       };
 
       const relativeZarrUrl = getPathFromUrl(zarrUrl);
+
       setZarrUrl(zarrUrl);
 
       // Step 2: Get metadata with retry logic
-      const metadataHeaders = { ...headers, Accept: "text/html" };
+      const metadataHeaders = {
+        ...headers,
+        Accept: "text/html",
+      };
+
       const metadataUrl = `${relativeZarrUrl}/view`;
 
       const metadataResponse = await fetch(metadataUrl, {
         method: "GET",
         credentials: "same-origin",
         headers: metadataHeaders,
+        signal,
       });
 
       // Handle 503 (processing/waiting states)
       if (metadataResponse.status === 503) {
         const errorText = await metadataResponse.text();
-        // retriable state
-        if (
-          (errorText.includes("processing") || errorText.includes("waiting")) &&
-          retryCount < MAX_RETRIES
-        ) {
-          // Retry after delay
-          await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
+
+        // retriable state check
+        if ((errorText.includes("processing") || errorText.includes("waiting"))
+            && retryCount < MAX_RETRIES) {
+          setNcDump({
+            status: NcDumpDialogState.LOADING,
+            output: null,
+            error: null
+          });
+
+          // Wait before retrying
+          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
           return loadNcdump(fn, retryCount + 1);
         }
 
@@ -166,12 +197,18 @@ function FilesPanelImpl(props) {
       // IMPORTANT: Get the xarray HTML directly from backend,
       // no need to be processed in frontend.
       const htmlOutput = await metadataResponse.text();
+
       setNcDump({
         output: htmlOutput,
         status: NcDumpDialogState.READY,
         error: null,
       });
     } catch (error) {
+      // Ignore abort errors since it's alreadt cancelled)
+      if (error.name === 'AbortError') {
+        return;
+      }
+
       let errorMessage = error.message;
 
       if (error.message.includes("Authentication")) {
@@ -181,6 +218,8 @@ function FilesPanelImpl(props) {
       } else if (error.message.includes("service not able to publish")) {
         errorMessage =
           "Zarr streaming service is not enabled. Please contact your administrator.";
+      } else if (error.message.includes("Failed to get zarr URL")) {
+        errorMessage = `Cannot create zarr endpoint: ${error.message.split(": ")[1] || error.message}`;
       }
       // TODO: further error message parsing regarind zarr streaming can be done here
 
@@ -297,6 +336,10 @@ function FilesPanelImpl(props) {
         file={filename}
         zarrUrl={zarrUrl}
         onClose={() => {
+          // Cancel any pending request when closing
+          if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+          }
           setShowDialog(false);
           setZarrUrl(null);
           setNcDump({

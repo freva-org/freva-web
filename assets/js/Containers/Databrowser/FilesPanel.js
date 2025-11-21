@@ -190,6 +190,7 @@ function FilesPanelImpl(props) {
           if (signal.aborted) {
             return;
           }
+          //eslint-disable-next-line consistent-return
           return loadNcdump(fn, retryCount + 1);
         }
 

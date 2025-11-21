@@ -189,6 +189,8 @@ function FrevaGPT() {
         }
 
         const decodedValues = decoder.decode(value);
+        //eslint-disable-next-line no-console
+        console.log('### frontend logger: ', decodedValues);
         buffer = buffer + decodedValues;
 
         let foundSomething = true;
@@ -246,9 +248,7 @@ function FrevaGPT() {
                 // set thread id
                 if (thread === "" && varObj.variant === "ServerHint") {
                   try {
-                    const currentThreadId = JSON.parse(
-                      varObj.content
-                    ).thread_id;
+                    const currentThreadId = varObj.content.thread_id;
                     dispatch(setThread(currentThreadId));
                     browserHistory.push({
                       pathname: "/chatbot/",

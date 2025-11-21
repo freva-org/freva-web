@@ -190,7 +190,7 @@ function FrevaGPT() {
 
         const decodedValues = decoder.decode(value);
         //eslint-disable-next-line no-console
-        console.log('### frontend logger: ', decodedValues);
+        console.log("### frontend logger: ", decodedValues);
         buffer = buffer + decodedValues;
 
         let foundSomething = true;

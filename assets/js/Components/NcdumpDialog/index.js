@@ -14,13 +14,12 @@ class NcdumpDialog extends React.Component {
     super(props);
     this.state = {
       pathInput: props.file || "",
-    };
-    this.state = {
-      pathInput: props.file || "",
       copied: false,
+      activeTab: "metadata", // 'metadata' or 'viewer'
     };
     this.handleBackdropClick = this.handleBackdropClick.bind(this);
     this.handleInspect = this.handleInspect.bind(this);
+    this.iframeRef = React.createRef();
   }
 
   componentDidUpdate(prevProps) {
@@ -36,6 +35,34 @@ class NcdumpDialog extends React.Component {
     ) {
       this.props.submitNcdump(this.props.file);
     }
+
+    // Send data to iframe when zarrUrl changes and viewer tab is active
+    if (
+      prevProps.zarrUrl !== this.props.zarrUrl &&
+      this.props.zarrUrl &&
+      this.state.activeTab === "viewer" &&
+      this.iframeRef.current
+    ) {
+      this.sendDataToIframe();
+    }
+  }
+
+  sendDataToIframe() {
+    if (this.iframeRef.current && this.props.zarrUrl) {
+      try {
+        this.iframeRef.current.contentWindow.postMessage(
+          {
+            type: "LOAD_ZARR",
+            zarrUrl: this.props.zarrUrl,
+            token: this.props.token,
+          },
+          "*"
+        );
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error("Error sending data to iframe:", error);
+      }
+    }
   }
 
   handleBackdropClick(e) {
@@ -50,12 +77,21 @@ class NcdumpDialog extends React.Component {
     }
   }
 
+  getGridlookUrl() {
+    const { zarrUrl } = this.props;
+    if (!zarrUrl) {return null;}
+  
+    return `https://gridlook.pages.dev/#${zarrUrl}`;
+  }
+
   render() {
     const { show, onClose, status, output, zarrUrl, error } = this.props;
 
     if (!show) {
       return null;
     }
+
+    const gridlookUrl = this.getGridlookUrl();
 
     return (
       <div
@@ -71,7 +107,7 @@ class NcdumpDialog extends React.Component {
         <div
           className="token-modal-content"
           style={{
-            maxWidth: "1000px",
+            maxWidth: "1200px",
             width: "100%",
             maxHeight: "95vh",
             display: "flex",
@@ -106,8 +142,72 @@ class NcdumpDialog extends React.Component {
                     className="fas fa-info-circle me-2"
                     style={{ fontSize: "16px", color: "#3b82f6" }}
                   ></i>
-                  File Metadata
+                  File Inspector
                 </h1>
+
+                {/* Path Input */}
+                <div
+                  style={{
+                    marginBottom: "8px",
+                    width: "100%",
+                  }}
+                >
+                  <label
+                    style={{
+                      display: "block",
+                      fontSize: "12px",
+                      color: "#6b7280",
+                      marginBottom: "4px",
+                      fontWeight: "500",
+                    }}
+                  >
+                    File path:
+                  </label>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "6px",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <input
+                      type="text"
+                      className="form-control form-control-sm"
+                      value={this.state.pathInput}
+                      onChange={(e) =>
+                        this.setState({ pathInput: e.target.value })
+                      }
+                      onKeyPress={(e) => {
+                        if (e.key === "Enter") {
+                          this.handleInspect();
+                        }
+                      }}
+                      placeholder="/path/to/data.nc"
+                      style={{
+                        flex: "1 1 200px",
+                        fontSize: "13px",
+                        padding: "6px 10px",
+                        minWidth: 0,
+                      }}
+                    />
+                    <button
+                      className="btn btn-sm btn-primary"
+                      onClick={this.handleInspect}
+                      disabled={
+                        !this.state.pathInput.trim() ||
+                        status === NcDumpDialogState.LOADING
+                      }
+                      style={{
+                        padding: "6px 14px",
+                        fontSize: "13px",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      <i className="fas fa-sync-alt me-1"></i>
+                      Load
+                    </button>
+                  </div>
+                </div>
 
                 {/* Zarr URL */}
                 {zarrUrl && (
@@ -123,70 +223,6 @@ class NcdumpDialog extends React.Component {
                       fontSize: "11px",
                     }}
                   >
-                    {/* Path Input */}
-                    <div
-                      style={{
-                        marginBottom: "8px",
-                        flex: "1 1 100%",
-                        width: "100%",
-                      }}
-                    >
-                      <label
-                        style={{
-                          display: "block",
-                          fontSize: "12px",
-                          color: "#6b7280",
-                          marginBottom: "4px",
-                          fontWeight: "500",
-                        }}
-                      >
-                        File path:
-                      </label>
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "6px",
-                          flexWrap: "wrap",
-                        }}
-                      >
-                        <input
-                          type="text"
-                          className="form-control form-control-sm"
-                          value={this.state.pathInput}
-                          onChange={(e) =>
-                            this.setState({ pathInput: e.target.value })
-                          }
-                          onKeyPress={(e) => {
-                            if (e.key === "Enter") {
-                              this.handleInspect();
-                            }
-                          }}
-                          placeholder="/path/to/data.nc"
-                          style={{
-                            flex: "1 1 200px",
-                            fontSize: "13px",
-                            padding: "6px 10px",
-                            minWidth: 0,
-                          }}
-                        />
-                        <button
-                          className="btn btn-sm btn-primary"
-                          onClick={this.handleInspect}
-                          disabled={
-                            !this.state.pathInput.trim() ||
-                            status === NcDumpDialogState.LOADING
-                          }
-                          style={{
-                            padding: "6px 14px",
-                            fontSize: "13px",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          <i className="fas fa-sync-alt me-1"></i>
-                          Load
-                        </button>
-                      </div>
-                    </div>
                     <div
                       style={{
                         display: "flex",
@@ -254,6 +290,71 @@ class NcdumpDialog extends React.Component {
                     </div>
                   </div>
                 )}
+
+                {/* Tab Navigation */}
+                {zarrUrl && (
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "4px",
+                      marginTop: "12px",
+                      borderBottom: "2px solid #e5e7eb",
+                    }}
+                  >
+                    <button
+                      onClick={() => this.setState({ activeTab: "metadata" })}
+                      style={{
+                        padding: "8px 16px",
+                        fontSize: "13px",
+                        fontWeight: "500",
+                        border: "none",
+                        backgroundColor: "transparent",
+                        color:
+                          this.state.activeTab === "metadata"
+                            ? "#3b82f6"
+                            : "#6b7280",
+                        borderBottom:
+                          this.state.activeTab === "metadata"
+                            ? "2px solid #3b82f6"
+                            : "2px solid transparent",
+                        marginBottom: "-2px",
+                        cursor: "pointer",
+                        transition: "all 0.2s",
+                      }}
+                    >
+                      <i className="fas fa-table me-2"></i>
+                      Metadata
+                    </button>
+                    <button
+                      onClick={() => {
+                        this.setState({ activeTab: "viewer" });
+                        // Send data after state updates
+                        setTimeout(() => this.sendDataToIframe(), 100);
+                      }}
+                      style={{
+                        padding: "8px 16px",
+                        fontSize: "13px",
+                        fontWeight: "500",
+                        border: "none",
+                        backgroundColor: "transparent",
+                        color:
+                          this.state.activeTab === "viewer"
+                            ? "#3b82f6"
+                            : "#6b7280",
+                        borderBottom:
+                          this.state.activeTab === "viewer"
+                            ? "2px solid #3b82f6"
+                            : "2px solid transparent",
+                        marginBottom: "-2px",
+                        cursor: "pointer",
+                        transition: "all 0.2s",
+                      }}
+                    >
+                      <i className="fas fa-cube me-2"></i>
+                      3D Viewer
+                    </button>
+                  </div>
+                )}
               </div>
               <button
                 className="token-close-btn"
@@ -279,7 +380,7 @@ class NcdumpDialog extends React.Component {
               overflowY: "auto",
               overflowX: "hidden",
               padding: "16px 12px",
-              maxHeight: "calc(95vh - 160px)",
+              maxHeight: "calc(95vh - 200px)",
             }}
           >
             {status === NcDumpDialogState.ERROR && (
@@ -338,17 +439,83 @@ class NcdumpDialog extends React.Component {
               </div>
             )}
 
-            {output && status === NcDumpDialogState.READY && (
+            {/* Metadata Tab */}
+            {this.state.activeTab === "metadata" &&
+              output &&
+              status === NcDumpDialogState.READY && (
+                <div
+                  className="xarray-metadata-display"
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    width: "100%",
+                    overflowX: "auto",
+                  }}
+                >
+                  <div dangerouslySetInnerHTML={{ __html: output }} />
+                </div>
+              )}
+
+            {/* 3D Viewer Tab */}
+            {this.state.activeTab === "viewer" && zarrUrl && (
               <div
-                className="xarray-metadata-display"
                 style={{
-                  display: "flex",
-                  justifyContent: "center",
                   width: "100%",
-                  overflowX: "auto",
+                  height: "calc(95vh - 280px)",
+                  minHeight: "500px",
+                  backgroundColor: "#f9fafb",
+                  borderRadius: "8px",
+                  overflow: "hidden",
+                  border: "1px solid #e5e7eb",
                 }}
               >
-                <div dangerouslySetInnerHTML={{ __html: output }} />
+                {gridlookUrl ? (
+                  <iframe
+                    ref={this.iframeRef}
+                    src={gridlookUrl}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      border: "none",
+                    }}
+                    title="GridLook 3D Viewer"
+                    onLoad={() => {
+                      this.sendDataToIframe();
+                    }}
+                  />
+                ) : (
+                  <div
+                    className="text-center py-5"
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      height: "100%",
+                    }}
+                  >
+                    <i
+                      className="fas fa-exclamation-triangle"
+                      style={{
+                        fontSize: "48px",
+                        color: "#f59e0b",
+                        marginBottom: "16px",
+                      }}
+                    ></i>
+                    <p style={{ fontSize: "14px", color: "#6b7280" }}>
+                      GridLook viewer is not configured.
+                    </p>
+                    <p
+                      style={{
+                        fontSize: "12px",
+                        color: "#9ca3af",
+                        marginTop: "8px",
+                      }}
+                    >
+                      Please ensure GridLook is running at localhost:3000
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -386,6 +553,7 @@ NcdumpDialog.propTypes = {
   error: PropTypes.string,
   file: PropTypes.string,
   zarrUrl: PropTypes.string,
+  token: PropTypes.string,
 };
 
 export default NcdumpDialog;

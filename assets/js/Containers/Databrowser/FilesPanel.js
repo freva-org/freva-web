@@ -137,33 +137,40 @@ function FilesPanelImpl(props) {
         throw new Error("No zarr URL returned from server");
       }
 
-      const zarrUrl = data.urls[0];
+      const rawzarrUrl = data.urls[0];
 
-      const getPathFromUrl = (url) => {
-        try {
-          const urlObj = new URL(url);
-          return urlObj.pathname;
-        } catch {
-          return url;
-        }
-      };
+      // const getPathFromUrl = (url) => {
+      //   try {
+      //     const urlObj = new URL(url);
+      //     return urlObj.pathname;
+      //   } catch {
+      //     return url;
+      //   }
+      // };
 
-      const relativeZarrUrl = getPathFromUrl(zarrUrl);
+      //const relativeZarrUrl = getPathFromUrl(zarrUrl);
 
+      // Step 1.5: Create presigned URL
+      const presignResponse = await fetch("/api/freva-nextgen/data-portal/share-zarr", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { ...headers, "Content-Type": "application/json" },
+        body: JSON.stringify({ path: rawzarrUrl, ttl_seconds: 3600 }),
+        signal,
+      });
+      const presignData = await presignResponse.json();
+      const presignedUrl = presignData.url;
+      const presignedUrlObj = new URL(presignedUrl);
+      const zarrUrl = presignedUrl.replace(presignedUrlObj.origin, window.location.origin);
       setZarrUrl(zarrUrl);
 
       // Step 2: Get metadata with retry logic
-      const metadataHeaders = {
-        ...headers,
-        Accept: "text/html",
-      };
-
-      const metadataUrl = `${relativeZarrUrl}/view`;
-
-      const metadataResponse = await fetch(metadataUrl, {
+      // Step 2: Fetch HTML using shared presigned URL (no auth needed)
+      const htmlUrl = `/api/freva-nextgen/data-portal/zarr-utils/html?url=${encodeURIComponent(zarrUrl)}&timeout=60`;
+      const metadataResponse = await fetch(htmlUrl, {
         method: "GET",
         credentials: "same-origin",
-        headers: metadataHeaders,
+        headers,
         signal,
       });
 
@@ -190,7 +197,8 @@ function FilesPanelImpl(props) {
           if (signal.aborted) {
             return;
           }
-          return loadNcdump(fn, retryCount + 1);
+          await loadNcdump(fn, retryCount + 1);
+          return;
         }
 
         // If it's "finished, failed" or max retries reached

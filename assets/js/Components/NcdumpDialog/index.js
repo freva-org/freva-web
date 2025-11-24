@@ -114,73 +114,8 @@ class NcdumpDialog extends React.Component {
                     className="fas fa-info-circle me-2"
                     style={{ fontSize: "16px", color: "#3b82f6" }}
                   ></i>
-                  File Metadata
+                  File Inspector
                 </h1>
-
-                {/* Path Input */}
-                <div
-                  style={{
-                    marginBottom: "8px",
-                    width: "100%",
-                  }}
-                >
-                  <label
-                    style={{
-                      display: "block",
-                      fontSize: "12px",
-                      color: "#6b7280",
-                      marginBottom: "4px",
-                      fontWeight: "500",
-                    }}
-                  >
-                    File path:
-                  </label>
-                  <div
-                    style={{
-                      display: "flex",
-                      gap: "6px",
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <input
-                      type="text"
-                      className="form-control form-control-sm"
-                      value={this.state.pathInput}
-                      onChange={(e) =>
-                        this.setState({ pathInput: e.target.value })
-                      }
-                      onKeyPress={(e) => {
-                        if (e.key === "Enter") {
-                          this.handleInspect();
-                        }
-                      }}
-                      placeholder="/path/to/data.nc"
-                      style={{
-                        flex: "1 1 200px",
-                        fontSize: "13px",
-                        padding: "6px 10px",
-                        minWidth: 0,
-                      }}
-                    />
-                    <button
-                      className="btn btn-sm btn-primary"
-                      onClick={this.handleInspect}
-                      disabled={
-                        !this.state.pathInput.trim() ||
-                        status === NcDumpDialogState.LOADING
-                      }
-                      style={{
-                        padding: "6px 14px",
-                        fontSize: "13px",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      <i className="fas fa-sync-alt me-1"></i>
-                      Load
-                    </button>
-                  </div>
-                </div>
-
                 {/* Zarr URL */}
                 {zarrUrl && (
                   <div
@@ -196,6 +131,69 @@ class NcdumpDialog extends React.Component {
                       marginBottom: "8px",
                     }}
                   >
+                    {/* Path Input */}
+                    <div
+                      style={{
+                        marginBottom: "8px",
+                        width: "100%",
+                      }}
+                    >
+                      <label
+                        style={{
+                          display: "block",
+                          fontSize: "12px",
+                          color: "#6b7280",
+                          marginBottom: "4px",
+                          fontWeight: "500",
+                        }}
+                      >
+                        File path:
+                      </label>
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "6px",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        <input
+                          type="text"
+                          className="form-control form-control-sm"
+                          value={this.state.pathInput}
+                          onChange={(e) =>
+                            this.setState({ pathInput: e.target.value })
+                          }
+                          onKeyPress={(e) => {
+                            if (e.key === "Enter") {
+                              this.handleInspect();
+                            }
+                          }}
+                          placeholder="/path/to/data.nc"
+                          style={{
+                            flex: "1 1 200px",
+                            fontSize: "13px",
+                            padding: "6px 10px",
+                            minWidth: 0,
+                          }}
+                        />
+                        <button
+                          className="btn btn-sm btn-primary"
+                          onClick={this.handleInspect}
+                          disabled={
+                            !this.state.pathInput.trim() ||
+                            status === NcDumpDialogState.LOADING
+                          }
+                          style={{
+                            padding: "6px 14px",
+                            fontSize: "13px",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          <i className="fas fa-sync-alt me-1"></i>
+                          Load
+                        </button>
+                      </div>
+                    </div>
                     <div
                       style={{
                         display: "flex",

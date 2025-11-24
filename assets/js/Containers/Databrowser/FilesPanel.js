@@ -159,14 +159,14 @@ function FilesPanelImpl(props) {
         signal,
       });
       const presignData = await presignResponse.json();
-      const presignedUrl = presignData.url;
-      const presignedUrlObj = new URL(presignedUrl);
-      const zarrUrl = presignedUrl.replace(presignedUrlObj.origin, window.location.origin);
+      const zarrUrl = presignData.url;
+      // const presignedUrlObj = new URL(presignedUrl);
+      // const zarrUrl = presignedUrl.replace(presignedUrlObj.origin, window.location.origin);
       setZarrUrl(zarrUrl);
 
       // Step 2: Get metadata with retry logic
       // Step 2: Fetch HTML using shared presigned URL (no auth needed)
-      const htmlUrl = `/api/freva-nextgen/data-portal/zarr-utils/html?url=${encodeURIComponent(zarrUrl)}&timeout=60`;
+      const htmlUrl = `/api/freva-nextgen/data-portal/zarr-utils/html?url=${encodeURIComponent(rawzarrUrl)}&timeout=60`;
       const metadataResponse = await fetch(htmlUrl, {
         method: "GET",
         credentials: "same-origin",

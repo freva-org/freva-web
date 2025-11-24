@@ -15,7 +15,8 @@ class NcdumpDialog extends React.Component {
     this.state = {
       pathInput: props.file || "",
       copied: false,
-      activeTab: "metadata", // 'metadata' or 'viewer'
+      gridlookCopied: false,
+      activeTab: "metadata",
     };
     this.handleBackdropClick = this.handleBackdropClick.bind(this);
     this.handleInspect = this.handleInspect.bind(this);
@@ -35,34 +36,6 @@ class NcdumpDialog extends React.Component {
     ) {
       this.props.submitNcdump(this.props.file);
     }
-
-    // Send data to iframe when zarrUrl changes and viewer tab is active
-    if (
-      prevProps.zarrUrl !== this.props.zarrUrl &&
-      this.props.zarrUrl &&
-      this.state.activeTab === "viewer" &&
-      this.iframeRef.current
-    ) {
-      this.sendDataToIframe();
-    }
-  }
-
-  sendDataToIframe() {
-    if (this.iframeRef.current && this.props.zarrUrl) {
-      try {
-        this.iframeRef.current.contentWindow.postMessage(
-          {
-            type: "LOAD_ZARR",
-            zarrUrl: this.props.zarrUrl,
-            token: this.props.token,
-          },
-          "*"
-        );
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error("Error sending data to iframe:", error);
-      }
-    }
   }
 
   handleBackdropClick(e) {
@@ -77,21 +50,12 @@ class NcdumpDialog extends React.Component {
     }
   }
 
-  getGridlookUrl() {
-    const { zarrUrl } = this.props;
-    if (!zarrUrl) {return null;}
-  
-    return `https://gridlook.pages.dev/#${zarrUrl}`;
-  }
-
   render() {
     const { show, onClose, status, output, zarrUrl, error } = this.props;
 
     if (!show) {
       return null;
     }
-
-    const gridlookUrl = this.getGridlookUrl();
 
     return (
       <div
@@ -142,7 +106,7 @@ class NcdumpDialog extends React.Component {
                     className="fas fa-info-circle me-2"
                     style={{ fontSize: "16px", color: "#3b82f6" }}
                   ></i>
-                  File Inspector
+                  File Metadata
                 </h1>
 
                 {/* Path Input */}
@@ -221,6 +185,7 @@ class NcdumpDialog extends React.Component {
                       backgroundColor: "#f3f4f6",
                       borderRadius: "6px",
                       fontSize: "11px",
+                      marginBottom: "8px",
                     }}
                   >
                     <div
@@ -291,63 +256,65 @@ class NcdumpDialog extends React.Component {
                   </div>
                 )}
 
-                {/* Tab Navigation */}
+                {/* Tab Navigation*/}
                 {zarrUrl && (
                   <div
                     style={{
                       display: "flex",
-                      gap: "4px",
-                      marginTop: "12px",
+                      gap: "2px",
                       borderBottom: "2px solid #e5e7eb",
+                      paddingBottom: "0",
                     }}
                   >
                     <button
                       onClick={() => this.setState({ activeTab: "metadata" })}
                       style={{
-                        padding: "8px 16px",
-                        fontSize: "13px",
-                        fontWeight: "500",
+                        padding: "12px 16px",
+                        fontSize: "14px",
+                        fontWeight: this.state.activeTab === "metadata" ? "600" : "500",
+                        backgroundColor: this.state.activeTab === "metadata" ? "#f3f4f6" : "transparent",
                         border: "none",
-                        backgroundColor: "transparent",
-                        color:
-                          this.state.activeTab === "metadata"
-                            ? "#3b82f6"
-                            : "#6b7280",
-                        borderBottom:
-                          this.state.activeTab === "metadata"
-                            ? "2px solid #3b82f6"
-                            : "2px solid transparent",
-                        marginBottom: "-2px",
+                        borderBottom: this.state.activeTab === "metadata" ? "3px solid #3b82f6" : "none",
                         cursor: "pointer",
-                        transition: "all 0.2s",
+                        color: this.state.activeTab === "metadata" ? "#1f2937" : "#6b7280",
+                        transition: "all 0.2s ease",
+                      }}
+                      onMouseEnter={(e) => {
+                        if (this.state.activeTab !== "metadata") {
+                          e.target.style.backgroundColor = "#f9fafb";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (this.state.activeTab !== "metadata") {
+                          e.target.style.backgroundColor = "transparent";
+                        }
                       }}
                     >
-                      <i className="fas fa-table me-2"></i>
+                      <i className="fas fa-database me-2"></i>
                       Metadata
                     </button>
                     <button
-                      onClick={() => {
-                        this.setState({ activeTab: "viewer" });
-                        // Send data after state updates
-                        setTimeout(() => this.sendDataToIframe(), 100);
-                      }}
+                      onClick={() => this.setState({ activeTab: "gridlook" })}
                       style={{
-                        padding: "8px 16px",
-                        fontSize: "13px",
-                        fontWeight: "500",
+                        padding: "12px 16px",
+                        fontSize: "14px",
+                        fontWeight: this.state.activeTab === "gridlook" ? "600" : "500",
+                        backgroundColor: this.state.activeTab === "gridlook" ? "#f3f4f6" : "transparent",
                         border: "none",
-                        backgroundColor: "transparent",
-                        color:
-                          this.state.activeTab === "viewer"
-                            ? "#3b82f6"
-                            : "#6b7280",
-                        borderBottom:
-                          this.state.activeTab === "viewer"
-                            ? "2px solid #3b82f6"
-                            : "2px solid transparent",
-                        marginBottom: "-2px",
+                        borderBottom: this.state.activeTab === "gridlook" ? "3px solid #3b82f6" : "none",
                         cursor: "pointer",
-                        transition: "all 0.2s",
+                        color: this.state.activeTab === "gridlook" ? "#1f2937" : "#6b7280",
+                        transition: "all 0.2s ease",
+                      }}
+                      onMouseEnter={(e) => {
+                        if (this.state.activeTab !== "gridlook") {
+                          e.target.style.backgroundColor = "#f9fafb";
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (this.state.activeTab !== "gridlook") {
+                          e.target.style.backgroundColor = "transparent";
+                        }
                       }}
                     >
                       <i className="fas fa-cube me-2"></i>
@@ -383,7 +350,7 @@ class NcdumpDialog extends React.Component {
               maxHeight: "calc(95vh - 200px)",
             }}
           >
-            {status === NcDumpDialogState.ERROR && (
+            {status === NcDumpDialogState.ERROR && this.state.activeTab === "metadata" && (
               <div
                 style={{
                   borderRadius: "8px",
@@ -456,67 +423,181 @@ class NcdumpDialog extends React.Component {
                 </div>
               )}
 
-            {/* 3D Viewer Tab */}
-            {this.state.activeTab === "viewer" && zarrUrl && (
-              <div
-                style={{
-                  width: "100%",
-                  height: "calc(95vh - 280px)",
-                  minHeight: "500px",
-                  backgroundColor: "#f9fafb",
-                  borderRadius: "8px",
-                  overflow: "hidden",
-                  border: "1px solid #e5e7eb",
-                }}
-              >
-                {gridlookUrl ? (
+            {/* 3D Viewer Tab*/}
+            {this.state.activeTab === "gridlook" && zarrUrl && (
+              <>
+                {/* GridLook Link Bar */}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    flexWrap: "wrap",
+                    gap: "8px",
+                    padding: "12px",
+                    backgroundColor: "#eff6ff",
+                    borderRadius: "8px",
+                    fontSize: "12px",
+                    marginBottom: "16px",
+                    border: "1px solid #bfdbfe",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      flex: "1 1 100%",
+                      minWidth: 0,
+                    }}
+                  >
+                    <i
+                      className="fas fa-external-link-alt"
+                      style={{ color: "#0284c7", flexShrink: 0 }}
+                    ></i>
+                    <span
+                      style={{
+                        color: "#0284c7",
+                        fontWeight: "600",
+                        flexShrink: 0,
+                      }}
+                    >
+                      GridLook URL:
+                    </span>
+                    <code
+                      style={{
+                        flex: 1,
+                        backgroundColor: "white",
+                        padding: "6px 10px",
+                        borderRadius: "4px",
+                        fontSize: "11px",
+                        color: "#1f2937",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        border: "1px solid #93c5fd",
+                        minWidth: 0,
+                      }}
+                    >
+                      {`https://gridlook.pages.dev/#${zarrUrl}`}
+                    </code>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(
+                          `https://gridlook.pages.dev/#${zarrUrl}`
+                        );
+                        this.setState({ gridlookCopied: true });
+                        setTimeout(
+                          () => this.setState({ gridlookCopied: false }),
+                          2000
+                        );
+                      }}
+                      className="btn btn-sm"
+                      style={{
+                        padding: "6px 12px",
+                        fontSize: "12px",
+                        backgroundColor: "white",
+                        border: "1px solid #93c5fd",
+                        borderRadius: "4px",
+                        color: "#0284c7",
+                        flexShrink: 0,
+                        transition: "all 0.2s",
+                        cursor: "pointer",
+                      }}
+                      title={this.state.gridlookCopied ? "Copied!" : "Copy link"}
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = "#f0f9ff";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = "white";
+                      }}
+                    >
+                      <i className={`fas fa-${this.state.gridlookCopied ? "check" : "copy"}`}></i>
+                    </button>
+                    <button
+                      onClick={() => {
+                        this.setState({ activeTab: "metadata" }, () => {
+                          this.setState({ activeTab: "gridlook" });
+                        });
+                      }}
+                      className="btn btn-sm"
+                      style={{
+                        padding: "6px 12px",
+                        fontSize: "12px",
+                        backgroundColor: "white",
+                        border: "1px solid #93c5fd",
+                        borderRadius: "4px",
+                        color: "#0284c7",
+                        flexShrink: 0,
+                        transition: "all 0.2s",
+                        cursor: "pointer",
+                      }}
+                      title="Refresh GridLook viewer"
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = "#f0f9ff";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = "white";
+                      }}
+                    >
+                      <i className="fas fa-redo me-1"></i>
+                    </button>
+                    <button
+                      onClick={() => {
+                        window.open(
+                          `https://gridlook.pages.dev/#${zarrUrl}`,
+                          "_blank"
+                        );
+                      }}
+                      className="btn btn-sm"
+                      style={{
+                        padding: "6px 12px",
+                        fontSize: "12px",
+                        backgroundColor: "#0284c7",
+                        border: "1px solid #0284c7",
+                        borderRadius: "4px",
+                        color: "white",
+                        flexShrink: 0,
+                        transition: "all 0.2s",
+                        cursor: "pointer",
+                      }}
+                      title="Open in new tab"
+                      onMouseEnter={(e) => {
+                        e.target.style.backgroundColor = "#0369a1";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.backgroundColor = "#0284c7";
+                      }}
+                    >
+                      <i className="fas fa-arrow-up-right-from-square me-1"></i>
+                      Open in New Tab
+                    </button>
+                  </div>
+                </div>
+
+                {/* Iframe */}
+                <div
+                  style={{
+                    width: "100%",
+                    height: "calc(95vh - 280px)",
+                    minHeight: "500px",
+                    backgroundColor: "#f9fafb",
+                    borderRadius: "8px",
+                    overflow: "hidden",
+                    border: "1px solid #e5e7eb",
+                  }}
+                >
                   <iframe
                     ref={this.iframeRef}
-                    src={gridlookUrl}
+                    src={`https://gridlook.pages.dev/#${zarrUrl}`}
                     style={{
                       width: "100%",
                       height: "100%",
                       border: "none",
                     }}
                     title="GridLook 3D Viewer"
-                    onLoad={() => {
-                      this.sendDataToIframe();
-                    }}
                   />
-                ) : (
-                  <div
-                    className="text-center py-5"
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      height: "100%",
-                    }}
-                  >
-                    <i
-                      className="fas fa-exclamation-triangle"
-                      style={{
-                        fontSize: "48px",
-                        color: "#f59e0b",
-                        marginBottom: "16px",
-                      }}
-                    ></i>
-                    <p style={{ fontSize: "14px", color: "#6b7280" }}>
-                      GridLook viewer is not configured.
-                    </p>
-                    <p
-                      style={{
-                        fontSize: "12px",
-                        color: "#9ca3af",
-                        marginTop: "8px",
-                      }}
-                    >
-                      Please ensure GridLook is running at localhost:3000
-                    </p>
-                  </div>
-                )}
-              </div>
+                </div>
+              </>
             )}
 
             {!output && status === NcDumpDialogState.READY && !error && (
@@ -553,7 +634,6 @@ NcdumpDialog.propTypes = {
   error: PropTypes.string,
   file: PropTypes.string,
   zarrUrl: PropTypes.string,
-  token: PropTypes.string,
 };
 
 export default NcdumpDialog;

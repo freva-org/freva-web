@@ -226,20 +226,9 @@ function FrevaGPT() {
                   varObj = jsonBuffer;
                 } else {
                   // if object has same variant, add content
-                  // eslint-disable-next-line no-lonely-if
-                  if (
-                    varObj.variant === "Code" ||
-                    varObj.variant === "CodeOutput"
-                  ) {
-                    varObj.content[0] =
-                      varObj.content[0] + jsonBuffer.content[0];
-                    setDynamicAnswer(varObj.content[0]);
-                    setDynamicVariant(varObj.variant);
-                  } else {
-                    varObj.content = varObj.content + jsonBuffer.content;
-                    setDynamicAnswer(varObj.content);
-                    setDynamicVariant(varObj.variant);
-                  }
+                  varObj.content = varObj.content + jsonBuffer.content;
+                  setDynamicAnswer(varObj.content);
+                  setDynamicVariant(varObj.variant);
                 }
               } else {
                 // object is empty so add content

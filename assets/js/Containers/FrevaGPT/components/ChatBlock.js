@@ -44,7 +44,7 @@ function ChatBlock() {
       } else {
         const existingIndex = newConv.findIndex(
           (x) =>
-            x[0].content.length > 1 && x[0].content[1] === element.content[1]
+            x[0].content.length > 1 && x[0].content.id === element.content.id
         );
         if (existingIndex === -1) {
           newConv.push([element]);
@@ -79,7 +79,7 @@ function ChatBlock() {
   }
 
   function renderCode(element, index) {
-    if (isEmpty(element[0].content[0])) {
+    if (isEmpty(element.content)) {
       return null;
     } else {
       return (

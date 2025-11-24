@@ -43,8 +43,7 @@ function ChatBlock() {
         }
       } else {
         const existingIndex = newConv.findIndex(
-          (x) =>
-            x[0].content.length > 1 && x[0].content.id === element.content.id
+          (x) => x[0].content.length > 1 && x[0].call_id === element.call_id
         );
         if (existingIndex === -1) {
           newConv.push([element]);
@@ -79,7 +78,7 @@ function ChatBlock() {
   }
 
   function renderCode(element, index) {
-    if (isEmpty(element.content)) {
+    if (isEmpty(element[0].content)) {
       return null;
     } else {
       return (

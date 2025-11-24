@@ -15,7 +15,7 @@ export function replaceLinebreaks(data) {
   return formattedData;
 }
 
-export function formatCode(mode, data) {
+export function formatCode(data) {
   /**
    * Given string of code is parsed as json and splitted by linebreak into seperate code parts
    *
@@ -34,11 +34,12 @@ export function formatCode(mode, data) {
   let rawCode;
 
   try {
-    if (mode === "Code") {
+    /*if (mode === "Code") {
       rawCode = JSON.parse(shortData).code;
     } else if (mode === "CodeOutput") {
       rawCode = shortData;
-    }
+    }*/
+    rawCode = shortData;
     codeSnippets = rawCode.split("\\n");
   } catch (err) {
     // do something

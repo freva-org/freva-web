@@ -6,8 +6,8 @@ Created on 14.11.2013
 views for the solr application
 """
 
-import logging
 import json
+import logging
 from typing import Union
 from urllib.parse import urlparse
 

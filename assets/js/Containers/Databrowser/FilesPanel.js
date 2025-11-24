@@ -151,13 +151,16 @@ function FilesPanelImpl(props) {
       //const relativeZarrUrl = getPathFromUrl(zarrUrl);
 
       // Step 1.5: Create presigned URL
-      const presignResponse = await fetch("/api/freva-nextgen/data-portal/share-zarr", {
-        method: "POST",
-        credentials: "same-origin",
-        headers: { ...headers, "Content-Type": "application/json" },
-        body: JSON.stringify({ path: rawzarrUrl, ttl_seconds: 3600 }),
-        signal,
-      });
+      const presignResponse = await fetch(
+        "/api/freva-nextgen/data-portal/share-zarr",
+        {
+          method: "POST",
+          credentials: "same-origin",
+          headers: { ...headers, "Content-Type": "application/json" },
+          body: JSON.stringify({ path: rawzarrUrl, ttl_seconds: 3600 }),
+          signal,
+        }
+      );
       const presignData = await presignResponse.json();
       const zarrUrl = presignData.url;
       // const presignedUrlObj = new URL(presignedUrl);

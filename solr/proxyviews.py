@@ -3,13 +3,8 @@
 from urllib.parse import urljoin
 
 from django.conf import settings
-from djproxy.views import HttpProxy
-
-from urllib.parse import urljoin
-
-from django.conf import settings
-from djproxy.views import HttpProxy
 from django.http import HttpResponse
+from djproxy.views import HttpProxy
 
 
 class CORSMixin:

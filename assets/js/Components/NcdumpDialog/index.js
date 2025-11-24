@@ -24,6 +24,14 @@ class NcdumpDialog extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
+    // TODO: temporary workaround to reset to metadata tab on open
+    // because on big data such as cmip6, gridlook may take time to load
+    // so we want to show metadata tab first and then switch to gridlook
+    // when user clicks on gridlook tab again. it's a trick to improve
+    // perceived performance.
+    if (!prevProps.show && this.props.show) {
+      this.setState({ activeTab: "metadata" });
+    }
     if (prevProps.file !== this.props.file && this.props.file) {
       this.setState({ pathInput: this.props.file });
     }
@@ -271,12 +279,22 @@ class NcdumpDialog extends React.Component {
                       style={{
                         padding: "12px 16px",
                         fontSize: "14px",
-                        fontWeight: this.state.activeTab === "metadata" ? "600" : "500",
-                        backgroundColor: this.state.activeTab === "metadata" ? "#f3f4f6" : "transparent",
+                        fontWeight:
+                          this.state.activeTab === "metadata" ? "600" : "500",
+                        backgroundColor:
+                          this.state.activeTab === "metadata"
+                            ? "#f3f4f6"
+                            : "transparent",
                         border: "none",
-                        borderBottom: this.state.activeTab === "metadata" ? "3px solid #3b82f6" : "none",
+                        borderBottom:
+                          this.state.activeTab === "metadata"
+                            ? "3px solid #3b82f6"
+                            : "none",
                         cursor: "pointer",
-                        color: this.state.activeTab === "metadata" ? "#1f2937" : "#6b7280",
+                        color:
+                          this.state.activeTab === "metadata"
+                            ? "#1f2937"
+                            : "#6b7280",
                         transition: "all 0.2s ease",
                       }}
                       onMouseEnter={(e) => {
@@ -298,12 +316,22 @@ class NcdumpDialog extends React.Component {
                       style={{
                         padding: "12px 16px",
                         fontSize: "14px",
-                        fontWeight: this.state.activeTab === "gridlook" ? "600" : "500",
-                        backgroundColor: this.state.activeTab === "gridlook" ? "#f3f4f6" : "transparent",
+                        fontWeight:
+                          this.state.activeTab === "gridlook" ? "600" : "500",
+                        backgroundColor:
+                          this.state.activeTab === "gridlook"
+                            ? "#f3f4f6"
+                            : "transparent",
                         border: "none",
-                        borderBottom: this.state.activeTab === "gridlook" ? "3px solid #3b82f6" : "none",
+                        borderBottom:
+                          this.state.activeTab === "gridlook"
+                            ? "3px solid #3b82f6"
+                            : "none",
                         cursor: "pointer",
-                        color: this.state.activeTab === "gridlook" ? "#1f2937" : "#6b7280",
+                        color:
+                          this.state.activeTab === "gridlook"
+                            ? "#1f2937"
+                            : "#6b7280",
                         transition: "all 0.2s ease",
                       }}
                       onMouseEnter={(e) => {
@@ -350,52 +378,57 @@ class NcdumpDialog extends React.Component {
               maxHeight: "calc(95vh - 200px)",
             }}
           >
-            {status === NcDumpDialogState.ERROR && this.state.activeTab === "metadata" && (
-              <div
-                style={{
-                  borderRadius: "8px",
-                  backgroundColor: "#fee2e2",
-                  border: "1px solid #fecaca",
-                  color: "#991b1b",
-                  fontSize: "13px",
-                  padding: "12px",
-                  marginBottom: "16px",
-                }}
-              >
+            {status === NcDumpDialogState.ERROR &&
+              this.state.activeTab === "metadata" && (
                 <div
-                  style={{ display: "flex", alignItems: "start", gap: "10px" }}
+                  style={{
+                    borderRadius: "8px",
+                    backgroundColor: "#fee2e2",
+                    border: "1px solid #fecaca",
+                    color: "#991b1b",
+                    fontSize: "13px",
+                    padding: "12px",
+                    marginBottom: "16px",
+                  }}
                 >
-                  <i
-                    className="fas fa-exclamation-circle"
+                  <div
                     style={{
-                      fontSize: "18px",
-                      marginTop: "2px",
-                      flexShrink: 0,
+                      display: "flex",
+                      alignItems: "start",
+                      gap: "10px",
                     }}
-                  ></i>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <strong style={{ display: "block", marginBottom: "6px" }}>
-                      Error loading metadata
-                    </strong>
-                    <div style={{ wordWrap: "break-word" }}>{error}</div>
-                    <button
-                      className="btn btn-sm mt-2"
-                      onClick={this.handleInspect}
+                  >
+                    <i
+                      className="fas fa-exclamation-circle"
                       style={{
-                        backgroundColor: "#dc2626",
-                        color: "white",
-                        border: "none",
-                        padding: "6px 12px",
-                        fontSize: "12px",
+                        fontSize: "18px",
+                        marginTop: "2px",
+                        flexShrink: 0,
                       }}
-                    >
-                      <i className="fas fa-redo me-1"></i>
-                      Retry
-                    </button>
+                    ></i>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <strong style={{ display: "block", marginBottom: "6px" }}>
+                        Error loading metadata
+                      </strong>
+                      <div style={{ wordWrap: "break-word" }}>{error}</div>
+                      <button
+                        className="btn btn-sm mt-2"
+                        onClick={this.handleInspect}
+                        style={{
+                          backgroundColor: "#dc2626",
+                          color: "white",
+                          border: "none",
+                          padding: "6px 12px",
+                          fontSize: "12px",
+                        }}
+                      >
+                        <i className="fas fa-redo me-1"></i>
+                        Retry
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
             {status === NcDumpDialogState.LOADING && (
               <div className="text-center py-4">
@@ -503,7 +536,9 @@ class NcdumpDialog extends React.Component {
                         transition: "all 0.2s",
                         cursor: "pointer",
                       }}
-                      title={this.state.gridlookCopied ? "Copied!" : "Copy link"}
+                      title={
+                        this.state.gridlookCopied ? "Copied!" : "Copy link"
+                      }
                       onMouseEnter={(e) => {
                         e.target.style.backgroundColor = "#f0f9ff";
                       }}
@@ -511,7 +546,9 @@ class NcdumpDialog extends React.Component {
                         e.target.style.backgroundColor = "white";
                       }}
                     >
-                      <i className={`fas fa-${this.state.gridlookCopied ? "check" : "copy"}`}></i>
+                      <i
+                        className={`fas fa-${this.state.gridlookCopied ? "check" : "copy"}`}
+                      ></i>
                     </button>
                     <button
                       onClick={() => {

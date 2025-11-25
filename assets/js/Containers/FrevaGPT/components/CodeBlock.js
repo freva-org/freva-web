@@ -105,7 +105,7 @@ function CodeBlock({ showCode, content }) {
                   style={{ backgroundColor: "#fafafa" }}
                 >
                   <SyntaxHighlighter language="python" style={oneLight}>
-                    {formatCode(codeElement.content)}
+                    {formatCode("Code", codeElement.content)}
                   </SyntaxHighlighter>
                 </Card.Body>
               );
@@ -119,7 +119,7 @@ function CodeBlock({ showCode, content }) {
                   style={{ backgroundColor: "#263238", fontSize: "0.72em" }}
                 >
                   <SyntaxHighlighter language="python" style={materialDark}>
-                    {formatCode(codeElement.content)}
+                    {formatCode("CodeOutput", codeElement.content)}
                   </SyntaxHighlighter>
                 </Card.Footer>
               );

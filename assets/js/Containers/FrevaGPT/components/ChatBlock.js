@@ -43,7 +43,7 @@ function ChatBlock() {
         }
       } else {
         const existingIndex = newConv.findIndex(
-          (x) => x[0].content.length > 1 && x[0].call_id === element.call_id
+          (x) => x[0].content.length > 1 && x[0].id === element.id
         );
         if (existingIndex === -1) {
           newConv.push([element]);

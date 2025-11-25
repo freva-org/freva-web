@@ -101,7 +101,7 @@ function CodeBlock({ showCode, content }) {
               return (
                 <Card.Body
                   className="p-0 m-0 border-bottom"
-                  key={`${codeElement.call_id}-code`}
+                  key={`${codeElement.id}-code`}
                   style={{ backgroundColor: "#fafafa" }}
                 >
                   <SyntaxHighlighter language="python" style={oneLight}>
@@ -115,7 +115,7 @@ function CodeBlock({ showCode, content }) {
               return (
                 <Card.Footer
                   className="p-0 m-0"
-                  key={`${codeElement.call_id}-codeoutput`}
+                  key={`${codeElement.id}-codeoutput`}
                   style={{ backgroundColor: "#263238", fontSize: "0.72em" }}
                 >
                   <SyntaxHighlighter language="python" style={materialDark}>

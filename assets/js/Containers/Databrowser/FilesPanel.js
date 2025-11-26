@@ -168,7 +168,6 @@ function FilesPanelImpl(props) {
       setZarrUrl(zarrUrl);
 
       // Step 2: Get metadata with retry logic
-      // Step 2: Fetch HTML using shared presigned URL (no auth needed)
       const htmlUrl = `/api/freva-nextgen/data-portal/zarr-utils/html?url=${encodeURIComponent(rawzarrUrl)}&timeout=60`;
       const metadataResponse = await fetch(htmlUrl, {
         method: "GET",

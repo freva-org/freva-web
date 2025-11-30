@@ -135,7 +135,7 @@ jobs:
           echo "repo=$(echo ${{ github.repository }} | tr 'A-Z' 'a-z')" >> $GITHUB_OUTPUT
           echo "tag=$(cat package.json | jq -r .version)" >> $GITHUB_OUTPUT
 
-    - name: Create GitHub App token for freva-admin (freva-bot)
+      - name: Create GitHub App token for freva-admin (freva-bot)
         id: app-token
         uses: actions/create-github-app-token@v2
         with:

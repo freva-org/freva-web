@@ -135,8 +135,18 @@ jobs:
           echo "repo=$(echo ${{ github.repository }} | tr 'A-Z' 'a-z')" >> $GITHUB_OUTPUT
           echo "tag=$(cat package.json | jq -r .version)" >> $GITHUB_OUTPUT
 
+    - name: Create GitHub App token for freva-admin (freva-bot)
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.REVA_BOT_APP_ID }}
+          private-key: ${{ secrets.FREVA_BOT_PRIVATE_KEY }}
+          owner: freva-org
+          repositories: |
+            freva-admin
+
       - name: Do the release job
         run: python3 bump.py deploy web -v
         env:
-          GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          DEPLOY_BOT_TOKEN: ${{ steps.app-token.outputs.token }}
           REPO_VERSION: ${{ steps.repository.outputs.tag }}

@@ -51,10 +51,12 @@ jobs:
         run: |
           RC="${{ github.event_name == 'workflow_dispatch' && inputs.rc || '' }}"
           if [ "$RC" ];then
-            echo "tag=$(python3 rc.py rc $RC web)" >> $GITHUB_OUTPUT
+            python3 rc.py rc $RC web  1> tag.txt
           else
-            echo "tag=$(jq -r .version package.json)" >> "$GITHUB_OUTPUT"
+            jq -r .version package.jso 1> tag.txt
           fi
+
+          echo "tag=$(tail -1 tag.txt)" >> "$GITHUB_OUTPUT"
           echo "repo=$(echo ${{ github.repository }} | tr 'A-Z' 'a-z')" >> "$GITHUB_OUTPUT"
 
       - name: Set up QEMU

@@ -1,3 +1,4 @@
+---
 name: Build and publish the container image
 run-name: ${{ github.actor }} is creating a new release
 
@@ -9,10 +10,10 @@ permissions:
 on:
   workflow_dispatch:
     inputs:
-      dev:
-        description: "Use this to create a pre release (dev image)."
+      rc:
+        description: "Release candicated number for this release."
         required: true
-        type: boolean
+        type: integer
 
   push:
     tags:
@@ -34,21 +35,26 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check if we need a dev tag
-        id: dev-tag
-        run: |
-          DEV_TAG="${{ github.event_name == 'workflow_dispatch' && inputs.dev || false }}"
-          if [ "$DEV_TAG" = 'true' ]; then
-            echo "tag_suffix=-dev" >> "$GITHUB_OUTPUT"
-          else
-            echo "tag_suffix=" >> "$GITHUB_OUTPUT"
-          fi
+      - name: Set up Python 3
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.X"
+
+      - name: Installing dependencies
+        run: pip install git-python packaging tomli requests
+
+      - name: Getting realease job
+        run: curl -Ls -o rc.py https://raw.githubusercontent.com/freva-org/freva-admin/main/release.py
 
       - name: Get tag
         id: repository
         run: |
-          # For both push & workflow_dispatch we use package.json + optional "-dev"
-          echo "tag=$(jq -r .version package.json)${{ steps.dev-tag.outputs.tag_suffix }}" >> "$GITHUB_OUTPUT"
+          RC="${{ github.event_name == 'workflow_dispatch' && inputs.rc || '' }}"
+          if [ "$RC" ];then
+            echo "tag=$(python3 rc.py rc $RC web)" >> $GITHUB_OUTPUT
+          else
+            echo "tag=$(jq -r .version package.json)" >> "$GITHUB_OUTPUT"
+          fi
           echo "repo=$(echo ${{ github.repository }} | tr 'A-Z' 'a-z')" >> "$GITHUB_OUTPUT"
 
       - name: Set up QEMU
@@ -125,12 +131,7 @@ jobs:
   bump-web-version:
     runs-on: ubuntu-latest
     needs: [build-and-push-image, lint]
-    # bump when:
-    # - manual run with dev == false, OR
-    # - tag push (normal release)
-    if: >
-      (github.event_name == 'workflow_dispatch' && inputs.dev == false) ||
-      github.event_name == 'push'
+    if: github.event_name != 'workflow_dispatch'
     permissions:
       contents: write
       packages: write

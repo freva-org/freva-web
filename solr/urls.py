@@ -13,10 +13,11 @@ from django.urls import path
 from django.urls import re_path as url
 
 from .proxyviews import DataBrowserProxy, DataPortalProxy
-from .views import databrowser, flavours_all_methods
+from .views import databrowser, flavours_all_methods, share_zarr
 
 urlpatterns = [
     url(r"^databrowser/$", databrowser, name="data_browser"),
+    path("api/freva-nextgen/data-portal/share-zarr", share_zarr, name="share_zarr"),
 ]
 if int(os.environ.get("DEV_MODE", "0")) == 1:
     urlpatterns.extend([

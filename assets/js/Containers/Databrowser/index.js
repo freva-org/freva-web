@@ -53,6 +53,7 @@ class Databrowser extends React.Component {
   constructor(props) {
     super(props);
     this.clickFacet = this.clickFacet.bind(this);
+    this.clickFacetValue = this.clickFacetValue.bind(this);
     this.renderFacetBadges = this.renderFacetBadges.bind(this);
     this.createCatalogLink = this.createCatalogLink.bind(this);
     this.clickFlavour = this.clickFlavour.bind(this);
@@ -144,7 +145,31 @@ class Databrowser extends React.Component {
       this.props.router.push(currentLocation);
     }
   }
+  clickFacetValue(category, valueToRemove) {
+    const currentLocation = this.props.location.pathname;
+    const originalQueryObject = this.props.location.query;
+    const currentValue = originalQueryObject[category];
 
+    // If it's an array, remove just this value
+    if (Array.isArray(currentValue)) {
+      const newValues = currentValue.filter((v) => v !== valueToRemove);
+      if (newValues.length === 0) {
+        const { [category]: toRemove, ...queryObject } = originalQueryObject;
+        const query = queryString.stringify({ ...queryObject, start: 0 });
+        this.props.router.push(currentLocation + "?" + query);
+      } else {
+        const query = queryString.stringify({
+          ...originalQueryObject,
+          [category]: newValues,
+          start: 0,
+        });
+        this.props.router.push(currentLocation + "?" + query);
+      }
+    } else {
+      // Single value, remove the whole facet
+      this.clickFacet(category);
+    }
+  }
   clickFlavour(value = DEFAULT_FLAVOUR) {
     const currentLocation = this.props.location.pathname;
     const query = queryString.stringify({
@@ -180,6 +205,7 @@ class Databrowser extends React.Component {
           selectedFacets={selectedFacets}
           facetMapping={facetMapping}
           clickFacet={this.clickFacet}
+          clickFacetValue={this.clickFacetValue}
           isFacetCentered={this.state.viewPort === ViewTypes.FACET_CENTERED}
         />
       );
@@ -353,21 +379,25 @@ class Databrowser extends React.Component {
     }
     values = [
       ...values,
-      ...Object.keys(this.props.databrowser.selectedFacets).map((x) => {
-        return (
+      ...Object.keys(this.props.databrowser.selectedFacets).flatMap((x) => {
+        const facetValue = this.props.databrowser.selectedFacets[x];
+        const valuesArray = Array.isArray(facetValue)
+          ? facetValue
+          : [facetValue];
+        return valuesArray.map((singleValue) => (
           <Button
             variant="secondary"
             className="me-2 mb-2 badge d-flex align-items-center"
             onClick={() => {
-              this.clickFacet(x);
+              this.clickFacetValue(x, singleValue);
             }}
-            key={"selected-" + x + this.props.databrowser.selectedFacets[x]}
+            key={"selected-" + x + "-" + singleValue}
           >
             {initCap(underscoreToBlank(this.props.databrowser.facetMapping[x]))}
-            : {this.props.databrowser.selectedFacets[x]}
+            : {singleValue}
             <FaTimes className="ms-2 fs-6" />
           </Button>
-        );
+        ));
       }),
     ];
 

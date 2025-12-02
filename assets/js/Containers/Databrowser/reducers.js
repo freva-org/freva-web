@@ -45,6 +45,8 @@ export const databrowserReducer = (state = databrowserInitialState, action) => {
         bboxSelector,
         start,
         flavour,
+        "max-results": _maxResults,
+        translate: _translate,
         ...queryObject
       } = action.queryObject;
       let myMinDate = minDate;

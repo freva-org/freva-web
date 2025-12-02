@@ -67,9 +67,10 @@ function DataBrowserCommandImpl(props) {
         ? `bbox=${props.minLon},${props.maxLon},${props.minLat},${props.maxLat} `
         : "") +
       Object.keys(selectedFacets)
-        .map((key) => {
+        .flatMap((key) => {
           const value = selectedFacets[key];
-          return `${props.facetMapping[key]}=${value}`;
+          const values = Array.isArray(value) ? value : [value];
+          return values.map((v) => `${props.facetMapping[key]}=${v}`);
         })
         .join(" ") +
       (dateSelectorToCli && props.minDate
@@ -109,14 +110,15 @@ function DataBrowserCommandImpl(props) {
             </span>
           </React.Fragment>
         )}
-        {Object.keys(selectedFacets).map((key) => {
+        {Object.keys(selectedFacets).flatMap((key) => {
           const value = selectedFacets[key];
-          return (
-            <React.Fragment key={`command-${key}`}>
+          const values = Array.isArray(value) ? value : [value];
+          return values.map((v) => (
+            <React.Fragment key={`command-${key}-${v}`}>
               {" "}
-              {props.facetMapping[key]}=<strong>{value}</strong>
+              {props.facetMapping[key]}=<strong>{v}</strong>
             </React.Fragment>
-          );
+          ));
         })}
         {dateSelectorToCli && props.minDate && (
           <React.Fragment>
@@ -153,9 +155,10 @@ function DataBrowserCommandImpl(props) {
 
     args = [
       ...args,
-      ...Object.keys(selectedFacets).map((key) => {
+      ...Object.keys(selectedFacets).flatMap((key) => {
         const value = selectedFacets[key];
-        return `${props.facetMapping[key]}="${value}"`;
+        const values = Array.isArray(value) ? value : [value];
+        return values.map((v) => `${props.facetMapping[key]}="${v}"`);
       }),
     ];
 

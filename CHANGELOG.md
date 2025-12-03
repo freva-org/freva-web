@@ -1,9 +1,14 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [v2511.1.0]
+### Changed
+Support selecting multi-facets in Databrowser
 ## [v2511.0.0]
-Switch from authorization-based zarr endpoints to public presigned URLs.
+### Added
 Add gridlook 3D visualization as a new tab in Metadata Inspector
+### Changed
+Switch from authorization-based zarr endpoints to public presigned URLs.
 ## [v2510.3.4]
 ### Fixed
 fix an issue in ncdump regarding the retrying the processing and waiting states in data-loader

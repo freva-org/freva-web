@@ -236,6 +236,7 @@ class Databrowser extends React.Component {
             selectedFacets={selectedFacets}
             facetMapping={facetMapping}
             clickFacet={this.clickFacet}
+            clickFacetValue={this.clickFacetValue}
             isFacetCentered={this.state.viewPort === ViewTypes.FACET_CENTERED}
           />
         );

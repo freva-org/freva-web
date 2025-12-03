@@ -23,14 +23,17 @@ export function FacetPanel({
 }) {
   const isFacetSelected = !!selectedFacets[keyVar];
   const facetTitle = initCap(underscoreToBlank(facetMapping[keyVar] ?? keyVar));
+
+  const selectedValue = selectedFacets[keyVar];
+  const valuesArray = isFacetSelected
+    ? Array.isArray(selectedValue)
+      ? selectedValue
+      : [selectedValue]
+    : [];
+
   let panelHeader;
 
   if (isFacetSelected) {
-    const selectedValue = selectedFacets[keyVar];
-    const valuesArray = Array.isArray(selectedValue)
-      ? selectedValue
-      : [selectedValue];
-
     panelHeader = (
       <span className="d-flex align-items-center flex-wrap gap-2">
         <span>{facetTitle}:</span>
@@ -43,14 +46,22 @@ export function FacetPanel({
               cursor: "pointer",
               padding: "6px 10px",
               fontSize: "13px",
+              whiteSpace: "normal",
+              wordBreak: "break-all",
+              textAlign: "left",
+              display: "inline-flex",
+              alignItems: "flex-start",
             }}
             onClick={(e) => {
               e.stopPropagation();
               clickFacetValue(keyVar, v);
             }}
           >
-            {v}
-            <FaTimes className="ms-1" style={{ fontSize: "10px" }} />
+            <span style={{ flex: 1 }}>{v}</span>
+            <FaTimes
+              className="ms-1"
+              style={{ fontSize: "11px", flexShrink: 0, marginTop: "2px" }}
+            />
           </Badge>
         ))}
       </span>
@@ -82,6 +93,7 @@ export function FacetPanel({
         isFacetCentered={isFacetCentered}
         facetClick={clickFacet}
         metadata={metadata[keyVar] ? metadata[keyVar] : null}
+        selectedValues={valuesArray}
       />
     </OwnPanel>
   );

@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 
 import { Badge } from "react-bootstrap";
+import { FaTimes } from "react-icons/fa";
 
 import { initCap, underscoreToBlank } from "../../utils";
 import AccordionItemBody from "../../Components/AccordionItemBody";
@@ -17,15 +18,52 @@ export function FacetPanel({
   selectedFacets,
   facetMapping,
   clickFacet,
+  clickFacetValue,
   isFacetCentered,
 }) {
   const isFacetSelected = !!selectedFacets[keyVar];
   const facetTitle = initCap(underscoreToBlank(facetMapping[keyVar] ?? keyVar));
+
+  const selectedValue = selectedFacets[keyVar];
+  const valuesArray = isFacetSelected
+    ? Array.isArray(selectedValue)
+      ? selectedValue
+      : [selectedValue]
+    : [];
+
   let panelHeader;
+
   if (isFacetSelected) {
     panelHeader = (
-      <span>
-        {facetTitle}: <strong>{selectedFacets[keyVar]}</strong>
+      <span className="d-flex align-items-center flex-wrap gap-2">
+        <span>{facetTitle}:</span>
+        {valuesArray.map((v) => (
+          <Badge
+            key={v}
+            bg=""
+            style={{
+              backgroundColor: window.MAIN_COLOR,
+              cursor: "pointer",
+              padding: "6px 10px",
+              fontSize: "13px",
+              whiteSpace: "normal",
+              wordBreak: "break-all",
+              textAlign: "left",
+              display: "inline-flex",
+              alignItems: "flex-start",
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              clickFacetValue(keyVar, v);
+            }}
+          >
+            <span style={{ flex: 1 }}>{v}</span>
+            <FaTimes
+              className="ms-1"
+              style={{ fontSize: "11px", flexShrink: 0, marginTop: "2px" }}
+            />
+          </Badge>
+        ))}
       </span>
     );
   } else if (value.length === 2) {
@@ -45,12 +83,9 @@ export function FacetPanel({
       </span>
     );
   }
+
   return (
-    <OwnPanel
-      header={panelHeader}
-      key={keyVar}
-      removeFacet={isFacetSelected ? () => clickFacet(keyVar) : null}
-    >
+    <OwnPanel header={panelHeader} key={keyVar} removeFacet={null}>
       <AccordionItemBody
         eventKey={keyVar}
         mappedName={facetTitle}
@@ -58,6 +93,7 @@ export function FacetPanel({
         isFacetCentered={isFacetCentered}
         facetClick={clickFacet}
         metadata={metadata[keyVar] ? metadata[keyVar] : null}
+        selectedValues={valuesArray}
       />
     </OwnPanel>
   );
@@ -71,4 +107,5 @@ FacetPanel.propTypes = {
   selectedFacets: PropTypes.object,
   isFacetCentered: PropTypes.bool,
   clickFacet: PropTypes.func.isRequired,
+  clickFacetValue: PropTypes.func.isRequired,
 };

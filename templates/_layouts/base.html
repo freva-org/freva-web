@@ -64,6 +64,7 @@
         <!-- JavaScript at the bottom for fast page loading -->
         <script>
             window.DEFAULT_FLAVOUR = "{% settings_val 'DEFAULT_FLAVOUR' %}";
+            window.MAIN_COLOR = "{% settings_val 'MAIN_COLOR' %}";
         </script>
         {% bootstrap_javascript%}
         <script src="{{ STATIC_URL }}js/documentcloud-visualsearch-4550d61/build-min/dependencies.js" type="text/javascript"></script>

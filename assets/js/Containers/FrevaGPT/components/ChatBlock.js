@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useSelector } from "react-redux";
 
 import { Col, Card, Modal, Button, Alert } from "react-bootstrap";
@@ -56,6 +56,9 @@ function ChatBlock() {
 
     return newConv;
   }
+  const rearrangedConversation = useMemo(() => {
+    return rearrangeCodeElements(conversation);
+  }, [conversation]);
 
   function renderImage(element, index) {
     return (
@@ -155,8 +158,6 @@ function ChatBlock() {
   }
 
   function render() {
-    const rearrangedConversation = rearrangeCodeElements(conversation);
-
     return (
       <>
         <Col>
@@ -187,4 +188,4 @@ function ChatBlock() {
   return render();
 }
 
-export default ChatBlock;
+export default React.memo(ChatBlock);

@@ -9,7 +9,7 @@ import { oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 import Markdown from "react-markdown";
 
-import * as constants from "../constants";
+import * as constants from "../../constants";
 
 const PendingAnswerComponent = forwardRef((props, ref) => {
   const [renderedCode, setRenderedCode] = useState("");

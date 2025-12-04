@@ -83,10 +83,11 @@ function AccordionItemBody(props) {
   }
 
   function renderFilteredItems(filteredValues) {
-    const { metadata, facetClick, eventKey } = props;
+    const { metadata, facetClick, eventKey, selectedValues = [] } = props;
     return filteredValues.map((item) => {
       const value = item.value;
       const count = item.count;
+      const isSelected = selectedValues.includes(value);
       let renderedElem;
       const badge = (
         <div>
@@ -99,6 +100,15 @@ function AccordionItemBody(props) {
         <a
           href="#"
           className="text-wrap"
+          style={{
+            fontWeight: isSelected ? "bold" : "normal",
+            backgroundColor: isSelected
+              ? window.MAIN_COLOR + "20"
+              : "transparent",
+            padding: isSelected ? "2px 6px" : "0",
+            borderRadius: isSelected ? "4px" : "0",
+            color: isSelected ? window.MAIN_COLOR : undefined,
+          }}
           onClick={(e) => {
             e.preventDefault();
             facetClick(eventKey, value);
@@ -225,6 +235,7 @@ AccordionItemBody.propTypes = {
   ]),
   facetClick: PropTypes.func,
   togglePanel: PropTypes.func,
+  selectedValues: PropTypes.array,
 };
 
 export default AccordionItemBody;

@@ -10,13 +10,16 @@ import remarkGfm from "remark-gfm";
 
 import { FaExpand } from "react-icons/fa";
 
+import PropTypes from "prop-types";
+
 import { replaceLinebreaks } from "../../utils";
 
 import * as constants from "../../constants";
 
 import CodeBlock from "./CodeBlock";
+import UserInputBlock from "./UserInputBlock";
 
-function ChatBlock() {
+function ChatBlock({ onEditInput }) {
   const [showModal, setShowModal] = useState(false);
   const [image, setImage] = useState("");
 
@@ -55,6 +58,7 @@ function ChatBlock() {
 
     return newConv;
   }
+
   const rearrangedConversation = useMemo(() => {
     return rearrangeCodeElements(conversation);
   }, [conversation]);
@@ -94,14 +98,12 @@ function ChatBlock() {
 
   function renderUser(element, index) {
     return (
-      <Col md={{ span: 10, offset: 2 }} key={`${index}-user`}>
-        <Card
-          className="shadow-sm card-body border-0 border-bottom mb-3"
-          style={{ backgroundColor: "#eee" }}
-        >
-          {element.content}
-        </Card>
-      </Col>
+      <UserInputBlock
+        content={element}
+        index={index}
+        key={`UserInputBlock-${index}`}
+        onEdit={onEditInput}
+      />
     );
   }
 
@@ -185,6 +187,10 @@ function ChatBlock() {
   }
 
   return render();
+}
+
+ChatBlock.propTypes = {
+  onEditInput: PropTypes.func, 
 }
 
 export default React.memo(ChatBlock);

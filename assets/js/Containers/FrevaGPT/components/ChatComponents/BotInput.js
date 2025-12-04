@@ -52,7 +52,7 @@ function BotInput({ loading, handleSubmit, handleStop }) {
           value={userInput}
           onChange={(e) => {
             handleUserInput(e);
-            resizeInputField();
+            resizeInputField("inputField");
           }}
           onKeyDown={handleKeyDown}
           placeholder="Ask a question"

@@ -17,16 +17,13 @@ function UserInputBlock({ content, index, onEdit }) {
   const [renderInput, setRenderInput] = useState(false);
   const [editedInput, setEditedInput] = useState("");
 
-  const thread = useSelector(
-      (state) => state.frevaGPTReducer.thread
-    );
+  const thread = useSelector((state) => state.frevaGPTReducer.thread);
 
   function handleEdit(e) {
     setEditedInput(e.target.value);
   }
 
   async function requestEditEndpoint(input, index) {
-
     const queryObject = {
       source_thread_id: thread,
       fork_from_index: index,
@@ -34,12 +31,24 @@ function UserInputBlock({ content, index, onEdit }) {
 
     const response = await fetchWithAuth(
       `/api/chatbot/editthread?` + queryString.stringify(queryObject)
-    )
+    );
 
-    //eslint-disable-next-line no-console
-    console.log("#####", response)
+    let results = {};
+
     // as soon as this request is finished and we got the answers
-    onEdit(input, "abc") // vielleicht auch die history provided by the endpoint
+    if (response.status >= 200 && response.status <= 299) {
+      results = await response.json();
+    } else {
+      results.history = [
+        {
+          varaint: "FrontendError",
+          content: "There was an issue fetching the previous part of the chat.",
+        },
+      ];
+      results.new_thread_id = "";
+    }
+
+    onEdit(input, results);
   }
 
   function renderInputComponent() {

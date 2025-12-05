@@ -140,22 +140,10 @@ function FrevaGPT() {
     setLoading(false);
   }
 
-  /*function createEditedChat() {
-    dispatch(setConversation([]));
-    dispatch(setThread(""));
-    browserHistory.push({
-      pathname: "/chatbot/",
-      search: "",
-    });
-    setShowSuggestions(false);
-    setDynamicAnswer("");
-    setDynamicVariant("");
-    setReader(undefined);
-  }*/
-
-  async function handleEditedChat(newInput, newThread) {
-    //eslint-disable-next-line no-console
-    console.log("#####", newInput, newThread)
+  async function handleEditedChat(newInput, chatObject) {
+    dispatch(setConversation(chatObject.history));
+    dispatch(setThread(chatObject.new_thread_id));
+    await handleSubmit(newInput);
   }
 
   async function handleStop(dispatchStopMessage = true) {
@@ -330,7 +318,7 @@ function FrevaGPT() {
         >
           <Row className="overflow-auto position-relative" id="chatContainer">
             <Col md={12}>
-              <ChatBlock onEditInput={handleEditedChat}/>
+              <ChatBlock onEditInput={handleEditedChat} />
 
               <PendingAnswerComponent
                 content={dynamicAnswer}

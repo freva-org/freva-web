@@ -190,7 +190,7 @@ function ChatBlock({ onEditInput }) {
 }
 
 ChatBlock.propTypes = {
-  onEditInput: PropTypes.func, 
-}
+  onEditInput: PropTypes.func,
+};
 
 export default React.memo(ChatBlock);

@@ -12,9 +12,11 @@ import PropTypes from "prop-types";
 
 import ClipboardToast from "../../../../Components/ClipboardToast";
 
+import FeedbackButtons from "../Snippets/FeedbackButtons";
+
 import { formatCode } from "../../utils";
 
-function CodeBlock({ showCode, content }) {
+function CodeBlock({ showCode, content, index }) {
   useEffect(() => {
     setLocalShowCode(showCode);
   }, [showCode]);
@@ -60,6 +62,7 @@ function CodeBlock({ showCode, content }) {
               )}
             </span>
           </Button>
+          <FeedbackButtons elementIndex={index} />
         </div>
 
         <Collapse in={localShowCode} className="mt-2">
@@ -113,6 +116,7 @@ function CodeBlock({ showCode, content }) {
 CodeBlock.propTypes = {
   content: PropTypes.array,
   showCode: PropTypes.bool,
+  index: PropTypes.number,
 };
 
 export default CodeBlock;

@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 
 import PropTypes from "prop-types";
 
-import queryString from "query-string";
+//import queryString from "query-string";
 
 import { Col } from "react-bootstrap";
 import { IconContext } from "react-icons";
@@ -14,7 +14,7 @@ import {
   FaThumbsUp,
 } from "react-icons/fa";
 
-import { fetchWithAuth } from "../../utils";
+//import { fetchWithAuth } from "../../utils";
 
 function FeedbackButtons({ elementIndex }) {
   const [thumb, setThumb] = useState();
@@ -51,9 +51,12 @@ function FeedbackButtons({ elementIndex }) {
       feedback: thumbRef.current,
     };
 
-    await fetchWithAuth(
+    //eslint-disable-next-line no-console
+    console.log("####", queryObject);
+
+    /*await fetchWithAuth(
       `/api/chatbot/userfeedback?` + queryString.stringify(queryObject)
-    );
+    );*/
   }
 
   return (

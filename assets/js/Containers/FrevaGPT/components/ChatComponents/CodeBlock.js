@@ -16,7 +16,7 @@ import FeedbackButtons from "../Snippets/FeedbackButtons";
 
 import { formatCode } from "../../utils";
 
-function CodeBlock({ showCode, content, index }) {
+function CodeBlock({ showCode, content, elementIndex }) {
   useEffect(() => {
     setLocalShowCode(showCode);
   }, [showCode]);
@@ -62,7 +62,7 @@ function CodeBlock({ showCode, content, index }) {
               )}
             </span>
           </Button>
-          <FeedbackButtons elementIndex={index} />
+          <FeedbackButtons elementIndex={elementIndex} />
         </div>
 
         <Collapse in={localShowCode} className="mt-2">
@@ -116,7 +116,7 @@ function CodeBlock({ showCode, content, index }) {
 CodeBlock.propTypes = {
   content: PropTypes.array,
   showCode: PropTypes.bool,
-  index: PropTypes.number,
+  elementIndex: PropTypes.number,
 };
 
 export default CodeBlock;

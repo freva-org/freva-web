@@ -11,7 +11,7 @@ import useHoverThread from "../../customHooks/useHoverThread";
 
 import ThreadModal from "./ThreadModal";
 
-function ThreadLink({ element }) {
+function ThreadLink({ element, updateThreadList }) {
   const [showModal, setShowModal] = useState(false);
   const ref = useRef(null);
   const [hovered, setHovered] = useState(false);
@@ -129,6 +129,7 @@ function ThreadLink({ element }) {
         showModal={showModal}
         setShowModal={setShowModal}
         element={element}
+        updateThreadList={updateThreadList}
       />
     </>
   );
@@ -136,6 +137,7 @@ function ThreadLink({ element }) {
 
 ThreadLink.propTypes = {
   element: PropTypes.object,
+  updateThreadList: PropTypes.func,
 };
 
 export default ThreadLink;

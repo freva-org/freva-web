@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import PropTypes from "prop-types";
 
 import queryString from "query-string";
@@ -9,6 +9,8 @@ import { Modal, Button, FormControl } from "react-bootstrap";
 
 import { fetchWithAuth } from "../../utils";
 
+import MessageToast from "../Snippets/MessageToast";
+
 function ThreadModal({
   mode,
   showModal,
@@ -17,6 +19,9 @@ function ThreadModal({
   updateThreadList,
 }) {
   const [newTopic, setNewTopic] = useState(element.topic);
+  const [showToast, setShowToast] = useState(false);
+  const toastColor = useRef("");
+  const toastMessage = useRef("");
 
   async function renameThread() {
     if (!isEmpty(newTopic) && newTopic !== element.topic) {
@@ -34,13 +39,16 @@ function ThreadModal({
           thread_id: element.thread_id,
           topic: newTopic,
         };
-
+        toastColor.current = "success";
+        toastMessage.current = "Renamed chat.";
         updateThreadList(mode, newElement);
       } else {
-        // todo: handle fail
+        toastColor.current = "danger";
+        toastMessage.current = "Could not rename chat!";
       }
     }
     setShowModal(false);
+    setShowToast(true);
   }
 
   async function deleteThread() {
@@ -53,11 +61,15 @@ function ThreadModal({
     );
 
     if (response.ok) {
+      toastColor.current = "success";
+      toastMessage.current = "Deleted chat.";
       updateThreadList(mode, element);
     } else {
-      // todo: handle fail
+      toastColor.current = "danger";
+      toastMessage.current = "Could not delete chat.";
     }
     setShowModal(false);
+    setShowToast(true);
   }
 
   const modalOptions = {
@@ -85,33 +97,41 @@ function ThreadModal({
   }
 
   return (
-    <Modal
-      size="s"
-      aria-labelledby="contained-modal-title-vcenter"
-      centered
-      show={showModal}
-      onHide={() => {
-        setShowModal(false);
-      }}
-    >
-      <Modal.Header closeButton>{modalOptions[mode].title}</Modal.Header>
+    <>
+      <Modal
+        size="s"
+        aria-labelledby="contained-modal-title-vcenter"
+        centered
+        show={showModal}
+        onHide={() => {
+          setShowModal(false);
+        }}
+      >
+        <Modal.Header closeButton>{modalOptions[mode].title}</Modal.Header>
 
-      <Modal.Body>{modalOptions[mode].body}</Modal.Body>
+        <Modal.Body>{modalOptions[mode].body}</Modal.Body>
 
-      <Modal.Footer>
-        <Button variant="secondary" onClick={() => setShowModal(false)}>
-          Cancel
-        </Button>
-        <Button
-          variant="info"
-          onClick={() => {
-            modalOptions[mode].handler();
-          }}
-        >
-          {modalOptions[mode].title}
-        </Button>
-      </Modal.Footer>
-    </Modal>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Cancel
+          </Button>
+          <Button
+            variant="info"
+            onClick={() => {
+              modalOptions[mode].handler();
+            }}
+          >
+            {modalOptions[mode].title}
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      <MessageToast
+        show={showToast}
+        setShow={setShowToast}
+        color={toastColor.current}
+        message={toastMessage.current}
+      />
+    </>
   );
 }
 

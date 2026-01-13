@@ -39,6 +39,7 @@ export function formatCode(mode, data) {
     } else if (mode === "CodeOutput") {
       rawCode = shortData;
     }
+    //rawCode = shortData;
     codeSnippets = rawCode.split("\\n");
   } catch (err) {
     // do something

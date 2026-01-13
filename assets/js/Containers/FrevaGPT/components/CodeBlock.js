@@ -37,7 +37,7 @@ function CodeBlock({ showCode, content }) {
 
   function copyCode() {
     const code = extractElements(content, "Code").map((codeElement) => {
-      return formatCode("Code", codeElement.content[0]);
+      return formatCode("Code", codeElement.content);
     });
     navigator.clipboard.writeText(code);
     setShowToast(true);
@@ -101,11 +101,11 @@ function CodeBlock({ showCode, content }) {
               return (
                 <Card.Body
                   className="p-0 m-0 border-bottom"
-                  key={`${codeElement.content[1]}-code`}
+                  key={`${codeElement.id}-code`}
                   style={{ backgroundColor: "#fafafa" }}
                 >
                   <SyntaxHighlighter language="python" style={oneLight}>
-                    {formatCode("Code", codeElement.content[0])}
+                    {formatCode("Code", codeElement.content)}
                   </SyntaxHighlighter>
                 </Card.Body>
               );
@@ -115,11 +115,11 @@ function CodeBlock({ showCode, content }) {
               return (
                 <Card.Footer
                   className="p-0 m-0"
-                  key={`${codeElement.content[1]}-codeoutput`}
+                  key={`${codeElement.id}-codeoutput`}
                   style={{ backgroundColor: "#263238", fontSize: "0.72em" }}
                 >
                   <SyntaxHighlighter language="python" style={materialDark}>
-                    {formatCode("CodeOutput", codeElement.content[0])}
+                    {formatCode("CodeOutput", codeElement.content)}
                   </SyntaxHighlighter>
                 </Card.Footer>
               );

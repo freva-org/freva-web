@@ -1,5 +1,8 @@
-import React, { useState } from "react";
-import { isEmpty } from "lodash";
+import React, { useState, useRef } from "react";
+import { useSelector } from "react-redux";
+import PropTypes from "prop-types";
+
+import queryString from "query-string";
 
 import { Col } from "react-bootstrap";
 
@@ -12,8 +15,12 @@ import {
   FaThumbsUp,
 } from "react-icons/fa";
 
-export default function FeedbackButtons() {
+import { fetchWithAuth } from "../../utils";
+
+function FeedbackButtons({ elementIndex }) {
   const [thumb, setThumb] = useState();
+  const thumbRef = useRef("remove");
+  const thread = useSelector((state) => state.frevaGPTReducer.thread);
 
   const thumbValues = {
     thumbsUp: {
@@ -30,17 +37,28 @@ export default function FeedbackButtons() {
   const ThumbsUpIcon = thumb === "up" ? FaThumbsUp : FaRegThumbsUp;
   const ThumbsDownIcon = thumb === "down" ? FaThumbsDown : FaRegThumbsDown;
 
-  function handleFeedback(value) {
-    if (!isEmpty(thumb) && thumb === value) {
-      setThumb("");
-    } else {
+  async function handleFeedback(value) {
+    if (thumbRef.current !== value) {
+      thumbRef.current = value;
       setThumb(value);
+    } else {
+      thumbRef.current = "remove";
+      setThumb("");
     }
-    // send feedback to backend
+
+    const queryObject = {
+      thread_id: thread,
+      feedback_at_index: elementIndex,
+      feedback: thumbRef.current,
+    };
+
+    await fetchWithAuth(
+      `/api/chatbot/userfeedback?` + queryString.stringify(queryObject)
+    );
   }
 
   return (
-    <Col md={11} className="d-flex justify-content-end mb-5">
+    <Col className="d-flex justify-content-end">
       <IconContext.Provider value={thumbValues.thumbsUp}>
         <ThumbsUpIcon onClick={() => handleFeedback("up")} role="button" />
       </IconContext.Provider>
@@ -50,3 +68,9 @@ export default function FeedbackButtons() {
     </Col>
   );
 }
+
+FeedbackButtons.propTypes = {
+  elementIndex: PropTypes.number,
+};
+
+export default FeedbackButtons;

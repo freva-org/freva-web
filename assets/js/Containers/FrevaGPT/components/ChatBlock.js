@@ -15,6 +15,7 @@ import { replaceLinebreaks } from "../utils";
 import * as constants from "../constants";
 
 import CodeBlock from "./CodeBlock";
+import FeedbackButtons from "./Snippets/FeedbackButtons";
 
 function ChatBlock() {
   const [showModal, setShowModal] = useState(false);
@@ -86,7 +87,11 @@ function ChatBlock() {
     } else {
       return (
         <Col md={constants.BOT_COLUMN_STYLE} key={`${index}-code`}>
-          <CodeBlock showCode={showCode} content={element} />
+          <CodeBlock
+            showCode={showCode}
+            content={element}
+            elementIndex={index}
+          />
         </Col>
       );
     }
@@ -123,6 +128,7 @@ function ChatBlock() {
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
             {replaceLinebreaks(element.content)}
           </ReactMarkdown>
+          <FeedbackButtons elementIndex={index} />
         </Card>
       </Col>
     );

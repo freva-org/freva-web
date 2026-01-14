@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
-import { Button, Form } from "react-bootstrap";
+import { Button, Form, ButtonGroup } from "react-bootstrap";
 
 import PropTypes from "prop-types";
 
 import { FaRegCommentAlt, FaHistory } from "react-icons/fa";
 
-import { setBotModel } from "../actions";
+import { setBotModel, toggleShowCode } from "../../actions";
 
-import { fetchWithAuth, successfulPing } from "../utils";
+import { fetchWithAuth, successfulPing } from "../../utils";
 
 function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
   const botModel = useSelector((state) => state.frevaGPTReducer.botModel);
+  const showCode = useSelector((state) => state.frevaGPTReducer.showCode);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -66,6 +67,14 @@ function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
               return <option key={model}>{model}</option>;
             })}
           </Form.Select>
+          <ButtonGroup size="sm" className="me-1">
+            <Button
+              variant={showCode ? "outline-secondary" : "secondary"}
+              onClick={() => dispatch(toggleShowCode(showCode))}
+            >
+              {showCode ? "Hide Code" : "Show Code"}
+            </Button>
+          </ButtonGroup>
           <Button
             variant="secondary"
             className="me-1"

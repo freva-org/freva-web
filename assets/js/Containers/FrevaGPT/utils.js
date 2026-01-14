@@ -59,11 +59,11 @@ export function truncate(value) {
   return trunc;
 }
 
-export function resizeInputField() {
+export function resizeInputField(id) {
   /**
    * Resizes textarea
    */
-  const inputField = document.getElementById("inputField");
+  const inputField = document.getElementById(id);
   const style = inputField.style;
 
   style.height = inputField.style.minHeight = "auto";

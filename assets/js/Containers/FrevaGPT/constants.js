@@ -4,6 +4,7 @@ export const SET_THREAD = "SET_THREAD";
 export const SET_BOT_MODEL = "SET_BOT_MODEL";
 export const TOGGLE_SHOW_CODE = "TOGGLE_SHOW_CODE";
 export const BOT_COLUMN_STYLE = { span: 11, offset: 0 };
+export const USER_INPUT_STYLE = { span: 10, offset: 2 };
 export const THREAD_NUMBER = 20;
 export const botSuggestions = [
   "Make an annual mean temperature global map plot for the year 2023",

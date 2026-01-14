@@ -139,6 +139,12 @@ function FrevaGPT() {
     setLoading(false);
   }
 
+  async function handleEditChat(newInput, chatObject) {
+    dispatch(setConversation(chatObject.history));
+    dispatch(setThread(chatObject.new_thread_id));
+    await handleSubmit(newInput);
+  }
+
   async function handleStop(dispatchStopMessage = true) {
     // stop of thread only possible if a thread id is given
     if (reader) {
@@ -309,7 +315,7 @@ function FrevaGPT() {
         >
           <Row className="overflow-auto position-relative" id="chatContainer">
             <Col md={12}>
-              <ChatBlock />
+              <ChatBlock onEditInput={handleEditChat} />
 
               <PendingAnswerComponent
                 content={dynamicAnswer}

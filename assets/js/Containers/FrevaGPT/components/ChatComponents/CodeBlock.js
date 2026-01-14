@@ -11,11 +11,11 @@ import {
 
 import PropTypes from "prop-types";
 
-import { toggleShowCode } from "../actions";
+import { toggleShowCode } from "../../actions";
 
-import ClipboardToast from "../../../Components/ClipboardToast";
+import ClipboardToast from "../../../../Components/ClipboardToast";
 
-import { formatCode } from "../utils";
+import { formatCode } from "../../utils";
 
 function CodeBlock({ showCode, content }) {
   useEffect(() => {

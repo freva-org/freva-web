@@ -7,9 +7,9 @@ import PropTypes from "prop-types";
 
 import { FaRegCommentAlt, FaHistory } from "react-icons/fa";
 
-import { setBotModel } from "../actions";
+import { setBotModel } from "../../actions";
 
-import { fetchWithAuth, successfulPing } from "../utils";
+import { fetchWithAuth, successfulPing } from "../../utils";
 
 function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
   const botModel = useSelector((state) => state.frevaGPTReducer.botModel);

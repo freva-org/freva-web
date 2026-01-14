@@ -15,7 +15,7 @@ import { toggleShowCode } from "../actions";
 
 import ClipboardToast from "../../../Components/ClipboardToast";
 
-import { formatCode } from "../utils";
+import { formatCode, setGivenFeedbackValue } from "../utils";
 
 import FeedbackButtons from "./Snippets/FeedbackButtons";
 
@@ -84,7 +84,12 @@ function CodeBlock({ showCode, content, elementIndex }) {
               </Button>
             </ButtonGroup>
           </div>
-          <FeedbackButtons elementIndex={elementIndex} />
+          <FeedbackButtons
+            elementIndex={elementIndex}
+            givenValue={setGivenFeedbackValue(
+              extractElements(content, "Code")[0]
+            )}
+          />
         </div>
 
         <Collapse in={localShowCode} className="mt-2">

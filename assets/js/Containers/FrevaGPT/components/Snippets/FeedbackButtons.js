@@ -17,9 +17,9 @@ import {
 
 import { fetchWithAuth } from "../../utils";
 
-function FeedbackButtons({ elementIndex }) {
-  const [thumb, setThumb] = useState();
-  const thumbRef = useRef("remove");
+function FeedbackButtons({ elementIndex, givenValue }) {
+  const [thumb, setThumb] = useState(givenValue);
+  const thumbRef = useRef(givenValue);
   const thread = useSelector((state) => state.frevaGPTReducer.thread);
 
   const thumbValues = {
@@ -71,6 +71,7 @@ function FeedbackButtons({ elementIndex }) {
 
 FeedbackButtons.propTypes = {
   elementIndex: PropTypes.number,
+  givenValue: PropTypes.string,
 };
 
 export default FeedbackButtons;

@@ -88,6 +88,16 @@ function isLastPage(totalNumber, currentPageNumber) {
   }
 }
 
+export function setGivenFeedbackValue(variantObject) {
+  let feedbackValue = "";
+
+  if ("feedback" in variantObject) {
+    feedbackValue = variantObject.feedback;
+  }
+
+  return feedbackValue;
+}
+
 /*-------------------------------------------------------------------------------------------------
  *                                  Authentication related functions
 -------------------------------------------------------------------------------------------------*/

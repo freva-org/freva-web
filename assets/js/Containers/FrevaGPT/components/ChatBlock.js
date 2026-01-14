@@ -10,7 +10,7 @@ import remarkGfm from "remark-gfm";
 
 import { FaExpand } from "react-icons/fa";
 
-import { replaceLinebreaks } from "../utils";
+import { replaceLinebreaks, setGivenFeedbackValue } from "../utils";
 
 import * as constants from "../constants";
 
@@ -56,6 +56,7 @@ function ChatBlock() {
 
     return newConv;
   }
+
   const rearrangedConversation = useMemo(() => {
     return rearrangeCodeElements(conversation);
   }, [conversation]);
@@ -128,7 +129,10 @@ function ChatBlock() {
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
             {replaceLinebreaks(element.content)}
           </ReactMarkdown>
-          <FeedbackButtons elementIndex={index} />
+          <FeedbackButtons
+            elementIndex={index}
+            givenValue={setGivenFeedbackValue(element)}
+          />
         </Card>
       </Col>
     );

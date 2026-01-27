@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 
 import queryString from "query-string";
 
+import { browserHistory } from "react-router";
 import { isEmpty } from "lodash";
 
 import { Modal, Button, FormControl } from "react-bootstrap";
@@ -22,6 +23,21 @@ function ThreadModal({
   const [showToast, setShowToast] = useState(false);
   const toastColor = useRef("");
   const toastMessage = useRef("");
+
+  function isCurrentThread(deleteThreadId) {
+    const currentQueryParams = browserHistory.getCurrentLocation().query;
+
+    if ("thread_id" in currentQueryParams) {
+      const currentThreadId = currentQueryParams.thread_id;
+      if (currentThreadId === deleteThreadId) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
 
   async function renameThread() {
     if (!isEmpty(newTopic) && newTopic !== element.topic) {
@@ -64,6 +80,11 @@ function ThreadModal({
       toastColor.current = "success";
       toastMessage.current = "Deleted chat.";
       updateThreadList(mode, element);
+
+      //if current displayed thread is deleted navigate to start chatbot page
+      if (isCurrentThread(element.thread_id)) {
+        window.location.assign("/chatbot");
+      }
     } else {
       toastColor.current = "danger";
       toastMessage.current = "Could not delete chat.";

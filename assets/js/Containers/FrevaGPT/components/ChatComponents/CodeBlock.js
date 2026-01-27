@@ -12,7 +12,7 @@ import PropTypes from "prop-types";
 
 import { formatCode } from "../../utils";
 
-import MessageToast from "./Snippets/MessageToast";
+import MessageToast from "../Snippets/MessageToast";
 
 function CodeBlock({ showCode, content }) {
   useEffect(() => {

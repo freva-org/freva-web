@@ -93,6 +93,19 @@ function FrevaGPT() {
       });
   }
 
+  function alertInvalidThread() {
+    dispatch(setThread(""));
+    dispatch(
+      setConversation([
+        {
+          variant: "InvalidThread",
+          content:
+            "The thread id is invalid or the thread doesn't exist anymore.",
+        },
+      ])
+    );
+  }
+
   async function getOldThread(thread) {
     const queryObject = { thread_id: thread };
     const response = await fetchWithAuth(
@@ -101,18 +114,13 @@ function FrevaGPT() {
 
     if (response.status >= 200 && response.status <= 299) {
       const variantArray = await response.json();
-      dispatch(setConversation(variantArray));
+      if (!Array.isArray(variantArray) && "variant" in variantArray) {
+        alertInvalidThread();
+      } else {
+        dispatch(setConversation(variantArray));
+      }
     } else {
-      dispatch(setThread(""));
-      dispatch(
-        setConversation([
-          {
-            variant: "InvalidThread",
-            content:
-              "The thread id is invalid or the thread doesn't exist anymore.",
-          },
-        ])
-      );
+      alertInvalidThread();
     }
   }
 

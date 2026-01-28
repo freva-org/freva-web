@@ -6,12 +6,16 @@ import { ListGroup } from "react-bootstrap";
 import ThreadLink from "./ThreadLink";
 
 export default function ThreadList({ threadList, setThreadList }) {
-  function updateThreadName(threadDetails) {
+  function updateThreadList(mode, threadDetails) {
     const threadListCopy = structuredClone(threadList);
     const threadIndex = threadListCopy.findIndex(
-      (elem) => elem.thread_id === threadDetails.id
+      (elem) => elem.thread_id === threadDetails.thread_id
     );
-    threadListCopy[threadIndex].topic = threadDetails.topic;
+    if (mode === "rename") {
+      threadListCopy[threadIndex].topic = threadDetails.topic;
+    } else {
+      threadListCopy.splice(threadIndex, 1);
+    }
     setThreadList(threadListCopy);
   }
 
@@ -22,7 +26,7 @@ export default function ThreadList({ threadList, setThreadList }) {
           <ThreadLink
             key={element.thread_id}
             element={element}
-            onChangeName={updateThreadName}
+            updateThreadList={updateThreadList}
           />
         );
       })}

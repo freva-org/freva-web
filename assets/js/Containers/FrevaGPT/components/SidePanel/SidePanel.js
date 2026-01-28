@@ -73,7 +73,7 @@ function SidePanel({ showThreadHistory, setShowThreadHistory }) {
   }
 
   return (
-    <Offcanvas show={showThreadHistory} onHide={setShowThreadHistory}>
+    <Offcanvas show={showThreadHistory} onHide={setShowThreadHistory} scroll>
       <Offcanvas.Header closeButton>
         <Offcanvas.Title>Chat History</Offcanvas.Title>
       </Offcanvas.Header>

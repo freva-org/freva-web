@@ -56,7 +56,11 @@ function ChatBlock() {
     return newConv;
   }
   const rearrangedConversation = useMemo(() => {
-    return rearrangeCodeElements(conversation);
+    if (!Array.isArray(conversation)) {
+      return [];
+    } else {
+      return rearrangeCodeElements(conversation);
+    }
   }, [conversation]);
 
   function renderImage(element, index) {

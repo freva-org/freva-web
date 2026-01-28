@@ -10,9 +10,9 @@ import {
 
 import PropTypes from "prop-types";
 
-import ClipboardToast from "../../../../Components/ClipboardToast";
-
 import { formatCode } from "../../utils";
+
+import MessageToast from "../Snippets/MessageToast";
 
 function CodeBlock({ showCode, content }) {
   useEffect(() => {
@@ -105,7 +105,12 @@ function CodeBlock({ showCode, content }) {
           </Card>
         </Collapse>
       </Card>
-      <ClipboardToast show={showToast} setShow={setShowToast} />
+      <MessageToast
+        show={showToast}
+        setShow={setShowToast}
+        color="success"
+        message="Copied toast to clipboard!"
+      />
     </>
   );
 }

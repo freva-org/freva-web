@@ -11,9 +11,9 @@ import remarkGfm from "remark-gfm";
 
 import { FaExpand } from "react-icons/fa";
 
-import { replaceLinebreaks } from "../utils";
+import { replaceLinebreaks } from "../../utils";
 
-import * as constants from "../constants";
+import * as constants from "../../constants";
 
 import CodeBlock from "./CodeBlock";
 import UserInputBlock from "./UserInputBlock";
@@ -58,7 +58,11 @@ function ChatBlock({ onEditInput }) {
     return newConv;
   }
   const rearrangedConversation = useMemo(() => {
-    return rearrangeCodeElements(conversation);
+    if (!Array.isArray(conversation)) {
+      return [];
+    } else {
+      return rearrangeCodeElements(conversation);
+    }
   }, [conversation]);
 
   function renderImage(element, index) {

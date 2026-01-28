@@ -10,9 +10,9 @@ import PropTypes from "prop-types";
 
 import queryString from "query-string";
 
-import { resizeInputField, fetchWithAuth } from "../utils";
+import { resizeInputField, fetchWithAuth } from "../../utils";
 
-import { USER_INPUT_STYLE } from "../constants";
+import { USER_INPUT_STYLE } from "../../constants";
 
 function UserInputBlock({ content, index, onEdit }) {
   const [showEditBar, setShowEditBar] = useState(false);

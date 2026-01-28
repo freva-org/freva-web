@@ -124,10 +124,8 @@ function ChatBlock() {
   }
 
   function renderError(element) {
-    // key for indexing components in DOM
-    const seconds = new Date().getTime() / 1000;
     return (
-      <Col md={12} key={`${seconds}-error`}>
+      <Col md={12} key={`${element.original_index}-error`}>
         <Alert variant="danger" className="shadow-sm mb-3">
           <span className="fw-bold">{element.variant}</span>
           <ReactMarkdown>{replaceLinebreaks(element.content)}</ReactMarkdown>

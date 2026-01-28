@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { Card, Collapse, Button, ButtonGroup } from "react-bootstrap";
+import { Card, Collapse, Button } from "react-bootstrap";
 import { FaAngleDown, FaAngleUp, FaRegCopy } from "react-icons/fa";
 
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
@@ -11,13 +10,10 @@ import {
 
 import PropTypes from "prop-types";
 
-import { toggleShowCode } from "../actions";
+import { formatCode, setGivenFeedbackValue } from "../../utils";
 
-import ClipboardToast from "../../../Components/ClipboardToast";
-
-import { formatCode, setGivenFeedbackValue } from "../utils";
-
-import FeedbackButtons from "./Snippets/FeedbackButtons";
+import MessageToast from "../Snippets/MessageToast";
+import FeedbackButtons from "../Snippets/FeedbackButtons";
 
 function CodeBlock({ showCode, content, elementIndex }) {
   useEffect(() => {
@@ -26,8 +22,6 @@ function CodeBlock({ showCode, content, elementIndex }) {
 
   const [localShowCode, setLocalShowCode] = useState();
   const [showToast, setShowToast] = useState(false);
-
-  const dispatch = useDispatch();
 
   function localToggleShowCode() {
     setLocalShowCode(!localShowCode);
@@ -67,23 +61,6 @@ function CodeBlock({ showCode, content, elementIndex }) {
               )}
             </span>
           </Button>
-          <div>
-            <p className="d-inline me-2">Always show details</p>
-            <ButtonGroup size="sm" aria-label="Basic example">
-              <Button
-                variant={showCode ? "outline-secondary" : "secondary"}
-                onClick={() => dispatch(toggleShowCode(showCode))}
-              >
-                Off
-              </Button>
-              <Button
-                variant={showCode ? "success" : "outline-success"}
-                onClick={() => dispatch(toggleShowCode(showCode))}
-              >
-                On
-              </Button>
-            </ButtonGroup>
-          </div>
           <FeedbackButtons
             elementIndex={elementIndex}
             givenValue={setGivenFeedbackValue(
@@ -135,7 +112,12 @@ function CodeBlock({ showCode, content, elementIndex }) {
           </Card>
         </Collapse>
       </Card>
-      <ClipboardToast show={showToast} setShow={setShowToast} />
+      <MessageToast
+        show={showToast}
+        setShow={setShowToast}
+        color="success"
+        message="Copied toast to clipboard!"
+      />
     </>
   );
 }

@@ -3,24 +3,22 @@ import PropTypes from "prop-types";
 
 import { browserHistory } from "react-router";
 
-import { isEmpty } from "lodash";
+import { ListGroup, OverlayTrigger, Popover } from "react-bootstrap";
 
-import queryString from "query-string";
+import { FaPen, FaTrash, FaEllipsisH } from "react-icons/fa";
 
-import { Modal, Button, FormControl, ListGroup } from "react-bootstrap";
-
-import { FaPen } from "react-icons/fa";
-
-import { fetchWithAuth } from "../../utils";
 import useHoverThread from "../../customHooks/useHoverThread";
 
-function ThreadLink({ element, onChangeName }) {
+import ThreadModal from "./ThreadModal";
+
+function ThreadLink({ element, updateThreadList }) {
   const [showModal, setShowModal] = useState(false);
-  const [topic, setTopic] = useState(element.topic);
   const ref = useRef(null);
   const [hovered, setHovered] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [showEditButton, setShowEditButton] = useState(false);
+  const [mode, setMode] = useState("rename");
+  const [showPopover, setShowPopover] = useState(false);
 
   useHoverThread({ hovered, setHovered, ref });
 
@@ -44,30 +42,46 @@ function ThreadLink({ element, onChangeName }) {
     });
   }
 
-  function handleTopicInput(e) {
-    setTopic(e.target.value);
+  function togglePopover() {
+    setShowPopover(!showPopover);
   }
 
-  async function renameThread() {
-    // TODO: add backend call to change topic of thread
-    if (!isEmpty(topic) && topic !== element.topic) {
-      const queryParameter = {
-        thread_id: element.thread_id,
-        topic,
-      };
+  const threadOptions = [
+    {
+      title: "Rename",
+      icon: <FaPen className="color" />,
+    },
+    {
+      title: "Delete",
+      icon: <FaTrash className="color" />,
+    },
+  ];
 
-      const response = await fetchWithAuth(
-        `/api/chatbot/setthreadtopic?` + queryString.stringify(queryParameter)
-      );
-
-      if (response.ok) {
-        onChangeName({ id: element.thread_id, topic });
-      } else {
-        // todo: handle fail
-      }
-    }
-    setShowModal(false);
-  }
+  const popover = (
+    <Popover className="p-2">
+      <ListGroup>
+        {threadOptions.map((element, index) => {
+          const itemKey = `options-${element.title}-${index}`;
+          return (
+            <ListGroup.Item
+              className="px-4"
+              action
+              key={itemKey}
+              role="button"
+              onClick={() => {
+                setMode(element.title.toLowerCase());
+                togglePopover();
+                setShowModal(true);
+              }}
+            >
+              <span className="me-3">{element.icon}</span>
+              {element.title}
+            </ListGroup.Item>
+          );
+        })}
+      </ListGroup>
+    </Popover>
+  );
 
   return (
     <>
@@ -87,58 +101,43 @@ function ThreadLink({ element, onChangeName }) {
             </a>
           </div>
 
-          {
-            showEditButton ? (
-              <div
-                role="button"
-                className="align-content-center color"
-                onClick={() => setShowModal(true)}
-              >
-                <FaPen />
-              </div>
-            ) : (
-              <div className="align-content-center opacity-0">
-                <FaPen />
-              </div>
-            ) /* invisible icon to avoid layout shift */
-          }
+          <OverlayTrigger
+            rootClose
+            placement="right"
+            trigger="click"
+            show={showPopover}
+            overlay={popover}
+            onToggle={togglePopover}
+          >
+            {
+              showEditButton ? (
+                <div role="button" className="align-content-center color">
+                  <FaEllipsisH />
+                </div>
+              ) : (
+                <div className="align-content-center opacity-0">
+                  <FaEllipsisH />
+                </div>
+              ) /* invisible icon to avoid layout shift */
+            }
+          </OverlayTrigger>
         </div>
       </ListGroup.Item>
 
-      <Modal
-        size="s"
-        aria-labelledby="contained-modal-title-vcenter"
-        centered
-        show={showModal}
-        onHide={() => {
-          setShowModal(false);
-        }}
-      >
-        <Modal.Header closeButton>Rename chat</Modal.Header>
-        <Modal.Body>
-          <FormControl
-            as="textarea"
-            value={topic}
-            onChange={handleTopicInput}
-            placeholder="Set a title"
-          />
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Cancel
-          </Button>
-          <Button variant="info" onClick={renameThread}>
-            Rename
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      <ThreadModal
+        mode={mode}
+        showModal={showModal}
+        setShowModal={setShowModal}
+        element={element}
+        updateThreadList={updateThreadList}
+      />
     </>
   );
 }
 
 ThreadLink.propTypes = {
   element: PropTypes.object,
-  onChangeName: PropTypes.func,
+  updateThreadList: PropTypes.func,
 };
 
 export default ThreadLink;

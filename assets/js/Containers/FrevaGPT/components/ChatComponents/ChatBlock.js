@@ -10,12 +10,13 @@ import remarkGfm from "remark-gfm";
 
 import { FaExpand } from "react-icons/fa";
 
-import { replaceLinebreaks, setGivenFeedbackValue } from "../utils";
+import { replaceLinebreaks, setGivenFeedbackValue } from "../../utils";
 
-import * as constants from "../constants";
+import * as constants from "../../constants";
 
-import CodeBlock from "./CodeBlock";
-import FeedbackButtons from "./Snippets/FeedbackButtons";
+import FeedbackButtons from "../Snippets/FeedbackButtons";
+
+import CodeBlock from './CodeBlock';
 
 function ChatBlock() {
   const [showModal, setShowModal] = useState(false);
@@ -58,7 +59,11 @@ function ChatBlock() {
   }
 
   const rearrangedConversation = useMemo(() => {
-    return rearrangeCodeElements(conversation);
+    if (!Array.isArray(conversation)) {
+      return [];
+    } else {
+      return rearrangeCodeElements(conversation);
+    }
   }, [conversation]);
 
   function renderImage(element, index) {

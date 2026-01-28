@@ -16,7 +16,7 @@ import * as constants from "../../constants";
 
 import FeedbackButtons from "../Snippets/FeedbackButtons";
 
-import CodeBlock from './CodeBlock';
+import CodeBlock from "./CodeBlock";
 
 function ChatBlock() {
   const [showModal, setShowModal] = useState(false);

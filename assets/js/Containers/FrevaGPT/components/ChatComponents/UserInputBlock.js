@@ -14,7 +14,7 @@ import { resizeInputField, fetchWithAuth } from "../../utils";
 
 import { USER_INPUT_STYLE } from "../../constants";
 
-function UserInputBlock({ content, index, onEdit }) {
+function UserInputBlock({ content, onEdit }) {
   const [showEditBar, setShowEditBar] = useState(false);
   const [renderInput, setRenderInput] = useState(false);
   const [editedInput, setEditedInput] = useState("");
@@ -58,12 +58,12 @@ function UserInputBlock({ content, index, onEdit }) {
       <>
         <FormControl
           as="textarea"
-          id={`UserInputField-${index}`}
+          id={`UserInputField-${content.original_index}`}
           className="mb-2"
           defaultValue={content.content}
           onChange={(e) => {
             handleEdit(e);
-            resizeInputField(`UserInputField-${index}`);
+            resizeInputField(`UserInputField-${content.original_index}`);
           }}
         />
 
@@ -81,7 +81,7 @@ function UserInputBlock({ content, index, onEdit }) {
           <Button
             variant="info"
             onClick={() => {
-              requestEditEndpoint(editedInput, index);
+              requestEditEndpoint(editedInput, content.original_index);
               setRenderInput(false);
             }}
           >
@@ -95,7 +95,7 @@ function UserInputBlock({ content, index, onEdit }) {
   return (
     <Col
       md={USER_INPUT_STYLE}
-      key={`${index}-user`}
+      key={`${content.original_index}-user`}
       onMouseEnter={() => setShowEditBar(true)}
       onMouseLeave={() => setShowEditBar(false)}
     >
@@ -123,7 +123,6 @@ function UserInputBlock({ content, index, onEdit }) {
 
 UserInputBlock.propTypes = {
   content: PropTypes.object,
-  index: PropTypes.number,
   onEdit: PropTypes.func,
 };
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { Card, Collapse, Button } from "react-bootstrap";
 import { FaAngleDown, FaAngleUp, FaRegCopy } from "react-icons/fa";
 
@@ -12,8 +13,8 @@ import PropTypes from "prop-types";
 
 import { formatCode, setGivenFeedbackValue } from "../../utils";
 
-import MessageToast from "../Snippets/MessageToast";
 import FeedbackButtons from "../Snippets/FeedbackButtons";
+import { setMessageToastContent, setShowMessageToast } from "../../actions";
 
 function CodeBlock({ showCode, content, elementIndex }) {
   useEffect(() => {
@@ -21,7 +22,8 @@ function CodeBlock({ showCode, content, elementIndex }) {
   }, [showCode]);
 
   const [localShowCode, setLocalShowCode] = useState();
-  const [showToast, setShowToast] = useState(false);
+
+  const dispatch = useDispatch();
 
   function localToggleShowCode() {
     setLocalShowCode(!localShowCode);
@@ -36,7 +38,8 @@ function CodeBlock({ showCode, content, elementIndex }) {
       return formatCode("Code", codeElement.content);
     });
     navigator.clipboard.writeText(code);
-    setShowToast(true);
+    dispatch(setMessageToastContent({color: "success", message: "Code copied to clipboard!"}));
+    dispatch(setShowMessageToast(true));
   }
 
   return (
@@ -112,12 +115,6 @@ function CodeBlock({ showCode, content, elementIndex }) {
           </Card>
         </Collapse>
       </Card>
-      <MessageToast
-        show={showToast}
-        setShow={setShowToast}
-        color="success"
-        message="Copied toast to clipboard!"
-      />
     </>
   );
 }

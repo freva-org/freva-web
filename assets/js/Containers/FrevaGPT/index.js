@@ -19,6 +19,7 @@ import SidePanel from "./components/SidePanel/SidePanel";
 import BotLoadingSpinner from "./components/Snippets/BotLoadingSpinner";
 import ScrollButtons from "./components/Snippets/ScrollButtons";
 import BotUnavailableAlert from "./components/Snippets/BotUnavailableAlert";
+import MessageToast from "./components/Snippets/MessageToast";
 
 import { fetchWithAuth, successfulPing, chatExceedsWindow } from "./utils";
 
@@ -376,6 +377,7 @@ function FrevaGPT() {
             <BotUnavailableAlert />
           )}
         </Row>
+        <MessageToast />
       </Container>
     );
   }

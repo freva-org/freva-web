@@ -1,28 +1,29 @@
 import React from "react";
-import PropTypes from "prop-types";
+import { useSelector, useDispatch } from "react-redux";
 import { Toast } from "react-bootstrap";
 
-export default function MessageToast({ show, setShow, color, message }) {
+import { setShowMessageToast } from "../../actions";
+
+export default function MessageToast() {
+
+  const showMessageToast = useSelector((state) => state.frevaGPTReducer.showMessageToast);
+  const messageToastContent = useSelector((state) => state.frevaGPTReducer.messageToastContent);
+
+  const dispatch = useDispatch();
+
   return (
     <div className="position-fixed top-0 end-0 p-3" style={{ zIndex: 11 }}>
       <Toast
-        onClose={() => setShow(false)}
-        show={show}
+        onClose={() => dispatch(setShowMessageToast(false))}
+        show={showMessageToast}
         delay={3000}
-        bg={color}
+        bg={messageToastContent.color}
         autohide
       >
         <Toast.Body>
-          <strong id="clipboard-toast-text">{message}</strong>
+          <strong id="clipboard-toast-text">{messageToastContent.message}</strong>
         </Toast.Body>
       </Toast>
     </div>
   );
 }
-
-MessageToast.propTypes = {
-  setShow: PropTypes.func.isRequired,
-  show: PropTypes.bool.isRequired,
-  color: PropTypes.string,
-  message: PropTypes.string,
-};

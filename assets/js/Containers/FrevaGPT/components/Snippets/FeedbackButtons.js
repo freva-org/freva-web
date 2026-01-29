@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import PropTypes from "prop-types";
 
 import queryString from "query-string";
@@ -16,11 +16,14 @@ import {
 } from "react-icons/fa";
 
 import { fetchWithAuth } from "../../utils";
+import { setMessageToastContent, setShowMessageToast } from "../../actions";
 
 function FeedbackButtons({ elementIndex, givenValue }) {
   const [thumb, setThumb] = useState(givenValue);
   const thumbRef = useRef(givenValue);
   const thread = useSelector((state) => state.frevaGPTReducer.thread);
+
+  const dispatch = useDispatch();
 
   const thumbValues = {
     thumbsUp: {
@@ -52,9 +55,19 @@ function FeedbackButtons({ elementIndex, givenValue }) {
       feedback: thumbRef.current,
     };
 
-    await fetchWithAuth(
+    const response = await fetchWithAuth(
       `/api/chatbot/userfeedback?` + queryString.stringify(queryObject)
     );
+
+    let toastContent;
+    if (response.ok) {
+      toastContent = { color: "success", message: "Feedback send." };
+    } else {
+      toastContent = { color: "danger", message: "Could not send feedback!" };
+    }
+
+    dispatch(setMessageToastContent(toastContent));
+    dispatch(setShowMessageToast(true));
   }
 
   return (

@@ -5,9 +5,12 @@ import { Toast } from "react-bootstrap";
 import { setShowMessageToast } from "../../actions";
 
 export default function MessageToast() {
-
-  const showMessageToast = useSelector((state) => state.frevaGPTReducer.showMessageToast);
-  const messageToastContent = useSelector((state) => state.frevaGPTReducer.messageToastContent);
+  const showMessageToast = useSelector(
+    (state) => state.frevaGPTReducer.showMessageToast
+  );
+  const messageToastContent = useSelector(
+    (state) => state.frevaGPTReducer.messageToastContent
+  );
 
   const dispatch = useDispatch();
 
@@ -21,7 +24,9 @@ export default function MessageToast() {
         autohide
       >
         <Toast.Body>
-          <strong id="clipboard-toast-text">{messageToastContent.message}</strong>
+          <strong id="clipboard-toast-text">
+            {messageToastContent.message}
+          </strong>
         </Toast.Body>
       </Toast>
     </div>

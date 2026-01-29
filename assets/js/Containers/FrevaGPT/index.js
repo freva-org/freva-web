@@ -23,7 +23,13 @@ import MessageToast from "./components/Snippets/MessageToast";
 
 import { fetchWithAuth, successfulPing, chatExceedsWindow } from "./utils";
 
-import { setThread, setConversation, addElement } from "./actions";
+import {
+  setThread,
+  setConversation,
+  addElement,
+  setMessageToastContent,
+  setShowMessageToast,
+} from "./actions";
 
 function FrevaGPT() {
   useEffect(() => {
@@ -115,7 +121,7 @@ function FrevaGPT() {
       `/api/chatbot/getthread?` + queryString.stringify(queryObject)
     );
 
-    if (response.status >= 200 && response.status <= 299) {
+    if (response.ok) {
       const variantArray = await response.json();
       if (!Array.isArray(variantArray) && "variant" in variantArray) {
         alertInvalidThread();
@@ -163,9 +169,19 @@ function FrevaGPT() {
     }
     const queryObject = { thread_id: thread };
     if (thread) {
-      await fetchWithAuth(
+      const response = await fetchWithAuth(
         `/api/chatbot/stop?` + queryString.stringify(queryObject)
       );
+
+      if (!response.ok) {
+        dispatch(
+          setMessageToastContent({
+            color: "danger",
+            message: "Could not stop process",
+          })
+        );
+        dispatch(setShowMessageToast(true));
+      }
     }
 
     setLoading(false);

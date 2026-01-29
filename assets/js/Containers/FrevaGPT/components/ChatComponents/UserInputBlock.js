@@ -38,7 +38,7 @@ function UserInputBlock({ content, onEdit }) {
     let results = {};
 
     // as soon as this request is finished and we got the answers
-    if (response.status >= 200 && response.status <= 299) {
+    if (response.ok) {
       results = await response.json();
     } else {
       results.history = [

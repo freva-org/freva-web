@@ -145,7 +145,7 @@ export async function successfulPing() {
 
   try {
     const response = await fetchWithAuth("/api/chatbot/ping");
-    if (response.status === 200) {
+    if (response.ok) {
       pingSuccessful = true;
     }
   } catch (err) {

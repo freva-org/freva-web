@@ -38,7 +38,12 @@ function CodeBlock({ showCode, content, elementIndex }) {
       return formatCode("Code", codeElement.content);
     });
     navigator.clipboard.writeText(code);
-    dispatch(setMessageToastContent({color: "success", message: "Code copied to clipboard!"}));
+    dispatch(
+      setMessageToastContent({
+        color: "success",
+        message: "Code copied to clipboard!",
+      })
+    );
     dispatch(setShowMessageToast(true));
   }
 

@@ -10,13 +10,15 @@ import queryString from "query-string";
 
 import BotHeader from "./components/ChatComponents/BotHeader";
 import ChatBlock from "./components/ChatComponents/ChatBlock";
-import SidePanel from "./components/SidePanel/SidePanel";
 import Suggestions from "./components/ChatComponents/Suggestions";
 import BotInput from "./components/ChatComponents/BotInput";
+import PendingAnswerComponent from "./components/ChatComponents/PendingAnswerComponent";
+
+import SidePanel from "./components/SidePanel/SidePanel";
+
 import BotLoadingSpinner from "./components/Snippets/BotLoadingSpinner";
 import ScrollButtons from "./components/Snippets/ScrollButtons";
 import BotUnavailableAlert from "./components/Snippets/BotUnavailableAlert";
-import PendingAnswerComponent from "./components/ChatComponents/PendingAnswerComponent";
 
 import { fetchWithAuth, successfulPing, chatExceedsWindow } from "./utils";
 
@@ -93,6 +95,19 @@ function FrevaGPT() {
       });
   }
 
+  function alertInvalidThread() {
+    dispatch(setThread(""));
+    dispatch(
+      setConversation([
+        {
+          variant: "InvalidThread",
+          content:
+            "The thread id is invalid or the thread doesn't exist anymore.",
+        },
+      ])
+    );
+  }
+
   async function getOldThread(thread) {
     const queryObject = { thread_id: thread };
     const response = await fetchWithAuth(
@@ -101,18 +116,13 @@ function FrevaGPT() {
 
     if (response.status >= 200 && response.status <= 299) {
       const variantArray = await response.json();
-      dispatch(setConversation(variantArray));
+      if (!Array.isArray(variantArray) && "variant" in variantArray) {
+        alertInvalidThread();
+      } else {
+        dispatch(setConversation(variantArray));
+      }
     } else {
-      dispatch(setThread(""));
-      dispatch(
-        setConversation([
-          {
-            variant: "InvalidThread",
-            content:
-              "The thread id is invalid or the thread doesn't exist anymore.",
-          },
-        ])
-      );
+      alertInvalidThread();
     }
   }
 

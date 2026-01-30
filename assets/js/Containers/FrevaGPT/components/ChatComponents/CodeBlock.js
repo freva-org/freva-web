@@ -10,11 +10,12 @@ import {
 
 import PropTypes from "prop-types";
 
-import ClipboardToast from "../../../../Components/ClipboardToast";
+import { formatCode, setGivenFeedbackValue } from "../../utils";
 
-import { formatCode } from "../../utils";
+import MessageToast from "../Snippets/MessageToast";
+import FeedbackButtons from "../Snippets/FeedbackButtons";
 
-function CodeBlock({ showCode, content }) {
+function CodeBlock({ showCode, content, elementIndex }) {
   useEffect(() => {
     setLocalShowCode(showCode);
   }, [showCode]);
@@ -60,6 +61,12 @@ function CodeBlock({ showCode, content }) {
               )}
             </span>
           </Button>
+          <FeedbackButtons
+            elementIndex={elementIndex}
+            givenValue={setGivenFeedbackValue(
+              extractElements(content, "Code")[0]
+            )}
+          />
         </div>
 
         <Collapse in={localShowCode} className="mt-2">
@@ -105,7 +112,12 @@ function CodeBlock({ showCode, content }) {
           </Card>
         </Collapse>
       </Card>
-      <ClipboardToast show={showToast} setShow={setShowToast} />
+      <MessageToast
+        show={showToast}
+        setShow={setShowToast}
+        color="success"
+        message="Copied toast to clipboard!"
+      />
     </>
   );
 }
@@ -113,6 +125,7 @@ function CodeBlock({ showCode, content }) {
 CodeBlock.propTypes = {
   content: PropTypes.array,
   showCode: PropTypes.bool,
+  elementIndex: PropTypes.number,
 };
 
 export default CodeBlock;

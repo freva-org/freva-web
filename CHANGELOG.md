@@ -1,6 +1,16 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [v2601.0.0]
+### Added
+- Feedback thumb up and down in the in Freva-gpt
+- Editing/deleting threads in Freva-GPT 
+### Changed
+- Support Helmholtz-AAI as an non-keycloak type OIDC for authentication without any specification
+- Refactoring the code structure on Freva-gpt
+- Keep the web client compatible with the newly introduced Python-based Freva-gpt endpoints
+### Fixed
+- Fix a performance issue regarding the rendering of long conversation in Freva-GPT
 ## [v2511.1.0]
 ### Changed
 Support selecting multi-facets in Databrowser

@@ -48,6 +48,8 @@ function UserInputBlock({ content, onEdit }) {
         },
       ];
       results.new_thread_id = "";
+      // eslint-disable-next-line no-console
+      console.log(results);
     }
 
     onEdit(input, results);

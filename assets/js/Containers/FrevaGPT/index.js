@@ -284,7 +284,6 @@ function FrevaGPT() {
               break;
             } catch (err) {
               // ServerHints and CodeBlocks include nested JSON Objects
-              // eslint-disable-next-line no-console
               if (
                 !subBuffer.includes("ServerHint") &&
                 !subBuffer.includes("Code")
@@ -295,6 +294,8 @@ function FrevaGPT() {
                     content: "Incomplete message received.",
                   })
                 );
+                // eslint-disable-next-line no-console
+                console.log(err);
               }
             }
           }

@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import PropTypes from "prop-types";
 
 import queryString from "query-string";
@@ -15,13 +15,12 @@ import {
   FaThumbsUp,
 } from "react-icons/fa";
 
-import { fetchWithAuth } from "../../utils";
+import { fetchWithAuth, grepThreadID } from "../../utils";
 import { setMessageToastContent, setShowMessageToast } from "../../actions";
 
 function FeedbackButtons({ elementIndex, givenValue }) {
   const [thumb, setThumb] = useState(givenValue);
   const thumbRef = useRef(givenValue);
-  const thread = useSelector((state) => state.frevaGPTReducer.thread);
 
   const dispatch = useDispatch();
 
@@ -50,7 +49,7 @@ function FeedbackButtons({ elementIndex, givenValue }) {
     }
 
     const queryObject = {
-      thread_id: thread,
+      thread_id: grepThreadID(),
       feedback_at_index: elementIndex,
       feedback: thumbRef.current,
     };

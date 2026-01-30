@@ -1,12 +1,5 @@
 import * as constants from "./constants";
 
-export function setThread(thread_id) {
-  return {
-    type: constants.SET_THREAD,
-    payload: thread_id,
-  };
-}
-
 export function setConversation(conversation) {
   return {
     type: constants.SET_CONVERSATION,

@@ -4,7 +4,6 @@ import { useSelector, useDispatch } from "react-redux";
 import { Container, Row, Col, Spinner } from "react-bootstrap";
 
 import { browserHistory } from "react-router";
-import { isEmpty } from "lodash";
 
 import queryString from "query-string";
 
@@ -21,10 +20,14 @@ import ScrollButtons from "./components/Snippets/ScrollButtons";
 import BotUnavailableAlert from "./components/Snippets/BotUnavailableAlert";
 import MessageToast from "./components/Snippets/MessageToast";
 
-import { fetchWithAuth, successfulPing, chatExceedsWindow } from "./utils";
+import {
+  fetchWithAuth,
+  successfulPing,
+  chatExceedsWindow,
+  grepThreadID,
+} from "./utils";
 
 import {
-  setThread,
   setConversation,
   addElement,
   setMessageToastContent,
@@ -34,17 +37,10 @@ import {
 function FrevaGPT() {
   useEffect(() => {
     async function initializeBot() {
-      // if thread giving on mounting the component, set thread within store
-      const givenQueryParams = browserHistory.getCurrentLocation().query;
-      if (
-        Object.hasOwn(givenQueryParams, "thread_id") &&
-        !isEmpty(givenQueryParams.thread_id)
-      ) {
-        dispatch(setThread(givenQueryParams.thread_id));
-
-        // request content of old thread if threa_id is given
+      // request content of old thread if thread_id is given
+      if (grepThreadID()) {
         setLoading(true);
-        await getOldThread(givenQueryParams.thread_id);
+        await getOldThread(grepThreadID());
         setLoading(false);
         setShowSuggestions(false);
       }
@@ -70,7 +66,6 @@ function FrevaGPT() {
 
   const lastVariant = useRef("User");
 
-  const thread = useSelector((state) => state.frevaGPTReducer.thread);
   const [showThreadHistory, setShowThreadHistory] = useState(false);
   const botModel = useSelector((state) => state.frevaGPTReducer.botModel);
 
@@ -83,7 +78,6 @@ function FrevaGPT() {
     handleStop(false)
       .then(() => {
         dispatch(setConversation([]));
-        dispatch(setThread(""));
         browserHistory.push({
           pathname: "/chatbot/",
           search: "",
@@ -102,12 +96,11 @@ function FrevaGPT() {
       });
   }
 
-  function alertInvalidThread() {
-    dispatch(setThread(""));
+  function alertInvalidThreadID() {
     dispatch(
       setConversation([
         {
-          variant: "InvalidThread",
+          variant: "InvalidThreadID",
           content:
             "The thread id is invalid or the thread doesn't exist anymore.",
         },
@@ -115,8 +108,8 @@ function FrevaGPT() {
     );
   }
 
-  async function getOldThread(thread) {
-    const queryObject = { thread_id: thread };
+  async function getOldThread(threadID) {
+    const queryObject = { thread_id: threadID };
     const response = await fetchWithAuth(
       `/api/chatbot/getthread?` + queryString.stringify(queryObject)
     );
@@ -124,12 +117,12 @@ function FrevaGPT() {
     if (response.ok) {
       const variantArray = await response.json();
       if (!Array.isArray(variantArray) && "variant" in variantArray) {
-        alertInvalidThread();
+        alertInvalidThreadID();
       } else {
         dispatch(setConversation(variantArray));
       }
     } else {
-      alertInvalidThread();
+      alertInvalidThreadID();
     }
   }
 
@@ -158,8 +151,11 @@ function FrevaGPT() {
 
   async function handleEditChat(newInput, chatObject) {
     dispatch(setConversation(chatObject.history));
-    dispatch(setThread(chatObject.new_thread_id));
-    await handleSubmit(newInput);
+    browserHistory.push({
+      pathname: "/chatbot/",
+      search: `?thread_id=${chatObject.new_thread_id}`,
+    });
+    await handleSubmit(newInput, chatObject.new_thread_id);
   }
 
   async function handleStop(dispatchStopMessage = true) {
@@ -167,8 +163,8 @@ function FrevaGPT() {
     if (reader) {
       await reader.cancel();
     }
-    const queryObject = { thread_id: thread };
-    if (thread) {
+    const queryObject = { thread_id: grepThreadID() };
+    if (grepThreadID()) {
       const response = await fetchWithAuth(
         `/api/chatbot/stop?` + queryString.stringify(queryObject)
       );
@@ -196,7 +192,7 @@ function FrevaGPT() {
   async function fetchData(input) {
     const queryObject = {
       input,
-      thread_id: thread,
+      thread_id: grepThreadID(),
       chatbot: botModel,
     };
 
@@ -266,10 +262,9 @@ function FrevaGPT() {
                 varObj = jsonBuffer;
 
                 // set thread id
-                if (thread === "" && varObj.variant === "ServerHint") {
+                if (grepThreadID() === "" && varObj.variant === "ServerHint") {
                   try {
                     const currentThreadId = varObj.content.thread_id;
-                    dispatch(setThread(currentThreadId));
                     browserHistory.push({
                       pathname: "/chatbot/",
                       search: `?thread_id=${currentThreadId}`,

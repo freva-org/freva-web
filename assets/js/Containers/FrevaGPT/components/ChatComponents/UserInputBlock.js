@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 
-import { useSelector } from "react-redux";
-
 import { Col, Card, Button, FormControl } from "react-bootstrap";
 
 import { FaEdit } from "react-icons/fa";
@@ -10,7 +8,7 @@ import PropTypes from "prop-types";
 
 import queryString from "query-string";
 
-import { resizeInputField, fetchWithAuth } from "../../utils";
+import { resizeInputField, fetchWithAuth, grepThreadID } from "../../utils";
 
 import { USER_INPUT_STYLE } from "../../constants";
 
@@ -19,15 +17,13 @@ function UserInputBlock({ content, onEdit }) {
   const [renderInput, setRenderInput] = useState(false);
   const [editedInput, setEditedInput] = useState("");
 
-  const thread = useSelector((state) => state.frevaGPTReducer.thread);
-
   function handleEdit(e) {
     setEditedInput(e.target.value);
   }
 
   async function requestEditEndpoint(input, index) {
     const queryObject = {
-      source_thread_id: thread,
+      source_thread_id: grepThreadID(),
       fork_from_index: index,
     };
 

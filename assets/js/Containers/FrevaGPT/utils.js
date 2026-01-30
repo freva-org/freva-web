@@ -2,6 +2,8 @@ import queryString from "query-string";
 
 import { isEmpty } from "lodash";
 
+import { browserHistory } from "react-router";
+
 import * as constants from "./constants";
 
 export function replaceLinebreaks(data) {
@@ -96,6 +98,18 @@ export function setGivenFeedbackValue(variantObject) {
   }
 
   return feedbackValue;
+}
+
+export function grepThreadID() {
+  const givenQueryParams = browserHistory.getCurrentLocation().query;
+  if (
+    Object.hasOwn(givenQueryParams, "thread_id") &&
+    !isEmpty(givenQueryParams.thread_id)
+  ) {
+    return givenQueryParams.thread_id;
+  } else {
+    return "";
+  }
 }
 
 /*-------------------------------------------------------------------------------------------------

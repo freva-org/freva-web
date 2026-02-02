@@ -150,12 +150,20 @@ function FrevaGPT() {
   }
 
   async function handleEditChat(newInput, chatObject) {
-    dispatch(setConversation(chatObject.history));
-    browserHistory.push({
-      pathname: "/chatbot/",
-      search: `?thread_id=${chatObject.new_thread_id}`,
-    });
-    await handleSubmit(newInput, chatObject.new_thread_id);
+    handleStop(false)
+      .then(() => {
+        dispatch(setConversation(chatObject.history));
+        browserHistory.push({
+          pathname: "/chatbot/",
+          search: `?thread_id=${chatObject.new_thread_id}`,
+        });
+        handleSubmit(newInput, chatObject.new_thread_id);
+        return;
+      })
+      .catch((err) => {
+        // eslint-disable-next-line no-console
+        console.error(err);
+      });
   }
 
   async function handleStop(dispatchStopMessage = true) {

@@ -95,7 +95,7 @@ stoprest:
 	echo "Stopped freva-rest development server..." > rest.log
 
 stopfrontend:
-	pkill -f "npm run dev"
+	- kill $$(pgrep -f 'npm.*run.*dev') 2>/dev/null || true
 	echo "Stopped npm development server..." > npm.log
 
 stop: stopserver stopfrontend stoprest

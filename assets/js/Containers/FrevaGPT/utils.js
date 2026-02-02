@@ -231,6 +231,43 @@ export async function handleThreadsRequest(
   setLoading(false);
 }
 
+export async function requestEditEndpoint(index) {
+  /**
+   * Request backend endpoint handling editing user input
+   *
+   * @param {number} index - Integer value of changed user input within conversation
+   * @returns {object} Object containing conversation history until changed user input and new thread id
+   */
+  const queryObject = {
+    source_thread_id: grepThreadID(),
+    fork_from_index: index,
+  };
+
+  let results = { history: [], new_thread_id: "" };
+  // if index == 0 the first element is changed which is equal to starting a new chat
+  // so we don't need a history and therefore skip requesting and setting it via the editthread endpoint
+  if (index !== 0) {
+    const response = await fetchWithAuth(
+      `/api/chatbot/editthread?` + queryString.stringify(queryObject)
+    );
+
+    // as soon as this request is finished and we got the answers
+    if (response.ok) {
+      results = await response.json();
+    } else {
+      results.history = [
+        {
+          varaint: "FrontendError",
+          content: "There was an issue fetching the previous part of the chat.",
+        },
+      ];
+      results.new_thread_id = "";
+    }
+  }
+
+  return results;
+}
+
 /*-------------------------------------------------------------------------------------------------
  *                                  Scrolling related functions
 -------------------------------------------------------------------------------------------------*/

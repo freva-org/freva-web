@@ -6,9 +6,7 @@ import { FaEdit } from "react-icons/fa";
 
 import PropTypes from "prop-types";
 
-import queryString from "query-string";
-
-import { resizeInputField, fetchWithAuth, grepThreadID } from "../../utils";
+import { resizeInputField, requestEditEndpoint } from "../../utils";
 
 import { USER_INPUT_STYLE } from "../../constants";
 
@@ -21,34 +19,8 @@ function UserInputBlock({ content, onEdit }) {
     setEditedInput(e.target.value);
   }
 
-  async function requestEditEndpoint(input, index) {
-    const queryObject = {
-      source_thread_id: grepThreadID(),
-      fork_from_index: index,
-    };
-
-    const response = await fetchWithAuth(
-      `/api/chatbot/editthread?` + queryString.stringify(queryObject)
-    );
-
-    let results = {};
-
-    // as soon as this request is finished and we got the answers
-    if (response.ok) {
-      results = await response.json();
-    } else {
-      results.history = [
-        {
-          varaint: "FrontendError",
-          content: "There was an issue fetching the previous part of the chat.",
-        },
-      ];
-      results.new_thread_id = "";
-      // eslint-disable-next-line no-console
-      console.log(results);
-    }
-
-    onEdit(input, results);
+  async function startEditedChat(input, index) {
+    onEdit(input, await requestEditEndpoint(index));
   }
 
   function renderInputComponent() {
@@ -79,7 +51,7 @@ function UserInputBlock({ content, onEdit }) {
           <Button
             variant="info"
             onClick={() => {
-              requestEditEndpoint(editedInput, content.original_index);
+              startEditedChat(editedInput, content.original_index);
               setRenderInput(false);
             }}
           >

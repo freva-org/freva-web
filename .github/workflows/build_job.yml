@@ -53,7 +53,7 @@ jobs:
           if [ "$RC" ];then
             python3 rc.py rc $RC web  1> tag.txt
           else
-            jq -r .version package.jso 1> tag.txt
+            jq -r .version package.json 1> tag.txt
           fi
 
           echo "tag=$(tail -1 tag.txt)" >> "$GITHUB_OUTPUT"

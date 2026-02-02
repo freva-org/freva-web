@@ -83,37 +83,40 @@ class OIDCCallbackView(View):
     """callback view handling the OAuth2 response from freva-rest"""
     def get(self, request):
         code = request.GET.get('code')
+        state = request.GET.get('state')
 
         is_offline_request = 'request_offline_token' in request.session
 
-        if not code:
-            logger.error("No authorization code received in callback")
+        if not code or not state:
+            logger.error("No authorization code or state received in callback")
             if is_offline_request:
                 return HttpResponse('<script>window.close();</script>')
             else:
                 return render(request, 'base/home.html', {
                     'login_failed': True,
-                    'error_message': 'Authentication failed - no authorization code received.'
+                    'error_message': 'Authentication failed - no code or state.'
                 })
 
         try:
-            callback_url = request.build_absolute_uri('/callback')
-            data = {
-                'code': code,
-                'redirect_uri': callback_url
-            }
-            headers = {"Content-Type": "application/x-www-form-urlencoded"}
-
-            response = requests.post(TOKEN_URL, headers=headers, data=data, timeout=10)
+            callback_endpoint = f"{ensure_url_scheme(settings.FREVA_REST_URL).rstrip('/')}/api/freva-nextgen/auth/v2/callback"
+            params = {'code': code, 'state': state}
+            response = requests.get(callback_endpoint, params=params, timeout=10)
             
             if response.status_code == 200:
                 token_data = response.json()
-
-                # OFFLINE TOKEN FLOW - Return HTML with postMessage to parent window
+                # Helmholtz doesn't provide refresh_expires_in
+                # Refresh tokens from Helmholtz don't expire (or expire very far in future)
+                now = int(time.time())
+                if 'expires' not in token_data and 'expires_in' in token_data:
+                    token_data['expires'] = now + token_data['expires_in']
+                elif 'expires' not in token_data:
+                    token_data['expires'] = now + 3600
+                if 'refresh_expires' not in token_data:
+                    token_data['refresh_expires'] = now + (365 * 24 * 3600)
+                # OFFLINE TOKEN FLOW
                 if is_offline_request:
                     # Clean up session
                     request.session.pop('request_offline_token', None)
-                    
                     formatted_token = {
                         "access_token": token_data.get('access_token'),
                         "refresh_token": token_data.get('refresh_token'),
@@ -145,9 +148,9 @@ class OIDCCallbackView(View):
                 # REGULAR LOGIN FLOW
                 else:
                     request.session['access_token'] = token_data['access_token']
-                    request.session['refresh_token'] = token_data['refresh_token']
+                    request.session['refresh_token'] = token_data.get('refresh_token', '')
                     request.session['token_expires'] = token_data['expires']
-                    request.session['refresh_expires'] = token_data['refresh_expires']
+                    request.session['refresh_expires'] = token_data.get('refresh_expires', 0)
 
                     user = authenticate(request=request, access_token=token_data['access_token'])
                     if user:

@@ -111,16 +111,16 @@ function FilesPanelImpl(props) {
       // Step 1: we use convert endpoint to be able to even
       // publush the zarr-endpoint arbitrary paths that are
       // indexed in the search backend.
-      const queryParams = new URLSearchParams({
-        path: fn,
-      });
-
-      const convertUrl = `/api/freva-nextgen/data-portal/zarr/convert?${queryParams}`;
+      const convertUrl = `/api/freva-nextgen/data-portal/zarr/convert`;
 
       const response = await fetch(convertUrl, {
-        method: "GET",
+        method: "POST",
         credentials: "same-origin",
-        headers,
+        headers: {
+          ...headers,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ path: fn }),
         signal,
       });
 

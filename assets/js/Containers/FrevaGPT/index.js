@@ -75,6 +75,10 @@ function FrevaGPT() {
   *
   -----------------------------------------------------------------------------------------------*/
   function createNewChat() {
+    /**
+     * Creates new chat stopping running conversations before and clearing state variables
+     *
+     */
     handleStop(false)
       .then(() => {
         dispatch(setConversation([]));
@@ -97,6 +101,9 @@ function FrevaGPT() {
   }
 
   function alertInvalidThreadID() {
+    /**
+     * Adds error message to chat stating that an invalid thread id was given
+     */
     dispatch(
       setConversation([
         {
@@ -109,6 +116,11 @@ function FrevaGPT() {
   }
 
   async function getOldThread(threadID) {
+    /**
+     * Requests old conversation based on given threadID
+     *
+     * @param {string} threadID - ThreadID of conversation which should be loaded
+     */
     const queryObject = { thread_id: threadID };
     const response = await fetchWithAuth(
       `/api/chatbot/getthread?` + queryString.stringify(queryObject)
@@ -130,6 +142,11 @@ function FrevaGPT() {
   *                                       User interaction methods
   -----------------------------------------------------------------------------------------------*/
   async function handleSubmit(input) {
+    /**
+     * Sends request to bot ncluding the given user input
+     *
+     * @param {string} input - Given user input
+     */
     dispatch(addElement({ variant: "User", content: input }));
     setShowSuggestions(false);
     setLoading(true);
@@ -150,6 +167,13 @@ function FrevaGPT() {
   }
 
   async function handleEditChat(newInput, chatObject) {
+    /**
+     * Handles edit of converstaion by stopping running conversation streams,
+     * setting new thread id and starting request to bot with edited input
+     *
+     * @param {string} newInput - Edited input from user
+     * @param {object} chatObject - Objection containing new threadID and conversation history until edited input {new_thread_id: "", history: [...]}
+     */
     handleStop(false)
       .then(() => {
         dispatch(setConversation(chatObject.history));
@@ -167,6 +191,11 @@ function FrevaGPT() {
   }
 
   async function handleStop(dispatchStopMessage = true) {
+    /**
+     * Stops running bot request and running stream responses
+     *
+     * @param {boolean} dispatchStopMessage - Determines if stop message should be shown
+     */
     // stop of thread only possible if a thread id is given
     if (reader) {
       await reader.cancel();
@@ -198,6 +227,11 @@ function FrevaGPT() {
   }
 
   async function fetchData(input) {
+    /**
+     * Fetches stream response from bot answering the given input adding it to the already existing conversation
+     *
+     * @param {string} input - User input
+     */
     const queryObject = {
       input,
       thread_id: grepThreadID(),
@@ -318,6 +352,9 @@ function FrevaGPT() {
   *                                         Render functions
   -----------------------------------------------------------------------------------------------*/
   function renderBotContent() {
+    /**
+     * Renders main bot components (ChatBlock, BotInput, SidePanel etc.)
+     */
     const windowHeight = document.documentElement.clientHeight * 0.8;
     const emptyDivHeight = showSuggestions
       ? 0
@@ -381,6 +418,9 @@ function FrevaGPT() {
 
   /*---------------------------------------------------------------------------------------------*/
   function render() {
+    /**
+     * Renders all chat related components
+     */
     return (
       <Container>
         <Row>

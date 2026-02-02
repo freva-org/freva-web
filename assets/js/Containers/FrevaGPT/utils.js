@@ -91,6 +91,12 @@ function isLastPage(totalNumber, currentPageNumber) {
 }
 
 export function setGivenFeedbackValue(variantObject) {
+  /**
+   * Returns feedback value if feedback in given variantObject
+   *
+   * @param {object} variantObject - Object containing chat variant and content (optionally also feedback)
+   * @return {string} String containing feedback value ("up" or "down")
+   */
   let feedbackValue = "";
 
   if ("feedback" in variantObject) {
@@ -101,6 +107,11 @@ export function setGivenFeedbackValue(variantObject) {
 }
 
 export function grepThreadID() {
+  /**
+   * Extracts thread id from current URL
+   *
+   * @return {string} String containing extracted thread id or nothing
+   */
   const givenQueryParams = browserHistory.getCurrentLocation().query;
   if (
     Object.hasOwn(givenQueryParams, "thread_id") &&

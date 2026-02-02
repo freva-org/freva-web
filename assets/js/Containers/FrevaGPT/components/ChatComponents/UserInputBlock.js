@@ -11,7 +11,6 @@ import { resizeInputField, requestEditEndpoint } from "../../utils";
 import { USER_INPUT_STYLE } from "../../constants";
 
 function UserInputBlock({ content, onEdit }) {
-  const [showEditBar, setShowEditBar] = useState(false);
   const [renderInput, setRenderInput] = useState(false);
   const [editedInput, setEditedInput] = useState("");
 
@@ -43,7 +42,6 @@ function UserInputBlock({ content, onEdit }) {
             className="me-1"
             onClick={() => {
               setRenderInput(false);
-              setShowEditBar(false);
             }}
           >
             Cancel
@@ -63,12 +61,7 @@ function UserInputBlock({ content, onEdit }) {
   }
 
   return (
-    <Col
-      md={USER_INPUT_STYLE}
-      key={`${content.original_index}-user`}
-      onMouseEnter={() => setShowEditBar(true)}
-      onMouseLeave={() => setShowEditBar(false)}
-    >
+    <Col md={USER_INPUT_STYLE} key={`${content.original_index}-user`}>
       <Card
         className="shadow-sm card-body border-0 border-bottom"
         style={{ backgroundColor: "#eee" }}
@@ -84,7 +77,7 @@ function UserInputBlock({ content, onEdit }) {
         <FaEdit
           onClick={() => setRenderInput(true)}
           role="button"
-          className={showEditBar ? "color mt-2" : "color mt-2 opacity-0"}
+          className="color mt-2"
         />
       </div>
     </Col>

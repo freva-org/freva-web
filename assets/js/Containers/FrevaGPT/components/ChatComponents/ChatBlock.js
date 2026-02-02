@@ -101,12 +101,8 @@ function ChatBlock({ onEditInput }) {
       return null;
     } else {
       return (
-        <Col md={constants.BOT_COLUMN_STYLE} key={`${element.id}-code`}>
-          <CodeBlock
-            showCode={showCode}
-            content={element}
-            elementIndex={element[0].original_index}
-          />
+        <Col md={constants.BOT_COLUMN_STYLE} key={`${element[0].id}-code`}>
+          <CodeBlock showCode={showCode} content={element} />
         </Col>
       );
     }

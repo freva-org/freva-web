@@ -16,7 +16,7 @@ import { formatCode, setGivenFeedbackValue } from "../../utils";
 import FeedbackButtons from "../Snippets/FeedbackButtons";
 import { setMessageToastContent, setShowMessageToast } from "../../actions";
 
-function CodeBlock({ showCode, content, elementIndex }) {
+function CodeBlock({ showCode, content }) {
   useEffect(() => {
     setLocalShowCode(showCode);
   }, [showCode]);
@@ -70,7 +70,7 @@ function CodeBlock({ showCode, content, elementIndex }) {
             </span>
           </Button>
           <FeedbackButtons
-            elementIndex={elementIndex}
+            elementIndex={content[0].original_index}
             givenValue={setGivenFeedbackValue(
               extractElements(content, "Code")[0]
             )}
@@ -127,7 +127,6 @@ function CodeBlock({ showCode, content, elementIndex }) {
 CodeBlock.propTypes = {
   content: PropTypes.array,
   showCode: PropTypes.bool,
-  elementIndex: PropTypes.number,
 };
 
 export default CodeBlock;

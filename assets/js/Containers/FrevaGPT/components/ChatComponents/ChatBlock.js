@@ -172,6 +172,8 @@ function ChatBlock({ onEditInput }) {
     switch (element[0].variant) {
       case "ServerHint":
       case "StreamEnd":
+      case "ToolCall":
+      case "ToolOutput":
         return null;
       case "Image":
         return renderImage(element[0]);

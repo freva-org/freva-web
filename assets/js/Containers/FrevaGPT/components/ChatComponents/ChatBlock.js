@@ -67,6 +67,8 @@ function ChatBlock({ onEditInput }) {
           break;
         }
         case "ServerHint": {
+          //eslint-disable-next-line no-console
+          console.log("####", element);
           // ServerHints containing thread_id are indexed as part of the thread
           // ServerHints (Heartbeat) containing cpu are not indexed
           if ("thread_id" in element.content) {

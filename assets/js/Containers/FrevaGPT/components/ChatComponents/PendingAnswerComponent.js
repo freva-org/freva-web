@@ -4,9 +4,6 @@ import PropTypes from "prop-types";
 import { Col, Card, Spinner, Row, Button, Collapse } from "react-bootstrap";
 import { FaAngleDown, FaAngleUp } from "react-icons/fa";
 
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
-
 import Markdown from "react-markdown";
 
 import * as constants from "../../constants";
@@ -79,9 +76,7 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
                 className="p-0 m-0"
                 style={{ backgroundColor: "#fafafa" }}
               >
-                <SyntaxHighlighter language="python" style={oneLight}>
-                  {renderedCode}
-                </SyntaxHighlighter>
+                <pre>{renderedCode}</pre>
                 <span>
                   <Spinner className="mx-1" size="sm" />
                 </span>

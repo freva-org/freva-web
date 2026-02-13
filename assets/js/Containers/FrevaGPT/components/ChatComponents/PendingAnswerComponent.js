@@ -110,6 +110,19 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
     );
   }
 
+  function renderImage() {
+    return (
+      <Row className="mb-3">
+        <Col md={3}>
+          <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light d-flex flex-row align-items-center">
+            <Spinner size="sm" />
+            <span className="ms-2">Plotting image...</span>
+          </Card>
+        </Col>
+      </Row>
+    );
+  }
+
   function renderAnswer(props) {
     switch (props.variant) {
       case "Assistant":
@@ -118,6 +131,8 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
         return renderCode();
       case "ServerHint":
         return renderServerHint();
+      case "Image":
+        return renderImage();
       default:
         return null;
     }

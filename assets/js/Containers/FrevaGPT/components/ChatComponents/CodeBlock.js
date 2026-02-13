@@ -3,13 +3,9 @@ import { useDispatch } from "react-redux";
 import { Card, Collapse, Button } from "react-bootstrap";
 import { FaAngleDown, FaAngleUp, FaRegCopy } from "react-icons/fa";
 
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import {
-  materialDark,
-  oneLight,
-} from "react-syntax-highlighter/dist/esm/styles/prism";
-
 import PropTypes from "prop-types";
+import hljs from "highlight.js";
+import "highlight.js/styles/stackoverflow-light.css";
 
 import { formatCode, setGivenFeedbackValue } from "../../utils";
 
@@ -17,20 +13,29 @@ import FeedbackButtons from "../Snippets/FeedbackButtons";
 import { setMessageToastContent, setShowMessageToast } from "../../actions";
 
 function CodeBlock({ showCode, content }) {
+  const [localShowCode, setLocalShowCode] = useState();
+  const dispatch = useDispatch();
+
   useEffect(() => {
     setLocalShowCode(showCode);
   }, [showCode]);
 
-  const [localShowCode, setLocalShowCode] = useState();
-
-  const dispatch = useDispatch();
+  useEffect(() => {
+    // hilights all code elements
+    document.querySelectorAll(".codeblock code").forEach((block) => {
+      if (!block.dataset.highlighted) {
+        hljs.highlightElement(block);
+      }
+    });
+  }, []);
 
   function localToggleShowCode() {
     setLocalShowCode(!localShowCode);
   }
 
   function extractElements(content, variant) {
-    return content.filter((elem) => elem.variant === variant);
+    // should be only one resulting item
+    return content.filter((elem) => elem.variant === variant)[0];
   }
 
   function copyCode() {
@@ -71,9 +76,7 @@ function CodeBlock({ showCode, content }) {
           </Button>
           <FeedbackButtons
             elementIndex={content[0].original_index}
-            givenValue={setGivenFeedbackValue(
-              extractElements(content, "Code")[0]
-            )}
+            givenValue={setGivenFeedbackValue(extractElements(content, "Code"))}
           />
         </div>
 
@@ -90,33 +93,37 @@ function CodeBlock({ showCode, content }) {
               </div>
             </Card.Header>
 
-            {extractElements(content, "Code").map((codeElement) => {
-              return (
-                <Card.Body
-                  className="p-0 m-0 border-bottom"
-                  key={`${codeElement.id}-code`}
-                  style={{ backgroundColor: "#fafafa" }}
-                >
-                  <SyntaxHighlighter language="python" style={oneLight}>
-                    {formatCode("Code", codeElement.content)}
-                  </SyntaxHighlighter>
-                </Card.Body>
-              );
-            })}
-
-            {extractElements(content, "CodeOutput").map((codeElement) => {
-              return (
-                <Card.Footer
-                  className="p-0 m-0"
-                  key={`${codeElement.id}-codeoutput`}
-                  style={{ backgroundColor: "#263238", fontSize: "0.72em" }}
-                >
-                  <SyntaxHighlighter language="python" style={materialDark}>
-                    {formatCode("CodeOutput", codeElement.content)}
-                  </SyntaxHighlighter>
-                </Card.Footer>
-              );
-            })}
+            <Card.Body
+              className="p-0 m-0 border-bottom"
+              key={`${content[0].id}-code`}
+            >
+              <pre className="m-0 codeblock">
+                <code>
+                  {
+                    formatCode(
+                      "Code",
+                      extractElements(content, "Code").content
+                    )[0]
+                  }
+                </code>
+              </pre>
+            </Card.Body>
+            <Card.Footer
+              className="p-0 m-0"
+              key={`${content[1].id}-codeoutput`}
+              style={{ fontSize: "0.72em" }}
+            >
+              <pre className="codeblock m-0">
+                <code style={{ color: "#fff", background: "#333" }}>
+                  {
+                    formatCode(
+                      "CodeOutput",
+                      extractElements(content, "CodeOutput").content
+                    )[0]
+                  }
+                </code>
+              </pre>
+            </Card.Footer>
           </Card>
         </Collapse>
       </Card>

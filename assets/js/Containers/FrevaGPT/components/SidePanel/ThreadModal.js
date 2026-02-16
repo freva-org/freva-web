@@ -1,4 +1,5 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
 import PropTypes from "prop-types";
 
 import queryString from "query-string";
@@ -10,7 +11,7 @@ import { Modal, Button, FormControl } from "react-bootstrap";
 
 import { fetchWithAuth } from "../../utils";
 
-import MessageToast from "../Snippets/MessageToast";
+import { setMessageToastContent, setShowMessageToast } from "../../actions";
 
 function ThreadModal({
   mode,
@@ -20,9 +21,9 @@ function ThreadModal({
   updateThreadList,
 }) {
   const [newTopic, setNewTopic] = useState(element.topic);
-  const [showToast, setShowToast] = useState(false);
-  const toastColor = useRef("");
-  const toastMessage = useRef("");
+  const toastContent = { color: "", message: "" };
+
+  const dispatch = useDispatch();
 
   function isCurrentThread(deleteThreadId) {
     const currentQueryParams = browserHistory.getCurrentLocation().query;
@@ -55,16 +56,17 @@ function ThreadModal({
           thread_id: element.thread_id,
           topic: newTopic,
         };
-        toastColor.current = "success";
-        toastMessage.current = "Renamed chat.";
+        toastContent.color = "success";
+        toastContent.message = "Renamed chat.";
         updateThreadList(mode, newElement);
       } else {
-        toastColor.current = "danger";
-        toastMessage.current = "Could not rename chat!";
+        toastContent.color = "danger";
+        toastContent.message = "Could not rename chat!";
       }
     }
     setShowModal(false);
-    setShowToast(true);
+    dispatch(setMessageToastContent(toastContent));
+    dispatch(setShowMessageToast(true));
   }
 
   async function deleteThread() {
@@ -77,8 +79,8 @@ function ThreadModal({
     );
 
     if (response.ok) {
-      toastColor.current = "success";
-      toastMessage.current = "Deleted chat.";
+      toastContent.color = "success";
+      toastContent.message = "Deleted chat.";
       updateThreadList(mode, element);
 
       //if current displayed thread is deleted navigate to start chatbot page
@@ -86,11 +88,12 @@ function ThreadModal({
         window.location.assign("/chatbot");
       }
     } else {
-      toastColor.current = "danger";
-      toastMessage.current = "Could not delete chat.";
+      toastContent.color = "danger";
+      toastContent.message = "Could not delete chat.";
     }
     setShowModal(false);
-    setShowToast(true);
+    dispatch(setMessageToastContent(toastContent));
+    dispatch(setShowMessageToast(true));
   }
 
   const modalOptions = {
@@ -146,12 +149,6 @@ function ThreadModal({
           </Button>
         </Modal.Footer>
       </Modal>
-      <MessageToast
-        show={showToast}
-        setShow={setShowToast}
-        color={toastColor.current}
-        message={toastMessage.current}
-      />
     </>
   );
 }

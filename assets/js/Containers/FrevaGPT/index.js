@@ -4,7 +4,6 @@ import { useSelector, useDispatch } from "react-redux";
 import { Container, Row, Col, Spinner } from "react-bootstrap";
 
 import { browserHistory } from "react-router";
-import { isEmpty } from "lodash";
 
 import queryString from "query-string";
 
@@ -19,25 +18,29 @@ import SidePanel from "./components/SidePanel/SidePanel";
 import BotLoadingSpinner from "./components/Snippets/BotLoadingSpinner";
 import ScrollButtons from "./components/Snippets/ScrollButtons";
 import BotUnavailableAlert from "./components/Snippets/BotUnavailableAlert";
+import MessageToast from "./components/Snippets/MessageToast";
 
-import { fetchWithAuth, successfulPing, chatExceedsWindow } from "./utils";
+import {
+  fetchWithAuth,
+  successfulPing,
+  chatExceedsWindow,
+  grepThreadID,
+} from "./utils";
 
-import { setThread, setConversation, addElement } from "./actions";
+import {
+  setConversation,
+  addElement,
+  setMessageToastContent,
+  setShowMessageToast,
+} from "./actions";
 
 function FrevaGPT() {
   useEffect(() => {
     async function initializeBot() {
-      // if thread giving on mounting the component, set thread within store
-      const givenQueryParams = browserHistory.getCurrentLocation().query;
-      if (
-        Object.hasOwn(givenQueryParams, "thread_id") &&
-        !isEmpty(givenQueryParams.thread_id)
-      ) {
-        dispatch(setThread(givenQueryParams.thread_id));
-
-        // request content of old thread if threa_id is given
+      // request content of old thread if thread_id is given
+      if (grepThreadID()) {
         setLoading(true);
-        await getOldThread(givenQueryParams.thread_id);
+        await getOldThread(grepThreadID());
         setLoading(false);
         setShowSuggestions(false);
       }
@@ -63,7 +66,6 @@ function FrevaGPT() {
 
   const lastVariant = useRef("User");
 
-  const thread = useSelector((state) => state.frevaGPTReducer.thread);
   const [showThreadHistory, setShowThreadHistory] = useState(false);
   const botModel = useSelector((state) => state.frevaGPTReducer.botModel);
 
@@ -73,10 +75,13 @@ function FrevaGPT() {
   *
   -----------------------------------------------------------------------------------------------*/
   function createNewChat() {
+    /**
+     * Creates new chat stopping running conversations before and clearing state variables
+     *
+     */
     handleStop(false)
       .then(() => {
         dispatch(setConversation([]));
-        dispatch(setThread(""));
         browserHistory.push({
           pathname: "/chatbot/",
           search: "",
@@ -95,12 +100,14 @@ function FrevaGPT() {
       });
   }
 
-  function alertInvalidThread() {
-    dispatch(setThread(""));
+  function alertInvalidThreadID() {
+    /**
+     * Adds error message to chat stating that an invalid thread id was given
+     */
     dispatch(
       setConversation([
         {
-          variant: "InvalidThread",
+          variant: "InvalidThreadID",
           content:
             "The thread id is invalid or the thread doesn't exist anymore.",
         },
@@ -108,21 +115,26 @@ function FrevaGPT() {
     );
   }
 
-  async function getOldThread(thread) {
-    const queryObject = { thread_id: thread };
+  async function getOldThread(threadID) {
+    /**
+     * Requests old conversation based on given threadID
+     *
+     * @param {string} threadID - ThreadID of conversation which should be loaded
+     */
+    const queryObject = { thread_id: threadID };
     const response = await fetchWithAuth(
       `/api/chatbot/getthread?` + queryString.stringify(queryObject)
     );
 
-    if (response.status >= 200 && response.status <= 299) {
+    if (response.ok) {
       const variantArray = await response.json();
       if (!Array.isArray(variantArray) && "variant" in variantArray) {
-        alertInvalidThread();
+        alertInvalidThreadID();
       } else {
         dispatch(setConversation(variantArray));
       }
     } else {
-      alertInvalidThread();
+      alertInvalidThreadID();
     }
   }
 
@@ -130,6 +142,11 @@ function FrevaGPT() {
   *                                       User interaction methods
   -----------------------------------------------------------------------------------------------*/
   async function handleSubmit(input) {
+    /**
+     * Sends request to bot ncluding the given user input
+     *
+     * @param {string} input - Given user input
+     */
     dispatch(addElement({ variant: "User", content: input }));
     setShowSuggestions(false);
     setLoading(true);
@@ -149,16 +166,55 @@ function FrevaGPT() {
     setLoading(false);
   }
 
+  async function handleEditChat(newInput, chatObject) {
+    /**
+     * Handles edit of converstaion by stopping running conversation streams,
+     * setting new thread id and starting request to bot with edited input
+     *
+     * @param {string} newInput - Edited input from user
+     * @param {object} chatObject - Objection containing new threadID and conversation history until edited input {new_thread_id: "", history: [...]}
+     */
+    handleStop(false)
+      .then(() => {
+        dispatch(setConversation(chatObject.history));
+        browserHistory.push({
+          pathname: "/chatbot/",
+          search: `?thread_id=${chatObject.new_thread_id}`,
+        });
+        handleSubmit(newInput, chatObject.new_thread_id);
+        return;
+      })
+      .catch((err) => {
+        // eslint-disable-next-line no-console
+        console.error(err);
+      });
+  }
+
   async function handleStop(dispatchStopMessage = true) {
+    /**
+     * Stops running bot request and running stream responses
+     *
+     * @param {boolean} dispatchStopMessage - Determines if stop message should be shown
+     */
     // stop of thread only possible if a thread id is given
     if (reader) {
       await reader.cancel();
     }
-    const queryObject = { thread_id: thread };
-    if (thread) {
-      await fetchWithAuth(
+    const queryObject = { thread_id: grepThreadID() };
+    if (grepThreadID()) {
+      const response = await fetchWithAuth(
         `/api/chatbot/stop?` + queryString.stringify(queryObject)
       );
+
+      if (!response.ok) {
+        dispatch(
+          setMessageToastContent({
+            color: "danger",
+            message: "Could not stop process",
+          })
+        );
+        dispatch(setShowMessageToast(true));
+      }
     }
 
     setLoading(false);
@@ -171,9 +227,14 @@ function FrevaGPT() {
   }
 
   async function fetchData(input) {
+    /**
+     * Fetches stream response from bot answering the given input adding it to the already existing conversation
+     *
+     * @param {string} input - User input
+     */
     const queryObject = {
       input,
-      thread_id: thread,
+      thread_id: grepThreadID(),
       chatbot: botModel,
     };
 
@@ -243,10 +304,9 @@ function FrevaGPT() {
                 varObj = jsonBuffer;
 
                 // set thread id
-                if (thread === "" && varObj.variant === "ServerHint") {
+                if (grepThreadID() === "" && varObj.variant === "ServerHint") {
                   try {
                     const currentThreadId = varObj.content.thread_id;
-                    dispatch(setThread(currentThreadId));
                     browserHistory.push({
                       pathname: "/chatbot/",
                       search: `?thread_id=${currentThreadId}`,
@@ -261,7 +321,6 @@ function FrevaGPT() {
               break;
             } catch (err) {
               // ServerHints and CodeBlocks include nested JSON Objects
-              // eslint-disable-next-line no-console
               if (
                 !subBuffer.includes("ServerHint") &&
                 !subBuffer.includes("Code")
@@ -272,6 +331,8 @@ function FrevaGPT() {
                     content: "Incomplete message received.",
                   })
                 );
+                // eslint-disable-next-line no-console
+                console.log(err);
               }
             }
           }
@@ -291,6 +352,9 @@ function FrevaGPT() {
   *                                         Render functions
   -----------------------------------------------------------------------------------------------*/
   function renderBotContent() {
+    /**
+     * Renders main bot components (ChatBlock, BotInput, SidePanel etc.)
+     */
     const windowHeight = document.documentElement.clientHeight * 0.8;
     const emptyDivHeight = showSuggestions
       ? 0
@@ -319,7 +383,7 @@ function FrevaGPT() {
         >
           <Row className="overflow-auto position-relative" id="chatContainer">
             <Col md={12}>
-              <ChatBlock />
+              <ChatBlock onEditInput={handleEditChat} />
 
               <PendingAnswerComponent
                 content={dynamicAnswer}
@@ -354,6 +418,9 @@ function FrevaGPT() {
 
   /*---------------------------------------------------------------------------------------------*/
   function render() {
+    /**
+     * Renders all chat related components
+     */
     return (
       <Container>
         <Row>
@@ -370,6 +437,7 @@ function FrevaGPT() {
             <BotUnavailableAlert />
           )}
         </Row>
+        <MessageToast />
       </Container>
     );
   }

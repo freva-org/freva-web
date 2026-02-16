@@ -1,12 +1,5 @@
 import * as constants from "./constants";
 
-export function setThread(thread_id) {
-  return {
-    type: constants.SET_THREAD,
-    payload: thread_id,
-  };
-}
-
 export function setConversation(conversation) {
   return {
     type: constants.SET_CONVERSATION,
@@ -34,3 +27,17 @@ export const addElement = (element) => (dispatch) => {
     payload: element,
   });
 };
+
+export function setShowMessageToast(showMessageToast) {
+  return {
+    type: constants.SET_SHOW_MESSAGE_TOAST,
+    payload: showMessageToast,
+  };
+}
+
+export function setMessageToastContent(messageToastContent) {
+  return {
+    type: constants.SET_MESSAGE_TOAST_CONTENT,
+    payload: messageToastContent,
+  };
+}

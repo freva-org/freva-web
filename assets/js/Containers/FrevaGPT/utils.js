@@ -2,6 +2,8 @@ import queryString from "query-string";
 
 import { isEmpty } from "lodash";
 
+import { browserHistory } from "react-router";
+
 import * as constants from "./constants";
 
 export function replaceLinebreaks(data) {
@@ -59,11 +61,11 @@ export function truncate(value) {
   return trunc;
 }
 
-export function resizeInputField() {
+export function resizeInputField(id) {
   /**
    * Resizes textarea
    */
-  const inputField = document.getElementById("inputField");
+  const inputField = document.getElementById(id);
   const style = inputField.style;
 
   style.height = inputField.style.minHeight = "auto";
@@ -89,6 +91,12 @@ function isLastPage(totalNumber, currentPageNumber) {
 }
 
 export function setGivenFeedbackValue(variantObject) {
+  /**
+   * Returns feedback value if feedback in given variantObject
+   *
+   * @param {object} variantObject - Object containing chat variant and content (optionally also feedback)
+   * @return {string} String containing feedback value ("up" or "down")
+   */
   let feedbackValue = "";
 
   if ("feedback" in variantObject) {
@@ -96,6 +104,23 @@ export function setGivenFeedbackValue(variantObject) {
   }
 
   return feedbackValue;
+}
+
+export function grepThreadID() {
+  /**
+   * Extracts thread id from current URL
+   *
+   * @return {string} String containing extracted thread id or nothing
+   */
+  const givenQueryParams = browserHistory.getCurrentLocation().query;
+  if (
+    Object.hasOwn(givenQueryParams, "thread_id") &&
+    !isEmpty(givenQueryParams.thread_id)
+  ) {
+    return givenQueryParams.thread_id;
+  } else {
+    return "";
+  }
 }
 
 /*-------------------------------------------------------------------------------------------------
@@ -145,7 +170,7 @@ export async function successfulPing() {
 
   try {
     const response = await fetchWithAuth("/api/chatbot/ping");
-    if (response.status === 200) {
+    if (response.ok) {
       pingSuccessful = true;
     }
   } catch (err) {
@@ -215,6 +240,43 @@ export async function handleThreadsRequest(
   setThreads((prevThreads) => [...prevThreads, ...response.threads]);
   setHasMore(response.hasMore);
   setLoading(false);
+}
+
+export async function requestEditEndpoint(index) {
+  /**
+   * Request backend endpoint handling editing user input
+   *
+   * @param {number} index - Integer value of changed user input within conversation
+   * @returns {object} Object containing conversation history until changed user input and new thread id
+   */
+  const queryObject = {
+    source_thread_id: grepThreadID(),
+    fork_from_index: index,
+  };
+
+  let results = { history: [], new_thread_id: "" };
+  // if index == 0 the first element is changed which is equal to starting a new chat
+  // so we don't need a history and therefore skip requesting and setting it via the editthread endpoint
+  if (index !== 0) {
+    const response = await fetchWithAuth(
+      `/api/chatbot/editthread?` + queryString.stringify(queryObject)
+    );
+
+    // as soon as this request is finished and we got the answers
+    if (response.ok) {
+      results = await response.json();
+    } else {
+      results.history = [
+        {
+          varaint: "FrontendError",
+          content: "There was an issue fetching the previous part of the chat.",
+        },
+      ];
+      results.new_thread_id = "";
+    }
+  }
+
+  return results;
 }
 
 /*-------------------------------------------------------------------------------------------------

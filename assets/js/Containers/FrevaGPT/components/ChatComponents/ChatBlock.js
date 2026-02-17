@@ -2,23 +2,21 @@ import React, { useState, useMemo } from "react";
 import { useSelector } from "react-redux";
 import PropTypes from "prop-types";
 
-import { Col, Card, Modal, Button, Alert } from "react-bootstrap";
+import { Col, Modal, Button, Alert } from "react-bootstrap";
 
 import { isEmpty } from "lodash";
 
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 
 import { FaExpand } from "react-icons/fa";
 
-import { replaceLinebreaks, setGivenFeedbackValue } from "../../utils";
+import { replaceLinebreaks } from "../../utils";
 
 import * as constants from "../../constants";
 
-import FeedbackButtons from "../Snippets/FeedbackButtons";
-
 import CodeBlock from "./CodeBlock";
 import UserInputBlock from "./UserInputBlock";
+import AssistantBlock from "./AssistantBlock";
 
 function ChatBlock({ onEditInput }) {
   const [showModal, setShowModal] = useState(false);
@@ -154,25 +152,6 @@ function ChatBlock({ onEditInput }) {
     );
   }
 
-  function renderDefault(element) {
-    return (
-      <Col
-        md={constants.BOT_COLUMN_STYLE}
-        key={`${element.original_index}-default`}
-      >
-        <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {replaceLinebreaks(element.content)}
-          </ReactMarkdown>
-          <FeedbackButtons
-            elementIndex={element.original_index}
-            givenValue={setGivenFeedbackValue(element)}
-          />
-        </Card>
-      </Col>
-    );
-  }
-
   function renderChatComponents(element) {
     switch (element[0].variant) {
       case "ServerHint":
@@ -199,7 +178,12 @@ function ChatBlock({ onEditInput }) {
         return renderError(element[0]);
 
       default:
-        return renderDefault(element[0]);
+        return (
+          <AssistantBlock
+            key={`${element[0].original_index}-default`}
+            content={element[0]}
+          />
+        );
     }
   }
 

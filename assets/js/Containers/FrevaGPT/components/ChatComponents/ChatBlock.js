@@ -181,6 +181,7 @@ function ChatBlock({ onEditInput }) {
         return (
           <AssistantBlock
             key={`${element[0].original_index}-default`}
+            streaming={false}
             content={element[0]}
           />
         );

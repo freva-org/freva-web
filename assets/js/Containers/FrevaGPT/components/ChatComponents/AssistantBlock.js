@@ -14,7 +14,7 @@ import * as constants from "../../constants";
 
 import FeedbackButtons from "../Snippets/FeedbackButtons";
 
-function AssistantBlock({ content }) {
+function AssistantBlock({ content, streaming }) {
   useEffect(() => {
     // hilights all inline code elements
     document.querySelectorAll("pre code").forEach((block) => {
@@ -30,10 +30,13 @@ function AssistantBlock({ content }) {
         <ReactMarkdown remarkPlugins={[remarkGfm]}>
           {replaceLinebreaks(content.content)}
         </ReactMarkdown>
-        <FeedbackButtons
-          elementIndex={content.original_index}
-          givenValue={setGivenFeedbackValue(content)}
-        />
+
+        {!streaming ? (
+          <FeedbackButtons
+            elementIndex={content.original_index}
+            givenValue={setGivenFeedbackValue(content)}
+          />
+        ) : null}
       </Card>
     </Col>
   );
@@ -41,6 +44,7 @@ function AssistantBlock({ content }) {
 
 AssistantBlock.propTypes = {
   content: PropTypes.object,
+  streaming: PropTypes.bool,
 };
 
 export default AssistantBlock;

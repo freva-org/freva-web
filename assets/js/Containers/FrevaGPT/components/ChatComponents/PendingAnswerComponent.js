@@ -4,9 +4,9 @@ import PropTypes from "prop-types";
 import { Col, Card, Spinner, Row, Button, Collapse } from "react-bootstrap";
 import { FaAngleDown, FaAngleUp } from "react-icons/fa";
 
-import Markdown from "react-markdown";
-
 import * as constants from "../../constants";
+
+import AssistantBlock from "./AssistantBlock";
 
 const PendingAnswerComponent = forwardRef((props, ref) => {
   const [renderedCode, setRenderedCode] = useState("");
@@ -36,16 +36,6 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
       // console.error(err);
     }
     return codeSnippets;
-  }
-
-  function renderAssistant(props) {
-    return (
-      <Col md={constants.BOT_COLUMN_STYLE}>
-        <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
-          <Markdown>{props.content}</Markdown>
-        </Card>
-      </Col>
-    );
   }
 
   function renderCode() {
@@ -121,7 +111,13 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
   function renderAnswer(props) {
     switch (props.variant) {
       case "Assistant":
-        return renderAssistant(props);
+        return (
+          <AssistantBlock
+            content={props}
+            streaming
+            key={`streaming-assistant`}
+          />
+        );
       case "Code":
         return renderCode();
       case "ServerHint":

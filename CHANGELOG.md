@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 ## [v2601.1.0]
 ### Added
 - Editing user input on Freva-GPT
+### CHANGED
+- Freeze the STAC-Browser version to v4.0.1
 ## [v2601.0.0]
 ### Added
 - Feedback thumb up and down in the in Freva-gpt

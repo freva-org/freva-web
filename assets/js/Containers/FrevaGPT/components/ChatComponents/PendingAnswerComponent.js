@@ -1,5 +1,7 @@
 import React, { useState, useEffect, forwardRef } from "react";
 import PropTypes from "prop-types";
+import hljs from "highlight.js";
+import "highlight.js/styles/stackoverflow-light.css";
 
 import { Col, Card, Spinner, Row, Button, Collapse } from "react-bootstrap";
 import { FaAngleDown, FaAngleUp } from "react-icons/fa";
@@ -9,19 +11,26 @@ import * as constants from "../../constants";
 import AssistantBlock from "./AssistantBlock";
 
 const PendingAnswerComponent = forwardRef((props, ref) => {
-  const [renderedCode, setRenderedCode] = useState("");
+  const [plainCode, setPlainCode] = useState("");
+  const [fancyCode, setFancyCode] = useState("");
   const [showCode, setShowCode] = useState(true);
 
   useEffect(() => {
-    const parsedCode = extractCode(props.content);
-    if (parsedCode !== "") {
-      setRenderedCode(parsedCode);
-    }
+    extractCode(props.content);
   }, [props.content]);
+
+  useEffect(() => {
+    // hilight code blocks
+    document.querySelectorAll(".fancy-code code").forEach((block) => {
+      if (block.dataset.highlighted) {
+        delete block.dataset.highlighted;
+      }
+      hljs.highlightElement(block);
+    });
+  }, [fancyCode]);
 
   function extractCode(rawCode) {
     let jsonCode = "";
-    let codeSnippets = "";
 
     if (!rawCode.endsWith('"}')) {
       jsonCode = rawCode + '"}';
@@ -30,12 +39,20 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
     }
 
     try {
-      const code = JSON.parse(jsonCode);
-      codeSnippets = code.code;
+      // dividing streamed code into blocks
+      // only full blocks getting hilighted
+      const code = JSON.parse(jsonCode).code;
+      const lastLineBreak = code.lastIndexOf("\n\n");
+
+      if (lastLineBreak !== -1) {
+        setFancyCode(code.slice(0, lastLineBreak + 4));
+        setPlainCode(code.slice(lastLineBreak));
+      } else {
+        setPlainCode(code);
+      }
     } catch (err) {
       // console.error(err);
     }
-    return codeSnippets;
   }
 
   function renderCode() {
@@ -64,9 +81,21 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
               <Card.Header>python</Card.Header>
               <Card.Body
                 className="p-0 m-0"
-                style={{ backgroundColor: "#fafafa" }}
+                style={{ backgroundColor: "#f6f6f6" }}
               >
-                <pre>{renderedCode}</pre>
+                <pre className="fancy-code">
+                  <code className="language-python">{fancyCode}</code>
+                </pre>
+
+                <p
+                  style={{
+                    color: "#2f3337",
+                    fontSize: "14px",
+                    padding: "1rem",
+                  }}
+                >
+                  {plainCode}
+                </p>
                 <span>
                   <Spinner className="mx-1" size="sm" />
                 </span>

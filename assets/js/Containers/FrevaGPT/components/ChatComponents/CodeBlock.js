@@ -52,6 +52,32 @@ function CodeBlock({ showCode, content }) {
     dispatch(setShowMessageToast(true));
   }
 
+  function renderCodeOutput(content) {
+    //TODO original_id added when rearranged?
+    if (content.length > 1) {
+      return (
+        <Card.Footer
+          className="p-0 m-0"
+          key={`${content[1].id}-codeoutput`}
+          style={{ fontSize: "0.72em" }}
+        >
+          <pre className="codeblock m-0">
+            <code style={{ color: "#fff", background: "#333" }}>
+              {
+                formatCode(
+                  "CodeOutput",
+                  extractElements(content, "CodeOutput").content
+                )[0]
+              }
+            </code>
+          </pre>
+        </Card.Footer>
+      );
+    } else {
+      return null;
+    }
+  }
+
   return (
     <>
       <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
@@ -108,22 +134,7 @@ function CodeBlock({ showCode, content }) {
                 </code>
               </pre>
             </Card.Body>
-            <Card.Footer
-              className="p-0 m-0"
-              key={`${content[1].id}-codeoutput`}
-              style={{ fontSize: "0.72em" }}
-            >
-              <pre className="codeblock m-0">
-                <code style={{ color: "#fff", background: "#333" }}>
-                  {
-                    formatCode(
-                      "CodeOutput",
-                      extractElements(content, "CodeOutput").content
-                    )[0]
-                  }
-                </code>
-              </pre>
-            </Card.Footer>
+            {renderCodeOutput(content)}
           </Card>
         </Collapse>
       </Card>

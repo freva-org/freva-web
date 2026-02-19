@@ -1,9 +1,12 @@
 export const ADD_ELEMENT = "ADD_ELEMENT";
 export const SET_CONVERSATION = "SET_CONVERSATION";
-export const SET_THREAD = "SET_THREAD";
 export const SET_BOT_MODEL = "SET_BOT_MODEL";
 export const TOGGLE_SHOW_CODE = "TOGGLE_SHOW_CODE";
+export const SET_SHOW_MESSAGE_TOAST = "SET_SHOW_MESSAGE_TOAST";
+export const SET_MESSAGE_TOAST_CONTENT = "SET_MESSAGE_TOAST_CONTENT";
+
 export const BOT_COLUMN_STYLE = { span: 11, offset: 0 };
+export const USER_INPUT_STYLE = { span: 10, offset: 2 };
 export const THREAD_NUMBER = 20;
 export const botSuggestions = [
   "Make an annual mean temperature global map plot for the year 2023",

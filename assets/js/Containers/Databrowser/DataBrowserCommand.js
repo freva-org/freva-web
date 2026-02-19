@@ -54,7 +54,14 @@ function DataBrowserCommandImpl(props) {
     }
     return bboxSelectorToCli;
   }
-
+  function resolveCliKey(key, facetMapping) {
+    if (key.includes("_not_")) {
+      const baseKey = key.replace("_not_", "");
+      const mappedBase = facetMapping[baseKey] ?? baseKey;
+      return `${mappedBase}_not_`;
+    }
+    return facetMapping[key] ?? key;
+  }
   function getFullCliCommand(dateSelectorToCli, bboxSelectorToCli) {
     const effectiveFlavour =
       props.selectedFlavour ||
@@ -70,7 +77,10 @@ function DataBrowserCommandImpl(props) {
         .flatMap((key) => {
           const value = selectedFacets[key];
           const values = Array.isArray(value) ? value : [value];
-          return values.map((v) => `${props.facetMapping[key]}=${v}`);
+          return values.map(
+            (v) =>
+              `${resolveCliKey(key, props.facetMapping)}=${v.includes(" ") ? `"${v}"` : v}`
+          );
         })
         .join(" ") +
       (dateSelectorToCli && props.minDate
@@ -116,7 +126,8 @@ function DataBrowserCommandImpl(props) {
           return values.map((v) => (
             <React.Fragment key={`command-${key}-${v}`}>
               {" "}
-              {props.facetMapping[key]}=<strong>{v}</strong>
+              {resolveCliKey(key, props.facetMapping)}=
+              <strong>{v.includes(" ") ? `"${v}"` : v}</strong>
             </React.Fragment>
           ));
         })}
@@ -158,7 +169,9 @@ function DataBrowserCommandImpl(props) {
       ...Object.keys(selectedFacets).flatMap((key) => {
         const value = selectedFacets[key];
         const values = Array.isArray(value) ? value : [value];
-        return values.map((v) => `${props.facetMapping[key]}="${v}"`);
+        return values.map(
+          (v) => `${resolveCliKey(key, props.facetMapping)}="${v}"`
+        );
       }),
     ];
 

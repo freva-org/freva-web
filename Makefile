@@ -40,7 +40,7 @@ setup-stacbrowser:
 	rm -rf static_root/stac-browser
 	mkdir -p static_root/stac-browser
 	@if [ ! -d "stac-browser" ]; then \
-		git clone https://github.com/radiantearth/stac-browser.git stac-browser; \
+		git clone -b v4.0.1 https://github.com/radiantearth/stac-browser.git stac-browser; \
 	fi
 	cd stac-browser && \
 	npm install && \
@@ -95,7 +95,7 @@ stoprest:
 	echo "Stopped freva-rest development server..." > rest.log
 
 stopfrontend:
-	pkill -f "npm run dev"
+	- kill $$(pgrep -f 'npm.*run.*dev') 2>/dev/null || true
 	echo "Stopped npm development server..." > npm.log
 
 stop: stopserver stopfrontend stoprest

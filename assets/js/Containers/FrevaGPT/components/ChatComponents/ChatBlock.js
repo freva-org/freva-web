@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { useSelector } from "react-redux";
+import PropTypes from "prop-types";
 
 import { Col, Card, Modal, Button, Alert } from "react-bootstrap";
 
@@ -17,8 +18,9 @@ import * as constants from "../../constants";
 import FeedbackButtons from "../Snippets/FeedbackButtons";
 
 import CodeBlock from "./CodeBlock";
+import UserInputBlock from "./UserInputBlock";
 
-function ChatBlock() {
+function ChatBlock({ onEditInput }) {
   const [showModal, setShowModal] = useState(false);
   const [image, setImage] = useState("");
 
@@ -34,31 +36,56 @@ function ChatBlock() {
 
   function rearrangeCodeElements(conversation) {
     const newConv = [];
+    let original_index = 0;
+    let frontend_index = 0;
     // integration of index because of rearrangement
     // original index is needed for assigning user feedback and editing user input
-    for (const [index, element] of conversation.entries()) {
-      if (element.variant !== "Code" && element.variant !== "CodeOutput") {
-        // handling all non-code elements
-        if (
-          element.variant !== "ServerHint" &&
-          element.variant !== "StreamEnd"
-        ) {
-          // TODO: what about frontend errors?
-          element.original_index = index;
-          newConv.push([element]);
+    for (const element of conversation) {
+      switch (element.variant) {
+        case "Code":
+        case "CodeOutput": {
+          // handling code elements
+          const existingIndex = newConv.findIndex(
+            (x) => x[0].content.length > 1 && x[0].id === element.id
+          );
+          element.original_index = original_index;
+          original_index++;
+          if (existingIndex === -1) {
+            // no code element there yet
+            newConv.push([element]);
+          } else {
+            // already existing code element with matching id
+            newConv[existingIndex].push(element);
+          }
+          break;
         }
-      } else {
-        // handling code elements
-        const existingIndex = newConv.findIndex(
-          (x) => x[0].content.length > 1 && x[0].id === element.id
-        );
-        element.original_index = index;
-        if (existingIndex === -1) {
-          // no code element there yet
+        case "FrontendError": {
+          // FrontendErrors are not indexed as part of the thread
+          element.original_index = `frontenderror-${frontend_index}`;
+          frontend_index++;
           newConv.push([element]);
-        } else {
-          // already existing code element with matching id
-          newConv[existingIndex].push(element);
+          break;
+        }
+        case "ServerHint": {
+          // ServerHints containing thread_id are indexed as part of the thread
+          // ServerHints (Heartbeat) containing cpu are not indexed
+          if (typeof element.content === "object" && element.content !== null) {
+            if ("thread_id" in element.content) {
+              element.original_index = original_index;
+              original_index++;
+            }
+          } else {
+            //eslint-disable-next-line no-console
+            console.warn(element.content);
+          }
+          newConv.push([element]);
+          break;
+        }
+        default: {
+          // all remaining variants are part of the thread and are indexed
+          element.original_index = original_index;
+          original_index++;
+          newConv.push([element]);
         }
       }
     }
@@ -99,12 +126,8 @@ function ChatBlock() {
       return null;
     } else {
       return (
-        <Col md={constants.BOT_COLUMN_STYLE} key={`${element.id}-code`}>
-          <CodeBlock
-            showCode={showCode}
-            content={element}
-            elementIndex={element[0].original_index}
-          />
+        <Col md={constants.BOT_COLUMN_STYLE} key={`${element[0].id}-code`}>
+          <CodeBlock showCode={showCode} content={element} />
         </Col>
       );
     }
@@ -112,14 +135,11 @@ function ChatBlock() {
 
   function renderUser(element) {
     return (
-      <Col md={{ span: 10, offset: 2 }} key={`${element.original_index}-user`}>
-        <Card
-          className="shadow-sm card-body border-0 border-bottom mb-3"
-          style={{ backgroundColor: "#eee" }}
-        >
-          {element.content}
-        </Card>
-      </Col>
+      <UserInputBlock
+        content={element}
+        key={`UserInputBlock-${element.original_index}`}
+        onEdit={onEditInput}
+      />
     );
   }
 
@@ -157,6 +177,8 @@ function ChatBlock() {
     switch (element[0].variant) {
       case "ServerHint":
       case "StreamEnd":
+      case "ToolCall":
+      case "ToolOutput":
         return null;
       case "Image":
         return renderImage(element[0]);
@@ -211,5 +233,9 @@ function ChatBlock() {
 
   return render();
 }
+
+ChatBlock.propTypes = {
+  onEditInput: PropTypes.func,
+};
 
 export default React.memo(ChatBlock);

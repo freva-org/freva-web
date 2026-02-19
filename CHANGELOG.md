@@ -1,6 +1,11 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [v2602.0.0]
+### Added
+- Zarr aggregation feature
+### CHANGED
+- support the negative search keys in data-browser
 ## [v2601.1.0]
 ### Added
 - Editing user input on Freva-GPT

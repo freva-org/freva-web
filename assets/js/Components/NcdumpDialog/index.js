@@ -1,9 +1,9 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-import Spinner from "../Spinner";
-
 import { AggregationConfig } from "./AggregationConfig";
+
+import { ZarrLoadingSteps } from "./ZarrLoadingSteps";
 
 export const NcDumpDialogState = {
   ERROR: "error",
@@ -19,6 +19,7 @@ class NcdumpDialog extends React.Component {
       copied: false,
       gridlookCopied: false,
       activeTab: "metadata",
+      dropdownOpen: false,
       aggregationConfig: {
         aggregate: "auto",
         join: null,
@@ -31,7 +32,14 @@ class NcdumpDialog extends React.Component {
     };
     this.handleBackdropClick = this.handleBackdropClick.bind(this);
     this.handleInspect = this.handleInspect.bind(this);
+    this.handleInspectReload = this.handleInspectReload.bind(this);
+    this.handleClickOutsideDropdown = this.handleClickOutsideDropdown.bind(this);
     this.iframeRef = React.createRef();
+    this.dropdownRef = React.createRef();
+  }
+
+  componentDidMount() {
+    document.addEventListener("mousedown", this.handleClickOutsideDropdown);
   }
 
   componentDidUpdate(prevProps) {
@@ -65,6 +73,16 @@ class NcdumpDialog extends React.Component {
     }
   }
 
+  componentWillUnmount() {
+    document.removeEventListener("mousedown", this.handleClickOutsideDropdown);
+  }
+
+  handleClickOutsideDropdown(e) {
+    if (this.dropdownRef.current && !this.dropdownRef.current.contains(e.target)) {
+      this.setState({ dropdownOpen: false });
+    }
+  }
+
   handleBackdropClick(e) {
     if (e.target === e.currentTarget) {
       this.props.onClose();
@@ -82,6 +100,14 @@ class NcdumpDialog extends React.Component {
     }
   }
 
+  handleInspectReload() {
+    const { pathInput } = this.state;
+    this.setState({ dropdownOpen: false });
+    if (pathInput.trim()) {
+      this.props.submitNcdump(pathInput.trim(), { reload: true });
+    }
+  }
+
   render() {
     const {
       show,
@@ -92,6 +118,7 @@ class NcdumpDialog extends React.Component {
       error,
       isAggregation,
       file,
+      zarrStatusCode,
     } = this.props;
 
     if (!show) {
@@ -254,22 +281,73 @@ class NcdumpDialog extends React.Component {
                               minWidth: 0,
                             }}
                           />
-                          <button
-                            className="btn btn-sm btn-primary"
-                            onClick={this.handleInspect}
-                            disabled={
-                              !this.state.pathInput.trim() ||
-                              status === NcDumpDialogState.LOADING
-                            }
-                            style={{
-                              padding: "6px 14px",
-                              fontSize: "13px",
-                              whiteSpace: "nowrap",
-                            }}
+                          <div
+                            ref={this.dropdownRef}
+                            className="btn-group btn-group-sm"
+                            style={{ position: "relative", flexShrink: 0 }}
                           >
-                            <i className="fas fa-sync-alt me-1"></i>
-                            Load
-                          </button>
+                            {/* Main load button */}
+                            <button
+                              className="btn btn-sm btn-primary"
+                              onClick={this.handleInspect}
+                              disabled={
+                                !this.state.pathInput.trim() ||
+                                status === NcDumpDialogState.LOADING
+                              }
+                              style={{
+                                padding: "6px 14px",
+                                fontSize: "13px",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              <i className="fas fa-sync-alt me-1"></i>
+                              Load
+                            </button>
+
+                            {/* Dropdown toggle */}
+                            <button
+                              className="btn btn-sm btn-primary dropdown-toggle dropdown-toggle-split"
+                              onClick={() =>
+                                this.setState((s) => ({
+                                  dropdownOpen: !s.dropdownOpen,
+                                }))
+                              }
+                              disabled={
+                                !this.state.pathInput.trim() ||
+                                status === NcDumpDialogState.LOADING
+                              }
+                              style={{ padding: "6px 8px" }}
+                              title="More load options"
+                            >
+                              <span className="visually-hidden">Toggle</span>
+                            </button>
+
+                            {/* Dropdown menu */}
+                            {this.state.dropdownOpen && (
+                              <ul
+                                className="dropdown-menu show"
+                                style={{
+                                  position: "absolute",
+                                  top: "100%",
+                                  right: 0,
+                                  zIndex: 1050,
+                                  minWidth: "210px",
+                                  marginTop: "2px",
+                                }}
+                              >
+                                <li>
+                                  <button
+                                    className="dropdown-item"
+                                    onClick={this.handleInspectReload}
+                                    style={{ fontSize: "13px" }}
+                                  >
+                                    <i className="fas fa-ban me-2 text-warning"></i>
+                                    Force Reload (bypass cache)
+                                  </button>
+                                </li>
+                              </ul>
+                            )}
+                          </div>
                         </div>
                       </div>
                     )}
@@ -530,7 +608,12 @@ class NcdumpDialog extends React.Component {
 
                   {status === NcDumpDialogState.LOADING && (
                     <div className="text-center py-4">
-                      <Spinner />
+                      {status === NcDumpDialogState.LOADING && (
+                        <ZarrLoadingSteps
+                          statusCode={zarrStatusCode ?? 3}
+                          isAggregation={isAggregation}
+                        />
+                      )}
                       <p
                         className="mt-3 text-muted"
                         style={{ fontSize: "13px" }}
@@ -755,6 +838,7 @@ NcdumpDialog.propTypes = {
   file: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
   zarrUrl: PropTypes.string,
   isAggregation: PropTypes.bool,
+  zarrStatusCode: PropTypes.number,
 };
 
 export default NcdumpDialog;

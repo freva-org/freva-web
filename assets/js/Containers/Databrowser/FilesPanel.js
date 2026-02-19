@@ -15,6 +15,8 @@ import CircularSpinner from "../../Components/Spinner";
 import { getCookie } from "../../utils";
 import Pagination from "../../Components/Pagination";
 
+import { useZarrStatus } from "../../Components/NcdumpDialog/useZarrStatus";
+
 import { BATCH_SIZE, TEMP_FREVA_AUTH_TOKEN } from "./constants";
 
 const MAX_RETRIES = 20;
@@ -35,6 +37,8 @@ async function refreshTokenIfNeeded() {
 function FilesPanelImpl(props) {
   const { files, numFiles, fileLoading } = props.databrowser;
   const [showDialog, setShowDialog] = useState(false);
+  const [rawZarrUrl, setRawZarrUrl] = useState(null);
+  const { statusCode } = useZarrStatus(rawZarrUrl, { enabled: showDialog });
   const [ncdump, setNcDump] = useState({
     status: NcDumpDialogState.READY,
     output: null,
@@ -49,6 +53,7 @@ function FilesPanelImpl(props) {
   const [selectedFiles, setSelectedFiles] = useState([]);
 
   const abortControllerRef = useRef(null);
+  const selectAllRef = useRef(null);
 
   function setPageOffset(offset) {
     const currentLocation = props.location.pathname;
@@ -109,6 +114,20 @@ function FilesPanelImpl(props) {
   function clearSelection() {
     setSelectedFiles([]);
   }
+
+  // Select / deselect all visible files
+  function toggleSelectAll() {
+    setSelectedFiles(
+      selectedFiles.length === files.length ? [] : [...files]
+    );
+  }
+
+  React.useEffect(() => {
+    if (!selectAllRef.current) {return;}
+    const someSelected = selectedFiles.length > 0;
+    const allSelected = selectedFiles.length === files.length && files.length > 0;
+    selectAllRef.current.indeterminate = someSelected && !allSelected;
+  }, [selectedFiles, files]);
 
   async function loadNcdump(fn, retryCount = 0, aggregationConfig = null) {
     // flush any previous request
@@ -180,7 +199,7 @@ function FilesPanelImpl(props) {
       }
 
       const rawzarrUrl = data.urls[0];
-
+      setRawZarrUrl(rawzarrUrl);
       // Step 1.5: Create presigned URL
       const presignResponse = await fetch(
         "/api/freva-nextgen/data-portal/share-zarr",
@@ -397,6 +416,35 @@ function FilesPanelImpl(props) {
         </div>
       )}
 
+      {/* Select-all header row */}
+      {!fileLoading && files.length > 0 && (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "4px 8px 6px",
+            borderBottom: "1px solid #e5e7eb",
+            marginBottom: "2px",
+          }}
+        >
+          <input
+            ref={selectAllRef}
+            type="checkbox"
+            className="form-check-input"
+            style={{ cursor: "pointer", marginTop: 0, flexShrink: 0 }}
+            checked={selectedFiles.length === files.length}
+            onChange={toggleSelectAll}
+            aria-label="Select all files"
+          />
+          <span style={{ fontSize: "12px", color: "#6b7280", userSelect: "none" }}>
+            {selectedFiles.length > 0
+              ? `${selectedFiles.length} of ${files.length} selected`
+              : "Select all"}
+          </span>
+        </div>
+      )}
+
       <ul
         className="jqueryFileTree border shadow-sm py-3 rounded"
         style={{ maxHeight: "1000px", overflow: "auto" }}
@@ -480,6 +528,7 @@ function FilesPanelImpl(props) {
             error: null,
             output: null,
           });
+          setRawZarrUrl(null);
         }}
         submitNcdump={(fn, aggregationConfig) =>
           loadNcdump(fn, 0, aggregationConfig)
@@ -487,6 +536,7 @@ function FilesPanelImpl(props) {
         status={ncdump.status}
         output={ncdump.output}
         error={ncdump.error}
+        zarrStatusCode={statusCode}
       />
     </div>
   );

@@ -33,7 +33,8 @@ class NcdumpDialog extends React.Component {
     this.handleBackdropClick = this.handleBackdropClick.bind(this);
     this.handleInspect = this.handleInspect.bind(this);
     this.handleInspectReload = this.handleInspectReload.bind(this);
-    this.handleClickOutsideDropdown = this.handleClickOutsideDropdown.bind(this);
+    this.handleClickOutsideDropdown =
+      this.handleClickOutsideDropdown.bind(this);
     this.iframeRef = React.createRef();
     this.dropdownRef = React.createRef();
   }
@@ -78,7 +79,10 @@ class NcdumpDialog extends React.Component {
   }
 
   handleClickOutsideDropdown(e) {
-    if (this.dropdownRef.current && !this.dropdownRef.current.contains(e.target)) {
+    if (
+      this.dropdownRef.current &&
+      !this.dropdownRef.current.contains(e.target)
+    ) {
       this.setState({ dropdownOpen: false });
     }
   }

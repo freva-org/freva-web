@@ -117,15 +117,16 @@ function FilesPanelImpl(props) {
 
   // Select / deselect all visible files
   function toggleSelectAll() {
-    setSelectedFiles(
-      selectedFiles.length === files.length ? [] : [...files]
-    );
+    setSelectedFiles(selectedFiles.length === files.length ? [] : [...files]);
   }
 
   React.useEffect(() => {
-    if (!selectAllRef.current) {return;}
+    if (!selectAllRef.current) {
+      return;
+    }
     const someSelected = selectedFiles.length > 0;
-    const allSelected = selectedFiles.length === files.length && files.length > 0;
+    const allSelected =
+      selectedFiles.length === files.length && files.length > 0;
     selectAllRef.current.indeterminate = someSelected && !allSelected;
   }, [selectedFiles, files]);
 
@@ -437,7 +438,9 @@ function FilesPanelImpl(props) {
             onChange={toggleSelectAll}
             aria-label="Select all files"
           />
-          <span style={{ fontSize: "12px", color: "#6b7280", userSelect: "none" }}>
+          <span
+            style={{ fontSize: "12px", color: "#6b7280", userSelect: "none" }}
+          >
             {selectedFiles.length > 0
               ? `${selectedFiles.length} of ${files.length} selected`
               : "Select all"}

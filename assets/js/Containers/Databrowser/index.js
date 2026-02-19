@@ -394,8 +394,15 @@ class Databrowser extends React.Component {
             }}
             key={"selected-" + x + "-" + singleValue}
           >
-            {initCap(underscoreToBlank(this.props.databrowser.facetMapping[x]))}
-            : {singleValue}
+            {initCap(
+              underscoreToBlank(
+                x.includes("_not_")
+                  ? `${this.props.databrowser.facetMapping[x.replace("_not_", "")] ?? x.replace("_not_", "")} ≠`
+                  : (this.props.databrowser.facetMapping[x] ?? x)
+              )
+            )}
+            {x.includes("_not_") ? " " : ": "}
+            {singleValue}
             <FaTimes className="ms-2 fs-6" />
           </Button>
         ));

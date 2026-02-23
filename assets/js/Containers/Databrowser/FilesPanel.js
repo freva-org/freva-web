@@ -21,6 +21,7 @@ import { BATCH_SIZE, TEMP_FREVA_AUTH_TOKEN } from "./constants";
 
 const MAX_RETRIES = 20;
 const RETRY_DELAY = 2000;
+const MAX_FILE_SELECTION = 10;
 
 async function refreshTokenIfNeeded() {
   try {
@@ -113,9 +114,11 @@ function FilesPanelImpl(props) {
     setSelectedFiles((prev) => {
       if (prev.includes(fn)) {
         return prev.filter((f) => f !== fn);
-      } else {
-        return [...prev, fn];
       }
+      if (prev.length >= MAX_FILE_SELECTION) {
+        return prev;
+      }
+      return [...prev, fn];
     });
   }
 
@@ -338,8 +341,19 @@ function FilesPanelImpl(props) {
               <i className="fas fa-times"></i>
             </button>
             <span style={{ fontSize: "14px", fontWeight: "500" }}>
-              {selectedFiles.length} file{selectedFiles.length !== 1 ? "s" : ""}{" "}
-              selected
+              {selectedFiles.length}/{MAX_FILE_SELECTION} file
+              {selectedFiles.length !== 1 ? "s" : ""} selected
+              {selectedFiles.length >= MAX_FILE_SELECTION && (
+                <span
+                  style={{
+                    color: "#f57c00",
+                    marginLeft: "6px",
+                    fontSize: "12px",
+                  }}
+                >
+                  (max reached)
+                </span>
+              )}
             </span>
           </div>
           <button
@@ -450,9 +464,15 @@ function FilesPanelImpl(props) {
                   type="checkbox"
                   checked={isSelected}
                   onChange={() => toggleFileSelection(fn)}
+                  disabled={
+                    !isSelected && selectedFiles.length >= MAX_FILE_SELECTION
+                  }
                   className="form-check-input"
                   style={{
-                    cursor: "pointer",
+                    cursor:
+                      !isSelected && selectedFiles.length >= MAX_FILE_SELECTION
+                        ? "not-allowed"
+                        : "pointer",
                     marginTop: 0,
                     flexShrink: 0,
                   }}

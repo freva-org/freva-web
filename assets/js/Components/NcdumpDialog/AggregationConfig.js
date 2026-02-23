@@ -22,6 +22,7 @@ export function AggregationConfig({ onChange, initialConfig = {} }) {
     access_pattern: initialConfig.access_pattern || "map",
     chunk_size: initialConfig.chunk_size || 16.0,
     map_primary_chunksize: initialConfig.map_primary_chunksize || 1,
+    timeout: initialConfig.timeout || 120,
     ...initialConfig,
   });
 
@@ -52,6 +53,24 @@ export function AggregationConfig({ onChange, initialConfig = {} }) {
         </Form.Select>
         <Form.Text className="text-muted">
           Auto mode will automatically detect the best aggregation method
+        </Form.Text>
+      </Form.Group>
+
+      {/* Timeout */}
+      <Form.Group className="mb-3">
+        <Form.Label className="fw-semibold">Timeout (seconds)</Form.Label>
+        <Form.Control
+          type="number"
+          size="sm"
+          min="10"
+          max="3600"
+          value={config.timeout || 120}
+          onChange={(e) =>
+            handleChange("timeout", parseInt(e.target.value, 10))
+          }
+        />
+        <Form.Text className="text-muted">
+          Max wait time for the aggregation to complete (default: 120 s). Increase for large datasets.
         </Form.Text>
       </Form.Group>
 
@@ -162,6 +181,7 @@ export function AggregationConfig({ onChange, initialConfig = {} }) {
               Group files by a specific attribute
             </Form.Text>
           </Form.Group>
+
           {/* Reload Cache */}
           <Form.Group className="mb-3">
             <Form.Check

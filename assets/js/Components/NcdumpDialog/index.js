@@ -28,6 +28,7 @@ class NcdumpDialog extends React.Component {
         coords: null,
         dim: "",
         group_by: "",
+        timeout: 120,
       },
     };
     this.handleBackdropClick = this.handleBackdropClick.bind(this);
@@ -588,7 +589,7 @@ class NcdumpDialog extends React.Component {
                             >
                               Error loading metadata
                             </strong>
-                            <div style={{ wordWrap: "break-word" }}>
+                            <div style={{ wordWrap: "break-word", whiteSpace: "pre-wrap" }}>
                               {error}
                             </div>
                             <button

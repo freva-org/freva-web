@@ -70,7 +70,8 @@ export function AggregationConfig({ onChange, initialConfig = {} }) {
           }
         />
         <Form.Text className="text-muted">
-          Max wait time for the aggregation to complete (default: 120 s). Increase for large datasets.
+          Max wait time for the aggregation to complete (default: 120 s).
+          Increase for large datasets.
         </Form.Text>
       </Form.Group>
 

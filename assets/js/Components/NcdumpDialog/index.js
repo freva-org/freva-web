@@ -589,7 +589,12 @@ class NcdumpDialog extends React.Component {
                             >
                               Error loading metadata
                             </strong>
-                            <div style={{ wordWrap: "break-word", whiteSpace: "pre-wrap" }}>
+                            <div
+                              style={{
+                                wordWrap: "break-word",
+                                whiteSpace: "pre-wrap",
+                              }}
+                            >
                               {error}
                             </div>
                             <button

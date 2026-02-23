@@ -26,7 +26,9 @@ const RETRY_DELAY = 2000;
  * Extracts a human-readable message from raw HTML or JSON error bodies.
  */
 function parseRawError(raw) {
-  if (!raw) {return null;}
+  if (!raw) {
+    return null;
+  }
   const s = raw.trim();
 
   // JSON: {"detail": "..."}
@@ -74,7 +76,9 @@ function parseRawError(raw) {
       return text;
     }
     const h1 = s.match(/<h1[^>]*>([^<]+)<\/h1>/i);
-    if (h1) {return h1[1].replace(/[^\w\s.,!?-]/g, "").trim();}
+    if (h1) {
+      return h1[1].replace(/[^\w\s.,!?-]/g, "").trim();
+    }
   }
 
   return raw;
@@ -260,9 +264,7 @@ function FilesPanelImpl(props) {
       setZarrUrl(zarrUrl);
 
       // Step 2: Get metadata with retry logic
-      const timeout = isAggregation
-        ? (aggregationConfig?.timeout || 120)
-        : 60;
+      const timeout = isAggregation ? aggregationConfig?.timeout || 120 : 60;
       const htmlUrl = `/api/freva-nextgen/data-portal/zarr-utils/html?url=${encodeURIComponent(rawzarrUrl)}&timeout=${timeout}`;
       const metadataResponse = await fetch(htmlUrl, {
         method: "GET",

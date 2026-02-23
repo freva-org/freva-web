@@ -42,7 +42,9 @@ function FilesPanelImpl(props) {
 
   // Surface terminal zarr status codes as errors in the dialog
   React.useEffect(() => {
-    if (statusCode === null) {return;}
+    if (statusCode === null) {
+      return;
+    }
     const terminalErrors = {
       1: "Zarr conversion failed on the server. Please retry.",
       2: "File not found — the server could not locate this file for streaming.",
@@ -218,9 +220,7 @@ function FilesPanelImpl(props) {
       setZarrUrl(zarrUrl);
 
       // Step 2: Get metadata with retry logic
-      const timeout = isAggregation
-        ? (aggregationConfig?.timeout || 120)
-        : 60;
+      const timeout = isAggregation ? aggregationConfig?.timeout || 120 : 60;
       const htmlUrl = `/api/freva-nextgen/data-portal/zarr-utils/html?url=${encodeURIComponent(rawzarrUrl)}&timeout=${timeout}`;
       const metadataResponse = await fetch(htmlUrl, {
         method: "GET",

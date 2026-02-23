@@ -22,68 +22,6 @@ import { BATCH_SIZE, TEMP_FREVA_AUTH_TOKEN } from "./constants";
 const MAX_RETRIES = 20;
 const RETRY_DELAY = 2000;
 
-/**
- * Extracts a human-readable message from raw HTML or JSON error bodies.
- */
-function parseRawError(raw) {
-  if (!raw) {
-    return null;
-  }
-  const s = raw.trim();
-
-  // JSON: {"detail": "..."}
-  if (s.startsWith("{")) {
-    try {
-      const obj = JSON.parse(s);
-      if (obj.detail) {
-        // The detail string uses \n\n-separated blocks like:
-        // "Main message.\n\nexception: SomeError\ndetail: human readable"
-        const blocks = obj.detail.split(/\n\n+/).filter(Boolean);
-        const mainMsg = blocks[0].replace(/\n/g, " ").trim();
-
-        // Collect per-group details (exception + detail lines after the first block)
-        const hints = blocks
-          .slice(1)
-          .map((block) => {
-            const detailLine = block.match(/\ndetail:\s*(.+)/);
-            const exceptionLine = block.match(/exception:\s*([^\n]+)/);
-            return detailLine
-              ? detailLine[1].trim()
-              : exceptionLine
-                ? exceptionLine[1].trim()
-                : null;
-          })
-          .filter(Boolean);
-
-        return hints.length
-          ? `${mainMsg}\n\n${hints.map((h) => `• ${h}`).join("\n")}`
-          : mainMsg;
-      }
-    } catch {
-      // fall through
-    }
-  }
-
-  // HTML: extract <title> or first <h1>
-  if (s.startsWith("<")) {
-    const title = s.match(/<title>([^<]+)<\/title>/i);
-    if (title) {
-      const text = title[1].trim();
-      // hint for the common 414 case
-      if (text.includes("414")) {
-        return "Request too large — too many files are selected. Try selecting fewer files.";
-      }
-      return text;
-    }
-    const h1 = s.match(/<h1[^>]*>([^<]+)<\/h1>/i);
-    if (h1) {
-      return h1[1].replace(/[^\w\s.,!?-]/g, "").trim();
-    }
-  }
-
-  return raw;
-}
-
 async function refreshTokenIfNeeded() {
   try {
     const response = await fetch("/api/token-health/", {
@@ -101,6 +39,23 @@ function FilesPanelImpl(props) {
   const [showDialog, setShowDialog] = useState(false);
   const [rawZarrUrl, setRawZarrUrl] = useState(null);
   const { statusCode } = useZarrStatus(rawZarrUrl, { enabled: showDialog });
+
+  // Surface terminal zarr status codes as errors in the dialog
+  React.useEffect(() => {
+    if (statusCode === null) {return;}
+    const terminalErrors = {
+      1: "Zarr conversion failed on the server. Please retry.",
+      2: "File not found — the server could not locate this file for streaming.",
+      5: null, // handled visually inside ZarrLoadingSteps after maxGoneRetries
+    };
+    if (statusCode in terminalErrors && terminalErrors[statusCode]) {
+      setNcDump((prev) => ({
+        ...prev,
+        status: NcDumpDialogState.ERROR,
+        error: terminalErrors[statusCode],
+      }));
+    }
+  }, [statusCode]);
   const [ncdump, setNcDump] = useState({
     status: NcDumpDialogState.READY,
     output: null,
@@ -235,9 +190,8 @@ function FilesPanelImpl(props) {
 
       if (!response.ok) {
         const errorText = await response.text();
-        const parsed = parseRawError(errorText);
         throw new Error(
-          `Failed to create zarr endpoint: ${parsed || response.statusText}`
+          `Failed to create zarr endpoint: ${errorText || response.statusText}`
         );
       }
 
@@ -264,7 +218,9 @@ function FilesPanelImpl(props) {
       setZarrUrl(zarrUrl);
 
       // Step 2: Get metadata with retry logic
-      const timeout = isAggregation ? aggregationConfig?.timeout || 120 : 60;
+      const timeout = isAggregation
+        ? (aggregationConfig?.timeout || 120)
+        : 60;
       const htmlUrl = `/api/freva-nextgen/data-portal/zarr-utils/html?url=${encodeURIComponent(rawzarrUrl)}&timeout=${timeout}`;
       const metadataResponse = await fetch(htmlUrl, {
         method: "GET",
@@ -301,12 +257,12 @@ function FilesPanelImpl(props) {
           return;
         }
         // If it's "finished, failed" or max retries reached
-        throw new Error(parseRawError(errorText) || "Service unavailable");
+        throw new Error(errorText || "Service unavailable");
       }
 
       if (!metadataResponse.ok) {
         const errorText = await metadataResponse.text();
-        throw new Error(parseRawError(errorText) || "Failed to get metadata");
+        throw new Error(errorText || "Failed to get metadata");
       }
       // IMPORTANT: Get the xarray HTML directly from backend,
       // no need to be processed in frontend.
@@ -335,11 +291,7 @@ function FilesPanelImpl(props) {
       } else if (error.message.includes("Failed to get zarr URL")) {
         errorMessage = `Cannot create zarr endpoint: ${error.message.split(": ")[1] || error.message}`;
       } else {
-        // Try to strip any leftover raw HTML/JSON that slipped through
-        const reparsed = parseRawError(error.message);
-        if (reparsed && reparsed !== error.message) {
-          errorMessage = reparsed;
-        }
+        // keep errorMessage as-is
       }
 
       setNcDump({

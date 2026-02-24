@@ -45,6 +45,7 @@
     "webpack-merge": "5.10.0"
   },
   "dependencies": {
+    "cypress": "^15.10.0",
     "date-fns": "^2.29",
     "dotenv": "^16.4.5",
     "dotenv-webpack": "^8.1.0",

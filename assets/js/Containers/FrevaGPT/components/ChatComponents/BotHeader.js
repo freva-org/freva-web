@@ -50,7 +50,7 @@ function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
 
   return (
     <div className="d-flex justify-content-between">
-      <h2 onClick={toggleBotSelect}>FrevaGPT</h2>
+      <h2 onClick={toggleBotSelect} data-test="heading">FrevaGPT</h2>
 
       {botOkay ? (
         <div className="d-flex justify-content-between mb-2">

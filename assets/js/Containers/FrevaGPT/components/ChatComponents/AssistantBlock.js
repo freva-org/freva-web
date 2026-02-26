@@ -26,7 +26,7 @@ function AssistantBlock({ content, streaming }) {
 
   return (
     <Col md={constants.BOT_COLUMN_STYLE}>
-      <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
+      <Card className="bot-shadow br-8 card-body border-0 border-bottom mb-3 bg-light">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>
           {replaceLinebreaks(content.content).replaceAll(
             "utm_source=openai",

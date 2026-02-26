@@ -16,7 +16,7 @@ function ScrollButtons() {
         <div className="d-flex flex-column">
           <Button
             variant="secondary"
-            className="mb-2"
+            className="mb-2 bot-shadow br-8"
             onClick={() =>
               document
                 .getElementById("chatContainer")
@@ -26,7 +26,11 @@ function ScrollButtons() {
             <FaArrowUp />
           </Button>
 
-          <Button variant="secondary" onClick={() => scrollToChatBottom()}>
+          <Button
+            variant="secondary"
+            onClick={() => scrollToChatBottom()}
+            className="bot-shadow br-8"
+          >
             <FaArrowDown />
           </Button>
         </div>

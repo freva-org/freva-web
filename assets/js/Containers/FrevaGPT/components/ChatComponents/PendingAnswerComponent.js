@@ -58,7 +58,7 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
   function renderCode() {
     return (
       <Col md={constants.BOT_COLUMN_STYLE}>
-        <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
+        <Card className="bot-shadow br-8 card-body border-0 border-bottom mb-3 bg-light">
           <Button
             variant="link"
             className="m-0 p-0 d-inline-flex text-decoration-none"
@@ -100,7 +100,7 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
     return (
       <Row className="mb-3">
         <Col md={3}>
-          <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light d-flex flex-row align-items-center">
+          <Card className="bot-shadow br-8 card-body border-0 border-bottom mb-3 bg-light d-flex flex-row align-items-center">
             <Spinner size="sm" />
             <span className="ms-2">
               {ref.lastVariant.current === "Code"
@@ -117,7 +117,7 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
     return (
       <Row className="mb-3">
         <Col md={3}>
-          <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light d-flex flex-row align-items-center">
+          <Card className="bot-shadown br-8 card-body border-0 border-bottom mb-3 bg-light d-flex flex-row align-items-center">
             <Spinner size="sm" />
             <span className="ms-2">Plotting image...</span>
           </Card>

@@ -59,7 +59,7 @@ function ThreadLink({ element, updateThreadList }) {
 
   const popover = (
     <Popover className="p-2">
-      <ListGroup>
+      <ListGroup className="bot-shadow br-8">
         {threadOptions.map((element, index) => {
           const itemKey = `options-${element.title}-${index}`;
           return (

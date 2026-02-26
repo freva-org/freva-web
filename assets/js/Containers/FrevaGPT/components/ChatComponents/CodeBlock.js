@@ -76,7 +76,7 @@ function CodeBlock({ showCode, content }) {
 
   return (
     <>
-      <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
+      <Card className="bot-shadow br-8 card-body border-0 border-bottom mb-3 bg-light">
         <div className="d-flex justify-content-between">
           <Button
             variant="link"

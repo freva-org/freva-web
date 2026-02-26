@@ -218,8 +218,20 @@ footer h4 {
 /*-----------------------------------------------------------------------------
                             BOT RELATED STYLES
 -----------------------------------------------------------------------------*/
+.bot-shadow {
+  box-shadow: 1px 2px 3px rgba(0,0,0,0.2);
+}
+
+.br-8 {
+  border-radius: 8px;
+}
+
 .bot-header-button {
   width: 8rem;
+}
+
+.bot-input-shadow {
+  box-shadow: -2px 2px 3px rgba(0,0,0,0.2);
 }
 
 .scroll-button {

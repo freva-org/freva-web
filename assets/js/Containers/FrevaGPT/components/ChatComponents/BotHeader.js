@@ -70,14 +70,14 @@ function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
           <Button
             variant={showCode ? "outline-secondary" : "secondary"}
             onClick={() => dispatch(toggleShowCode(showCode))}
-            className="me-1 bot-header-button"
+            className="me-1 bot-header-button bot-shadow br-8"
           >
             <FaCode className="me-1" />
             {showCode ? "Hide Code" : "Show Code"}
           </Button>
           <Button
             variant="secondary"
-            className="me-1 bot-header-button"
+            className="me-1 bot-header-button bot-shadow br-8"
             onClick={toggleShowThreadHistory}
           >
             <FaHistory className="me-1" /> History
@@ -85,7 +85,7 @@ function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
           <Button
             onClick={() => createNewChat()}
             variant="secondary"
-            className="bot-header-button"
+            className="bot-header-button bot-shadow br-8"
           >
             <FaRegCommentAlt className="me-1" /> New Chat
           </Button>

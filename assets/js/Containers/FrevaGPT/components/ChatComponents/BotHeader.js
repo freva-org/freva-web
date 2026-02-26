@@ -5,7 +5,7 @@ import { Button, Form } from "react-bootstrap";
 
 import PropTypes from "prop-types";
 
-import { FaRegCommentAlt, FaHistory } from "react-icons/fa";
+import { FaRegCommentAlt, FaHistory, FaCode } from "react-icons/fa";
 
 import { setBotModel, toggleShowCode } from "../../actions";
 
@@ -72,6 +72,7 @@ function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
             onClick={() => dispatch(toggleShowCode(showCode))}
             className="me-1 bot-header-button"
           >
+            <FaCode className="me-1" />
             {showCode ? "Hide Code" : "Show Code"}
           </Button>
           <Button
@@ -79,14 +80,14 @@ function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
             className="me-1 bot-header-button"
             onClick={toggleShowThreadHistory}
           >
-            <FaHistory /> History
+            <FaHistory className="me-1" /> History
           </Button>
           <Button
             onClick={() => createNewChat()}
             variant="secondary"
             className="bot-header-button"
           >
-            <FaRegCommentAlt /> New Chat
+            <FaRegCommentAlt className="me-1" /> New Chat
           </Button>
         </div>
       ) : null}

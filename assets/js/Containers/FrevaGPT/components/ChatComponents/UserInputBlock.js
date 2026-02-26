@@ -62,10 +62,7 @@ function UserInputBlock({ content, onEdit }) {
 
   return (
     <Col md={USER_INPUT_STYLE} key={`${content.original_index}-user`}>
-      <Card
-        className="shadow-sm card-body border-0 border-bottom"
-        style={{ backgroundColor: "#eee" }}
-      >
+      <Card className="shadow-sm card-body border-0 border-bottom bot-bg-lg">
         {renderInput
           ? renderInputComponent()
           : editedInput

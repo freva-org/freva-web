@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
-import { Button, Form, ButtonGroup } from "react-bootstrap";
+import { Button, Form } from "react-bootstrap";
 
 import PropTypes from "prop-types";
 
@@ -67,22 +67,25 @@ function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
               return <option key={model}>{model}</option>;
             })}
           </Form.Select>
-          <ButtonGroup size="sm" className="me-1">
-            <Button
-              variant={showCode ? "outline-secondary" : "secondary"}
-              onClick={() => dispatch(toggleShowCode(showCode))}
-            >
-              {showCode ? "Hide Code" : "Show Code"}
-            </Button>
-          </ButtonGroup>
+          <Button
+            variant={showCode ? "outline-secondary" : "secondary"}
+            onClick={() => dispatch(toggleShowCode(showCode))}
+            className="me-1 bot-header-button"
+          >
+            {showCode ? "Hide Code" : "Show Code"}
+          </Button>
           <Button
             variant="secondary"
-            className="me-1"
+            className="me-1 bot-header-button"
             onClick={toggleShowThreadHistory}
           >
             <FaHistory /> History
           </Button>
-          <Button onClick={() => createNewChat()} variant="info">
+          <Button
+            onClick={() => createNewChat()}
+            variant="secondary"
+            className="bot-header-button"
+          >
             <FaRegCommentAlt /> New Chat
           </Button>
         </div>

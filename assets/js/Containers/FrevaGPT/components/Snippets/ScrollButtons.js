@@ -7,20 +7,11 @@ import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 import { scrollToChatBottom } from "../../utils";
 
 function ScrollButtons() {
-  // here also no suitable solutions using bootstrap found -> need for better solution
-  const scrollButtonStyle = {
-    zIndex: 10,
-    right: "40px",
-    bottom: "10px",
-    position: "sticky",
-  };
-
   return (
     <>
       <Col
         md={12}
-        style={scrollButtonStyle}
-        className="d-flex flex-row justify-content-end"
+        className="d-flex flex-row justify-content-end scroll-button"
       >
         <div className="d-flex flex-column">
           <Button

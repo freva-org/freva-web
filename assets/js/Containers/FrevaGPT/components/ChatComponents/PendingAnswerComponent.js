@@ -79,23 +79,12 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
           <Collapse in={showCode} className="mt-2">
             <Card className="shadow-sm mt-2">
               <Card.Header>python</Card.Header>
-              <Card.Body
-                className="p-0 m-0"
-                style={{ backgroundColor: "#f6f6f6" }}
-              >
+              <Card.Body className="p-0 m-0 bot-streaming-code">
                 <pre className="fancy-code">
                   <code className="language-python">{fancyCode}</code>
                 </pre>
 
-                <p
-                  style={{
-                    color: "#2f3337",
-                    fontSize: "14px",
-                    padding: "1rem",
-                  }}
-                >
-                  {plainCode}
-                </p>
+                <p className="bot-streaming-code">{plainCode}</p>
                 <span>
                   <Spinner className="mx-1" size="sm" />
                 </span>

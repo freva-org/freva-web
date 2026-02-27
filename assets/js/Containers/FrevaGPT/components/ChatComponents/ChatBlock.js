@@ -112,7 +112,7 @@ function ChatBlock({ onEditInput }) {
             onClick={() => enlargeImage(element.content)}
             className="d-flex align-items-center"
           >
-            <FaExpand className="color" />
+            <FaExpand color="grey" />
           </Button>
         </div>
       </div>

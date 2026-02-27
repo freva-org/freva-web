@@ -74,7 +74,8 @@ function UserInputBlock({ content, onEdit }) {
         <FaEdit
           onClick={() => setRenderInput(true)}
           role="button"
-          className="color mt-2"
+          className="mt-2"
+          color="grey"
         />
       </div>
     </Col>

@@ -8,6 +8,7 @@ import { ListGroup, OverlayTrigger, Popover } from "react-bootstrap";
 import { FaPen, FaTrash, FaEllipsisH } from "react-icons/fa";
 
 import useHoverThread from "../../customHooks/useHoverThread";
+import useMobileStatus from "../../customHooks/useMobileStatus";
 
 import ThreadModal from "./ThreadModal";
 
@@ -15,17 +16,12 @@ function ThreadLink({ element, updateThreadList }) {
   const [showModal, setShowModal] = useState(false);
   const ref = useRef(null);
   const [hovered, setHovered] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const [showEditButton, setShowEditButton] = useState(false);
   const [mode, setMode] = useState("rename");
   const [showPopover, setShowPopover] = useState(false);
+  const isMobile = useMobileStatus();
 
   useHoverThread({ hovered, setHovered, ref });
-
-  useEffect(() => {
-    const minWidth = 768; // Minimum width for desktop devices
-    setIsMobile(window.innerWidth < minWidth || screen.width < minWidth);
-  }, []);
 
   useEffect(() => {
     if (isMobile) {

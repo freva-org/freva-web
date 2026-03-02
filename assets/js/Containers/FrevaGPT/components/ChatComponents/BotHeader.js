@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
-import { Button, Form } from "react-bootstrap";
+import { Button, Form, Row, Col, Container } from "react-bootstrap";
 
 import PropTypes from "prop-types";
 
@@ -49,49 +49,70 @@ function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
   }
 
   return (
-    <div className="d-flex justify-content-between">
-      <h2 onClick={toggleBotSelect}>FrevaGPT</h2>
+    <Container className="mb-2">
+      <Row>
+        <Col md={5}>
+          <h2 onClick={toggleBotSelect}>FrevaGPT</h2>
+        </Col>
 
-      {botOkay ? (
-        <div className="d-flex justify-content-between mb-2">
-          <Form.Select
-            value={botModel}
-            onChange={(e) => {
-              dispatch(setBotModel(e.target.value));
-            }}
-            className="me-1"
-            placeholder="Model"
-            hidden={hideBotModelList}
-          >
-            {botModelList.map((model) => {
-              return <option key={model}>{model}</option>;
-            })}
-          </Form.Select>
-          <Button
-            variant={showCode ? "outline-secondary" : "secondary"}
-            onClick={() => dispatch(toggleShowCode(showCode))}
-            className="me-1 bot-header-button bot-shadow br-8"
-          >
-            <FaCode className="me-1" />
-            {showCode ? "Hide Code" : "Show Code"}
-          </Button>
-          <Button
-            variant="secondary"
-            className="me-1 bot-header-button bot-shadow br-8"
-            onClick={toggleShowThreadHistory}
-          >
-            <FaHistory className="me-1" /> History
-          </Button>
-          <Button
-            onClick={() => createNewChat()}
-            variant="secondary"
-            className="bot-header-button bot-shadow br-8"
-          >
-            <FaRegCommentAlt className="me-1" /> New Chat
-          </Button>
-        </div>
-      ) : null}
-    </div>
+        <Col>
+          {botOkay ? (
+            <Form.Select
+              value={botModel}
+              onChange={(e) => {
+                dispatch(setBotModel(e.target.value));
+              }}
+              className="me-1"
+              placeholder="Model"
+              hidden={hideBotModelList}
+            >
+              {botModelList.map((model) => {
+                return <option key={model}>{model}</option>;
+              })}
+            </Form.Select>
+          ) : null}
+        </Col>
+
+        <Col md={5}>
+          {botOkay ? (
+            <Row>
+              <Col>
+                <Button
+                  variant={showCode ? "outline-secondary" : "secondary"}
+                  onClick={() => dispatch(toggleShowCode(showCode))}
+                  className="me-1 bot-shadow br-8 w-100"
+                >
+                  <FaCode className="me-1" />
+                  <span className="d-none d-sm-inline">
+                    {showCode ? "Hide Code" : "Show Code"}
+                  </span>
+                </Button>
+              </Col>
+              <Col>
+                <Button
+                  variant="secondary"
+                  className="me-1 bot-shadow br-8 w-100"
+                  onClick={toggleShowThreadHistory}
+                >
+                  <FaHistory className="me-1" />
+                  <span className="d-none d-sm-inline">History</span>
+                </Button>
+              </Col>
+              <Col>
+                <Button
+                  onClick={() => createNewChat()}
+                  variant="secondary"
+                  className="bot-shadow br-8 w-100"
+                >
+                  <FaRegCommentAlt className="me-1" />
+                  <span className="d-none d-sm-inline">New Chat</span>
+                </Button>
+              </Col>
+            </Row>
+          ) : null}
+        </Col>
+      </Row>
+    </Container>
   );
 }
 

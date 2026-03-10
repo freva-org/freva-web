@@ -55,7 +55,7 @@ function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
           <h2 onClick={toggleBotSelect}>FrevaGPT</h2>
         </Col>
 
-        <Col>
+        <Col className="mb-2">
           {botOkay ? (
             <Form.Select
               value={botModel}

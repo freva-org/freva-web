@@ -15,7 +15,7 @@ export default function MessageToast() {
   const dispatch = useDispatch();
 
   return (
-    <div className="position-fixed top-0 end-0 p-3" style={{ zIndex: 11 }}>
+    <div className="position-fixed top-0 end-0 p-3 bot-message-toast">
       <Toast
         onClose={() => dispatch(setShowMessageToast(false))}
         show={showMessageToast}

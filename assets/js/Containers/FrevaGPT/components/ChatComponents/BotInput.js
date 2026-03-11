@@ -56,12 +56,13 @@ function BotInput({ loading, handleSubmit, handleStop }) {
           }}
           onKeyDown={handleKeyDown}
           placeholder="Ask a question"
+          className="br-8 bot-input-shadow"
         />
         {loading ? (
           <Button
             variant="outline-danger"
             onClick={handleStop}
-            className="d-flex align-items-center"
+            className="d-flex align-items-center br-8 bot-shadow"
           >
             <FaStop />
           </Button>
@@ -69,7 +70,7 @@ function BotInput({ loading, handleSubmit, handleStop }) {
           <Button
             variant="outline-success"
             onClick={submitUserInput}
-            className="d-flex align-items-center"
+            className="d-flex align-items-center br-8 bot-shadow"
           >
             <FaPlay />
           </Button>

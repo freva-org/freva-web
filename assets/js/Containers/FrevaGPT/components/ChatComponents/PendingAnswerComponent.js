@@ -58,7 +58,7 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
   function renderCode() {
     return (
       <Col md={constants.BOT_COLUMN_STYLE}>
-        <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
+        <Card className="bot-shadow br-8 card-body border-0 border-bottom mb-3 bg-light">
           <Button
             variant="link"
             className="m-0 p-0 d-inline-flex text-decoration-none"
@@ -79,23 +79,12 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
           <Collapse in={showCode} className="mt-2">
             <Card className="shadow-sm mt-2">
               <Card.Header>python</Card.Header>
-              <Card.Body
-                className="p-0 m-0"
-                style={{ backgroundColor: "#f6f6f6" }}
-              >
+              <Card.Body className="p-0 m-0 bot-streaming-code">
                 <pre className="fancy-code">
                   <code className="language-python">{fancyCode}</code>
                 </pre>
 
-                <p
-                  style={{
-                    color: "#2f3337",
-                    fontSize: "14px",
-                    padding: "1rem",
-                  }}
-                >
-                  {plainCode}
-                </p>
+                <p className="bot-streaming-code">{plainCode}</p>
                 <span>
                   <Spinner className="mx-1" size="sm" />
                 </span>
@@ -111,7 +100,7 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
     return (
       <Row className="mb-3">
         <Col md={3}>
-          <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light d-flex flex-row align-items-center">
+          <Card className="bot-shadow br-8 card-body border-0 border-bottom mb-3 bg-light d-flex flex-row align-items-center">
             <Spinner size="sm" />
             <span className="ms-2">
               {ref.lastVariant.current === "Code"
@@ -128,7 +117,7 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
     return (
       <Row className="mb-3">
         <Col md={3}>
-          <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light d-flex flex-row align-items-center">
+          <Card className="bot-shadown br-8 card-body border-0 border-bottom mb-3 bg-light d-flex flex-row align-items-center">
             <Spinner size="sm" />
             <span className="ms-2">Plotting image...</span>
           </Card>

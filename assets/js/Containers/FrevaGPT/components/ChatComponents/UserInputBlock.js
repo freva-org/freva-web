@@ -62,10 +62,7 @@ function UserInputBlock({ content, onEdit }) {
 
   return (
     <Col md={USER_INPUT_STYLE} key={`${content.original_index}-user`}>
-      <Card
-        className="shadow-sm card-body border-0 border-bottom"
-        style={{ backgroundColor: "#eee" }}
-      >
+      <Card className="bot-shadow br-8 card-body border-0 border-bottom bot-bg-lg">
         {renderInput
           ? renderInputComponent()
           : editedInput
@@ -77,7 +74,8 @@ function UserInputBlock({ content, onEdit }) {
         <FaEdit
           onClick={() => setRenderInput(true)}
           role="button"
-          className="color mt-2"
+          className="mt-2"
+          color="grey"
         />
       </div>
     </Col>

@@ -78,7 +78,7 @@ function SidePanel({ showThreadHistory, setShowThreadHistory }) {
         <Offcanvas.Title>Chat History</Offcanvas.Title>
       </Offcanvas.Header>
       <Offcanvas.Body>
-        <Card className="w-100">
+        <Card className="w-100 bot-shadow br-8">
           <Card.Header>
             <FormControl
               className="my-2"

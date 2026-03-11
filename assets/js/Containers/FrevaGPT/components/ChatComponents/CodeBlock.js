@@ -39,9 +39,7 @@ function CodeBlock({ showCode, content }) {
   }
 
   function copyCode() {
-    const code = extractElements(content, "Code").map((codeElement) => {
-      return formatCode("Code", codeElement.content);
-    });
+    const code = formatCode("Code", extractElements(content, "Code").content);
     navigator.clipboard.writeText(code);
     dispatch(
       setMessageToastContent({
@@ -56,13 +54,9 @@ function CodeBlock({ showCode, content }) {
     //TODO original_id added when rearranged?
     if (content.length > 1) {
       return (
-        <Card.Footer
-          className="p-0 m-0"
-          key={`${content[1].id}-codeoutput`}
-          style={{ fontSize: "0.72em" }}
-        >
+        <Card.Footer className="p-0 m-0" key={`${content[1].id}-codeoutput`}>
           <pre className="codeblock m-0">
-            <code style={{ color: "#fff", background: "#333" }}>
+            <code className="bot-code-output">
               {
                 formatCode(
                   "CodeOutput",
@@ -80,7 +74,7 @@ function CodeBlock({ showCode, content }) {
 
   return (
     <>
-      <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
+      <Card className="bot-shadow br-8 card-body border-0 border-bottom mb-3 bg-light">
         <div className="d-flex justify-content-between">
           <Button
             variant="link"
@@ -89,9 +83,7 @@ function CodeBlock({ showCode, content }) {
               localToggleShowCode();
             }}
           >
-            <span style={{ fontWeight: "bold" }} className="color">
-              Analyzed
-            </span>
+            <strong className="color">Analyzed</strong>
             <span>
               {localShowCode ? (
                 <FaAngleUp className="color" />
@@ -108,7 +100,7 @@ function CodeBlock({ showCode, content }) {
 
         <Collapse in={localShowCode} className="mt-2">
           <Card className="shadow-sm">
-            <Card.Header style={{ backgroundColor: "#eee" }}>
+            <Card.Header className="bot-bg-lg">
               <div className="d-flex justify-content-between align-items-center">
                 python
                 <Button variant="link" onClick={copyCode}>

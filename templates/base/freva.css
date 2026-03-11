@@ -214,3 +214,54 @@ footer h4 {
    margin-bottom: 4px;
    color: #ccc;
 }
+
+/*-----------------------------------------------------------------------------
+                            BOT RELATED STYLES
+-----------------------------------------------------------------------------*/
+.bot-shadow {
+  box-shadow: 1px 2px 3px rgba(0,0,0,0.2);
+}
+
+.br-8 {
+  border-radius: 8px;
+}
+
+.bot-hb-l {
+  width: 8rem;
+}
+
+.bot-input-shadow {
+  box-shadow: -2px 2px 3px rgba(0,0,0,0.2);
+}
+
+.scroll-button {
+  z-index: 10;
+  right: 40px;
+  bottom: 10px;
+  position: sticky;
+}
+
+.bot-message-toast {
+  z-index: 11;
+}
+
+.bot-bg-lg {
+  background-color: #eee;
+}
+
+.bot-code-output {
+  color: #fff;
+  background-color: #333;
+  font-size: 0.72em;
+}
+
+.bot-streaming-code {
+  background-color: #f6f6f6;
+  color: #2f3337;
+  font-size: 14px;
+  padding: 1rem;
+}
+
+.bot-references {
+  padding: .5em 1em;
+}

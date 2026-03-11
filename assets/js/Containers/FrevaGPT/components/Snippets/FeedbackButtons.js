@@ -26,12 +26,10 @@ function FeedbackButtons({ elementIndex, givenValue }) {
 
   const thumbValues = {
     thumbsUp: {
-      color: "green",
       size: 20,
       className: "me-1",
     },
     thumbsDown: {
-      color: "red",
       size: 20,
     },
   };
@@ -72,10 +70,18 @@ function FeedbackButtons({ elementIndex, givenValue }) {
   return (
     <Col className="d-flex justify-content-end">
       <IconContext.Provider value={thumbValues.thumbsUp}>
-        <ThumbsUpIcon onClick={() => handleFeedback("up")} role="button" />
+        <ThumbsUpIcon
+          onClick={() => handleFeedback("up")}
+          color={thumb === "up" ? "green" : "grey"}
+          role="button"
+        />
       </IconContext.Provider>
       <IconContext.Provider value={thumbValues.thumbsDown}>
-        <ThumbsDownIcon onClick={() => handleFeedback("down")} role="button" />
+        <ThumbsDownIcon
+          onClick={() => handleFeedback("down")}
+          color={thumb === "down" ? "red" : "grey"}
+          role="button"
+        />
       </IconContext.Provider>
     </Col>
   );

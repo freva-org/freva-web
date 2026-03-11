@@ -7,7 +7,9 @@ function ReferenceItem({ link, title }) {
       className="color bot-shadow br-8 bot-references me-1 bot-bg-lg"
       role="button"
     >
-      <a href={link ? link : ""}>{title}</a>
+      <a target="_blank" rel="noopener noreferrer" href={link ? link : ""}>
+        {title}
+      </a>
     </span>
   );
 }

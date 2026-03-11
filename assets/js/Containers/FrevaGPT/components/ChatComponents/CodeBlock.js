@@ -39,9 +39,7 @@ function CodeBlock({ showCode, content }) {
   }
 
   function copyCode() {
-    const code = extractElements(content, "Code").map((codeElement) => {
-      return formatCode("Code", codeElement.content);
-    });
+    const code = formatCode("Code", extractElements(content, "Code").content);
     navigator.clipboard.writeText(code);
     dispatch(
       setMessageToastContent({

@@ -136,10 +136,15 @@ function ThreadModal({
         <Modal.Body>{modalOptions[mode].body}</Modal.Body>
 
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => setShowModal(false)}
+            className="bot-shadow br-8"
+          >
             Cancel
           </Button>
           <Button
+            className="bot-shadow br-8"
             variant="info"
             onClick={() => {
               modalOptions[mode].handler();

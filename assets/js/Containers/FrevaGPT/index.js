@@ -7,6 +7,8 @@ import { browserHistory } from "react-router";
 
 import queryString from "query-string";
 
+import { isEmpty } from "lodash";
+
 import BotHeader from "./components/ChatComponents/BotHeader";
 import ChatBlock from "./components/ChatComponents/ChatBlock";
 import Suggestions from "./components/ChatComponents/Suggestions";
@@ -143,13 +145,33 @@ function FrevaGPT() {
   -----------------------------------------------------------------------------------------------*/
   async function handleSubmit(input) {
     /**
-     * Sends request to bot ncluding the given user input
+     * Sends request to bot including the given user input
      *
      * @param {string} input - Given user input
      */
     dispatch(addElement({ variant: "User", content: input }));
     setShowSuggestions(false);
     setLoading(true);
+
+    // backend always requires a thread id to be send with streamresponse
+    // for new conversation without existing thread id -> request new thread id and set it
+    if (isEmpty(grepThreadID())) {
+      const response = await fetchWithAuth("/api/chatbot/newthread");
+
+      //eslint-disable-next-line no-console
+      console.log(response.body);
+
+      if (response.ok) {
+        const init_thread_id = await response.json();
+        browserHistory.push({
+          pathname: "/chatbot/",
+          search: `?thread_id=${init_thread_id}`,
+        });
+      } else {
+        //eslint-disable-next-line no-console
+        console.error("Could not fetch new thread id!", response.statusText);
+      }
+    }
 
     try {
       await fetchData(input);

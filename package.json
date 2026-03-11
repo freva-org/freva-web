@@ -1,6 +1,6 @@
 {
   "name": "evaluation_system_web",
-  "version": "2602.0.0",
+  "version": "2603.0.0",
   "description": "React-bits of the freva-web interface. The react-parts of the web interface include the plugin-selection, the data-browser and the result-browser",
   "main": "index.js",
   "engines": {
@@ -57,15 +57,12 @@
     "react": "^16.14.0",
     "react-bootstrap": "^2.7.2",
     "react-dom": "^16.14.0",
-    "react-highlight": "^0.15.0",
-    "react-html-parser": "^2.0.2",
     "react-icons": "^4.12.0",
     "react-markdown": "^8.0.7",
     "react-nl2br": "^1.0.2",
     "react-redux": "^7.2.6",
     "react-router": "^3.2.6",
     "react-select": "5.7.3",
-    "react-syntax-highlighter": "^15.6.1",
     "react-table": "^7.7.0",
     "react-window": "^1.8.8",
     "redux": "^4.2.1",

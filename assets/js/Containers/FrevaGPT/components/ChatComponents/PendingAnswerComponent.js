@@ -1,30 +1,36 @@
 import React, { useState, useEffect, forwardRef } from "react";
 import PropTypes from "prop-types";
+import hljs from "highlight.js";
+import "highlight.js/styles/stackoverflow-light.css";
 
 import { Col, Card, Spinner, Row, Button, Collapse } from "react-bootstrap";
 import { FaAngleDown, FaAngleUp } from "react-icons/fa";
 
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
-
-import Markdown from "react-markdown";
-
 import * as constants from "../../constants";
 
+import AssistantBlock from "./AssistantBlock";
+
 const PendingAnswerComponent = forwardRef((props, ref) => {
-  const [renderedCode, setRenderedCode] = useState("");
+  const [plainCode, setPlainCode] = useState("");
+  const [fancyCode, setFancyCode] = useState("");
   const [showCode, setShowCode] = useState(true);
 
   useEffect(() => {
-    const parsedCode = extractCode(props.content);
-    if (parsedCode !== "") {
-      setRenderedCode(parsedCode);
-    }
+    extractCode(props.content);
   }, [props.content]);
+
+  useEffect(() => {
+    // hilight code blocks
+    document.querySelectorAll(".fancy-code code").forEach((block) => {
+      if (block.dataset.highlighted) {
+        delete block.dataset.highlighted;
+      }
+      hljs.highlightElement(block);
+    });
+  }, [fancyCode]);
 
   function extractCode(rawCode) {
     let jsonCode = "";
-    let codeSnippets = "";
 
     if (!rawCode.endsWith('"}')) {
       jsonCode = rawCode + '"}';
@@ -33,28 +39,26 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
     }
 
     try {
-      const code = JSON.parse(jsonCode);
-      codeSnippets = code.code;
+      // dividing streamed code into blocks
+      // only full blocks getting hilighted
+      const code = JSON.parse(jsonCode).code;
+      const lastLineBreak = code.lastIndexOf("\n\n");
+
+      if (lastLineBreak !== -1) {
+        setFancyCode(code.slice(0, lastLineBreak + 4));
+        setPlainCode(code.slice(lastLineBreak));
+      } else {
+        setPlainCode(code);
+      }
     } catch (err) {
       // console.error(err);
     }
-    return codeSnippets;
-  }
-
-  function renderAssistant(props) {
-    return (
-      <Col md={constants.BOT_COLUMN_STYLE}>
-        <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
-          <Markdown>{props.content}</Markdown>
-        </Card>
-      </Col>
-    );
   }
 
   function renderCode() {
     return (
       <Col md={constants.BOT_COLUMN_STYLE}>
-        <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
+        <Card className="bot-shadow br-8 card-body border-0 border-bottom mb-3 bg-light">
           <Button
             variant="link"
             className="m-0 p-0 d-inline-flex text-decoration-none"
@@ -75,13 +79,12 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
           <Collapse in={showCode} className="mt-2">
             <Card className="shadow-sm mt-2">
               <Card.Header>python</Card.Header>
-              <Card.Body
-                className="p-0 m-0"
-                style={{ backgroundColor: "#fafafa" }}
-              >
-                <SyntaxHighlighter language="python" style={oneLight}>
-                  {renderedCode}
-                </SyntaxHighlighter>
+              <Card.Body className="p-0 m-0 bot-streaming-code">
+                <pre className="fancy-code">
+                  <code className="language-python">{fancyCode}</code>
+                </pre>
+
+                <p className="bot-streaming-code">{plainCode}</p>
                 <span>
                   <Spinner className="mx-1" size="sm" />
                 </span>
@@ -97,7 +100,7 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
     return (
       <Row className="mb-3">
         <Col md={3}>
-          <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light d-flex flex-row align-items-center">
+          <Card className="bot-shadow br-8 card-body border-0 border-bottom mb-3 bg-light d-flex flex-row align-items-center">
             <Spinner size="sm" />
             <span className="ms-2">
               {ref.lastVariant.current === "Code"
@@ -110,14 +113,35 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
     );
   }
 
+  function renderImage() {
+    return (
+      <Row className="mb-3">
+        <Col md={3}>
+          <Card className="bot-shadown br-8 card-body border-0 border-bottom mb-3 bg-light d-flex flex-row align-items-center">
+            <Spinner size="sm" />
+            <span className="ms-2">Plotting image...</span>
+          </Card>
+        </Col>
+      </Row>
+    );
+  }
+
   function renderAnswer(props) {
     switch (props.variant) {
       case "Assistant":
-        return renderAssistant(props);
+        return (
+          <AssistantBlock
+            content={props}
+            streaming
+            key={`streaming-assistant`}
+          />
+        );
       case "Code":
         return renderCode();
       case "ServerHint":
         return renderServerHint();
+      case "Image":
+        return renderImage();
       default:
         return null;
     }

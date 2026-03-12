@@ -41,3 +41,10 @@ export function setMessageToastContent(messageToastContent) {
     payload: messageToastContent,
   };
 }
+
+export function setShowReferencePanel(showReferencePanel) {
+  return {
+    type: constants.SET_SHOW_REFERENCE_PANEL,
+    payload: showReferencePanel,
+  };
+}

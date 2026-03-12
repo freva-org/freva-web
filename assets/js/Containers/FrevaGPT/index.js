@@ -35,6 +35,7 @@ import {
   setMessageToastContent,
   setShowMessageToast,
 } from "./actions";
+import ReferencePanel from "./components/ReferenceComponents/ReferencePanel";
 
 function FrevaGPT() {
   useEffect(() => {
@@ -393,6 +394,7 @@ function FrevaGPT() {
           showThreadHistory={showThreadHistory}
           setShowThreadHistory={setShowThreadHistory}
         />
+        <ReferencePanel />
         <Col
           md={12}
           className={

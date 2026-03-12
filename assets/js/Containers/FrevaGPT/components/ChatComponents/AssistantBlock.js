@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { useDispatch } from "react-redux";
 import PropTypes from "prop-types";
 import hljs from "highlight.js";
 import "highlight.js/styles/stackoverflow-light.css";
@@ -6,16 +7,20 @@ import "highlight.js/styles/stackoverflow-light.css";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-import { Col, Card } from "react-bootstrap";
+import { Col, Card, Button } from "react-bootstrap";
+import { FaBook } from "react-icons/fa";
 
 import { replaceLinebreaks, setGivenFeedbackValue } from "../../utils";
 
 import * as constants from "../../constants";
 
+import { setShowReferencePanel } from "../../actions";
+
 import FeedbackButtons from "../Snippets/FeedbackButtons";
-import ReferenceItem from "../Snippets/ReferenceItem";
+import ReferenceItem from "../ReferenceComponents/ReferenceItem";
 
 function AssistantBlock({ content, streaming }) {
+  const dispatch = useDispatch();
   useEffect(() => {
     // hilights all inline code elements
     document.querySelectorAll("pre code").forEach((block) => {
@@ -45,6 +50,15 @@ function AssistantBlock({ content, streaming }) {
             ""
           )}
         </ReactMarkdown>
+
+        <Button
+          className="br-8 bot-shadow"
+          variant="secondary"
+          onClick={() => dispatch(setShowReferencePanel(true))}
+        >
+          <FaBook className="me-2" />
+          References
+        </Button>
 
         {!streaming ? (
           <FeedbackButtons

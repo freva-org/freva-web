@@ -282,6 +282,8 @@ function FrevaGPT() {
         }
 
         const decodedValues = decoder.decode(value);
+        //eslint-disable-next-line no-console
+        console.log(decodedValues);
         buffer = buffer + decodedValues;
 
         let foundSomething = true;

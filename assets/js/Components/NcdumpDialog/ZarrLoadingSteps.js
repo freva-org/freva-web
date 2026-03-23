@@ -18,7 +18,11 @@ function statusToStageIndex(statusCode) {
   if (statusCode === 4) {
     return 2;
   }
-  return 1;
+  if (statusCode === 3) {
+    return 1;
+  }
+  // if data-loader is offline
+  return 0;
 }
 
 const PROCESSING_MESSAGES = [

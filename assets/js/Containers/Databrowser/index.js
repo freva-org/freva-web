@@ -190,6 +190,9 @@ class Databrowser extends React.Component {
     const { facets, primaryFacets, selectedFacets, facetMapping, metadata } =
       this.props.databrowser;
 
+    if (!primaryFacets) {
+      return null;
+    }
     return primaryFacets.map((key) => {
       const value = facets[key];
       if (!value) {
@@ -215,7 +218,7 @@ class Databrowser extends React.Component {
   renderAdditionalFacets() {
     const { facets, primaryFacets, selectedFacets, facetMapping, metadata } =
       this.props.databrowser;
-    const primaryFacetsSet = new Set(primaryFacets);
+    const primaryFacetsSet = new Set(primaryFacets || []);
 
     return Object.keys(facetMapping)
       .filter((x) => {

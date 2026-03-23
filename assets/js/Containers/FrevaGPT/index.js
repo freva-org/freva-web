@@ -412,6 +412,7 @@ function FrevaGPT() {
               <PendingAnswerComponent
                 content={dynamicAnswer}
                 variant={dynamicVariant}
+                loading={loading}
                 ref={{ lastVariant }}
               />
 

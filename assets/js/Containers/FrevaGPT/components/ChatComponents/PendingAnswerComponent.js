@@ -42,7 +42,7 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
       // dividing streamed code into blocks
       // only full blocks getting hilighted
       const code = JSON.parse(jsonCode).code;
-      const lastLineBreak = code.lastIndexOf("\n\n");
+      const lastLineBreak = code.lastIndexOf("\n");
 
       if (lastLineBreak !== -1) {
         setFancyCode(code.slice(0, lastLineBreak + 4));
@@ -85,9 +85,11 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
                 </pre>
 
                 <p className="bot-streaming-code">{plainCode}</p>
-                <span>
-                  <Spinner className="mx-1" size="sm" />
-                </span>
+                {props.loading ? (
+                  <span>
+                    <Spinner className="mx-1" size="sm" />
+                  </span>
+                ) : null}
               </Card.Body>
             </Card>
           </Collapse>
@@ -153,6 +155,7 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
 PendingAnswerComponent.propTypes = {
   content: PropTypes.string,
   variant: PropTypes.string,
+  loading: PropTypes.bool,
 };
 
 export default PendingAnswerComponent;

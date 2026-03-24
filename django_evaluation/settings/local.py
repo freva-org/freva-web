@@ -156,7 +156,9 @@ IMPRINT = web_config.get("imprint") or [
 HOMEPAGE_HEADING = web_config.get("homepage_heading") or "Lorem ipsum dolor."
 ABOUT_US_TEXT = web_config.get("about_us_text") or "Hello world, this is freva."
 CONTACTS = web_config.get("contacts") or ["freva@dkrz.de"]
-DEFAULT_FLAVOUR = web_config.get("DEFAULT_FLAVOUR") or os.getenv("DEFAULT_FLAVOUR") or "freva"
+DEFAULT_FLAVOUR = (
+    web_config.get("DEFAULT_FLAVOUR") or os.getenv("DEFAULT_FLAVOUR") or "freva"
+)
 if isinstance(CONTACTS, str):
     CONTACTS = [c for c in CONTACTS.split(",") if c.strip()]
 ##########
@@ -298,7 +300,7 @@ RESULT_BROWSER_FACETS = [
 ]
 MENU_ENTRIES = []
 
-CHAT_BOT_URL = "http://vader4-icpub.lvt.dkrz.de:8502"
+CHAT_BOT_URL = os.environ.get("CHAT_BOT_URL", "http://vader4-icpub.lvt.dkrz.de:8502")
 CHAT_BOT_AUTH_KEY = os.environ.get("CHAT_BOT_AUTH_KEY")
 CHAT_BOT_FREVA_CONFIG = os.environ.get("CHAT_BOT_FREVA_CONFIG")
 ### CHATBOT development settings
@@ -352,4 +354,3 @@ if os.getenv("STAC_BROWSER", "1") == "1":
     )
 # help menu entry has to stay at the end of the menu
 MENU_ENTRIES.sort(key=lambda m: m.get("html_id") == "doc_menu")
-

@@ -1,6 +1,9 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [v2604.0.0]
+### Fixed
+- Make chatbot url configurable via env variable.
 ## [v2603.0.1]
 ### Fixed
 - Manage one scenario when data-loader is shut down

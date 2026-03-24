@@ -1,6 +1,11 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [v2604.0.1]
+### Fixed
+- Hiding aborted chat response in FrevaGPT
+- Reloading of thread history on opening side panel in FrevaGPT
+- Added custom hook for selecting bot model in FrevaGPT 
 ## [v2604.0.0]
 ### Fixed
 - Make chatbot url configurable via env variable.

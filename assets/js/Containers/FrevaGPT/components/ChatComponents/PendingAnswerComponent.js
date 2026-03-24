@@ -85,11 +85,9 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
                 </pre>
 
                 <p className="bot-streaming-code">{plainCode}</p>
-                {props.loading ? (
-                  <span>
-                    <Spinner className="mx-1" size="sm" />
-                  </span>
-                ) : null}
+                <span>
+                  <Spinner className="mx-1" size="sm" />
+                </span>
               </Card.Body>
             </Card>
           </Collapse>
@@ -155,7 +153,6 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
 PendingAnswerComponent.propTypes = {
   content: PropTypes.string,
   variant: PropTypes.string,
-  loading: PropTypes.bool,
 };
 
 export default PendingAnswerComponent;

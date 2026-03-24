@@ -240,6 +240,8 @@ function FrevaGPT() {
     }
 
     setLoading(false);
+    setDynamicAnswer("");
+    setDynamicVariant("");
     setReader(undefined);
     if (dispatchStopMessage) {
       dispatch(
@@ -412,7 +414,6 @@ function FrevaGPT() {
               <PendingAnswerComponent
                 content={dynamicAnswer}
                 variant={dynamicVariant}
-                loading={loading}
                 ref={{ lastVariant }}
               />
 

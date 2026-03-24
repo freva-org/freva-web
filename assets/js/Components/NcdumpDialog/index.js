@@ -467,6 +467,21 @@ class NcdumpDialog extends React.Component {
             </div>
           )}
 
+          {/* Submitted Loading state: shown while convert/presign are in flight (data-loader not yet available) */}
+          {!zarrUrl && status === NcDumpDialogState.LOADING && (
+            <div className="text-center py-4">
+              <ZarrLoadingSteps
+                statusCode={zarrStatusCode ?? 6}
+                isAggregation={isAggregation}
+              />
+              <p className="mt-3 text-muted" style={{ fontSize: "13px" }}>
+                {isAggregation
+                  ? "Aggregating files and loading metadata..."
+                  : "Loading metadata..."}
+              </p>
+            </div>
+          )}
+
           {/* Tabs and Content */}
           {zarrUrl &&
             (output ||

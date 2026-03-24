@@ -1,6 +1,10 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [v2603.0.1]
+### Fixed
+- Manage one scenario when data-loader is shut down
+- when the shared link contains `next`, while user is already logged in
 ## [v2603.0.0]
 ### Added
 - Handling of reference links in bot answers

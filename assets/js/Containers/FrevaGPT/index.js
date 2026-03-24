@@ -240,6 +240,8 @@ function FrevaGPT() {
     }
 
     setLoading(false);
+    setDynamicAnswer("");
+    setDynamicVariant("");
     setReader(undefined);
     if (dispatchStopMessage) {
       dispatch(
@@ -282,6 +284,8 @@ function FrevaGPT() {
         }
 
         const decodedValues = decoder.decode(value);
+        //eslint-disable-next-line no-console
+        console.log(decodedValues);
         buffer = buffer + decodedValues;
 
         let foundSomething = true;

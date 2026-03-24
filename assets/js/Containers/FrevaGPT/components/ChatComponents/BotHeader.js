@@ -10,6 +10,7 @@ import { FaRegCommentAlt, FaHistory, FaCode } from "react-icons/fa";
 import { setBotModel, toggleShowCode } from "../../actions";
 
 import { fetchWithAuth, successfulPing } from "../../utils";
+import useBotSelect from "../../customHooks/useBotSelect";
 
 function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
   const botModel = useSelector((state) => state.frevaGPTReducer.botModel);
@@ -40,9 +41,7 @@ function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
   const [botModelList, setBotModelList] = useState([]);
   const [hideBotModelList, setHideBotModelList] = useState(true);
 
-  function toggleBotSelect() {
-    setHideBotModelList(!hideBotModelList);
-  }
+  useBotSelect(hideBotModelList, setHideBotModelList, hideBotModelList);
 
   function toggleShowThreadHistory() {
     setShowThreadHistory(!showThreadHistory);
@@ -52,7 +51,7 @@ function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
     <Container className="mb-2">
       <Row>
         <Col md={5}>
-          <h2 onClick={toggleBotSelect}>FrevaGPT</h2>
+          <h2>FrevaGPT</h2>
         </Col>
 
         <Col className="mb-2">

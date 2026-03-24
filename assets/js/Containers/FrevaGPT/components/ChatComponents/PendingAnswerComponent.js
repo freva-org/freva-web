@@ -42,7 +42,7 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
       // dividing streamed code into blocks
       // only full blocks getting hilighted
       const code = JSON.parse(jsonCode).code;
-      const lastLineBreak = code.lastIndexOf("\n\n");
+      const lastLineBreak = code.lastIndexOf("\n");
 
       if (lastLineBreak !== -1) {
         setFancyCode(code.slice(0, lastLineBreak + 4));

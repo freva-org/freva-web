@@ -18,7 +18,7 @@ function SidePanel({ showThreadHistory, setShowThreadHistory }) {
 
   // unfiltered threads for default display
   const { threads, setThreads, threadsLoading, setPageNumber } =
-    useGeneralThreads();
+    useGeneralThreads(showThreadHistory);
 
   // filtered threads based on query
   const [query, setQuery] = useState("");

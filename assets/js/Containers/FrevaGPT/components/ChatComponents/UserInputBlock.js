@@ -49,7 +49,7 @@ function UserInputBlock({ content, onEdit }) {
           <Button
             variant="info"
             onClick={() => {
-              startEditedChat(editedInput, content.original_index);
+              startEditedChat(editedInput, content.user_index);
               setRenderInput(false);
             }}
           >

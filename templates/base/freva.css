@@ -265,3 +265,8 @@ footer h4 {
 .bot-references {
   padding: 2px;
 }
+
+.bot-chat-link {
+  color: black !important;
+  text-decoration: none !important;
+}

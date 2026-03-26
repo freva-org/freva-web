@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 
-import { FormControl, Offcanvas, Card } from "react-bootstrap";
+import { FormControl, Offcanvas } from "react-bootstrap";
 
 import PropTypes from "prop-types";
 
@@ -74,30 +74,23 @@ function SidePanel({ showThreadHistory, setShowThreadHistory }) {
 
   return (
     <Offcanvas show={showThreadHistory} onHide={setShowThreadHistory} scroll>
-      <Offcanvas.Header closeButton>
-        <Offcanvas.Title>Chat History</Offcanvas.Title>
-      </Offcanvas.Header>
       <Offcanvas.Body>
-        <Card className="w-100 bot-shadow br-8">
-          <Card.Header>
-            <FormControl
-              className="my-2"
-              id="search"
-              type="text"
-              placeholder={`Search chats`}
-              onChange={handleSearchInput}
-              value={query}
-            />
-          </Card.Header>
-          <Card.Body>
-            <Card.Title>{query ? "Filtered History" : "History"}</Card.Title>
-            {query
-              ? renderThreads(filteredThreads, setFilteredThreads)
-              : renderThreads(threads, setThreads)}
-            {loading ? <TextPlaceholder /> : null}
-            <div ref={lastThreadRef} className="p-1"></div>
-          </Card.Body>
-        </Card>
+        <h4>{query ? "Filtered History" : "History"}</h4>
+
+        <FormControl
+          className="my-2 bot-shadow br-8"
+          id="search"
+          type="text"
+          placeholder={`Search chats`}
+          onChange={handleSearchInput}
+          value={query}
+        />
+
+        {query
+          ? renderThreads(filteredThreads, setFilteredThreads)
+          : renderThreads(threads, setThreads)}
+        {loading ? <TextPlaceholder /> : null}
+        <div ref={lastThreadRef} className="p-1"></div>
       </Offcanvas.Body>
     </Offcanvas>
   );

@@ -5,10 +5,11 @@ import { browserHistory } from "react-router";
 
 import { ListGroup, OverlayTrigger, Popover } from "react-bootstrap";
 
-import { FaPen, FaTrash, FaEllipsisH } from "react-icons/fa";
+import { FaPen, FaTrash, FaEllipsisV } from "react-icons/fa";
 
 import useHoverThread from "../../customHooks/useHoverThread";
 import useMobileStatus from "../../customHooks/useMobileStatus";
+import { grepThreadID } from "../../utils";
 
 import ThreadModal from "./ThreadModal";
 
@@ -19,6 +20,7 @@ function ThreadLink({ element, updateThreadList }) {
   const [showEditButton, setShowEditButton] = useState(false);
   const [mode, setMode] = useState("rename");
   const [showPopover, setShowPopover] = useState(false);
+  const [activeLink, setActiveLink] = useState(false);
   const isMobile = useMobileStatus();
 
   useHoverThread({ hovered, setHovered, ref });
@@ -30,6 +32,12 @@ function ThreadLink({ element, updateThreadList }) {
       setShowEditButton(hovered); // only show edit button on hover for desktop devices
     }
   }, [isMobile, hovered]);
+
+  useEffect(() => {
+    if (grepThreadID() === element.thread_id) {
+      setActiveLink(true);
+    }
+  }, []);
 
   function changeToThread(thread) {
     browserHistory.push({
@@ -45,11 +53,11 @@ function ThreadLink({ element, updateThreadList }) {
   const threadOptions = [
     {
       title: "Rename",
-      icon: <FaPen className="color" />,
+      icon: <FaPen color="grey" />,
     },
     {
       title: "Delete",
-      icon: <FaTrash className="color" />,
+      icon: <FaTrash color="grey" />,
     },
   ];
 
@@ -81,8 +89,10 @@ function ThreadLink({ element, updateThreadList }) {
 
   return (
     <>
-      <ListGroup.Item
-        className="px-0"
+      <div
+        className={
+          hovered | activeLink ? "p-2 br-8 bot-shadow bot-bg-lg" : "p-2 br-8"
+        }
         ref={ref}
         onMouseEnter={() => setHovered(true)}
       >
@@ -90,7 +100,7 @@ function ThreadLink({ element, updateThreadList }) {
           <div>
             <a
               href=""
-              className="forced-textwrap"
+              className="forced-textwrap bot-chat-link"
               onClick={() => changeToThread(element.thread_id)}
             >
               {element.topic}
@@ -107,18 +117,18 @@ function ThreadLink({ element, updateThreadList }) {
           >
             {
               showEditButton ? (
-                <div role="button" className="align-content-center color">
-                  <FaEllipsisH />
+                <div role="button" className="align-content-center">
+                  <FaEllipsisV color="grey" />
                 </div>
               ) : (
                 <div className="align-content-center opacity-0">
-                  <FaEllipsisH />
+                  <FaEllipsisV color="grey" />
                 </div>
               ) /* invisible icon to avoid layout shift */
             }
           </OverlayTrigger>
         </div>
-      </ListGroup.Item>
+      </div>
 
       <ThreadModal
         mode={mode}

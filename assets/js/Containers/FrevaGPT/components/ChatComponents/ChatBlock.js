@@ -35,6 +35,7 @@ function ChatBlock({ onEditInput }) {
   function rearrangeCodeElements(conversation) {
     const newConv = [];
     let original_index = 0;
+    let user_index = 0;
     let frontend_index = 0;
     // integration of index because of rearrangement
     // original index is needed for assigning user feedback and editing user input
@@ -81,6 +82,10 @@ function ChatBlock({ onEditInput }) {
         }
         default: {
           // all remaining variants are part of the thread and are indexed
+          if (element.variant === "User") {
+            element.user_index = user_index;
+            user_index++;
+          }
           element.original_index = original_index;
           original_index++;
           newConv.push([element]);
@@ -135,7 +140,7 @@ function ChatBlock({ onEditInput }) {
     return (
       <UserInputBlock
         content={element}
-        key={`UserInputBlock-${element.original_index}`}
+        key={`UserInputBlock-${element.user_index}`}
         onEdit={onEditInput}
       />
     );

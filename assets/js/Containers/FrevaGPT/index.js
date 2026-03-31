@@ -133,6 +133,8 @@ function FrevaGPT() {
       if (!Array.isArray(variantArray) && "variant" in variantArray) {
         alertInvalidThreadID();
       } else {
+        //eslint-disable-next-line no-console
+        console.log("### Old thread: ", variantArray);
         dispatch(setConversation(variantArray));
       }
     } else {

@@ -51,7 +51,6 @@ function CodeBlock({ showCode, content }) {
   }
 
   function renderCodeOutput(content) {
-    //TODO original_id added when rearranged?
     if (content.length > 1) {
       return (
         <Card.Footer className="p-0 m-0" key={`${content[1].id}-codeoutput`}>
@@ -93,7 +92,7 @@ function CodeBlock({ showCode, content }) {
             </span>
           </Button>
           <FeedbackButtons
-            elementIndex={content[0].original_index}
+            elementIndex={content[0].feedback_index}
             givenValue={setGivenFeedbackValue(extractElements(content, "Code"))}
           />
         </div>

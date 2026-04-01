@@ -220,10 +220,6 @@ function FrevaGPT() {
      *
      * @param {boolean} dispatchStopMessage - Determines if stop message should be shown
      */
-    // stop of thread only possible if a thread id is given
-    if (reader) {
-      await reader.cancel();
-    }
     const queryObject = { thread_id: grepThreadID() };
     if (grepThreadID()) {
       const response = await fetchWithAuth(
@@ -239,6 +235,11 @@ function FrevaGPT() {
         );
         dispatch(setShowMessageToast(true));
       }
+    }
+
+    // stop of thread only possible if a thread id is given
+    if (reader) {
+      await reader.cancel();
     }
 
     setLoading(false);

@@ -48,7 +48,7 @@ function AssistantBlock({ content, streaming }) {
 
         {!streaming ? (
           <FeedbackButtons
-            elementIndex={content.original_index}
+            elementIndex={content.feedback_index}
             givenValue={setGivenFeedbackValue(content)}
           />
         ) : null}

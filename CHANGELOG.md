@@ -1,6 +1,13 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [v2604.1.1]
+### Changed
+- Adapted styling of side panel including chat history (FrevaGPT)
+- Changed name to `ClimateClaw`
+### Added
+- Added index for user input for optimized handling of thread editing
+- Added index for feedback
 ## [v2604.0.1]
 ### Fixed
 - Hiding aborted chat response in FrevaGPT

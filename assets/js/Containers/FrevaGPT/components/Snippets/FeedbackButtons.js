@@ -48,7 +48,7 @@ function FeedbackButtons({ elementIndex, givenValue }) {
 
     const queryObject = {
       thread_id: grepThreadID(),
-      feedback_at_index: elementIndex,
+      feedback_index: elementIndex,
       feedback: thumbRef.current,
     };
 

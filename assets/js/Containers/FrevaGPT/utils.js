@@ -251,7 +251,7 @@ export async function requestEditEndpoint(index) {
    */
   const queryObject = {
     source_thread_id: grepThreadID(),
-    fork_from_index: index,
+    user_index: index,
   };
 
   let results = { history: [], new_thread_id: "" };

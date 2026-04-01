@@ -51,7 +51,7 @@ function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
     <Container className="mb-2">
       <Row>
         <Col md={5}>
-          <h2>FrevaGPT</h2>
+          <h2>ClimateClaw</h2>
         </Col>
 
         <Col className="mb-2">

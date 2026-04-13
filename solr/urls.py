@@ -19,6 +19,7 @@ from .views import databrowser, flavours_all_methods, share_zarr, inspect
 urlpatterns = [
     url(r"^databrowser/$", databrowser, name="data_browser"),
     path("api/freva-nextgen/data-portal/share-zarr", share_zarr, name="share_zarr"),
+    path("inspect/", inspect, name="inspect"),
 ]
 if int(os.environ.get("DEV_MODE", "0")) == 1:
     urlpatterns.extend([
@@ -42,5 +43,4 @@ if int(os.environ.get("DEV_MODE", "0")) == 1:
             DataPortalProxy.as_view(),
             name="data_portal_proxy",
         ),
-        path("inspect/", inspect, name="inspect"),
     ])

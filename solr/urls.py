@@ -13,8 +13,7 @@ from django.urls import path
 from django.urls import re_path as url
 
 from .proxyviews import DataBrowserProxy, DataPortalProxy
-from .views import databrowser, flavours_all_methods, share_zarr, inspect
-
+from .views import databrowser, flavours_all_methods, inspect, share_zarr
 
 urlpatterns = [
     url(r"^databrowser/$", databrowser, name="data_browser"),

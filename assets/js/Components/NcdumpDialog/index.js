@@ -18,6 +18,7 @@ class NcdumpDialog extends React.Component {
       pathInput: Array.isArray(props.file) ? "" : props.file || "",
       copied: false,
       gridlookCopied: false,
+      shareCopied: false,
       activeTab: "metadata",
       dropdownOpen: false,
       aggregationConfig: {
@@ -113,6 +114,24 @@ class NcdumpDialog extends React.Component {
     }
   }
 
+  buildShareUrl() {
+    const { isAggregation, file } = this.props;
+    const { pathInput } = this.state;
+
+    if (isAggregation) {
+      const files = Array.isArray(file) ? file : [];
+      const params = files
+        .map((f) => `file=${encodeURIComponent(f)}`)
+        .join("&");
+      return `${window.location.origin}/inspect?${params}`;
+    }
+
+    const path = pathInput.trim();
+    return path
+      ? `${window.location.origin}/inspect?file=${encodeURIComponent(path)}`
+      : null;
+  }
+
   render() {
     const {
       show,
@@ -131,6 +150,9 @@ class NcdumpDialog extends React.Component {
     }
 
     const fileList = Array.isArray(file) ? file : [];
+
+    const shareUrl = this.buildShareUrl();
+    const canShare = isAggregation ? fileList.length > 0 : !!shareUrl;
 
     return (
       <div
@@ -425,6 +447,45 @@ class NcdumpDialog extends React.Component {
                   </div>
                 )}
               </div>
+
+              {/* Share button */}
+              {canShare && (
+                <button
+                  className=""
+                  onClick={() => {
+                    navigator.clipboard.writeText(shareUrl);
+                    this.setState({ shareCopied: true });
+                    setTimeout(
+                      () => this.setState({ shareCopied: false }),
+                      2000
+                    );
+                  }}
+                  title={
+                    this.state.shareCopied
+                      ? "Link copied!"
+                      : "Copy shareable inspect link"
+                  }
+                  style={{
+                    position: "absolute",
+                    top: "16px",
+                    right: "56px",
+                    height: "32px",
+                    padding: "0 10px",
+                    fontSize: "12px",
+                    backgroundColor: "rgba(255,255,255,0.2)",
+                    border: "none",
+                    borderRadius: "6px",
+                    color: "white",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <i
+                    className={`fas fa-${this.state.shareCopied ? "check" : "share-alt"} me-1`}
+                  ></i>
+                  {this.state.shareCopied ? "Copied!" : "Share"}
+                </button>
+              )}
 
               <button
                 className="token-close-btn"

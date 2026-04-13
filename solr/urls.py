@@ -13,7 +13,8 @@ from django.urls import path
 from django.urls import re_path as url
 
 from .proxyviews import DataBrowserProxy, DataPortalProxy
-from .views import databrowser, flavours_all_methods, share_zarr
+from .views import databrowser, flavours_all_methods, share_zarr, inspect
+
 
 urlpatterns = [
     url(r"^databrowser/$", databrowser, name="data_browser"),
@@ -41,4 +42,5 @@ if int(os.environ.get("DEV_MODE", "0")) == 1:
             DataPortalProxy.as_view(),
             name="data_portal_proxy",
         ),
+        path("inspect/", inspect, name="inspect"),
     ])

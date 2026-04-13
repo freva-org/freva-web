@@ -1,0 +1,8 @@
+{% extends "_layouts/base.html" %}
+{% block content %}
+<script>
+  window.INSPECT_FILES     = {{ files_json|safe }};
+  window.INSPECT_IS_AGGREGATION = {{ is_aggregation|safe }};
+</script>
+<div id="inspect-root"></div>
+{% endblock %}

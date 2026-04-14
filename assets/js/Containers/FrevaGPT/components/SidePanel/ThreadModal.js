@@ -57,12 +57,12 @@ function ThreadModal({
           topic: newTopic,
         };
         toastContent.color = "success";
-        toastContent.message = "Renamed chat.";
         updateThreadList(mode, newElement);
       } else {
         toastContent.color = "danger";
-        toastContent.message = "Could not rename chat!";
       }
+      const message = await response.json();
+      toastContent.message = message.detail;
     }
     setShowModal(false);
     dispatch(setMessageToastContent(toastContent));
@@ -80,7 +80,6 @@ function ThreadModal({
 
     if (response.ok) {
       toastContent.color = "success";
-      toastContent.message = "Deleted chat.";
       updateThreadList(mode, element);
 
       //if current displayed thread is deleted navigate to start chatbot page
@@ -89,8 +88,9 @@ function ThreadModal({
       }
     } else {
       toastContent.color = "danger";
-      toastContent.message = "Could not delete chat.";
     }
+    const message = await response.json();
+    toastContent.message = message.detail;
     setShowModal(false);
     dispatch(setMessageToastContent(toastContent));
     dispatch(setShowMessageToast(true));

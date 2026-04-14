@@ -157,9 +157,6 @@ function FrevaGPT() {
     if (isEmpty(grepThreadID())) {
       const response = await fetchWithAuth("/api/chatbot/newthread");
 
-      //eslint-disable-next-line no-console
-      console.log(response.body);
-
       if (response.ok) {
         const init_thread_id = await response.json();
         browserHistory.push({
@@ -329,16 +326,19 @@ function FrevaGPT() {
                 // object is empty so add content
                 varObj = jsonBuffer;
 
-                // set thread id
-                if (grepThreadID() === "" && varObj.variant === "ServerHint") {
-                  try {
-                    const currentThreadId = varObj.content.thread_id;
+                // set thread id if no id given or newly provided id differs from current one
+                if (
+                  varObj.variant === "ServerHint" &&
+                  Object.keys(varObj.content).includes("thread_id")
+                ) {
+                  if (
+                    grepThreadID() === "" ||
+                    grepThreadID() !== varObj.content.thread_id
+                  ) {
                     browserHistory.push({
                       pathname: "/chatbot/",
-                      search: `?thread_id=${currentThreadId}`,
+                      search: `?thread_id=${varObj.content.thread_id}`,
                     });
-                  } catch (err) {
-                    // handle warning
                   }
                 }
               }

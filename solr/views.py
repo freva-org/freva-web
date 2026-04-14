@@ -160,3 +160,7 @@ def reverse_proxy(request, path):
     except requests.RequestException as e:
         logging.error(f"Proxy request failed: {e}")
         return JsonResponse({"error": str(e)}, status=500)
+
+@login_required()
+def inspect(request):
+    return render(request, "plugins/list.html", {"title": "File Inspector"})

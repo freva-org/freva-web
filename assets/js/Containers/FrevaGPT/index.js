@@ -78,28 +78,25 @@ function FrevaGPT() {
   -----------------------------------------------------------------------------------------------*/
   function createNewChat() {
     /**
-     * Creates new chat stopping running conversations before and clearing state variables
+     * Creates new chat, stopping running conversations before and clearing state variables
      *
      */
-    handleStop(false)
-      .then(() => {
-        dispatch(setConversation([]));
-        browserHistory.push({
-          pathname: "/chatbot/",
-          search: "",
-        });
-        setShowSuggestions(true);
-        setDynamicAnswer("");
-        setDynamicVariant("");
-        setReader(undefined);
-        setShowScrollButtons(false);
-        window.scrollTo(0, 0);
-        return;
-      })
-      .catch((err) => {
-        // eslint-disable-next-line no-console
-        console.error(err);
-      });
+    if (reader !== undefined) {
+      handleStop(false);
+    }
+
+    dispatch(setConversation([]));
+    browserHistory.push({
+      pathname: "/chatbot/",
+      search: "",
+    });
+    setShowSuggestions(true);
+    setDynamicAnswer("");
+    setDynamicVariant("");
+    setReader(undefined);
+    setShowScrollButtons(false);
+    window.scrollTo(0, 0);
+    return;
   }
 
   function alertInvalidThreadID() {
@@ -231,10 +228,11 @@ function FrevaGPT() {
       );
 
       if (!response.ok) {
+        const message = await response.json();
         dispatch(
           setMessageToastContent({
             color: "danger",
-            message: "Could not stop process",
+            message: message.detail,
           })
         );
         dispatch(setShowMessageToast(true));

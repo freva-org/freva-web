@@ -56,11 +56,13 @@ function FeedbackButtons({ elementIndex, givenValue }) {
       `/api/chatbot/userfeedback?` + queryString.stringify(queryObject)
     );
 
-    let toastContent;
+    const message = await response.json();
+    const toastContent = { color: "", message: message.detail };
+
     if (response.ok) {
-      toastContent = { color: "success", message: "Feedback send." };
+      toastContent.color = "success";
     } else {
-      toastContent = { color: "danger", message: "Could not send feedback!" };
+      toastContent.color = "danger";
     }
 
     dispatch(setMessageToastContent(toastContent));

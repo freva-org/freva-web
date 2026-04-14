@@ -41,3 +41,10 @@ export function setMessageToastContent(messageToastContent) {
     payload: messageToastContent,
   };
 }
+
+export function setLastVariant(variant) {
+  return {
+    type: constants.SET_LAST_VARIANT,
+    payload: variant,
+  };
+}

@@ -1,4 +1,5 @@
-import React, { useState, useEffect, forwardRef } from "react";
+import React, { useState, useEffect } from "react";
+import { useSelector } from "react-redux";
 import PropTypes from "prop-types";
 import hljs from "highlight.js";
 import "highlight.js/styles/stackoverflow-light.css";
@@ -10,14 +11,15 @@ import * as constants from "../../constants";
 
 import AssistantBlock from "./AssistantBlock";
 
-const PendingAnswerComponent = forwardRef((props, ref) => {
+function PendingAnswerComponent({ content, variant }) {
   const [plainCode, setPlainCode] = useState("");
   const [fancyCode, setFancyCode] = useState("");
   const [showCode, setShowCode] = useState(true);
+  const lastVariant = useSelector((state) => state.frevaGPTReducer.lastVariant);
 
   useEffect(() => {
-    extractCode(props.content);
-  }, [props.content]);
+    extractCode(content);
+  }, [content]);
 
   useEffect(() => {
     // hilight code blocks
@@ -103,9 +105,7 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
           <Card className="bot-shadow br-8 card-body border-0 border-bottom mb-3 bg-light d-flex flex-row align-items-center">
             <Spinner size="sm" />
             <span className="ms-2">
-              {ref.lastVariant.current === "Code"
-                ? "Executing..."
-                : "Thinking..."}
+              {lastVariant === "Code" ? "Executing..." : "Thinking..."}
             </span>
           </Card>
         </Col>
@@ -126,12 +126,12 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
     );
   }
 
-  function renderAnswer(props) {
-    switch (props.variant) {
+  function renderAnswer() {
+    switch (variant) {
       case "Assistant":
         return (
           <AssistantBlock
-            content={props}
+            content={{ variant, content }}
             streaming
             key={`streaming-assistant`}
           />
@@ -147,8 +147,8 @@ const PendingAnswerComponent = forwardRef((props, ref) => {
     }
   }
 
-  return renderAnswer(props);
-});
+  return renderAnswer();
+}
 
 PendingAnswerComponent.propTypes = {
   content: PropTypes.string,

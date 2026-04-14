@@ -41,6 +41,7 @@ function UserInputBlock({ content, onEdit }) {
             variant="secondary"
             className="me-1"
             onClick={() => {
+              setEditedInput("");
               setRenderInput(false);
             }}
           >

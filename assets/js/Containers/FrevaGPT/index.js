@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
 import { Container, Row, Col, Spinner } from "react-bootstrap";
@@ -34,6 +34,7 @@ import {
   addElement,
   setMessageToastContent,
   setShowMessageToast,
+  setLastVariant,
 } from "./actions";
 
 function FrevaGPT() {
@@ -66,8 +67,6 @@ function FrevaGPT() {
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [showScrollButtons, setShowScrollButtons] = useState(false);
 
-  const lastVariant = useRef("User");
-
   const [showThreadHistory, setShowThreadHistory] = useState(false);
   const botModel = useSelector((state) => state.frevaGPTReducer.botModel);
 
@@ -78,28 +77,25 @@ function FrevaGPT() {
   -----------------------------------------------------------------------------------------------*/
   function createNewChat() {
     /**
-     * Creates new chat stopping running conversations before and clearing state variables
+     * Creates new chat, stopping running conversations before and clearing state variables
      *
      */
-    handleStop(false)
-      .then(() => {
-        dispatch(setConversation([]));
-        browserHistory.push({
-          pathname: "/chatbot/",
-          search: "",
-        });
-        setShowSuggestions(true);
-        setDynamicAnswer("");
-        setDynamicVariant("");
-        setReader(undefined);
-        setShowScrollButtons(false);
-        window.scrollTo(0, 0);
-        return;
-      })
-      .catch((err) => {
-        // eslint-disable-next-line no-console
-        console.error(err);
-      });
+    if (reader !== undefined) {
+      handleStop(false);
+    }
+
+    dispatch(setConversation([]));
+    browserHistory.push({
+      pathname: "/chatbot/",
+      search: "",
+    });
+    setShowSuggestions(true);
+    setDynamicAnswer("");
+    setDynamicVariant("");
+    setReader(undefined);
+    setShowScrollButtons(false);
+    window.scrollTo(0, 0);
+    return;
   }
 
   function alertInvalidThreadID() {
@@ -159,9 +155,6 @@ function FrevaGPT() {
     // for new conversation without existing thread id -> request new thread id and set it
     if (isEmpty(grepThreadID())) {
       const response = await fetchWithAuth("/api/chatbot/newthread");
-
-      //eslint-disable-next-line no-console
-      console.log(response.body);
 
       if (response.ok) {
         const init_thread_id = await response.json();
@@ -231,10 +224,11 @@ function FrevaGPT() {
       );
 
       if (!response.ok) {
+        const message = await response.json();
         dispatch(
           setMessageToastContent({
             color: "danger",
-            message: "Could not stop process",
+            message: message.detail,
           })
         );
         dispatch(setShowMessageToast(true));
@@ -287,7 +281,7 @@ function FrevaGPT() {
 
         const decodedValues = decoder.decode(value);
         //eslint-disable-next-line no-console
-        console.log(decodedValues);
+        //console.log(decodedValues);
         buffer = buffer + decodedValues;
 
         let foundSomething = true;
@@ -314,7 +308,7 @@ function FrevaGPT() {
                 // if object has not same variant, add answer to conversation and override object
                 if (varObj.variant !== jsonBuffer.variant) {
                   dispatch(addElement(varObj));
-                  lastVariant.current = varObj.variant;
+                  dispatch(setLastVariant(varObj.variant));
                   if (chatExceedsWindow()) {
                     setShowScrollButtons(true);
                   }
@@ -331,16 +325,19 @@ function FrevaGPT() {
                 // object is empty so add content
                 varObj = jsonBuffer;
 
-                // set thread id
-                if (grepThreadID() === "" && varObj.variant === "ServerHint") {
-                  try {
-                    const currentThreadId = varObj.content.thread_id;
+                // set thread id if no id given or newly provided id differs from current one
+                if (
+                  varObj.variant === "ServerHint" &&
+                  Object.keys(varObj.content).includes("thread_id")
+                ) {
+                  if (
+                    grepThreadID() === "" ||
+                    grepThreadID() !== varObj.content.thread_id
+                  ) {
                     browserHistory.push({
                       pathname: "/chatbot/",
-                      search: `?thread_id=${currentThreadId}`,
+                      search: `?thread_id=${varObj.content.thread_id}`,
                     });
-                  } catch (err) {
-                    // handle warning
                   }
                 }
               }
@@ -351,7 +348,8 @@ function FrevaGPT() {
               // ServerHints and CodeBlocks include nested JSON Objects
               if (
                 !subBuffer.includes("ServerHint") &&
-                !subBuffer.includes("Code")
+                !subBuffer.includes("Code") &&
+                !subBuffer.includes("ToolCall")
               ) {
                 dispatch(
                   addElement({
@@ -416,13 +414,11 @@ function FrevaGPT() {
               <PendingAnswerComponent
                 content={dynamicAnswer}
                 variant={dynamicVariant}
-                ref={{ lastVariant }}
               />
 
               <BotLoadingSpinner
                 loading={loading}
                 dynamicAnswer={dynamicAnswer}
-                ref={{ lastVariant }}
               />
               {loading ? <div style={{ height: emptyDivHeight }}></div> : null}
             </Col>

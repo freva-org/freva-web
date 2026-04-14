@@ -1,6 +1,12 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [v2604.1.2]
+### Changed
+- Displaying server message provided by requests to stop chat, delete thread, rename thread and sending feedback
+- Request to stop endpoint only called on running request
+- Handling of ToolCalls and display of "Search Docs"
+- Handling of differing Thread IDs
 ## [v2604.1.1]
 ### Changed
 - Adapted styling of side panel including chat history (FrevaGPT)

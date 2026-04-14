@@ -1,10 +1,24 @@
-import React, { forwardRef } from "react";
+import React from "react";
+import { useSelector } from "react-redux";
 
 import { Card, Row, Col, Spinner } from "react-bootstrap";
 
 import PropTypes from "prop-types";
 
-const BotLoadingSpinner = forwardRef(({ dynamicAnswer, loading }, ref) => {
+function BotLoadingSpinner({ dynamicAnswer, loading }) {
+  const lastVariant = useSelector((state) => state.frevaGPTReducer.lastVariant);
+
+  function loadingMessage() {
+    switch (lastVariant) {
+      case "Code":
+        return "Executing...";
+      case "ToolCall":
+        return "Searching Docs...";
+      default:
+        return "Thinking...";
+    }
+  }
+
   return (
     <>
       {loading && !dynamicAnswer ? (
@@ -12,18 +26,14 @@ const BotLoadingSpinner = forwardRef(({ dynamicAnswer, loading }, ref) => {
           <Col md={3}>
             <Card className="bot-shadow br-8 card-body border-0 border-bottom mb-3 bg-light d-flex flex-row align-items-center">
               <Spinner size="sm" />
-              <span className="ms-2">
-                {ref.lastVariant.current === "Code"
-                  ? "Executing..."
-                  : "Thinking..."}
-              </span>
+              <span className="ms-2">{loadingMessage()}</span>
             </Card>
           </Col>
         </Row>
       ) : null}
     </>
   );
-});
+}
 
 BotLoadingSpinner.propTypes = {
   dynamicAnswer: PropTypes.string,

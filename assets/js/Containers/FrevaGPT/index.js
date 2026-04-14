@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
 import { Container, Row, Col, Spinner } from "react-bootstrap";
@@ -34,6 +34,7 @@ import {
   addElement,
   setMessageToastContent,
   setShowMessageToast,
+  setLastVariant,
 } from "./actions";
 
 function FrevaGPT() {
@@ -65,8 +66,6 @@ function FrevaGPT() {
   const [botOkay, setBotOkay] = useState(undefined);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [showScrollButtons, setShowScrollButtons] = useState(false);
-
-  const lastVariant = useRef("User");
 
   const [showThreadHistory, setShowThreadHistory] = useState(false);
   const botModel = useSelector((state) => state.frevaGPTReducer.botModel);
@@ -282,7 +281,7 @@ function FrevaGPT() {
 
         const decodedValues = decoder.decode(value);
         //eslint-disable-next-line no-console
-        console.log(decodedValues);
+        //console.log(decodedValues);
         buffer = buffer + decodedValues;
 
         let foundSomething = true;
@@ -309,7 +308,7 @@ function FrevaGPT() {
                 // if object has not same variant, add answer to conversation and override object
                 if (varObj.variant !== jsonBuffer.variant) {
                   dispatch(addElement(varObj));
-                  lastVariant.current = varObj.variant;
+                  dispatch(setLastVariant(varObj.variant));
                   if (chatExceedsWindow()) {
                     setShowScrollButtons(true);
                   }
@@ -349,7 +348,8 @@ function FrevaGPT() {
               // ServerHints and CodeBlocks include nested JSON Objects
               if (
                 !subBuffer.includes("ServerHint") &&
-                !subBuffer.includes("Code")
+                !subBuffer.includes("Code") &&
+                !subBuffer.includes("ToolCall")
               ) {
                 dispatch(
                   addElement({
@@ -414,13 +414,11 @@ function FrevaGPT() {
               <PendingAnswerComponent
                 content={dynamicAnswer}
                 variant={dynamicVariant}
-                ref={{ lastVariant }}
               />
 
               <BotLoadingSpinner
                 loading={loading}
                 dynamicAnswer={dynamicAnswer}
-                ref={{ lastVariant }}
               />
               {loading ? <div style={{ height: emptyDivHeight }}></div> : null}
             </Col>

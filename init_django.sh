@@ -14,7 +14,7 @@ wait_for_db() {
 
     for i in $(seq 1 "$MAX_ATTEMPTS"); do
         echo "[$i/$MAX_ATTEMPTS] Checking database readiness..."
-        if python manage.py makemigrations base; then
+        if timeout 10s python manage.py makemigrations base; then
             echo "Database reachable and Django setup succeeded."
             return 0
         fi

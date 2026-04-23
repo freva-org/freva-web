@@ -115,7 +115,7 @@ function CodeBlock({ showCode, content }) {
               key={`${content[0].id}-code`}
             >
               <pre className="m-0 codeblock">
-                <code>
+                <code className="language-python">
                   {
                     formatCode(
                       "Code",

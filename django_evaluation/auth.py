@@ -27,6 +27,7 @@ class OIDCAuthorizationCodeBackend(BaseBackend):
     def __init__(self):
         self.userinfo_url = f"{ensure_url_scheme(settings.FREVA_REST_URL).rstrip('/')}/api/freva-nextgen/auth/v2/userinfo"
         self.systemuser_url = f"{ensure_url_scheme(settings.FREVA_REST_URL).rstrip('/')}/api/freva-nextgen/auth/v2/systemuser"
+        self.token_url = f"{ensure_url_scheme(settings.FREVA_REST_URL).rstrip('/')}/api/freva-nextgen/auth/v2/token"
 
     def authenticate(self, request: Any, access_token: str = None, **kwargs):
         """
@@ -83,40 +84,84 @@ class OIDCAuthorizationCodeBackend(BaseBackend):
 
                 sync_mail_users(oneshot=True)
                 return user
-                
+
         except Exception as e:
             logger.error(f"Authentication failed: {e}")
-            
+
         return None
 
     def _get_system_user_info(self, access_token: str) -> Optional[dict]:
         """
-        Fetch system user information.
+        Validate the user against the systemuser endpoint.
+
+        Exchanges the IDP access token for a freva-rest broker JWT first,
+        then calls the systemuser endpoint with that broker JWT. This two-step
+        process is required because the systemuser endpoint only accepts broker
+        JWTs issued by freva-rest, not raw IDP tokens.
 
         Parameters
         ----------
         access_token : str
-            The access token for API authentication.
+            The raw IDP access token from the authorization code flow.
+
         Returns
         -------
-        Optional[dict]: System user info if successful
-        or {Unknown user} if not found.
+        Optional[dict]: System user info dict (username, email) if the user is
+                        a full system user, otherwise None (guest).
         """
-        try:
-            headers = {"Authorization": f"Bearer {access_token}"}
-            response = requests.get(self.systemuser_url, headers=headers, timeout=5)
+        broker_token = self._exchange_for_broker_token(access_token)
+        if not broker_token:
+            return None
 
+        try:
+            headers = {"Authorization": f"Bearer {broker_token}"}
+            response = requests.get(self.systemuser_url, headers=headers, timeout=5)
             if response.status_code == 200:
                 return response.json()
-            elif response.status_code == 404:
-                logger.warning("System user not found (unknown user)")
-                return None
-            else:
-                logger.error(f"System user API error: {response.status_code} - {response.text}")
-                return None
-
+            logger.error(
+                f"System user API error: {response.status_code} - {response.text}"
+            )
+            return None
         except Exception as e:
-            logger.error(f"Failed to fetch system user info: {e}")
+            logger.error(f"System user API error: {e}")
+            return None
+
+    def _exchange_for_broker_token(self, idp_token: str) -> Optional[str]:
+        """
+        Exchange an IDP access token for a freva-rest broker JWT.
+
+        Uses RFC 8693 token exchange (grant type
+        ``urn:ietf:params:oauth:grant-type:token-exchange``) to obtain a broker
+        JWT from freva-rest. The broker JWT carries the user's roles as
+        configured in freva-rest's ``token_claims`` and is signed by
+        freva-rest's own key pair.
+
+        Parameters
+        ----------
+        idp_token : str
+            The raw IDP access token to exchange.
+
+        Returns
+        -------
+        Optional[str]: The broker JWT access token if the exchange succeeded,
+                       otherwise None.
+        """
+        try:
+            resp = requests.post(
+                self.token_url,
+                data={
+                    "grant_type": "urn:ietf:params:oauth:grant-type:token-exchange",
+                    "subject_token": idp_token,
+                },
+                headers={"Content-Type": "application/x-www-form-urlencoded"},
+                timeout=10,
+            )
+            if resp.status_code == 200:
+                return resp.json()["access_token"]
+            logger.error(f"Broker exchange failed: {resp.status_code} - {resp.text}")
+            return None
+        except Exception as e:
+            logger.error(f"Broker exchange error: {e}")
             return None
 
     def get_user(self, user_id: int) -> Optional[User]:

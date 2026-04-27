@@ -1,8 +1,32 @@
-{% extends "_layouts/base.html" %}
+{% extends "_layouts/menu.html" %}
+{% load render_bundle from webpack_loader %}
+
+{% block page_title %}File Inspector - Evaluation System{% endblock %}
+
 {% block content %}
-<script>
-  window.INSPECT_FILES     = {{ files_json|safe }};
-  window.INSPECT_IS_AGGREGATION = {{ is_aggregation|safe }};
-</script>
-<div id="inspect-root"></div>
+
+    <style>
+        html {
+            overflow-y: -moz-scrollbars-vertical;
+            overflow-y: scroll;
+        }
+    </style>
+
+    <div id="react-app"></div>
+    {% render_bundle 'main' %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const reactAppNode = document.getElementById("react-app")
+            if (reactAppNode && reactAppNode.children.length === 0) {
+                const newDiv = document.createElement("div");
+                newDiv.textContent = "Dynamic content could not be loaded";
+                newDiv.classList.add("alert")
+                newDiv.classList.add("alert-danger")
+                newDiv.classList.add("container")
+                reactAppNode.append(newDiv)
+            }
+        }, false);
+    </script>
+
 {% endblock %}

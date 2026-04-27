@@ -322,7 +322,6 @@ else:
 # prefix to your relative url (the second value in each of the lists), e.g. "/impressum"
 _MENU_ENTRIES = [
     ["Data-Browser", "solr:data_browser", "browser_menu"],
-    ["Data-Inspect", "solr:inspect", "inspect_menu"],
     ["Plugins", "plugins:home", "plugin_menu"],
     ["History", "history:history", "history_menu"],
     ["Result-Browser", "history:result_browser", "result_browser_menu"],
@@ -335,7 +334,9 @@ for title, url, html_id in web_config.get("menu_entries", []) or _MENU_ENTRIES:
         MENU_ENTRIES.append(
             {"name": title, "url": reverse_lazy(url), "html_id": html_id}
         )
-
+MENU_ENTRIES.append(
+    {"name": "Data-Inspect", "url": reverse_lazy("solr:inspect"), "html_id": "inspect_menu"}
+)
 if ACTIVATE_CHAT_BOT:
     MENU_ENTRIES.append(
         {

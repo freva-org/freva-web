@@ -1,6 +1,9 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [v2604.3.0]
+### Add
+- standalone Data-Inspect page to the navbar
 ## [v2604.2.0]
 ### Add
 - A `/inspect?file=file1&file=file2` endpoint added that renders the existing File Inspector as a standalone, shareable page

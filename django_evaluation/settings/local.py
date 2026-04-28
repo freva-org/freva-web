@@ -334,7 +334,9 @@ for title, url, html_id in web_config.get("menu_entries", []) or _MENU_ENTRIES:
         MENU_ENTRIES.append(
             {"name": title, "url": reverse_lazy(url), "html_id": html_id}
         )
-
+MENU_ENTRIES.append(
+    {"name": "Data-Inspect", "url": reverse_lazy("solr:inspect"), "html_id": "inspect_menu"}
+)
 if ACTIVATE_CHAT_BOT:
     MENU_ENTRIES.append(
         {

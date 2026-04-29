@@ -1,6 +1,12 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [v2604.3.1]
+### Fixed
+- Flashing of old code content on rendering new code
+### Changed
+- Fixed code highlighting language to python
+- Changed key combination for bot select
 ## [v2604.3.0]
 ### Add
 - standalone Data-Inspect page to the navbar

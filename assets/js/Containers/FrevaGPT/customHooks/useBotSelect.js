@@ -7,14 +7,12 @@ export default function useBotSelect(
 ) {
   useEffect(() => {
     function keyDownHandler(e) {
-      if (e.key === "Escape") {
-        e.preventDefault();
+      if (e.ctrlKey && e.code === "Escape") {
         visibilitySetter(!visibilityValue);
       }
     }
 
     document.addEventListener("keydown", keyDownHandler);
-
     return () => {
       document.removeEventListener("keydown", keyDownHandler);
     };

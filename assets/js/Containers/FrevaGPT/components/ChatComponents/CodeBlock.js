@@ -12,6 +12,8 @@ import { formatCode, setGivenFeedbackValue } from "../../utils";
 import FeedbackButtons from "../Snippets/FeedbackButtons";
 import { setMessageToastContent, setShowMessageToast } from "../../actions";
 
+import CodeOutputBlock from "./CodeOutputBlock";
+
 function CodeBlock({ showCode, content }) {
   const [localShowCode, setLocalShowCode] = useState();
   const dispatch = useDispatch();
@@ -48,27 +50,6 @@ function CodeBlock({ showCode, content }) {
       })
     );
     dispatch(setShowMessageToast(true));
-  }
-
-  function renderCodeOutput(content) {
-    if (content.length > 1) {
-      return (
-        <Card.Footer className="p-0 m-0" key={`${content[1].id}-codeoutput`}>
-          <pre className="codeblock m-0">
-            <code className="bot-code-output">
-              {
-                formatCode(
-                  "CodeOutput",
-                  extractElements(content, "CodeOutput").content
-                )[0]
-              }
-            </code>
-          </pre>
-        </Card.Footer>
-      );
-    } else {
-      return null;
-    }
   }
 
   return (
@@ -115,7 +96,7 @@ function CodeBlock({ showCode, content }) {
               key={`${content[0].id}-code`}
             >
               <pre className="m-0 codeblock">
-                <code>
+                <code className="language-python">
                   {
                     formatCode(
                       "Code",
@@ -125,7 +106,7 @@ function CodeBlock({ showCode, content }) {
                 </code>
               </pre>
             </Card.Body>
-            {renderCodeOutput(content)}
+            <CodeOutputBlock content={content} />
           </Card>
         </Collapse>
       </Card>

@@ -4,6 +4,8 @@ import PropTypes from "prop-types";
 import hljs from "highlight.js";
 import "highlight.js/styles/stackoverflow-light.css";
 
+import { isEmpty } from "lodash";
+
 import { Col, Card, Spinner, Row, Button, Collapse } from "react-bootstrap";
 import { FaAngleDown, FaAngleUp } from "react-icons/fa";
 
@@ -18,6 +20,13 @@ function PendingAnswerComponent({ content, variant }) {
   const lastVariant = useSelector((state) => state.frevaGPTReducer.lastVariant);
 
   useEffect(() => {
+    //reset code when empty content is provided
+    // normally empty content is provided in between different
+    // variants being streamed or when the stream has finished
+    if (isEmpty(content)) {
+      setFancyCode("");
+      setPlainCode("");
+    }
     extractCode(content);
   }, [content]);
 

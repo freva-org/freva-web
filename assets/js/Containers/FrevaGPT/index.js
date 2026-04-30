@@ -3,8 +3,6 @@ import { useSelector, useDispatch } from "react-redux";
 
 import { Container, Row, Col, Spinner } from "react-bootstrap";
 
-import { browserHistory } from "react-router";
-
 import queryString from "query-string";
 
 import { isEmpty } from "lodash";
@@ -27,6 +25,7 @@ import {
   successfulPing,
   chatExceedsWindow,
   grepThreadID,
+  updateUrl,
 } from "./utils";
 
 import {
@@ -85,10 +84,7 @@ function FrevaGPT() {
     }
 
     dispatch(setConversation([]));
-    browserHistory.push({
-      pathname: "/chatbot/",
-      search: "",
-    });
+    updateUrl("");
     setShowSuggestions(true);
     setDynamicAnswer("");
     setDynamicVariant("");
@@ -158,10 +154,7 @@ function FrevaGPT() {
 
       if (response.ok) {
         const init_thread_id = await response.json();
-        browserHistory.push({
-          pathname: "/chatbot/",
-          search: `?thread_id=${init_thread_id}`,
-        });
+        updateUrl(`?thread_id=${init_thread_id}`);
       } else {
         //eslint-disable-next-line no-console
         console.error("Could not fetch new thread id!", response.statusText);
@@ -169,7 +162,7 @@ function FrevaGPT() {
     }
 
     try {
-      await fetchData(input);
+      await streamResponse(input);
     } catch (err) {
       dispatch(
         addElement({
@@ -194,10 +187,7 @@ function FrevaGPT() {
     handleStop(false)
       .then(() => {
         dispatch(setConversation(chatObject.history));
-        browserHistory.push({
-          pathname: "/chatbot/",
-          search: `?thread_id=${chatObject.new_thread_id}`,
-        });
+        updateUrl(`?thread_id=${chatObject.new_thread_id}`);
         handleSubmit(newInput, chatObject.new_thread_id);
         return;
       })
@@ -246,7 +236,7 @@ function FrevaGPT() {
     }
   }
 
-  async function fetchData(input) {
+  async function streamResponse(input) {
     /**
      * Fetches stream response from bot answering the given input adding it to the already existing conversation
      *
@@ -268,7 +258,6 @@ function FrevaGPT() {
       setReader(localReader);
       const decoder = new TextDecoder("utf-8");
 
-      let buffer = "";
       let varObj = {};
 
       // eslint-disable-next-line no-constant-condition
@@ -282,85 +271,57 @@ function FrevaGPT() {
         const decodedValues = decoder.decode(value);
         //eslint-disable-next-line no-console
         //console.log(decodedValues);
-        buffer = buffer + decodedValues;
 
-        let foundSomething = true;
+        const variantArray = decodedValues
+          .split("\n")
+          .filter((elem) => !isEmpty(elem));
 
-        while (foundSomething) {
-          foundSomething = false;
+        for (let index = 0; index < variantArray.length; index++) {
+          try {
+            const parsedVariant = JSON.parse(variantArray[index]);
 
-          for (
-            let bufferIndex = 0;
-            bufferIndex < buffer.length;
-            bufferIndex++
-          ) {
-            if (buffer[bufferIndex] !== "}") {
-              continue;
-            }
-            const subBuffer = buffer.slice(0, bufferIndex + 1);
-
-            try {
-              const jsonBuffer = JSON.parse(subBuffer);
-              buffer = buffer.slice(bufferIndex + 1); // shorten string by already evaluated string
-
-              // object is not empty so compare variants
-              if (Object.keys(varObj).length !== 0) {
-                // if object has not same variant, add answer to conversation and override object
-                if (varObj.variant !== jsonBuffer.variant) {
-                  dispatch(addElement(varObj));
-                  dispatch(setLastVariant(varObj.variant));
-                  if (chatExceedsWindow()) {
-                    setShowScrollButtons(true);
-                  }
-                  setDynamicAnswer("");
-                  setDynamicVariant("");
-                  varObj = jsonBuffer;
-                } else {
-                  // if object has same variant, add content
-                  varObj.content = varObj.content + jsonBuffer.content;
-                  setDynamicAnswer(varObj.content);
-                  setDynamicVariant(varObj.variant);
+            // object is not empty so compare variants
+            if (Object.keys(varObj).length !== 0) {
+              // if object has not same variant, add answer to conversation and override object
+              if (varObj.variant !== parsedVariant.variant) {
+                dispatch(addElement(varObj));
+                dispatch(setLastVariant(varObj.variant));
+                if (chatExceedsWindow()) {
+                  setShowScrollButtons(true);
                 }
+                setDynamicAnswer("");
+                setDynamicVariant("");
+                varObj = parsedVariant;
               } else {
-                // object is empty so add content
-                varObj = jsonBuffer;
+                // if object has same variant, add content
+                varObj.content = varObj.content + parsedVariant.content;
+                setDynamicAnswer(varObj.content);
+                setDynamicVariant(varObj.variant);
+              }
+            } else {
+              // object is empty so add content
+              varObj = parsedVariant;
 
-                // set thread id if no id given or newly provided id differs from current one
+              // set thread id if no id given or newly provided id differs from current one
+              if (
+                varObj.variant === "ServerHint" &&
+                Object.keys(varObj.content).includes("thread_id")
+              ) {
                 if (
-                  varObj.variant === "ServerHint" &&
-                  Object.keys(varObj.content).includes("thread_id")
+                  grepThreadID() === "" ||
+                  grepThreadID() !== varObj.content.thread_id
                 ) {
-                  if (
-                    grepThreadID() === "" ||
-                    grepThreadID() !== varObj.content.thread_id
-                  ) {
-                    browserHistory.push({
-                      pathname: "/chatbot/",
-                      search: `?thread_id=${varObj.content.thread_id}`,
-                    });
-                  }
+                  updateUrl(`?thread_id=${varObj.content.thread_id}`);
                 }
               }
-
-              foundSomething = true;
-              break;
-            } catch (err) {
-              // ServerHints and CodeBlocks include nested JSON Objects
-              if (
-                !subBuffer.includes("ServerHint") &&
-                !subBuffer.includes("Code") &&
-                !subBuffer.includes("ToolCall")
-              ) {
-                dispatch(
-                  addElement({
-                    variant: "FrontendError",
-                    content: "Incomplete message received.",
-                  })
-                );
-                // eslint-disable-next-line no-console
-                console.log(err);
-              }
             }
+          } catch (err) {
+            dispatch(
+              addElement({
+                variant: "FrontendError",
+                content: err,
+              })
+            );
           }
         }
       }

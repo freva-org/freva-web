@@ -123,6 +123,13 @@ export function grepThreadID() {
   }
 }
 
+export function updateUrl(searchParameter) {
+  browserHistory.push({
+    pathname: "/chatbot/",
+    search: searchParameter,
+  });
+}
+
 /*-------------------------------------------------------------------------------------------------
  *                                  Authentication related functions
 -------------------------------------------------------------------------------------------------*/

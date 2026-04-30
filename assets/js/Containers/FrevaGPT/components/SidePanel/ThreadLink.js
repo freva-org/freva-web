@@ -1,15 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 
-import { browserHistory } from "react-router";
-
 import { ListGroup, OverlayTrigger, Popover } from "react-bootstrap";
 
 import { FaPen, FaTrash, FaEllipsisV } from "react-icons/fa";
 
 import useHoverThread from "../../customHooks/useHoverThread";
 import useMobileStatus from "../../customHooks/useMobileStatus";
-import { grepThreadID } from "../../utils";
+import { grepThreadID, updateUrl } from "../../utils";
 
 import ThreadModal from "./ThreadModal";
 
@@ -38,13 +36,6 @@ function ThreadLink({ element, updateThreadList }) {
       setActiveLink(true);
     }
   }, []);
-
-  function changeToThread(thread) {
-    browserHistory.push({
-      pathname: "/chatbot/",
-      search: `?thread_id=${thread}`,
-    });
-  }
 
   function togglePopover() {
     setShowPopover(!showPopover);
@@ -101,7 +92,7 @@ function ThreadLink({ element, updateThreadList }) {
             <a
               href=""
               className="forced-textwrap bot-chat-link"
-              onClick={() => changeToThread(element.thread_id)}
+              onClick={() => updateUrl(`?thread_id=${element.thread_id}`)}
             >
               {element.topic}
             </a>

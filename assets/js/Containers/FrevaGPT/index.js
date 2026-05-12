@@ -236,6 +236,36 @@ function FrevaGPT() {
     }
   }
 
+  function addToExistingVariant(varObj) {
+    setDynamicAnswer(varObj.content);
+    setDynamicVariant(varObj.variant);
+  }
+
+  function addNewVariant(varObj) {
+    dispatch(addElement(varObj));
+    dispatch(setLastVariant(varObj.variant));
+    if (chatExceedsWindow()) {
+      setShowScrollButtons(true);
+    }
+    setDynamicAnswer("");
+    setDynamicVariant("");
+  }
+
+  function handleServerHint(varObj) {
+    // set thread id if no id given or newly provided id differs from current one
+    if (
+      varObj.variant === "ServerHint" &&
+      Object.keys(varObj.content).includes("thread_id")
+    ) {
+      if (
+        grepThreadID() === "" ||
+        grepThreadID() !== varObj.content.thread_id
+      ) {
+        updateUrl(`?thread_id=${varObj.content.thread_id}`);
+      }
+    }
+  }
+
   async function streamResponse(input) {
     /**
      * Fetches stream response from bot answering the given input adding it to the already existing conversation
@@ -259,6 +289,7 @@ function FrevaGPT() {
       const decoder = new TextDecoder("utf-8");
 
       let varObj = {};
+      let buffer = "";
 
       // eslint-disable-next-line no-constant-condition
       while (true) {
@@ -270,10 +301,10 @@ function FrevaGPT() {
 
         const decodedValues = decoder.decode(value);
         //eslint-disable-next-line no-console
-        //console.log(decodedValues);
+        //console.log(decodedValues)
 
         const variantArray = decodedValues
-          .split("\n")
+          .split(/\n(?=\{)/)
           .filter((elem) => !isEmpty(elem));
 
         for (let index = 0; index < variantArray.length; index++) {
@@ -284,44 +315,50 @@ function FrevaGPT() {
             if (Object.keys(varObj).length !== 0) {
               // if object has not same variant, add answer to conversation and override object
               if (varObj.variant !== parsedVariant.variant) {
-                dispatch(addElement(varObj));
-                dispatch(setLastVariant(varObj.variant));
-                if (chatExceedsWindow()) {
-                  setShowScrollButtons(true);
-                }
-                setDynamicAnswer("");
-                setDynamicVariant("");
+                addNewVariant(varObj);
                 varObj = parsedVariant;
               } else {
                 // if object has same variant, add content
                 varObj.content = varObj.content + parsedVariant.content;
-                setDynamicAnswer(varObj.content);
-                setDynamicVariant(varObj.variant);
+                addToExistingVariant(varObj);
               }
             } else {
               // object is empty so add content
               varObj = parsedVariant;
-
-              // set thread id if no id given or newly provided id differs from current one
-              if (
-                varObj.variant === "ServerHint" &&
-                Object.keys(varObj.content).includes("thread_id")
-              ) {
-                if (
-                  grepThreadID() === "" ||
-                  grepThreadID() !== varObj.content.thread_id
-                ) {
-                  updateUrl(`?thread_id=${varObj.content.thread_id}`);
-                }
-              }
+              handleServerHint(varObj);
+             
             }
           } catch (err) {
-            dispatch(
-              addElement({
-                variant: "FrontendError",
-                content: err,
-              })
-            );
+            buffer += variantArray[index];
+            try {
+              const parsedBuffer = JSON.parse(buffer);
+
+              if (Object.keys(varObj).length !== 0) {
+                if (varObj.variant !== parsedBuffer.variant) {
+                  addNewVariant(varObj);
+                  varObj=parsedBuffer;
+                } else {
+                  varObj.content = varObj.content + parsedBuffer.content;
+                  addToExistingVariant(varObj);
+                }
+              } else {
+                varObj = parsedBuffer;
+                handleServerHint(varObj);
+              }
+              buffer = "";
+            } catch(err) {
+              // string ends with } but not parsable -> either nested elements or misformatted response
+              if (buffer.endsWith("}")) {
+                dispatch(
+                  addElement({
+                    variant: "FrontendError",
+                    content: err,
+                  })
+                );
+                //eslint-disable-next-line no-console
+                console.log("Error parsing: ", buffer);
+              }
+            }
           }
         }
       }

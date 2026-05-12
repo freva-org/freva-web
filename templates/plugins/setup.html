@@ -18,6 +18,8 @@
         html.wait,
         html.wait *        { cursor: wait !important; }
         .required-form::before { content: "* "; color: red; }
+        .select2-container.is-invalid .select2-choice,
+        .select2-container.is-invalid .select2-choices { border-color: #dc3545 !important; box-shadow: 0 0 0 0.2rem rgba(220,53,69,.25); }
 
         /* shared custom-modal base
          Used by both the password modal and the error modal. */
@@ -327,17 +329,65 @@
 
     /* password modal */
     function validateForm() {
+        // regular field names (have id_<name>)
         var invalid = [];
+        // solr field ids (hidden, Select2 rendered)
+        var invalidSolr = [];
+
+        // Regular visible required inputs
         document.querySelectorAll('#plugin_form [required]').forEach(function (el) {
             if (!el.value || !el.value.trim()) {
                 invalid.push(el.id.replace(/^id_/, ''));
             }
         });
-        if (invalid.length) {
-            showFormError('', invalid);
-            return false;
+
+        // Hidden solr inputs; [required] never applies to hidden inputs,
+        // so we stamp data-required in solrfield.html and check here instead.
+        document.querySelectorAll('#plugin_form input[type="hidden"][data-required]').forEach(function (el) {
+            if (!el.value || !el.value.trim()) {
+                // full id, e.g. "id_variable"
+                invalidSolr.push(el.id);
+            }
+        });
+
+        if (!invalid.length && !invalidSolr.length) return true;
+
+        // Highlight regular fields via showFormError (handles scroll + is-invalid)
+        if (invalid.length) showFormError('', invalid);
+
+        // Highlight solr Select2 containers
+        invalidSolr.forEach(function (fieldId) {
+            var container = document.getElementById('s2id_' + fieldId);
+            if (!container) return;
+            container.classList.add('is-invalid');
+            // clear on selection; Select2 fires a change event on the hidden input
+            var hidden = document.getElementById(fieldId);
+            if (hidden) {
+                $(hidden).one('change', function () {
+                    container.classList.remove('is-invalid');
+                    clearFormError();
+                });
+            }
+        });
+
+        // Scroll to whichever invalid field comes first in the DOM
+        var firstInvalid = null;
+        if (invalidSolr.length) {
+            firstInvalid = document.getElementById('s2id_' + invalidSolr[0]);
         }
-        return true;
+        if (invalid.length) {
+            var firstRegular = document.getElementById('id_' + invalid[0]);
+            if (firstRegular && (!firstInvalid ||
+                firstRegular.compareDocumentPosition(firstInvalid) & Node.DOCUMENT_POSITION_FOLLOWING)) {
+                firstInvalid = firstRegular;
+            }
+        }
+        if (firstInvalid) {
+            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            firstInvalid.focus();
+        }
+
+        return false;
     }
 
     function togglePwVisibility() {

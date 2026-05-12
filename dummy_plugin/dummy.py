@@ -6,10 +6,12 @@ from pathlib import Path
 from subprocess import PIPE, run
 
 from evaluation_system.api.parameters import (
+    Bool,
     Float,
     InputDirectory,
     Integer,
     ParameterDictionary,
+    Range,
     SelectField,
     SolrField,
     String,
@@ -30,38 +32,104 @@ class DummyPlugin(PluginAbstract):
     __category__ = "statistical"
     __name__ = "DummyPlugin"
     __parameters__ = ParameterDictionary(
-        Integer(name="number", help="This is just a number, not really important"),
+        # Integer
+        Integer(
+            name="number",
+            help="Optional integer — not mandatory",
+        ),
         Integer(
             name="the_number",
             mandatory=True,
             help="This is *THE* number. Please provide it",
         ),
-        String(name="something", default="test"),
-        Float(name="other", default=1.4),
-        InputDirectory(name="input", help="An input file"),
+        # String
+        String(
+            name="something",
+            default="test",
+            mandatory=True,
+            help="A mandatory string with a default",
+        ),
+        # Float
+        Float(
+            name="other",
+            default=1.4,
+            mandatory=True,
+            help="A mandatory float with a default",
+        ),
+        # Bool(RadioSelect)
+        Bool(
+            name="debug_mode",
+            default=False,
+            mandatory=False,
+            help="Enable debug mode (optional bool)",
+        ),
+        Bool(
+            name="strict",
+            default=True,
+            mandatory=True,
+            help="Mandatory bool — must be explicitly set",
+        ),
+        # Range (PluginRangeFieldWidget)
+        Range(
+            name="years",
+            default="1990:2000",
+            mandatory=False,
+            help="Optional year range, e.g. 1990:5:2000",
+        ),
+        Range(
+            name="levels",
+            mandatory=True,
+            help="Mandatory pressure levels range, e.g. 500,850",
+        ),
+        # File / InputDirectory (PluginFileFieldWidget)
+        InputDirectory(
+            name="input",
+            mandatory=True,
+            help="Mandatory input directory",
+        ),
+        InputDirectory(
+            name="output_dir",
+            mandatory=False,
+            help="Optional output directory",
+        ),
+        # SelectField (PluginSelectFieldWidget)
         SelectField(
             name="variable",
             default="tas",
             multiple=True,
             allow_user_input=True,
-            options={"tas": "tas", "pr": "pr"},
-            help="An input variable",
+            mandatory=True,
+            options={"tas": "tas", "pr": "pr", "ua": "ua", "va": "va"},
+            help="Mandatory multi-select variable",
         ),
+        SelectField(
+            name="frequency",
+            multiple=False,
+            allow_user_input=False,
+            mandatory=False,
+            options={"mon": "Monthly", "day": "Daily", "yr": "Yearly"},
+            help="Optional single-select output frequency",
+        ),
+        # SolrField (SolrFieldWidget)
         SolrField(
             name="project",
-            mandatory=False,
+            mandatory=True,
             facet="project",
-            help=(
-                "Select the project to use (e.g. cmip6, cordex)"
-            ),
-            max_items=1,
             default="cmip6",
-        )
+            max_items=1,
+            help="Mandatory solr facet — select the project (e.g. cmip6, cordex)",
+        ),
+        SolrField(
+            name="model",
+            mandatory=False,
+            facet="model",
+            help="Optional solr facet — filter by model",
+        ),
     )
+
     _runs: list = []
     _template = "${number} - $something - $other"
-    tool_developer = {"name": "DummyUser", "email": "data@dkrz.de"} 
-    # tool_developer = "DummyUser"
+    tool_developer = {"name": "DummyUser", "email": "data@dkrz.de"}
 
     def run_tool(self, config_dict=None):
         DummyPlugin._runs.append(config_dict)

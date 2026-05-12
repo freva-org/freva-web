@@ -9,6 +9,8 @@ All notable changes to this project will be documented in this file.
 - Password/error modals unified in design across all freva-web pages
 - SSH errors now surfaced directly; 403/500 handled in JS instead of Django error templates
 - Data-loader polls smarter, respects server `Retry-After` header and no longer blocks the proxy
+### Fixed
+- Upgraded embedded STAC Browser from v4 (Vue CLI/webpack) to v5 (Vue 3/Vite);
 ## [v2604.3.1]
 ### Fixed
 - Flashing of old code content on rendering new code

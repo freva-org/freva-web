@@ -1,6 +1,9 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [v2605.0.0]
+### Fixed
+- Upgraded embedded STAC Browser from v4 (Vue CLI/webpack) to v5 (Vue 3/Vite);
 ## [v2604.3.1]
 ### Fixed
 - Flashing of old code content on rendering new code

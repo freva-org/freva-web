@@ -326,7 +326,6 @@ function FrevaGPT() {
               // object is empty so add content
               varObj = parsedVariant;
               handleServerHint(varObj);
-             
             }
           } catch (err) {
             buffer += variantArray[index];
@@ -336,7 +335,7 @@ function FrevaGPT() {
               if (Object.keys(varObj).length !== 0) {
                 if (varObj.variant !== parsedBuffer.variant) {
                   addNewVariant(varObj);
-                  varObj=parsedBuffer;
+                  varObj = parsedBuffer;
                 } else {
                   varObj.content = varObj.content + parsedBuffer.content;
                   addToExistingVariant(varObj);
@@ -346,7 +345,7 @@ function FrevaGPT() {
                 handleServerHint(varObj);
               }
               buffer = "";
-            } catch(err) {
+            } catch (err) {
               // string ends with } but not parsable -> either nested elements or misformatted response
               if (buffer.endsWith("}")) {
                 dispatch(

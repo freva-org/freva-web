@@ -40,10 +40,7 @@ function AssistantBlock({ content, streaming }) {
             },
           }}
         >
-          {content.content.replaceAll(
-            "utm_source=openai",
-            ""
-          )}
+          {content.content.replaceAll("utm_source=openai", "")}
         </ReactMarkdown>
 
         {!streaming ? (

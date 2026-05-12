@@ -9,10 +9,12 @@ import urllib
 from pathlib import Path
 
 import evaluation_system.api.plugin_manager as pm
+import paramiko
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
+from django.urls import reverse
 from django.views.decorators.debug import sensitive_post_parameters, sensitive_variables
 from evaluation_system.misc import config
 from evaluation_system.model.user import User
@@ -105,24 +107,52 @@ def search_similar_results(request, plugin_name=None, history_id=None):
 @login_required()
 def setup(request, plugin_name, row_id=None):
     pm.reload_plugins(request.user.username)
-    user_can_submit = request.session.get("system_user_valid", False)
-
-    if user_can_submit:
-        try:
-            user = OpenIdUser(request.user.username)
-        except UserNotFoundError:
-            user = User()
-    else:
+    try:
+        user = OpenIdUser(request.user.username)
+    except UserNotFoundError:
         user = User()
 
     plugin = get_plugin_or_404(plugin_name, user=user)
 
     error_msg = pm.get_error_warning(plugin_name)[0]
 
+    plugin_dict = pm.get_plugin_metadata(
+        plugin_name, user_name=request.user.username
+    )
+    try:
+        scratch_dir = user.getUserScratch()
+    except Exception:
+        scratch_dir = None
+    plugin_web = PluginWeb(plugin)
+
     if request.method == "POST":
+        is_ajax = request.headers.get("X-Requested-With") == "XMLHttpRequest"
+
         form = PluginForm(
             request.POST, tool=plugin, uid=request.user.username, request=request
         )
+        if not form.is_valid():
+            if is_ajax:
+                # Collect field-level errors into a readable message so the
+                # frontend can show them instead of the generic "network error".
+                messages = []
+                for field_name, errors in form.errors.items():
+                    if field_name == "__all__":
+                        messages.extend(str(e) for e in errors)
+                    elif field_name == "password_hidden":
+                        messages.append(f"Password: {', '.join(str(e) for e in errors)}")
+                    else:
+                        label = form.fields[field_name].label or field_name
+                        messages.append(f"{label}: {', '.join(str(e) for e in errors)}")
+                error_text = (
+                    "Please fix the following before submitting:\n• "
+                    + "\n• ".join(messages)
+                    if messages
+                    else "Please fill in all required fields."
+                )
+                invalid_fields = [f for f in form.errors if f not in ("__all__", "password_hidden")]
+                return JsonResponse({"form_errors": True, "error": error_text, "fields": invalid_fields}, status=400)
+
         if form.is_valid():
             # read the configuration
             config_dict = dict(form.data)
@@ -195,14 +225,63 @@ def setup(request, plugin_name, row_id=None):
             logging.info(ssh_cmd)
 
             # finally send the ssh call
-            _, stdout, stderr = ssh_call(
-                username=username,
-                password=password,
-                # we use "bash -c because users with other login shells can't use "export"
-                # not clear why we removed this in the first place...
-                command=ssh_cmd,
-                hostnames=hostnames,
-            )
+            try:
+                _, stdout, stderr = ssh_call(
+                    username=username,
+                    password=password,
+                    # we use "bash -c because users with other login shells can't use "export"
+                    # not clear why we removed this in the first place...
+                    command=ssh_cmd,
+                    hostnames=hostnames,
+                )
+            except paramiko.AuthenticationException:
+                error_detail = (
+                    "Authentication failed: the password you entered is incorrect. "
+                    "Please close this dialog and try again."
+                )
+                logging.warning("SSH authentication failed for user %s", username)
+                if is_ajax:
+                    return JsonResponse({"error": error_detail}, status=400)
+                return render(
+                    request,
+                    "plugins/setup.html",
+                    {
+                        "tool": plugin_web,
+                        "user_exported": plugin_dict.user_exported,
+                        "form": form,
+                        "user_scratch": scratch_dir,
+                        "error_message": error_msg,
+                        "show_pw_error": True,
+                        "PREVIEW_URL": settings.PREVIEW_URL,
+                        "ssh_error": error_detail,
+                    },
+                )
+            except (paramiko.SSHException, OSError) as exc:
+                error_detail = (
+                    "Could not connect to the scheduler host. "
+                    "The SSH service may be temporarily unavailable — "
+                    "please try again in a moment. "
+                    f"(Detail: {exc})"
+                )
+                logging.error(
+                    "SSH connection error for user %s: %s", username, exc
+                )
+                if is_ajax:
+                    return JsonResponse({"error": error_detail}, status=503)
+                return render(
+                    request,
+                    "plugins/setup.html",
+                    {
+                        "tool": plugin_web,
+                        "user_exported": plugin_dict.user_exported,
+                        "form": form,
+                        "user_scratch": scratch_dir,
+                        "error_message": error_msg,
+                        "show_pw_error": False,
+                        "PREVIEW_URL": settings.PREVIEW_URL,
+                        "ssh_error": error_detail,
+                    },
+                )
 
             # get the text form stdout
             out = stdout.readlines()
@@ -223,8 +302,17 @@ def setup(request, plugin_name, row_id=None):
                 logging.exception(error)
                 # We couldn't find out the row id due to issues with the log file.
                 # Redirect to user's history
+                if is_ajax:
+                    return JsonResponse(
+                        {"redirect": reverse("history:history")}, status=200
+                    )
                 return redirect("history:history")
 
+            if is_ajax:
+                return JsonResponse(
+                    {"redirect": reverse("history:results", kwargs={"id": row_id})},
+                    status=200,
+                )
             return redirect("history:results", id=row_id)
 
     else:
@@ -243,16 +331,6 @@ def setup(request, plugin_name, row_id=None):
             initial=config_dict, tool=plugin, uid=user.getName(), request=request
         )
 
-    plugin_dict = pm.get_plugin_metadata(
-        plugin_name, user_name=request.user.username
-    )
-
-    try:
-        scratch_dir = user.getUserScratch()
-    except:
-        scratch_dir = None
-    plugin_web = PluginWeb(plugin)
-
     return render(
         request,
         "plugins/setup.html",
@@ -262,7 +340,6 @@ def setup(request, plugin_name, row_id=None):
             "form": form,
             "user_scratch": scratch_dir,
             "error_message": error_msg,
-            "restricted_user": not user_can_submit,
             "show_pw_error": "password_hidden" in form.errors.keys(),
             "PREVIEW_URL": settings.PREVIEW_URL,
         },

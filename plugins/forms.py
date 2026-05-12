@@ -121,14 +121,7 @@ class PasswordField(forms.CharField):
 
     def validate(self, value):
         password_type = getattr(settings, "FORM_PASSWORD_CHECK", "OIDC")
-        if password_type == "OIDC":
-            session = getattr(self.request, "session", None)
-            if not (session and session.get("system_user_valid", False)):
-                raise exceptions.ValidationError(
-                    "Your system user session is no longer valid.",
-                    code="invalid_session",
-                )
-        elif password_type == "ssh":
+        if password_type == "ssh":
             try:
                 ssh_call(self._user, value, "ls", settings.SCHEDULER_HOSTS)
             except:

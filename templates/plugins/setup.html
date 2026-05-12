@@ -4,213 +4,186 @@
 {% block page_class %}home-page{% endblock %}
 {% block content %}
     {% load infotag %}
-
-    <script src="{{ STATIC_URL }}js/solr_search.js?{% now "U" %}"> </script>
-
     {% load bootstrap5 %}
     {% load static %}
     {% load settingstags %}
+
+    <script src="{{ STATIC_URL }}js/solr_search.js?{% now "U" %}"></script>
+
     <style>
-        .files {
-            max-height: 500px;
-            overflow-y: scroll;
-        }
+        /* existing page styles */
+        .files             { max-height: 500px; overflow-y: scroll; }
+        body .solr-modal   { width: 70%; max-width: 1000px; }
+        #simAffix.affix    { position: fixed; top: 10px; width: 220px; }
+        html.wait,
+        html.wait *        { cursor: wait !important; }
+        .required-form::before { content: "* "; color: red; }
 
-        body .solr-modal {
-            width: 70%;
-            max-width: 1000px;
-        }
-
-        #simAffix.affix {
+        /* shared custom-modal base
+         Used by both the password modal and the error modal. */
+        .freva-modal {
+            display: none;
             position: fixed;
-            top: 10px;
-            width: 220px;
-        }
-
-        html.wait, html.wait * {
-            cursor: wait !important;
-        }
-
-        .required-form::before{
-            content: "* ";
-            color: red;
-        }
-
-        /* Guest Modal Styles */
-        #guestModal {
+            inset: 0;
+            z-index: 1060;
             background: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(4px);
-        }
-
-        #guestModal .modal-dialog {
-            display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
-            margin: 0 auto;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            padding: 20px;
         }
+        .freva-modal.is-open { display: flex; }
 
-        #guestModal .modal-content {
-            background: white;
+        @keyframes freva-modal-in {
+            from { opacity: 0; transform: translateY(18px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0)     scale(1);    }
+        }
+        .freva-modal-box {
+            background: #fff;
             border-radius: 16px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-            border: none;
-            max-width: 500px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0,0,0,0.08);
             width: 100%;
-        }
-
-        #guestModal .modal-header {
-            background: {% settings_val 'MAIN_COLOR' %};
-            color: white;
-            padding: 16px 20px;
-            border-radius: 16px 16px 0 0;
-            border-bottom: none;
-            position: relative;
-        }
-
-        #guestModal .modal-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin: 0;
+            max-width: 500px;
             display: flex;
-            align-items: center;
-            gap: 8px;
+            flex-direction: column;
+            overflow: hidden;
+            animation: freva-modal-in 0.22s ease;
         }
-
-        #guestModal .modal-title::before {
-            content: "👥";
-            font-size: 20px;
+        .freva-modal-header {
+            background: linear-gradient(135deg, {% settings_val 'MAIN_COLOR' %} 0%, {% settings_val 'HOVER_COLOR' %} 100%);
+            color: #fff;
+            padding: 14px 20px;
+            position: relative;
+            flex-shrink: 0;
         }
-
-        #guestModal .btn-close {
+        .freva-modal-header h2 {
+            font-size: 17px;
+            font-weight: 700;
+            margin: 0 36px 3px 0;
+            letter-spacing: -0.01em;
+        }
+        .freva-modal-header p {
+            font-size: 12px;
+            opacity: 0.82;
+            margin: 0;
+        }
+        .freva-modal-close {
             position: absolute;
-            top: 16px;
-            right: 20px;
+            top: 16px; right: 16px;
             background: rgba(255, 255, 255, 0.2);
             border: none;
-            color: white;
-            width: 28px;
-            height: 28px;
+            color: #fff;
+            width: 28px; height: 28px;
             border-radius: 6px;
-            font-size: 18px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s;
-            opacity: 1;
-            box-shadow: none;
-            filter: none;
-        }
-
-        #guestModal .btn-close::before {
-            content: "×";
             font-size: 20px;
             line-height: 1;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s;
+            padding: 0;
+        }
+        .freva-modal-close:hover { background: rgba(255, 255, 255, 0.35); }
+        .freva-modal-body   { padding: 24px; }
+        .freva-modal-footer {
+            padding: 0 24px 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 16px;
+            margin-top: 4px;
         }
 
-        #guestModal .btn-close:hover {
-            background: rgba(255, 255, 255, 0.3);
+        /* password input with eye toggle */
+        .pw-input-wrap {
+            position: relative;
         }
-
-        #guestModal .modal-body {
-            padding: 20px;
+        .pw-input-wrap .form-control {
+            padding-right: 44px;
         }
+        .pw-eye-btn {
+            position: absolute;
+            right: 10px; top: 50%;
+            transform: translateY(-50%);
+            background: none; border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 4px;
+            line-height: 1;
+            transition: color 0.15s;
+        }
+        .pw-eye-btn:hover { color: #374151; }
 
-        #guestModal .help-block {
+        .freva-btn {
+            background: {% settings_val 'MAIN_COLOR' %};
+            color: #fff;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-size: 14px; font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .freva-btn:hover    { background: {% settings_val 'HOVER_COLOR' %}; }
+        .freva-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .freva-btn-secondary {
+            background: #f1f5f9; color: #374151;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-size: 14px; font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .freva-btn-secondary:hover { background: #e2e8f0; }
+
+        /* error modal: red accent */
+        #errorModal .freva-modal-header { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); }
+        #errorModal .freva-btn          { background: #dc2626; }
+        #errorModal .freva-btn:hover    { background: #b91c1c; }
+        .error-detail {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 10px;
+            padding: 14px 16px;
+            color: #7f1d1d;
             font-size: 14px;
             line-height: 1.6;
-            color: #4b5563;
-            margin-bottom: 16px;
         }
 
-        #guestModal .help-block:first-child {
-            font-size: 16px;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 16px;
-        }
-
-        #guestModal .modal-footer {
-            padding: 20px;
-            border-top: none;
-            display: flex;
-            justify-content: center;
-        }
-
-        #guestModal .tourbtn {
-            background: {% settings_val 'MAIN_COLOR' %};
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: background 0.2s;
-            min-width: 100px;
-        }
-
-        #guestModal .tourbtn:hover {
-            background: {% settings_val 'HOVER_COLOR' %};
-        }
-
-        @media (max-width: 640px) {
-            #guestModal .modal-dialog {
-                margin: 10px;
-            }
-            #guestModal .modal-body {
-                padding: 16px;
-            }
-        }
     </style>
 
-    {# Load CSS and JavaScript #}
-
+    <!-- main plugin form -->
     <div class="container">
-        <!-- Example row of columns -->
         <div class="row">
             <div class="col-md-9">
                 <h1>{{ tool.name }}</h1>
                 <p>{{ tool.short_description }}</p>
-                {% if show_pw_error %}
-                    <div class="alert alert-danger" role="alert">
-                        You've entered a <strong>wrong password</strong>! Please try again.
-                    </div>
-                {% endif %}
                 {% if user_exported %}
                     <div class="text-danger mb-2">You have plugged in this tool.</div>
                 {% endif %}
-
                 <form action="" method="post" name="plugin_form" id="plugin_form">
                     {% csrf_token %}
                     {% bootstrap_form form required_css_class="required-form" %}
-
-                    <a class="btn-lg btn-primary btn-block btn" id="runButton">
-                        Run
-                    </a>
+                    <div id="form-error-alert" style="display:none; margin-bottom:12px;"
+                         class="alert alert-danger alert-dismissible" role="alert">
+                        <button type="button" class="btn-close" onclick="clearFormError()" aria-label="Close"></button>
+                        <strong>Please fix the following:</strong>
+                        <pre id="form-error-text" style="margin:6px 0 0; font-size:13px; white-space:pre-wrap; font-family:inherit;"></pre>
+                    </div>
+                    <a class="btn-lg btn-primary btn-block btn" id="runButton">Run</a>
                 </form>
             </div>
             <div class="col-md-3 pull-right" id="similarD22iv">
                 <div id="simAffix">
-                    {% if restricted_user %}
-                        <p>As a full user you would see similar results here. The suggestions update in real-time while
-                            you fill out the from.</p>
-                    {% endif %}
                     <div id="similarDiv"></div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- Modal -->
+
+    <!-- file-browser Bootstrap modal -->
     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -219,14 +192,12 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="btn-group" data-toggle="buttons" style='margin-bottom:20px'>
+                    <div class="btn-group" data-toggle="buttons" style="margin-bottom:20px">
                         <label class="btn btn-primary">
                             <input type="radio" name="browse_options" id="browse_scratch" value="scratch">Work
                         </label>
                     </div>
-                    <div id="browsefield">
-                        ...
-                    </div>
+                    <div id="browsefield">...</div>
                 </div>
                 <div class="modal-footer">
                     <input type="hidden" name="senderField" id="senderField" value="">
@@ -234,14 +205,12 @@
                     <button type="button" class="btn btn-default" data-bs-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-primary">Select file</button>
                 </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
+            </div>
+        </div>
+    </div>
 
-
-    <!-- Modal Solr_search-->
-    <div class="modal fade" id="myModal_solr" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
-        aria-hidden="true">
+    <!-- Solr-search Bootstrap modal -->
+    <div class="modal fade" id="myModal_solr" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
         <div class="modal-dialog solr-modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -250,306 +219,397 @@
                 </div>
                 <div class="modal-body">
                     <div class="visual_search"></div>
-
                     <div class="files"></div>
-
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-bs-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-primary" id="solr_select_file">Select file</button>
                 </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
+            </div>
+        </div>
+    </div>
 
 
-    {% if restricted_user %}
-        <!-- Modal Guest Dialog-->
-        <div class="modal fade" id="guestModal" tabindex="-1" role="dialog" aria-labelledby="guestModal"
-            aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Guest login</h4>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body" id="guest_text">
+    <div id="pwModal" class="freva-modal" role="dialog" aria-modal="true" aria-labelledby="pwModalTitle">
+        <div class="freva-modal-box">
+            <div class="freva-modal-header">
+                <h2 id="pwModalTitle">Confirm your password</h2>
+                <p>Re-enter your password to schedule the analysis.</p>
+                <button class="freva-modal-close" onclick="closePwModal()" aria-label="Close">&#215;</button>
+            </div>
+            <div class="freva-modal-body">
+                <!-- Hidden username field — helps browsers offer password save/autofill -->
+                <input type="text" autocomplete="username"
+                       value="{{ request.user.username }}"
+                       style="display:none;" readonly>
+                <label style="font-size:13px; font-weight:600; color:#374151; margin-bottom:6px; display:block;">
+                    Password
+                </label>
+                <div class="pw-input-wrap">
+                    <input type="password" id="pw-input" class="form-control"
+                           placeholder="Enter your password" autocomplete="current-password">
+                    <button type="button" class="pw-eye-btn" onclick="togglePwVisibility()" aria-label="Toggle password visibility" tabindex="-1">
+                        <i class="fas fa-eye" id="pw-eye-icon"></i>
+                    </button>
+                </div>
+                <div id="similarResults" style="margin-top:16px; font-size:13px; color:#6b7280;"></div>
+            </div>
+            <div class="freva-modal-footer">
+                <button class="freva-btn-secondary" onclick="closePwModal()">Cancel</button>
+                <button class="freva-btn" id="pw-submit-btn" onclick="submitPlugin()">
+                    <i class="fas fa-play me-1"></i> Submit analysis
+                </button>
+            </div>
+        </div>
+    </div>
 
-                        <div class="form-group">
-                            <p class="help-block">Dear Guest,</p>
-                            <p class="help-block">you do not have the permissions to start any job.
-                                Press OK to be automatically redirected to the history. There you can view
-                                example results of the tools available.
-                            </p>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary tourbtn" data-bs-dismiss="modal"
-                            onclick='window.location.href="/history";'>Ok
-                        </button>
-                    </div>
-                </div><!-- /.modal-content -->
-            </div><!-- /.modal-dialog -->
-        </div><!-- /.modal -->
-    {% else %}
+    <div id="errorModal" class="freva-modal" role="dialog" aria-modal="true" aria-labelledby="errorModalTitle">
+        <div class="freva-modal-box">
+            <div class="freva-modal-header">
+                <h2 id="errorModalTitle">Submission Failed</h2>
+                <p>The plugin could not be started.</p>
+                <button class="freva-modal-close" onclick="closeErrorModal()" aria-label="Close">&#215;</button>
+            </div>
+            <div class="freva-modal-body">
+                <div class="error-detail" id="errorDetail">An error occurred.</div>
+            </div>
+            <div class="freva-modal-footer">
+                <button class="freva-btn-secondary" onclick="closeErrorModal()">Close</button>
+                <button class="freva-btn" onclick="closeErrorModal(); openPwModal();">
+                    <i class="fas fa-rotate-right me-1"></i> Try Again
+                </button>
+            </div>
+        </div>
+    </div>
 
-
-
-        <!-- Modal Passwort Dialog-->
-        <div class="modal fade" id="myModalPw" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Enter password</h4>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body" id="browsefield">
-
-                        <div class="form-group">
-                            <p class="help-block">To schedule the analysis you have to re-enter your password</p>
-                            {% comment %}
-                                This form is used to trigger the browsers "save password" function
-                                It also requires a username field and a submit (method="post") button.
-                                The actual submit is supressed with "return false" in $('#submit_analysis').on('click')
-                            {% endcomment %}
-                            <form name="passForm" id="passForm" action="/" method="post">
-                                <input id="username" type="text" name="username" style="display:none;" />
-                                <input id="password_temp" class="form-control" type="password" name="password_temp"
-                                    style="width: 90%;" />
-
-                                <div class="row">
-                                    <div class="col-md-12" id="similarResults">
-                                        <div class="spinner-border text-center" role="status">
-                                            <span class="visually-hidden">Loading...</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-default" data-bs-dismiss="modal">Cancel</button>
-                                    <button type="submit" class="btn btn-primary" id="submit_analysis">Submit analysis</button>
-                                </div>
-                        </form>
-                    </div>
-                </div><!-- /.modal-content -->
-            </div><!-- /.modal-dialog -->
-        </div><!-- /.modal -->
-    {% endif %}
-
-    {% if not restricted_user %} <!-- offer warnings and errors only operational -->
-        {% error_warning_dialog tool.name %}
-    {% endif %}
-
+    {% error_warning_dialog tool.name %}
     <script>
+    /* Custom modal system
+       A counter tracks how many .freva-modal panels are open so
+       closing one never accidentally restores scroll while another
+       is still visible. */
+    var _openModalCount = 0;
 
-        //Script for serializing the solr form values
-        function getActiveFacets(facet_to_look, facet_group) {
-            //var form = $('#plugin_form');
+    function openFrevaModal(id) {
+        var el = document.getElementById(id);
+        if (!el || el.classList.contains('is-open')) return;
+        el.classList.add('is-open');
+        _openModalCount++;
+        document.body.style.overflow = 'hidden';
+    }
 
-            if (facet_group == 'global') {
-                var solr_fields = $('input[data-group]');
-                var solr_fields_global = {};
-            } else {
-                var solr_fields = $('input[data-group="' + facet_group + '"]');
-                var solr_fields_global = $('input[data-group="global"]');
-                //var solr_fields = $.extend(solr_fields1, solr_fields2);
-            }
-            var search = '';
-            $.each(solr_fields, function (index, value) {
-                search += facetToQuery(index, value, facet_to_look);
-            });
-            $.each(solr_fields_global, function (index, value) {
-
-                search += facetToQuery(index, value, facet_to_look);
-
-            });
-
-            return search;
-
+    function closeFrevaModal(id) {
+        var el = document.getElementById(id);
+        if (!el || !el.classList.contains('is-open')) return;
+        el.classList.remove('is-open');
+        _openModalCount = Math.max(0, _openModalCount - 1);
+        if (_openModalCount === 0) {
+            /* using '' to restore natural scroll */
+            document.body.style.overflow = '';
         }
+    }
 
-        function facetToQuery(index, value, facet_to_look) {
-            var val = $(value).val();
-            var facet = $(value).attr('data-facet');
-            var multiple = $(value).attr('data-multiple');
-            if (val != '' && facet != facet_to_look) {
-                if (multiple == 'True') {
-                    var search = '';
-                    var values = val.split(',');
-                    $.each(values, function (i, v) {
-                        search += facet + '=' + v + '&';
-                    });
-                    return search;
-                } else {
-                    return facet + '=' + val + '&';
-                }
+    /* IMPORTANT: close on backdrop click; blocked while submitting */
+    document.querySelectorAll('.freva-modal').forEach(function (el) {
+        el.addEventListener('click', function (e) {
+            if (e.target === el && !window._isSubmitting) closeFrevaModal(el.id);
+        });
+    });
+
+    /* Escape closes topmost custom modal */
+    document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Escape' || window._isSubmitting) return;
+        ['errorModal', 'pwModal'].forEach(function (id) {
+            var el = document.getElementById(id);
+            if (el && el.classList.contains('is-open')) closeFrevaModal(id);
+        });
+    });
+
+    /* password modal */
+    function validateForm() {
+        var invalid = [];
+        document.querySelectorAll('#plugin_form [required]').forEach(function (el) {
+            if (!el.value || !el.value.trim()) {
+                invalid.push(el.id.replace(/^id_/, ''));
             }
-            return '';
-
+        });
+        if (invalid.length) {
+            showFormError('', invalid);
+            return false;
         }
+        return true;
+    }
 
-        // Script for the password modal
-        // set focus to pw-field
-        $('#myModalPw').on('shown.bs.modal', function () {
-            $('#password_temp').focus();
+    function togglePwVisibility() {
+        var inp  = document.getElementById('pw-input');
+        var icon = document.getElementById('pw-eye-icon');
+        var show = inp.type === 'password';
+        inp.type  = show ? 'text' : 'password';
+        icon.className = show ? 'fas fa-eye-slash' : 'fas fa-eye';
+    }
+
+    function openPwModal() {
+        var inp = document.getElementById('pw-input');
+        if (inp) inp.value = '';
+        clearFormError();
+        searchResults('similarResults');
+        openFrevaModal('pwModal');
+        setTimeout(function () { if (inp) inp.focus(); }, 50);
+    }
+    function closePwModal() {
+        closeFrevaModal('pwModal');
+        var inp = document.getElementById('pw-input');
+        if (inp) inp.type = 'password';
+        var icon = document.getElementById('pw-eye-icon');
+        if (icon) icon.className = 'fas fa-eye';
+    }
+
+    /* Enter submits from the password field */
+    document.addEventListener('DOMContentLoaded', function () {
+        var inp = document.getElementById('pw-input');
+        if (inp) {
+            inp.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') { e.preventDefault(); submitPlugin(); }
+            });
+        }
+    });
+
+    /* error modal */
+    function openErrorModal(message) {
+        document.getElementById('errorDetail').textContent = message;
+        openFrevaModal('errorModal');
+    }
+    function closeErrorModal() { closeFrevaModal('errorModal'); }
+
+    /* form input validation errors */
+    function showFormError(message, fields) {
+        if (fields && fields.length) {
+            fields.forEach(function (name) {
+                var el = document.getElementById('id_' + name);
+                if (!el) return;
+                el.classList.add('is-invalid');
+                el.addEventListener('input', function () {
+                    el.classList.remove('is-invalid');
+                    clearFormError();
+                }, { once: true });
+            });
+            var first = document.getElementById('id_' + fields[0]);
+            if (first) {
+                first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                first.focus();
+                return;
+            }
+        }
+        // fallback: no field names; show the text banner
+        var alert = document.getElementById('form-error-alert');
+        document.getElementById('form-error-text').textContent =
+            message.replace(/^Please fix the following before submitting:\n• /, '').replace(/\n• /g, '\n• ');
+        alert.style.display = 'block';
+        alert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    function clearFormError() {
+        document.getElementById('form-error-alert').style.display = 'none';
+    }
+
+    /* plugin submission */
+    function submitPlugin() {
+        var inp = document.getElementById('pw-input');
+        var pw  = inp ? inp.value.trim() : '';
+        if (!pw) { if (inp) inp.focus(); return; }
+
+        var btn = document.getElementById('pw-submit-btn');
+        btn.disabled = true;
+        btn.innerHTML =
+            '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Submitting\u2026';
+        document.documentElement.classList.add('wait');
+
+        /* lock the modal so user can't dismiss mid-flight */
+        window._isSubmitting = true;
+        document.querySelector('#pwModal .freva-modal-close').style.display = 'none';
+        document.querySelector('#pwModal .freva-btn-secondary').style.display = 'none';
+
+        /* copy password into the hidden field inside plugin_form */
+        document.getElementById('id_password_hidden').value = pw;
+
+        fetch(window.location.href, {
+            method:  'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body:    new FormData(document.getElementById('plugin_form')),
         })
-
-        // simulate click on submit when enter is pressed
-        $('#password_temp').keypress(function (e) {
-            if (e.which == 13) {
-                $('#submit_analysis').click();
-                return false;
+        .then(function (response) {
+            if (response.status === 403) {
+                throw { status: 403 };
             }
+            return response.json().then(function (data) {
+                return { ok: response.ok, data: data };
+            });
+        })
+        .then(function (result) {
+            closePwModal();
+            if (result.data.redirect) {
+                window.location.href = result.data.redirect;
+            } else if (result.data.form_errors) {
+                // Validation failure: it shows the error above the Run button so
+                // the user knows to fill in the required fields, not as an SSH
+                // error modal (which implies something system-level went wrong).
+                showFormError(result.data.error, result.data.fields);
+            } else {
+                openErrorModal(result.data.error);
+            }
+        })
+        .catch(function (err) {
+            closePwModal();
+            if (err && err.status === 403) {
+                openErrorModal('Access denied. Your session may have expired — please refresh the page.');
+            } else {
+                openErrorModal('A network error occurred. Please try again.');
+            }
+        })
+        .finally(function () {
+            window._isSubmitting = false;
+            document.querySelector('#pwModal .freva-modal-close').style.display = '';
+            document.querySelector('#pwModal .freva-btn-secondary').style.display = '';
+            document.documentElement.classList.remove('wait');
+            btn.disabled = false;
+            btn.innerHTML = 'Submit analysis';
         });
+    }
 
-        function activate_browse(dir, file_extension) {
-            $('#browsefield').fileTree({
-                root: dir ? dir : '{{user_scratch}}',
-                script: '{% url 'plugins:dirlist' %}?file_type=' + file_extension,
-                expandSpeed: 100,
-                collapseSpeed: 100,
-                multiFolder: false
-            }, function (file) {
-                var sender = $('#senderField').val();
-                $('#' + sender).val(file);
-                $('#myModal').modal('hide');
-
-            });
+    /* Similar-results helpers */
+    function getActiveFacets(facet_to_look, facet_group) {
+        var solr_fields, solr_fields_global;
+        if (facet_group === 'global') {
+            solr_fields        = $('input[data-group]');
+            solr_fields_global = {};
+        } else {
+            solr_fields        = $('input[data-group="' + facet_group + '"]');
+            solr_fields_global = $('input[data-group="global"]');
         }
+        var search = '';
+        $.each(solr_fields,        function (i, v) { search += facetToQuery(i, v, facet_to_look); });
+        $.each(solr_fields_global, function (i, v) { search += facetToQuery(i, v, facet_to_look); });
+        return search;
+    }
 
-        function searchResults(container) {
-            var form_vals = $('#plugin_form').serializeArray();
-            var index_pw;
-            $.each(form_vals, function (index, value) {
-                if (value.name == 'password_hidden') {
-                    index_pw = index;
-                }
-            });
-            form_vals.splice(index_pw, 1);
-            $('#' + container).html('<div class="text-center"><p>Loading similar results!</p><div class="spinner-border" role="status"> <span class="visually-hidden">Loading...</span> </div></div> ');
-            $.ajax({
-                url: '/plugins/{{tool.name}}/similar-results/',
-                data: form_vals,
-                type: 'GET',
-                dataType: 'json',
-                success: function (data) {
-                    if (data.length == 0)
+    function facetToQuery(index, value, facet_to_look) {
+        var val      = $(value).val();
+        var facet    = $(value).attr('data-facet');
+        var multiple = $(value).attr('data-multiple');
+        if (val !== '' && facet !== facet_to_look) {
+            if (multiple === 'True') {
+                var s = '';
+                $.each(val.split(','), function (i, v) { s += facet + '=' + v + '&'; });
+                return s;
+            }
+            return facet + '=' + val + '&';
+        }
+        return '';
+    }
+
+    function historyLinkWrapper(res, tag) {
+        return '<a href="/history/' + res.pk + '/results/" target="_blank">' + tag + '</a>';
+    }
+
+    function getPreview(res, width) {
+        if (!res.preview) return '';
+        var src = '{{ PREVIEW_URL }}' + res.preview;
+        if (res.preview.endsWith('.mp4'))
+            return historyLinkWrapper(res, '<video src="' + src + '" width="' + width + '"/>') + '<br/>';
+        return historyLinkWrapper(res, '<img src="' + src + '" width="' + width + '"/>') + '<br/>';
+    }
+
+    function similarHtml(res) {
+        return getPreview(res, 200) +
+               historyLinkWrapper(res, res.tool + ' Result #' + res.pk) +
+               ' by ' + res.uid + '<br/><br/>';
+    }
+
+    function similarDialog(res) {
+        return '<td>' + getPreview(res, 130) +
+               historyLinkWrapper(res, 'Result #' + res.pk) +
+               ' by ' + res.uid + '</td>';
+    }
+
+    function searchResults(container) {
+        var form_vals = $('#plugin_form').serializeArray().filter(function (v) {
+            return v.name !== 'password_hidden';
+        });
+        $('#' + container).html(
+            '<div class="text-center"><p>Loading similar results\u2026</p>' +
+            '<div class="spinner-border" role="status">' +
+            '<span class="visually-hidden">Loading\u2026</span></div></div>'
+        );
+        $.ajax({
+            url: '/plugins/{{ tool.name }}/similar-results/',
+            data: form_vals, type: 'GET', dataType: 'json',
+            success: function (data) {
+                var result;
+                if (!data.length) {
                     result = 'No similar results found';
-                    else {
-                        result = '<table width="100%" style="text-align:center;" cellpadding="10"><tr>';
-                        var i = 0;
-                        data.forEach(function (val) {
-                            i += 1;
-                            if (container == 'similarResults') {
-                                result += similarDialog(val, i);
-                                if (i == 3)result += '</tr><tr>';
-                            } else
-                            result += similarHtml(val, i);
-                        });
-                        result += '</tr></table>';
-                        if (result.length > 0) {
-                            if (container == 'similarResults')
-                            result = 'This analysis has already be done by other users. Here you can view their results. <br>' + result;
-                            else
-                            result = 'Similar results: <br>' + result;
+                } else {
+                    result = '<table width="100%" style="text-align:center;" cellpadding="10"><tr>';
+                    data.forEach(function (val, i) {
+                        if (container === 'similarResults') {
+                            result += similarDialog(val);
+                            if (i === 2) result += '</tr><tr>';
+                        } else {
+                            result += similarHtml(val);
                         }
-                    }
-                    $('#' + container).html(result);
-                },
-                error: function (xhr, status, err) {
-                    console.log(xhr.responseJSON);
+                    });
+                    result += '</tr></table>';
+                    result = (container === 'similarResults'
+                        ? 'This analysis has already been done. View the results below.<br>'
+                        : 'Similar results:<br>') + result;
                 }
-            });
+                $('#' + container).html(result);
+            },
+            error: function () { $('#' + container).html(''); }
+        });
+    }
 
-        }
+    /* ── file browser ────────────────────────────────────────── */
+    function activate_browse(dir, file_extension) {
+        $('#browsefield').fileTree({
+            root:          dir || '{{ user_scratch }}',
+            script:        '{% url "plugins:dirlist" %}?file_type=' + file_extension,
+            expandSpeed:   100,
+            collapseSpeed: 100,
+            multiFolder:   false,
+        }, function (file) {
+            $('#' + $('#senderField').val()).val(file);
+            $('#myModal').modal('hide');
+        });
+    }
 
-        function historyLinkWrapper(res, stringTag) {
-            return `<a href="/history/${res['pk']}/results/" target="_blank">
-                      ${stringTag}
-                    </a>`
-        }
+    /* Page init */
+    $(document).ready(function () {
+        getActiveFacets();
+        activate_browse('{{ user_scratch }}', $('#fileExtension').val());
 
-        function getPreview(res, width) {
-            let img = '';
-            if (res['preview'] != '' && res['preview'].endsWith(".mp4")) {
-                img = historyLinkWrapper(res, `<video src="{{PREVIEW_URL}}${res['preview']}" width="${width}"/>`) + '<br/>';
-            } else if (res['preview'] != '') {
-                img = historyLinkWrapper(res, `<img src="{{PREVIEW_URL}}${res['preview']}" width="${width}"/>`) + '<br/>';
+        $("input:radio[name='browse_options']").on('change', function () {
+            if (this.value === $("input:radio[name='browse_options']:checked").val()) {
+                activate_browse('{{ user_scratch }}', $('#fileExtension').val());
             }
-            return img;
-        }
-
-        function similarHtml(res, i) {
-            const img = getPreview(res, 200)
-            const html = `${img} ${historyLinkWrapper(res, res['tool'] + ` Result #${res['pk']}`)} by  ${res['uid']} <br/><br/>`;
-            return html;
-        }
-
-        function similarDialog(res, i) {
-            const img = getPreview(res, 130)
-            const html = `<td> ${img} ${historyLinkWrapper(res, `Result #${res['pk']}`)} by ${res['uid']} </td>`;
-            return html;
-        }
-
-        $(document).ready(function () {
-            getActiveFacets();
-
-            activate_browse('{{user_scratch}}', $('#fileExtension').val());
-
-            $("input:radio[name='browse_options']").on('change', function () {
-                kind = $("input:radio[name='browse_options']:checked").val();
-
-                if (this.value == kind) {
-                    var file_extension = $('#fileExtension').val()
-                    activate_browse('{{user_scratch}}', file_extension);
-                }
-            });
-
-            {% if restricted_user %}
-                // disable run buttons but enable the token management button.
-                $('#runButton, .tool-btn, .form-btn').attr('disabled', 'disabled');
-                // $('.btn').attr('disabled', 'disabled'); // {{ disable_buttons }}
-
-                // actually the runbutton is a forwarding
-                $('#runButton').removeAttr('disabled');
-                $('.tourbtn').removeAttr('disabled');
-                $('#runButton').on('click', function (e) {
-                    $('#guestModal').modal("show");
-                });
-            {% elif error_message %}
-                $('.btn').attr('disabled', 'disabled'); // {{ disable_buttons }}
-                $('#okBtn').removeAttr('disabled');
-
-            {% else %}
-                $('#runButton').on('click', function (e) {
-                    searchResults('similarResults'); //This triggers the search for similar results
-                    $('#myModalPw').modal('show');
-                });
-
-
-                $('#submit_analysis').on('click', function (e) {
-                    $('#submit_analysis').button('loading');
-                    var pw = $('#password_temp').val();
-                    $('html').addClass('wait');
-                    $('#id_password_hidden').val(pw);
-
-                    $('#plugin_form').submit();
-                    return false;
-
-                });
-
-
-            {% endif %}
-
-            $('form :input').change(function () {
-                searchResults('similarDiv');
-            });
-            searchResults('similarDiv');
         });
 
+        {% if error_message %}
+            $('.btn').attr('disabled', 'disabled');
+            $('#okBtn').removeAttr('disabled');
 
+        {% else %}
+            $('#runButton').on('click', function () { if (validateForm()) openPwModal(); });
+        {% endif %}
+
+        $('form :input').change(function () { searchResults('similarDiv'); });
+        searchResults('similarDiv');
+    });
+
+    {% if ssh_error %}
+    /* non-AJAX fallback anymore: server rendered an ssh_error context variable */
+    document.addEventListener('DOMContentLoaded', function () {
+        openErrorModal("{{ ssh_error|escapejs }}");
+    });
+    {% endif %}
     </script>
-
 
 {% endblock %}

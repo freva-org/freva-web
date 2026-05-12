@@ -4,7 +4,7 @@ import { TEMP_FREVA_AUTH_TOKEN } from "../../Containers/Databrowser/constants";
 
 /**
  * Returns the Authorization header for the current user, or an empty object
- * when no token is present. Mirrors the same helper in useZarrStatus.js.
+ * when no token is present
  */
 function getAuthHeaders() {
   const cookies = document.cookie.split(";");
@@ -34,7 +34,7 @@ function getAuthHeaders() {
  * when the header is absent (500, 404, network errors) or unparseable.
  *
  * The server-side constant _RETRY_AFTER is currently hardcoded to 2 seconds,
- * so in practice this will usually return 2000 — but reading it directly
+ * so in practice this will usually return 2000; but reading it directly
  * means the client automatically adapts if the server value ever changes.
  */
 function retryDelayMs(response, defaultMs) {
@@ -56,7 +56,7 @@ function retryDelayMs(response, defaultMs) {
  * 2 s). The hook uses that value as the retry delay when present, falling back
  * to `intervalMs` otherwise.
  *
- * Only activates when `enabled` is true — set enabled={statusCode === 0} so
+ * Only activates when `enabled` is true; set enabled={statusCode === 0} so
  * the hook never fires before the zarr conversion job is finished.
  *
  * @param {string|null} rawZarrUrl  The internal zarr URL returned by /zarr/convert.
@@ -119,14 +119,14 @@ export function useHtmlMetadata(
           return;
         }
 
-        // Non-OK response — use Retry-After when the server sends it (503),
+        // Non-OK response; use Retry-After when the server sends it (503),
         // fall back to intervalMs for everything else (500, 404, etc.).
         const delay = retryDelayMs(res, intervalMs);
         if (!cancelled) {
           timerId = setTimeout(poll, delay);
         }
       } catch {
-        // Network error — no response headers available, use fixed fallback.
+        // Network error; no response headers available, use fixed fallback.
         if (!cancelled) {
           timerId = setTimeout(poll, intervalMs);
         }

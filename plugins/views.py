@@ -9,7 +9,6 @@ import urllib
 from pathlib import Path
 
 import evaluation_system.api.plugin_manager as pm
-import paramiko
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
@@ -28,6 +27,8 @@ from plugins.utils import (
     get_scheduler_hosts,
     is_path_relative_to,
     ssh_call,
+    classify_ssh_exception,
+    SSHFailureKind,
 )
 
 
@@ -234,14 +235,15 @@ def setup(request, plugin_name, row_id=None):
                     command=ssh_cmd,
                     hostnames=hostnames,
                 )
-            except paramiko.AuthenticationException:
-                error_detail = (
-                    "Authentication failed: the password you entered is incorrect. "
-                    "Please close this dialog and try again."
+            except Exception as exc:
+                failure = classify_ssh_exception(exc)
+                logging.log(
+                    logging.WARNING if failure.kind == SSHFailureKind.AUTH_FAILED else logging.ERROR,
+                    "SSH %s for user %s: %s", failure.kind, username, exc,
                 )
-                logging.warning("SSH authentication failed for user %s", username)
+                status = 400 if failure.kind == SSHFailureKind.AUTH_FAILED else 503
                 if is_ajax:
-                    return JsonResponse({"error": error_detail}, status=400)
+                    return JsonResponse({"error": failure.message}, status=status)
                 return render(
                     request,
                     "plugins/setup.html",
@@ -251,35 +253,9 @@ def setup(request, plugin_name, row_id=None):
                         "form": form,
                         "user_scratch": scratch_dir,
                         "error_message": error_msg,
-                        "show_pw_error": True,
+                        "show_pw_error": failure.kind == SSHFailureKind.AUTH_FAILED,
                         "PREVIEW_URL": settings.PREVIEW_URL,
-                        "ssh_error": error_detail,
-                    },
-                )
-            except (paramiko.SSHException, OSError) as exc:
-                error_detail = (
-                    "Could not connect to the scheduler host. "
-                    "The SSH service may be temporarily unavailable — "
-                    "please try again in a moment. "
-                    f"(Detail: {exc})"
-                )
-                logging.error(
-                    "SSH connection error for user %s: %s", username, exc
-                )
-                if is_ajax:
-                    return JsonResponse({"error": error_detail}, status=503)
-                return render(
-                    request,
-                    "plugins/setup.html",
-                    {
-                        "tool": plugin_web,
-                        "user_exported": plugin_dict.user_exported,
-                        "form": form,
-                        "user_scratch": scratch_dir,
-                        "error_message": error_msg,
-                        "show_pw_error": False,
-                        "PREVIEW_URL": settings.PREVIEW_URL,
-                        "ssh_error": error_detail,
+                        "ssh_error": failure.message,
                     },
                 )
 

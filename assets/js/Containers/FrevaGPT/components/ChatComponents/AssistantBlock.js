@@ -8,7 +8,7 @@ import remarkGfm from "remark-gfm";
 
 import { Col, Card } from "react-bootstrap";
 
-import { replaceLinebreaks, setGivenFeedbackValue } from "../../utils";
+import { setGivenFeedbackValue } from "../../utils";
 
 import * as constants from "../../constants";
 
@@ -40,7 +40,7 @@ function AssistantBlock({ content, streaming }) {
             },
           }}
         >
-          {replaceLinebreaks(content.content).replaceAll(
+          {content.content.replaceAll(
             "utm_source=openai",
             ""
           )}

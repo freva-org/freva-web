@@ -10,8 +10,6 @@ import ReactMarkdown from "react-markdown";
 
 import { FaExpand } from "react-icons/fa";
 
-import { replaceLinebreaks } from "../../utils";
-
 import * as constants from "../../constants";
 
 import CodeBlock from "./CodeBlock";
@@ -134,7 +132,7 @@ function ChatBlock({ onEditInput }) {
       <Col md={12} key={`${element.index}-error`}>
         <Alert variant="danger" className="shadow-sm mb-3">
           <span className="fw-bold">{element.variant}</span>
-          <ReactMarkdown>{replaceLinebreaks(element.content)}</ReactMarkdown>
+          <ReactMarkdown>{element.content}</ReactMarkdown>
         </Alert>
       </Col>
     );

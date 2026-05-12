@@ -6,68 +6,66 @@
 {% block title %}STAC Browser{% endblock %}
 
 {% block content %}
-<!-- Pass STAC API and STAC-Browser JS and CSS paths to JavaScript -->
 {{ stac_assets|json_script:"stac-assets" }}
 {{ stac_api_url|json_script:"stac-api-url" }}
 
 <script>
     const assets = JSON.parse(document.getElementById('stac-assets').textContent);
     const stacApiUrl = JSON.parse(document.getElementById('stac-api-url').textContent);
-    
+
+    // v5 merged-config.js reads window.STAC_BROWSER_CONFIG (not window.STAC_CATALOG_URL).
+    // This must be set before the module script loads so it is available when
+    // merged-config.js is evaluated.
+    window.STAC_BROWSER_CONFIG = { catalogUrl: stacApiUrl };
+
     document.addEventListener('DOMContentLoaded', function() {
-        const head = document.head;
-
-        // check for the all required meta tags and create them if they don't exist
-        if (!document.getElementById('og-title')) {
-            const ogTitle = document.createElement('meta');
-            ogTitle.id = 'og-title';
-            ogTitle.property = 'og:title';
-            ogTitle.content = document.title;
-            head.appendChild(ogTitle);
-        }
-
-        if (!document.getElementById('meta-description')) {
-            const metaDesc = document.createElement('meta');
-            metaDesc.id = 'meta-description';
-            metaDesc.name = 'description';
-            metaDesc.content = 'STAC Browser - Evaluation System';
-            head.appendChild(metaDesc);
-        }
-
-        if (!document.getElementById('og-description')) {
-            const ogDesc = document.createElement('meta');
-            ogDesc.id = 'og-description';
-            ogDesc.property = 'og:description';
-            ogDesc.content = 'STAC Browser - Evaluation System';
-            head.appendChild(ogDesc);
-        }
-
-        if (!document.getElementById('og-locale')) {
-            const ogLocale = document.createElement('meta');
-            ogLocale.id = 'og-locale';
-            ogLocale.property = 'og:locale';
-            ogLocale.content = 'en';
-            head.appendChild(ogLocale);
-        }
-
-        if (!document.getElementById('og-url')) {
-            const ogUrl = document.createElement('meta');
-            ogUrl.id = 'og-url';
-            ogUrl.property = 'og:url';
-            ogUrl.content = window.location.href;
-            head.appendChild(ogUrl);
-        }
-        
+        ensureMetaTags();
         loadScopedCSS();
     });
 
+    function ensureMetaTags() {
+        const head = document.head;
+        function ensure(id, attrs) {
+            if (document.getElementById(id)) return;
+            const el = document.createElement('meta');
+            el.id = id;
+            Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+            head.appendChild(el);
+        }
+        ensure('og-title',         { property: 'og:title',       content: document.title });
+        ensure('meta-description', { name:     'description',    content: 'STAC Browser - Evaluation System' });
+        ensure('og-description',   { property: 'og:description', content: 'STAC Browser - Evaluation System' });
+        ensure('og-locale',        { property: 'og:locale',      content: 'en' });
+        ensure('og-url',           { property: 'og:url',         content: window.location.href });
+    }
+
+    // Vite produces one hashed CSS file. Its path (e.g. "assets/index-CXnPQ.css")
+    // is already relative to the stac-browser static root, so we just prepend that.
+    function loadScopedCSS() {
+        return new Promise((resolve) => {
+            if (!assets.main_css) {
+                addDropdownFixes();
+                addLayoutProtection();
+                resolve();
+                return;
+            }
+            const link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = `{% static "stac-browser/" %}${assets.main_css}`;
+            link.onload = link.onerror = () => {
+                addDropdownFixes();
+                addLayoutProtection();
+                resolve();
+            };
+            document.head.appendChild(link);
+        });
+    }
+
     function addLayoutProtection() {
-        // Create a style element to protect the main layout
+        if (document.getElementById('stac-layout-protection')) return;
         const protectionStyle = document.createElement('style');
         protectionStyle.id = 'stac-layout-protection';
         protectionStyle.textContent = `
-            /* original max-width number is 1200px, but since it's a SPA
-            we found 1240px by experiment*/
             .container {
                 max-width: 1240px !important;
                 width: 100% !important;
@@ -80,14 +78,12 @@
                 margin: 0 auto !important;
             }
 
-            /* Adjustment of the logo and keep the original behavior */
             header .row.justify-content-between {
-                max-width: 1240px !important; 
-                margin: 0 auto !important; 
+                max-width: 1240px !important;
+                margin: 0 auto !important;
                 justify-content: space-between !important;
             }
 
-            /* Lock column widths to original sizes. 400px is the original size */
             header .col-md-4.col-sm-6 {
                 width: 400px !important;
                 max-width: 400px !important;
@@ -100,7 +96,6 @@
                 flex: 0 0 200px !important;
             }
 
-            /* Lock logo sizes at their original sizes. 376px is the original size */
             header .col-md-4 .logo img {
                 max-width: 376px !important;
                 width: auto !important;
@@ -109,13 +104,11 @@
 
             header .col-md-2 .logo img {
                 max-width: 176px !important;
-                width: auto !important; 
+                width: auto !important;
                 height: auto !important;
             }
 
             @media (max-width: 991px) {
-                /* Aall values below, has been experimentally determined
-                to be the original values for the responsive layout */
                 .navbar-toggler {
                     margin-left: -2px !important;
                 }
@@ -172,57 +165,10 @@
                 max-width: 100% !important;
                 overflow: hidden !important;
             }
-
         `;
         document.head.appendChild(protectionStyle);
     }
 
-    // we load CSS dynamically in script to ensure it is loaded after the DOM is ready
-    // and it prevent conflicts with other styles of freva-web
-    const loadScopedCSS = () => {
-        return new Promise((resolve) => {
-            let loadedCount = 0;
-            const totalFiles = 2;
-            
-            const checkComplete = () => {
-                loadedCount++;
-                if (loadedCount === totalFiles) {
-                    addDropdownFixes();
-                    addLayoutProtection();
-                    resolve();
-                }
-            };
-            
-            // load vendor and app CSS files dynamically
-            const vendorCSS = document.createElement('link');
-            vendorCSS.rel = 'stylesheet';
-            vendorCSS.href = `{% static "stac-browser/css/" %}${assets.vendor_css}`;
-            vendorCSS.onload = () => {
-                checkComplete();
-            };
-            vendorCSS.onerror = () => {
-                checkComplete();
-            };
-            
-            const appCSS = document.createElement('link');
-            appCSS.rel = 'stylesheet';
-            appCSS.href = `{% static "stac-browser/css/" %}${assets.app_css}`;
-            appCSS.onload = () => {
-                checkComplete();
-            };
-            appCSS.onerror = () => {
-                checkComplete();
-            };
-            
-            document.head.appendChild(vendorCSS);
-            document.head.appendChild(appCSS);
-        });
-    };
-    
-    // important:
-    // since the `additional-filters` and `queryable-group` classes are used in the STAC Browser,
-    // we need to ensure that the dropdowns and other elements are properly styled and contained
-    // otherwise they might overflow or not display correctly
     function addDropdownFixes() {
         const style = document.createElement('style');
         style.textContent = `
@@ -395,41 +341,28 @@
     }
 </script>
 
-<!-- Important" Where we import STAC Browser container -->
 <div class="stac-browser-wrapper">
     <div id="stac-browser"></div>
 </div>
 
-<!-- Load STAC Browser config -->
-<script src="{% static 'stac-browser/config.js' %}"></script>
-<script>
-    window.STAC_CATALOG_URL = stacApiUrl;
-</script>
-
-<!-- Load STAC Browser JavaScript -->
 <script>
     window.addEventListener('load', function() {
+        if (!assets.main_js) {
+            console.error(
+                'STAC Browser: main_js is empty. ' +
+                'Make sure `make setup-stacbrowser` ran successfully and ' +
+                '.vite/manifest.json was copied to static_root/stac-browser/.'
+            );
+            return;
+        }
 
-        // Load vendor script and then app script
-        const vendorScript = document.createElement('script');
-        vendorScript.src = `{% static "stac-browser/js/" %}${assets.vendor_js}`;
-        vendorScript.onload = function() {
-
-            const appScript = document.createElement('script');
-            appScript.src = `{% static "stac-browser/js/" %}${assets.app_js}`;
-            appScript.onload = function() {
-                
-                setTimeout(() => {
-                    try {
-                        const vueInstance = document.getElementById('stac-browser').__vue__;
-                    } catch (error) {
-                        console.warn(error);
-                    }
-                }, 1000);
-            };
-            document.head.appendChild(appScript);
-        };
-        document.head.appendChild(vendorScript);
+        // Vite builds are ES modules — script MUST have type="module".
+        // Without it the browser throws SyntaxError on the first import
+        // statement and the app never boots.
+        const script = document.createElement('script');
+        script.type = 'module';
+        script.src = `{% static "stac-browser/" %}${assets.main_js}`;
+        document.head.appendChild(script);
     });
 </script>
 {% endblock %}

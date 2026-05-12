@@ -23,12 +23,12 @@ from base.Users import OpenIdUser
 from history.models import Configuration, History
 from plugins.forms import PluginForm, PluginWeb
 from plugins.utils import (
+    SSHFailureKind,
+    classify_ssh_exception,
     get_plugin_or_404,
     get_scheduler_hosts,
     is_path_relative_to,
     ssh_call,
-    classify_ssh_exception,
-    SSHFailureKind,
 )
 
 

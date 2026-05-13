@@ -27,8 +27,6 @@ jobs:
           micromamba run -n freva-web python docker/config/dev-utils.py gen-certs
       - name: Set up services
         run: docker compose up -d --remove-orphans
-      - name: Set up STAC Browser
-        run: micromamba run -n freva-web make setup-stacbrowser
       - name: Lint js code and python
         run: micromamba run -n freva-web make lint
       - name: Run build checks for js and python smoke tests

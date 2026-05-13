@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 ## [v2605.0.0]
+### Removed
+- Guest user concept fully removed from auth, views, forms and templates
+### Changed
+- Plugin mandatory fields validated client-side before password modal, covering all widget types with red highlight and auto-scroll to first offender
+- Password/error modals unified in design across all freva-web pages
+- SSH errors now surfaced directly; 403/500 handled in JS instead of Django error templates
+- Data-loader polls smarter, respects server `Retry-After` header and no longer blocks the proxy
 ### Fixed
 - Upgraded embedded STAC Browser from v4 (Vue CLI/webpack) to v5 (Vue 3/Vite);
 ## [v2604.3.1]

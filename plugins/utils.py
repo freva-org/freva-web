@@ -1,9 +1,12 @@
 import base64
+import errno
 import io
 import logging
 import shlex
 import socket
 import subprocess
+from dataclasses import dataclass
+from enum import Enum
 
 import evaluation_system.api.plugin_manager as pm
 import paramiko
@@ -11,7 +14,82 @@ from django.conf import settings
 from django.http import Http404
 from django.views.decorators.debug import sensitive_variables
 from evaluation_system.misc import config
+from paramiko.ssh_exception import (
+    AuthenticationException,
+    BadAuthenticationType,
+    BadHostKeyException,
+    NoValidConnectionsError,
+    SSHException,
+)
 
+
+class SSHFailureKind(str, Enum):
+    AUTH_FAILED        = "auth_failed"
+    BAD_HOST_KEY       = "bad_host_key"
+    CONNECTION_REFUSED = "connection_refused"
+    HOST_UNREACHABLE   = "host_unreachable"
+    DNS_FAILED         = "dns_failed"
+    TIMEOUT            = "timeout"
+    CONNECTION_CLOSED  = "connection_closed"
+    SSH_ERROR          = "ssh_error"
+    UNKNOWN            = "unknown"
+
+
+@dataclass
+class SSHFailure:
+    kind: SSHFailureKind
+    message: str
+    original_exception: Exception
+
+
+def classify_ssh_exception(exc: Exception) -> SSHFailure:
+    if isinstance(exc, BadHostKeyException):
+        return SSHFailure(SSHFailureKind.BAD_HOST_KEY,
+                          f"Host key verification failed: {exc}", exc)
+
+    if isinstance(exc, (AuthenticationException, BadAuthenticationType)):
+        return SSHFailure(SSHFailureKind.AUTH_FAILED,
+                          "Authentication failed: the password you entered is incorrect. "
+                          "Please close this dialog and try again.", exc)
+
+    if isinstance(exc, NoValidConnectionsError):
+        for _target, err in getattr(exc, "errors", {}).items():
+            no = getattr(err, "errno", None)
+            if no == errno.ECONNREFUSED:
+                return SSHFailure(SSHFailureKind.CONNECTION_REFUSED,
+                                  f"Connection refused by scheduler host: {err}", exc)
+            if no in (errno.EHOSTUNREACH, errno.ENETUNREACH):
+                return SSHFailure(SSHFailureKind.HOST_UNREACHABLE,
+                                  f"Scheduler host unreachable: {err}", exc)
+            if no == errno.ETIMEDOUT:
+                return SSHFailure(SSHFailureKind.TIMEOUT,
+                                  f"Connection to scheduler host timed out: {err}", exc)
+        return SSHFailure(SSHFailureKind.UNKNOWN, f"Connection failed: {exc}", exc)
+
+    if isinstance(exc, socket.gaierror):
+        return SSHFailure(SSHFailureKind.DNS_FAILED,
+                          f"Could not resolve scheduler hostname: {exc}", exc)
+
+    if isinstance(exc, (socket.timeout, TimeoutError)):
+        return SSHFailure(SSHFailureKind.TIMEOUT,
+                          f"Connection to scheduler host timed out: {exc}", exc)
+
+    if isinstance(exc, ConnectionRefusedError):
+        return SSHFailure(SSHFailureKind.CONNECTION_REFUSED,
+                          f"Connection refused by scheduler host: {exc}", exc)
+
+    if isinstance(exc, (ConnectionResetError, EOFError)):
+        return SSHFailure(SSHFailureKind.CONNECTION_CLOSED,
+                          f"Connection was closed unexpectedly: {exc}", exc)
+
+    if isinstance(exc, SSHException):
+        return SSHFailure(SSHFailureKind.SSH_ERROR,
+                          f"SSH protocol error: {exc}", exc)
+
+    if isinstance(exc, OSError):
+        return SSHFailure(SSHFailureKind.UNKNOWN, f"OS/socket error: {exc}", exc)
+
+    return SSHFailure(SSHFailureKind.UNKNOWN, f"Unexpected error: {exc}", exc)
 
 def is_local_host(hostname: str) -> bool:
     """Return True if hostname refers to this machine."""

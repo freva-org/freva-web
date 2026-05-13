@@ -7,41 +7,12 @@ import { AggregationConfig } from "../../Components/NcdumpDialog/AggregationConf
 import { ZarrLoadingSteps } from "../../Components/NcdumpDialog/ZarrLoadingSteps";
 import { NcDumpDialogState } from "../../Components/NcdumpDialog";
 import { useZarrStatus } from "../../Components/NcdumpDialog/useZarrStatus";
-import { getCookie } from "../../utils";
-import { TEMP_FREVA_AUTH_TOKEN } from "../Databrowser/constants";
-
-const MAX_RETRIES = 20;
-const RETRY_DELAY = 2000;
-
-async function refreshTokenIfNeeded() {
-  try {
-    const res = await fetch("/api/token-health/", {
-      credentials: "same-origin",
-    });
-    return res.ok;
-  } catch {
-    return false;
-  }
-}
-
-function getTokenFromCookie() {
-  const cookies = document.cookie.split(";");
-  const authCookie = cookies.find((c) =>
-    c.trim().startsWith(TEMP_FREVA_AUTH_TOKEN)
-  );
-  if (!authCookie) {
-    return null;
-  }
-  try {
-    let value = authCookie.substring(authCookie.indexOf("=") + 1).trim();
-    if (value.startsWith('"') && value.endsWith('"')) {
-      value = value.slice(1, -1);
-    }
-    return { access_token: value };
-  } catch {
-    return null;
-  }
-}
+import { useHtmlMetadata } from "../../Components/NcdumpDialog/useHtmlMetadata";
+import {
+  getCookie,
+  getTokenFromCookie,
+  refreshTokenIfNeeded,
+} from "../../utils";
 
 // Tab bar component
 
@@ -147,14 +118,73 @@ function InspectPage({ location, router }) {
   const [currentFile, setCurrentFile] = useState(initialFilename);
   const [currentIsAgg, setCurrentIsAgg] = useState(isAggregation);
 
-  const { statusCode } = useZarrStatus(rawZarrUrl, { enabled: true });
+  // Zarr conversion status polling
+  const { statusCode, statusReason } = useZarrStatus(rawZarrUrl, {
+    enabled: true,
+  });
+
+  // HTML metadata polling
+  // Only activates once the zarr job is done (statusCode === 0).
+  // Each individual fetch uses server-side timeout=1 so no single request
+  // can block the proxy; retries automatically until content arrives.
+  const { html: htmlMetadata, error: htmlError } = useHtmlMetadata(rawZarrUrl, {
+    enabled: statusCode === 0,
+  });
+
   const abortRef = useRef(null);
   const dropdownRef = useRef(null);
   const iframeRef = useRef(null);
 
+  // React to zarr job failure interpretaion
+  React.useEffect(() => {
+    if (statusCode === null) {
+      return;
+    }
+    if (statusCode === 1) {
+      setNcDump({
+        status: NcDumpDialogState.ERROR,
+        output: null,
+        error:
+          statusReason || "Zarr conversion failed on the server. Please retry.",
+      });
+    }
+    if (statusCode === 2) {
+      setNcDump({
+        status: NcDumpDialogState.ERROR,
+        output: null,
+        error:
+          statusReason ||
+          "File not found — the server could not locate this file for streaming.",
+      });
+    }
+  }, [statusCode, statusReason]);
+
+  // React to HTML metadata arriving (or failing after retries)
+  React.useEffect(() => {
+    if (htmlMetadata) {
+      setNcDump({
+        status: NcDumpDialogState.READY,
+        output: htmlMetadata,
+        error: null,
+      });
+    }
+    if (htmlError) {
+      setNcDump({
+        status: NcDumpDialogState.ERROR,
+        output: null,
+        error: htmlError,
+      });
+    }
+  }, [htmlMetadata, htmlError]);
+
+  /**
+   * Submits the zarr conversion job and presigns the URL for sharing.
+   * Returns immediately after both fast steps; the heavy lifting (conversion
+   * + metadata fetch) is handled asynchronously by useZarrStatus and
+   * useHtmlMetadata respectively; no blocking wait here.
+   */
   const loadNcdump = useCallback(async function loadNcdump(
     fn,
-    retryCount = 0,
     aggregationConfig = null
   ) {
     if (abortRef.current) {
@@ -168,7 +198,11 @@ function InspectPage({ location, router }) {
       return;
     }
 
-    setNcDump({ status: NcDumpDialogState.LOADING, output: null, error: null });
+    setNcDump({
+      status: NcDumpDialogState.LOADING,
+      output: null,
+      error: null,
+    });
     setZarrUrl(null);
     setRawZarrUrl(null);
 
@@ -180,12 +214,11 @@ function InspectPage({ location, router }) {
 
       const headers = {
         "X-CSRFToken": getCookie("csrftoken"),
-        Accept: "text/plain",
+        "Content-Type": "application/json",
         Authorization: `Bearer ${tokenData.access_token}`,
       };
 
-      const isAgg = Array.isArray(fn);
-      const paths = isAgg ? fn : [fn];
+      const paths = Array.isArray(fn) ? fn : [fn];
       const requestBody = {
         path: paths.length === 1 ? paths[0] : paths,
         ...(aggregationConfig
@@ -197,78 +230,54 @@ function InspectPage({ location, router }) {
           : {}),
       };
 
+      // Step 1: submit conversion; returns immediately, worker is async.
+      // Setting rawZarrUrl starts useZarrStatus polling.
       const convertRes = await fetch(
         "/api/freva-nextgen/data-portal/zarr/convert",
         {
           method: "POST",
           credentials: "same-origin",
-          headers: { ...headers, "Content-Type": "application/json" },
+          headers,
           body: JSON.stringify(requestBody),
           signal,
         }
       );
       if (!convertRes.ok) {
-        throw new Error(
-          `Failed to create zarr endpoint: ${await convertRes.text()}`
-        );
+        let detail = convertRes.statusText;
+        try {
+          const body = await convertRes.json();
+          detail = body.detail || body.message || detail;
+        } catch {
+          // non-JSON body; keep statusText
+        }
+        throw new Error(detail);
       }
-      const convertData = await convertRes.json();
-      if (!convertData.urls?.length) {
+      const { urls } = await convertRes.json();
+      if (!urls?.length) {
         throw new Error("No zarr URL returned from server");
       }
 
-      const rawUrl = convertData.urls[0];
+      const rawUrl = urls[0];
+      // starts useZarrStatus polling
       setRawZarrUrl(rawUrl);
 
+      // Step 2: presign for sharing / GridLook
       const presignRes = await fetch(
         "/api/freva-nextgen/data-portal/share-zarr",
         {
           method: "POST",
           credentials: "same-origin",
-          headers: { ...headers, "Content-Type": "application/json" },
+          headers,
           body: JSON.stringify({ path: rawUrl, ttl_seconds: 3600 }),
           signal,
         }
       );
-      setZarrUrl((await presignRes.json()).url);
-
-      const timeout = isAgg ? aggregationConfig?.timeout || 120 : 60;
-      const metaRes = await fetch(
-        `/api/freva-nextgen/data-portal/zarr-utils/html?url=${encodeURIComponent(rawUrl)}&timeout=${timeout}`,
-        { credentials: "same-origin", headers, signal }
-      );
-
-      if (metaRes.status === 503) {
-        const text = await metaRes.text();
-        if (
-          (text.includes("processing") || text.includes("waiting")) &&
-          retryCount < MAX_RETRIES
-        ) {
-          if (signal.aborted) {
-            return;
-          }
-          await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
-          if (signal.aborted) {
-            return;
-          }
-          loadNcdump(fn, retryCount + 1, aggregationConfig);
-          return;
-        }
-        throw new Error("Conversion failed or timed out");
+      if (presignRes.ok) {
+        setZarrUrl((await presignRes.json()).url);
       }
 
-      if (!metaRes.ok) {
-        throw new Error(`Metadata fetch failed: ${metaRes.statusText}`);
-      }
-
-      const html = await metaRes.text();
-      if (!signal.aborted) {
-        setNcDump({
-          status: NcDumpDialogState.READY,
-          output: html,
-          error: null,
-        });
-      }
+      // Step3. Done. useZarrStatus polls /status; once status=0, useHtmlMetadata
+      // polls /html with short timeouts and retries until it gets the content.
     } catch (err) {
       if (!signal.aborted) {
         setNcDump({
@@ -279,24 +288,6 @@ function InspectPage({ location, router }) {
       }
     }
   }, []);
-
-  // Effects
-  React.useEffect(() => {
-    if (statusCode === null) {
-      return;
-    }
-    const terminalErrors = {
-      1: "Zarr conversion failed on the server. Please retry.",
-      2: "File not found — the server could not locate this file for streaming.",
-    };
-    if (terminalErrors[statusCode]) {
-      setNcDump((prev) => ({
-        ...prev,
-        status: NcDumpDialogState.ERROR,
-        error: terminalErrors[statusCode],
-      }));
-    }
-  }, [statusCode]);
 
   React.useEffect(() => {
     if (initialFilename && !isAggregation) {
@@ -335,14 +326,12 @@ function InspectPage({ location, router }) {
     }
 
     if (filled.length === 1) {
-      // Single file
       setCurrentFile(filled[0]);
       setCurrentIsAgg(false);
       setActiveTab("metadata");
       router.replace(`/inspect/?file=${encodeURIComponent(filled[0])}`);
       loadNcdump(filled[0]);
     } else {
-      // Multiple files
       setCurrentFile(filled);
       setCurrentIsAgg(true);
       setActiveTab("metadata");
@@ -362,12 +351,12 @@ function InspectPage({ location, router }) {
       return;
     }
     setDropdownOpen(false);
-    loadNcdump(filled.length === 1 ? filled[0] : filled, 0, { reload: true });
+    loadNcdump(filled.length === 1 ? filled[0] : filled, { reload: true });
   }
 
   function handleAggregateSubmit() {
     const files = Array.isArray(currentFile) ? currentFile : [];
-    loadNcdump(files, 0, aggregationConfig);
+    loadNcdump(files, aggregationConfig);
   }
 
   function buildShareUrl() {

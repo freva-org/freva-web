@@ -195,15 +195,12 @@ def home(request):
     messages = UIMessages.objects.order_by("-id").filter(resolved=False)
 
     login_required_param = request.GET.get("login_required", False)
-    is_guest_user = False
     if request.user.is_authenticated:
-        # Already logged in
         next_url = request.GET.get("next")
         if next_url and url_has_allowed_host_and_scheme(
             next_url, allowed_hosts={request.get_host()}
         ):
             return HttpResponseRedirect(next_url)
-        is_guest_user = not request.session.get("system_user_valid", False)
 
     return render(
         request,
@@ -211,7 +208,6 @@ def home(request):
         {
             "login_required": login_required_param,
             "messages": messages,
-            "is_guest_user": is_guest_user,
         },
     )
 

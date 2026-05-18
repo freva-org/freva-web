@@ -28,23 +28,27 @@ function parseDtypeStr(dtype) {
  */
 function buildDataset(meta, prefix) {
   const attrs = meta[`${prefix}.zattrs`] ?? {};
-
   // Important: We collect arrays that are direct children of this prefix only.
   // e.g. for prefix "group0/", "group0/var/.zarray" is included but
   // "group0/sub/var/.zarray" (nested group) is skipped.
   const arrays = {};
   for (const [key, val] of Object.entries(meta)) {
-    if (!key.startsWith(prefix)) continue;
+    if (!key.startsWith(prefix)) {
+      continue;
+    }
     const rel = key.slice(prefix.length);
     if (rel.endsWith("/.zarray")) {
       const name = rel.slice(0, -8);
-      // nested group — skip
-      if (name.includes("/")) continue;
+      if (name.includes("/")) {
+        continue;
+      }
       arrays[name] ??= {};
       arrays[name].zarray = val;
     } else if (rel.endsWith("/.zattrs")) {
       const name = rel.slice(0, -8);
-      if (!name || name.includes("/")) continue;
+      if (!name || name.includes("/")) {
+        continue;
+      }
       arrays[name] ??= {};
       arrays[name].zattrs = val;
     }
@@ -55,7 +59,9 @@ function buildDataset(meta, prefix) {
     const za = info.zarray ?? {};
     const dimNames = (info.zattrs ?? {})._ARRAY_DIMENSIONS ?? [];
     dimNames.forEach((d, i) => {
-      if (!(d in dims)) dims[d] = za.shape?.[i] ?? 0;
+      if (!(d in dims)) {
+        dims[d] = za.shape?.[i] ?? 0;
+      }
     });
   }
 
@@ -84,7 +90,9 @@ function buildDataset(meta, prefix) {
       .split(/[\s,]+/)
       .filter(Boolean);
   for (const [name, dv] of Object.entries(allVars)) {
-    if (dv.dims.length === 1 && dv.dims[0] === name) coordSet.add(name);
+    if (dv.dims.length === 1 && dv.dims[0] === name) {
+      coordSet.add(name);
+    }
   }
   splitWords(attrs.coordinates).forEach((c) => coordSet.add(c));
   for (const dv of Object.values(allVars)) {
@@ -102,7 +110,7 @@ function buildDataset(meta, prefix) {
 /**
  * Fetches .zmetadata and returns either:
  *   { groups: null, ...dataset }; flat store
- *   { groups: { name → dataset } }; multi-group store
+ *   { groups: { name -> dataset } }; multi-group store
  */
 async function openDatasetMeta(url) {
   const base = url.replace(/\/$/, "");
@@ -115,21 +123,26 @@ async function openDatasetMeta(url) {
         ? { Authorization: `${token.token_type} ${token.access_token}` }
         : {},
     });
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    if (!r.ok) {
+      throw new Error(`HTTP ${r.status}`);
+    }
     zmeta = await r.json();
   } catch (e) {
     throw new Error(`Could not read .zmetadata: ${e.message}`);
   }
 
   const meta = zmeta.metadata ?? {};
-
   // Detect top-level groups: keys like "group0/.zgroup"
   const groupNames = new Set();
   for (const key of Object.keys(meta)) {
-    if (key === ".zgroup" || key === ".zattrs") continue;
+    if (key === ".zgroup" || key === ".zattrs") {
+      continue;
+    }
     if (key.endsWith("/.zgroup")) {
       const name = key.slice(0, -8);
-      if (!name.includes("/")) groupNames.add(name);
+      if (!name.includes("/")) {
+        groupNames.add(name);
+      }
     }
   }
 
@@ -166,7 +179,9 @@ function icon(id) {
 }
 
 function formatDims(dimSizes, indexedNames) {
-  if (!Object.keys(dimSizes).length) return "";
+  if (!Object.keys(dimSizes).length) {
+    return "";
+  }
   const lis = Object.entries(dimSizes)
     .map(
       ([d, n]) =>
@@ -178,7 +193,9 @@ function formatDims(dimSizes, indexedNames) {
 
 function summarizeAttrs(attrs) {
   const entries = Object.entries(attrs);
-  if (!entries.length) return "<em>No attributes</em>";
+  if (!entries.length) {
+    return "<em>No attributes</em>";
+  }
   return `<dl class='xr-attrs'>${entries
     .map(
       ([k, v]) => `<dt><span>${esc(k)} :</span></dt><dd>${esc(String(v))}</dd>`
@@ -190,18 +207,26 @@ function previewVar(dv) {
   const total = dv.shape.reduce((a, b) => a * b, 1);
   return total === 0
     ? "[]"
-    : `${dv.dtype} (${dv.shape.join(" × ")} = ${total.toLocaleString()})`;
+    : `${dv.dtype} (${dv.shape.join(" \u00d7 ")} = ${total.toLocaleString()})`;
 }
 
 function fmtBytes(n) {
-  if (n < 1024) return n + " B";
-  if (n < 1024 ** 2) return (n / 1024).toFixed(2) + " KiB";
-  if (n < 1024 ** 3) return (n / 1024 ** 2).toFixed(2) + " MiB";
+  if (n < 1024) {
+    return n + " B";
+  }
+  if (n < 1024 ** 2) {
+    return (n / 1024).toFixed(2) + " KiB";
+  }
+  if (n < 1024 ** 3) {
+    return (n / 1024 ** 2).toFixed(2) + " MiB";
+  }
   return (n / 1024 ** 3).toFixed(2) + " GiB";
 }
 
-function buildChunkCube(shape, chunks) {
-  if (!shape.length) return "";
+function buildChunkCube(shape) {
+  if (!shape.length) {
+    return "";
+  }
   const ndim = Math.min(shape.length, 3);
   const s = shape.slice(-ndim);
   const vis = (n) =>
@@ -303,15 +328,15 @@ function buildDataRepr(dv) {
           <th style="font-weight:600;padding:0 16px 5px 0;text-align:left">Array</th>
           <th style="font-weight:600;padding:0 0 5px 0;text-align:left">Chunk</th>
         </tr></thead><tbody>
-          ${row("Bytes", fmtBytes(arrayBytes), chunkBytes !== null ? fmtBytes(chunkBytes) : "—")}
-          ${row("Shape", "(" + shape.join(", ") + ")", chunks ? "(" + chunks.join(", ") + ")" : "—")}
+          ${row("Bytes", fmtBytes(arrayBytes), chunkBytes !== null ? fmtBytes(chunkBytes) : "\u2014")}
+          ${row("Shape", "(" + shape.join(", ") + ")", chunks ? "(" + chunks.join(", ") + ")" : "\u2014")}
           ${nChunks !== null ? row("Chunks", nChunks.toLocaleString() + " chunks") : ""}
           ${row("dtype", esc(dtype))}
           ${row("dims", "(" + dv.dims.join(", ") + ")")}
         </tbody>
       </table>
     </td>
-    <td style="vertical-align:middle;padding:0 0 0 32px">${buildChunkCube(shape, chunks ?? shape)}</td>
+    <td style="vertical-align:middle;padding:0 0 0 32px">${buildChunkCube(shape)}</td>
   </tr></table>`;
 }
 
@@ -435,18 +460,16 @@ function renderDataset(ds) {
 }
 
 function buildXarrayRepr(result) {
-  // Flat store
   if (!result.groups) {
     return `${XR_ICONS}${renderDataset(result)}`;
   }
-
   // Multi-group store
   const cards = Object.entries(result.groups)
     .map(
       ([name, ds]) => `
     <details open style="margin-bottom:10px;border:1px solid var(--xr-border-color);border-radius:4px;overflow:hidden">
       <summary style="padding:8px 12px;font-weight:600;cursor:pointer;background:var(--xr-background-color-row-odd);list-style:none;display:flex;align-items:center;gap:8px">
-        <span style="font-size:11px;color:var(--xr-font-color2)">▶</span>
+        <span style="font-size:11px;color:var(--xr-font-color2)">\u25b6</span>
         <span>Group: ${esc(name)}</span>
       </summary>
       <div style="padding:0 12px 8px">${renderDataset(ds)}</div>
@@ -454,7 +477,6 @@ function buildXarrayRepr(result) {
   `
     )
     .join("");
-
   return `${XR_ICONS}<div style="font-family:monospace">${cards}</div>`;
 }
 
@@ -535,7 +557,9 @@ dl.xr-attrs{padding:0;margin:0;display:grid;grid-template-columns:125px auto}
 
 let cssInjected = false;
 function injectXarrayCss() {
-  if (cssInjected) return;
+  if (cssInjected) {
+    return;
+  }
   cssInjected = true;
 
   const hex = (window.MAIN_COLOR || "#9b7a52").replace(/^#/, "");
@@ -571,7 +595,9 @@ export function useHtmlMetadata(rawZarrUrl, { enabled = false } = {}) {
     setHtml(null);
     setError(null);
 
-    if (!rawZarrUrl || !enabled) return () => {};
+    if (!rawZarrUrl || !enabled) {
+      return () => {};
+    }
 
     injectXarrayCss();
 
@@ -580,9 +606,13 @@ export function useHtmlMetadata(rawZarrUrl, { enabled = false } = {}) {
     (async () => {
       try {
         const ds = await openDatasetMeta(rawZarrUrl);
-        if (!cancelled) setHtml(buildXarrayRepr(ds));
+        if (!cancelled) {
+          setHtml(buildXarrayRepr(ds));
+        }
       } catch (e) {
-        if (!cancelled) setError(e.message);
+        if (!cancelled) {
+          setError(e.message);
+        }
       }
     })();
 

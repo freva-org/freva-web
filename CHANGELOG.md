@@ -1,6 +1,9 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [v2605.1.0]
+### Removed
+- Remove `/zarr-utils/html` endpoint and render xarray metadata client-side
 ## [v2605.0.0]
 ### Removed
 - Guest user concept fully removed from auth, views, forms and templates

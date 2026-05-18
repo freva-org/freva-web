@@ -6,9 +6,17 @@ import { getTokenFromCookie } from "../../utils";
 
 function parseDtypeStr(dtype) {
   const map = {
-    f2: "float16", f4: "float32", f8: "float64",
-    i1: "int8",   i2: "int16",   i4: "int32",  i8: "int64",
-    u1: "uint8",  u2: "uint16",  u4: "uint32", u8: "uint64",
+    f2: "float16",
+    f4: "float32",
+    f8: "float64",
+    i1: "int8",
+    i2: "int16",
+    i4: "int32",
+    i8: "int64",
+    u1: "uint8",
+    u2: "uint16",
+    u4: "uint32",
+    u8: "uint64",
     b1: "bool",
   };
   return map[dtype.slice(1)] ?? dtype;
@@ -46,7 +54,9 @@ function buildDataset(meta, prefix) {
   for (const [, info] of Object.entries(arrays)) {
     const za = info.zarray ?? {};
     const dimNames = (info.zattrs ?? {})._ARRAY_DIMENSIONS ?? [];
-    dimNames.forEach((d, i) => { if (!(d in dims)) dims[d] = za.shape?.[i] ?? 0; });
+    dimNames.forEach((d, i) => {
+      if (!(d in dims)) dims[d] = za.shape?.[i] ?? 0;
+    });
   }
 
   const allVars = {};
@@ -54,26 +64,35 @@ function buildDataset(meta, prefix) {
     const za = info.zarray ?? {};
     const { _ARRAY_DIMENSIONS, ...userAttrs } = info.zattrs ?? {};
     const dimNames = _ARRAY_DIMENSIONS ?? [];
-    const isTime = dimNames.length === 1 && dimNames[0] === name &&
+    const isTime =
+      dimNames.length === 1 &&
+      dimNames[0] === name &&
       (String(userAttrs.units ?? "").includes("since") || name === "time");
     allVars[name] = {
-      shape: za.shape ?? [], chunks: za.chunks ?? za.shape ?? [],
+      shape: za.shape ?? [],
+      chunks: za.chunks ?? za.shape ?? [],
       dtype: parseDtypeStr(za.dtype ?? "|u1"),
-      dims: dimNames, attrs: userAttrs, _isTimeCoord: isTime,
+      dims: dimNames,
+      attrs: userAttrs,
+      _isTimeCoord: isTime,
     };
   }
 
   const coordSet = new Set();
-  const splitWords = s => String(s ?? "").split(/[\s,]+/).filter(Boolean);
+  const splitWords = (s) =>
+    String(s ?? "")
+      .split(/[\s,]+/)
+      .filter(Boolean);
   for (const [name, dv] of Object.entries(allVars)) {
     if (dv.dims.length === 1 && dv.dims[0] === name) coordSet.add(name);
   }
-  splitWords(attrs.coordinates).forEach(c => coordSet.add(c));
+  splitWords(attrs.coordinates).forEach((c) => coordSet.add(c));
   for (const dv of Object.values(allVars)) {
-    splitWords(dv.attrs.coordinates).forEach(c => coordSet.add(c));
+    splitWords(dv.attrs.coordinates).forEach((c) => coordSet.add(c));
   }
 
-  const coords = {}, data_vars = {};
+  const coords = {},
+    data_vars = {};
   for (const [name, dv] of Object.entries(allVars)) {
     (coordSet.has(name) ? coords : data_vars)[name] = dv;
   }
@@ -92,7 +111,9 @@ async function openDatasetMeta(url) {
     const token = getTokenFromCookie();
     const r = await fetch(`${base}/.zmetadata`, {
       credentials: "same-origin",
-      headers: token ? { Authorization: `${token.token_type} ${token.access_token}` } : {},
+      headers: token
+        ? { Authorization: `${token.token_type} ${token.access_token}` }
+        : {},
     });
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     zmeta = await r.json();
@@ -131,33 +152,45 @@ async function openDatasetMeta(url) {
 // xarray HTML renderer
 
 function esc(s) {
-  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 let _uid = 0;
-function uid() { return `xr${++_uid}`; }
+function uid() {
+  return `xr${++_uid}`;
+}
 function icon(id) {
   return `<svg class="icon xr-${id}"><use xlink:href="#${id}"></use></svg>`;
 }
 
 function formatDims(dimSizes, indexedNames) {
   if (!Object.keys(dimSizes).length) return "";
-  const lis = Object.entries(dimSizes).map(([d, n]) =>
-    `<li><span${indexedNames.has(d) ? " class='xr-has-index'" : ""}>${esc(d)}</span>: ${n}</li>`
-  ).join("");
+  const lis = Object.entries(dimSizes)
+    .map(
+      ([d, n]) =>
+        `<li><span${indexedNames.has(d) ? " class='xr-has-index'" : ""}>${esc(d)}</span>: ${n}</li>`
+    )
+    .join("");
   return `<ul class='xr-dim-list'>${lis}</ul>`;
 }
 
 function summarizeAttrs(attrs) {
   const entries = Object.entries(attrs);
   if (!entries.length) return "<em>No attributes</em>";
-  return `<dl class='xr-attrs'>${entries.map(([k, v]) =>
-    `<dt><span>${esc(k)} :</span></dt><dd>${esc(String(v))}</dd>`
-  ).join("")}</dl>`;
+  return `<dl class='xr-attrs'>${entries
+    .map(
+      ([k, v]) => `<dt><span>${esc(k)} :</span></dt><dd>${esc(String(v))}</dd>`
+    )
+    .join("")}</dl>`;
 }
 
 function previewVar(dv) {
   const total = dv.shape.reduce((a, b) => a * b, 1);
-  return total === 0 ? "[]" : `${dv.dtype} (${dv.shape.join(" × ")} = ${total.toLocaleString()})`;
+  return total === 0
+    ? "[]"
+    : `${dv.dtype} (${dv.shape.join(" × ")} = ${total.toLocaleString()})`;
 }
 
 function fmtBytes(n) {
@@ -171,8 +204,9 @@ function buildChunkCube(shape, chunks) {
   if (!shape.length) return "";
   const ndim = Math.min(shape.length, 3);
   const s = shape.slice(-ndim);
-  const vis = n => Math.max(20, Math.min(110, 20 + Math.log10(Math.max(1, n)) * 30));
-  const fmt = n => n.toLocaleString();
+  const vis = (n) =>
+    Math.max(20, Math.min(110, 20 + Math.log10(Math.max(1, n)) * 30));
+  const fmt = (n) => n.toLocaleString();
   const fSize = 11;
   const ts = `font-size:${fSize}px;fill:var(--xr-font-color2);font-family:monospace`;
 
@@ -182,7 +216,7 @@ function buildChunkCube(shape, chunks) {
     const H = ndim === 2 ? vis(s[0]) : 12;
     // room for left label
     const PAD_LEFT = ndim === 2 ? 42 : 2;
-    const PAD_BTM  = 16;
+    const PAD_BTM = 16;
     const svgW = PAD_LEFT + W + 4;
     const svgH = H + PAD_BTM;
     return `<svg width="${Math.ceil(svgW)}" height="${Math.ceil(svgH)}"
@@ -190,43 +224,68 @@ function buildChunkCube(shape, chunks) {
         style="overflow:visible;display:block;flex-shrink:0">
       <rect x="${PAD_LEFT}" y="0" width="${W}" height="${H}"
             style="fill:var(--xr-chunk-face);stroke:var(--xr-chunk-edge);stroke-width:0.8"/>
-      ${ndim === 2 ? `<text x="${PAD_LEFT - 5}" y="${H / 2 + 4}"
-            text-anchor="end" style="${ts}">${fmt(s[0])}</text>` : ""}
+      ${
+        ndim === 2
+          ? `<text x="${PAD_LEFT - 5}" y="${H / 2 + 4}"
+            text-anchor="end" style="${ts}">${fmt(s[0])}</text>`
+          : ""
+      }
       <text x="${PAD_LEFT + W / 2}" y="${H + PAD_BTM - 3}"
             text-anchor="middle" style="${ts}">${fmt(s[ndim - 1])}</text>
     </svg>`;
   }
 
   // 3-D cube
-  const W = vis(s[2]), H = vis(s[1]), D = vis(s[0]);
-  const sk = 0.5, dX = D * sk, dY = D * sk * 0.45;
-  const PAD_TOP = 16, PAD_BTM = 16, PAD_RGT = 52;
+  const W = vis(s[2]),
+    H = vis(s[1]),
+    D = vis(s[0]);
+  const sk = 0.5,
+    dX = D * sk,
+    dY = D * sk * 0.45;
+  const PAD_TOP = 16,
+    PAD_BTM = 16,
+    PAD_RGT = 52;
   const svgW = W + dX + PAD_RGT;
   const svgH = PAD_TOP + H + dY + PAD_BTM;
-  const ox = 2, oy = PAD_TOP + H + dY;
+  const ox = 2,
+    oy = PAD_TOP + H + dY;
   return `<svg width="${Math.ceil(svgW)}" height="${Math.ceil(svgH)}"
       viewBox="0 0 ${Math.ceil(svgW)} ${Math.ceil(svgH)}"
       style="overflow:visible;display:block;flex-shrink:0">
-    <polygon points="${ox},${oy} ${ox+W},${oy} ${ox+W},${oy-H} ${ox},${oy-H}"
+    <polygon points="${ox},${oy} ${ox + W},${oy} ${ox + W},${oy - H} ${ox},${oy - H}"
              style="fill:var(--xr-chunk-face);stroke:var(--xr-chunk-edge);stroke-width:0.8"/>
-    <polygon points="${ox},${oy-H} ${ox+W},${oy-H} ${ox+W+dX},${oy-H-dY} ${ox+dX},${oy-H-dY}"
+    <polygon points="${ox},${oy - H} ${ox + W},${oy - H} ${ox + W + dX},${oy - H - dY} ${ox + dX},${oy - H - dY}"
              style="fill:var(--xr-chunk-top);stroke:var(--xr-chunk-edge);stroke-width:0.8"/>
-    <polygon points="${ox+W},${oy} ${ox+W+dX},${oy-dY} ${ox+W+dX},${oy-H-dY} ${ox+W},${oy-H}"
+    <polygon points="${ox + W},${oy} ${ox + W + dX},${oy - dY} ${ox + W + dX},${oy - H - dY} ${ox + W},${oy - H}"
              style="fill:var(--xr-chunk-side);stroke:var(--xr-chunk-edge);stroke-width:0.8"/>
-    <text x="${ox+W/2}" y="${oy+PAD_BTM-3}"
+    <text x="${ox + W / 2}" y="${oy + PAD_BTM - 3}"
           text-anchor="middle" style="${ts}">${fmt(s[2])}</text>
-    <text x="${ox+W/2+dX/2}" y="${PAD_TOP-3}"
+    <text x="${ox + W / 2 + dX / 2}" y="${PAD_TOP - 3}"
           text-anchor="middle" style="${ts}">${fmt(s[1])}</text>
-    <text x="${ox+W+dX+5}" y="${oy-H/2-dY/2+4}"
+    <text x="${ox + W + dX + 5}" y="${oy - H / 2 - dY / 2 + 4}"
           text-anchor="start" style="${ts}">${fmt(s[0])}</text>
   </svg>`;
 }
 
 function buildDataRepr(dv) {
   const { shape, chunks, dtype } = dv;
-  const elemBytes = { int8:1,uint8:1,bool:1,int16:2,uint16:2,int32:4,uint32:4,float32:4,int64:8,uint64:8,float64:8 }[dtype] ?? 4;
+  const elemBytes =
+    {
+      int8: 1,
+      uint8: 1,
+      bool: 1,
+      int16: 2,
+      uint16: 2,
+      int32: 4,
+      uint32: 4,
+      float32: 4,
+      int64: 8,
+      uint64: 8,
+      float64: 8,
+    }[dtype] ?? 4;
   const arrayBytes = shape.reduce((a, b) => a * b, 1) * elemBytes;
-  let chunkBytes = null, nChunks = null;
+  let chunkBytes = null,
+    nChunks = null;
   if (chunks && chunks.length === shape.length) {
     chunkBytes = chunks.reduce((a, b) => a * b, 1) * elemBytes;
     nChunks = shape.reduce((tot, s, i) => tot * Math.ceil(s / chunks[i]), 1);
@@ -245,10 +304,10 @@ function buildDataRepr(dv) {
           <th style="font-weight:600;padding:0 0 5px 0;text-align:left">Chunk</th>
         </tr></thead><tbody>
           ${row("Bytes", fmtBytes(arrayBytes), chunkBytes !== null ? fmtBytes(chunkBytes) : "—")}
-          ${row("Shape", "("+shape.join(", ")+")", chunks ? "("+chunks.join(", ")+")" : "—")}
-          ${nChunks !== null ? row("Chunks", nChunks.toLocaleString()+" chunks") : ""}
+          ${row("Shape", "(" + shape.join(", ") + ")", chunks ? "(" + chunks.join(", ") + ")" : "—")}
+          ${nChunks !== null ? row("Chunks", nChunks.toLocaleString() + " chunks") : ""}
           ${row("dtype", esc(dtype))}
-          ${row("dims", "("+dv.dims.join(", ")+")")}
+          ${row("dims", "(" + dv.dims.join(", ") + ")")}
         </tbody>
       </table>
     </td>
@@ -257,7 +316,8 @@ function buildDataRepr(dv) {
 }
 
 function summarizeVariable(name, dv, isIndex) {
-  const aId = uid(), dId = uid();
+  const aId = uid(),
+    dId = uid();
   const hasAttrs = Object.keys(dv.attrs).length > 0;
   return `
     <div class='xr-var-name'><span${isIndex ? " class='xr-has-index'" : ""}>${esc(name)}</span></div>
@@ -274,14 +334,22 @@ function summarizeVariable(name, dv, isIndex) {
 }
 
 function varListHtml(vars, indexedNames) {
-  return `<ul class='xr-var-list'>${
-    Object.entries(vars).map(([name, dv]) =>
-      `<li class='xr-var-item'>${summarizeVariable(name, dv, indexedNames.has(name))}</li>`
-    ).join("")
-  }</ul>`;
+  return `<ul class='xr-var-list'>${Object.entries(vars)
+    .map(
+      ([name, dv]) =>
+        `<li class='xr-var-item'>${summarizeVariable(name, dv, indexedNames.has(name))}</li>`
+    )
+    .join("")}</ul>`;
 }
 
-function collapsibleSection(header, inline, details, nItems, enabled, collapsed) {
+function collapsibleSection(
+  header,
+  inline,
+  details,
+  nItems,
+  enabled,
+  collapsed
+) {
   const id = uid();
   const hasItems = nItems > 0;
   const nSpan = nItems !== null ? ` <span>(${nItems})</span>` : "";
@@ -311,15 +379,53 @@ const XR_ICONS = `<svg style="position:absolute;width:0;height:0;overflow:hidden
 function renderDataset(ds) {
   const coordNames = new Set(Object.keys(ds.coords));
   const sections = [];
-  sections.push(collapsibleSection("Dimensions:", formatDims(ds.dims, coordNames), "", Object.keys(ds.dims).length, false, true));
+  sections.push(
+    collapsibleSection(
+      "Dimensions:",
+      formatDims(ds.dims, coordNames),
+      "",
+      Object.keys(ds.dims).length,
+      false,
+      true
+    )
+  );
   if (Object.keys(ds.coords).length) {
-    sections.push(collapsibleSection("Coordinates:", "", varListHtml(ds.coords, coordNames), Object.keys(ds.coords).length, true, false));
+    sections.push(
+      collapsibleSection(
+        "Coordinates:",
+        "",
+        varListHtml(ds.coords, coordNames),
+        Object.keys(ds.coords).length,
+        true,
+        false
+      )
+    );
   }
-  sections.push(collapsibleSection("Data variables:", "", varListHtml(ds.data_vars, new Set()), Object.keys(ds.data_vars).length, true, false));
+  sections.push(
+    collapsibleSection(
+      "Data variables:",
+      "",
+      varListHtml(ds.data_vars, new Set()),
+      Object.keys(ds.data_vars).length,
+      true,
+      false
+    )
+  );
   if (Object.keys(ds.attrs).length) {
-    sections.push(collapsibleSection("Attributes:", "", summarizeAttrs(ds.attrs), Object.keys(ds.attrs).length, true, true));
+    sections.push(
+      collapsibleSection(
+        "Attributes:",
+        "",
+        summarizeAttrs(ds.attrs),
+        Object.keys(ds.attrs).length,
+        true,
+        true
+      )
+    );
   }
-  const sectHtml = sections.map(s => `<li class='xr-section-item'>${s}</li>`).join("");
+  const sectHtml = sections
+    .map((s) => `<li class='xr-section-item'>${s}</li>`)
+    .join("");
   return `<div class='xr-root'>
     <div class='xr-wrap'>
       <div class='xr-header'><div class='xr-obj-type'>xarray.Dataset</div></div>
@@ -335,7 +441,9 @@ function buildXarrayRepr(result) {
   }
 
   // Multi-group store
-  const cards = Object.entries(result.groups).map(([name, ds]) => `
+  const cards = Object.entries(result.groups)
+    .map(
+      ([name, ds]) => `
     <details open style="margin-bottom:10px;border:1px solid var(--xr-border-color);border-radius:4px;overflow:hidden">
       <summary style="padding:8px 12px;font-weight:600;cursor:pointer;background:var(--xr-background-color-row-odd);list-style:none;display:flex;align-items:center;gap:8px">
         <span style="font-size:11px;color:var(--xr-font-color2)">▶</span>
@@ -343,7 +451,9 @@ function buildXarrayRepr(result) {
       </summary>
       <div style="padding:0 12px 8px">${renderDataset(ds)}</div>
     </details>
-  `).join("");
+  `
+    )
+    .join("");
 
   return `${XR_ICONS}<div style="font-family:monospace">${cards}</div>`;
 }
@@ -432,13 +542,15 @@ function injectXarrayCss() {
   const r = parseInt(hex.slice(0, 2), 16);
   const g = parseInt(hex.slice(2, 4), 16);
   const b = parseInt(hex.slice(4, 6), 16);
-  const cl = f => `rgb(${Math.min(255,r*f|0)},${Math.min(255,g*f|0)},${Math.min(255,b*f|0)})`;
-  const ca = (f, a) => `rgba(${Math.min(255,r*f|0)},${Math.min(255,g*f|0)},${Math.min(255,b*f|0)},${a})`;
+  const cl = (f) =>
+    `rgb(${Math.min(255, (r * f) | 0)},${Math.min(255, (g * f) | 0)},${Math.min(255, (b * f) | 0)})`;
+  const ca = (f, a) =>
+    `rgba(${Math.min(255, (r * f) | 0)},${Math.min(255, (g * f) | 0)},${Math.min(255, (b * f) | 0)},${a})`;
 
   const chunkVars = `
     :root{--xr-chunk-face:${cl(0.85)};--xr-chunk-top:${cl(1.25)};--xr-chunk-side:${cl(0.55)};--xr-chunk-edge:${cl(0.25)}}
     html[data-theme="dark"],body[data-theme="dark"],body.vscode-dark{
-      --xr-chunk-face:${ca(0.85,.65)};--xr-chunk-top:${ca(1.25,.65)};--xr-chunk-side:${ca(0.55,.65)};--xr-chunk-edge:${ca(0.25,.4)}
+      --xr-chunk-face:${ca(0.85, 0.65)};--xr-chunk-top:${ca(1.25, 0.65)};--xr-chunk-side:${ca(0.55, 0.65)};--xr-chunk-edge:${ca(0.25, 0.4)}
     }
   `;
 
@@ -451,10 +563,7 @@ function injectXarrayCss() {
 // Hook to fetch .zmetadata and build an HTML representation
 // of the dataset using xarray's style.
 // it fires only after the zarr conversion job is done
-export function useHtmlMetadata(
-  rawZarrUrl,
-  { enabled = false } = {}
-) {
+export function useHtmlMetadata(rawZarrUrl, { enabled = false } = {}) {
   const [html, setHtml] = useState(null);
   const [error, setError] = useState(null);
 
@@ -477,7 +586,9 @@ export function useHtmlMetadata(
       }
     })();
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [rawZarrUrl, enabled]);
 
   return { html, error };

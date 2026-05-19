@@ -211,15 +211,20 @@ function InspectPage({ location, router }) {
         throw new Error("Authentication required. Please refresh your token.");
       }
 
-      // If fn is a remote URL already pointing to a zarr store,
-      // skip conversion
-      const path = Array.isArray(fn) ? fn[0] : fn;
-      if (path.startsWith("http")) {
-        const { isZarr } = await detectZarrStore(path);
+      // Skip conversion only for a single remote zarr URL with no active
+      // aggregation parameters. Multi-file arrays and any aggregation config
+      // (time range, level, etc.) always go through the data-loader.
+      const paths = Array.isArray(fn) ? fn : [fn];
+      const hasAggConfig =
+        aggregationConfig &&
+        Object.values(aggregationConfig).some((v) => v !== null && v !== "");
+
+      if (paths.length === 1 && paths[0].startsWith("http") && !hasAggConfig) {
+        const { isZarr } = await detectZarrStore(paths[0]);
         if (isZarr) {
           setIsDirectZarr(true);
-          setRawZarrUrl(path);
-          setZarrUrl(path);
+          setRawZarrUrl(paths[0]);
+          setZarrUrl(paths[0]);
           return;
         }
       }

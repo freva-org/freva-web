@@ -203,10 +203,6 @@ function FrevaGPT() {
      *
      * @param {boolean} dispatchStopMessage - Determines if stop message should be shown
      */
-    // stop of thread only possible if a thread id is given
-    if (reader) {
-      await reader.cancel();
-    }
     const queryObject = { thread_id: grepThreadID() };
     if (grepThreadID()) {
       const response = await fetchWithAuth(
@@ -225,6 +221,11 @@ function FrevaGPT() {
       }
     }
 
+    // stop of thread only possible if a thread id is given
+    if (reader) {
+      await reader.cancel();
+    }
+
     setLoading(false);
     setDynamicAnswer("");
     setDynamicVariant("");
@@ -236,12 +237,25 @@ function FrevaGPT() {
     }
   }
 
+  /*-----------------------------------------------------------------------------------------------
+  *                                           Data fetching
+  -----------------------------------------------------------------------------------------------*/
   function addToExistingVariant(varObj) {
+    /**
+     * Adds content to already existing variant
+     * 
+     * @param {object} varObj -  Object containing current varaint and content
+     */
     setDynamicAnswer(varObj.content);
     setDynamicVariant(varObj.variant);
   }
 
   function addNewVariant(varObj) {
+    /**
+     *  Adds old variant to conversation and starts new variant with given content
+     * 
+     * @param {object} varObj - Object containing current varaint and content
+     */
     dispatch(addElement(varObj));
     dispatch(setLastVariant(varObj.variant));
     if (chatExceedsWindow()) {
@@ -252,6 +266,11 @@ function FrevaGPT() {
   }
 
   function handleServerHint(varObj) {
+    /**
+     * Handle ServerHint variant setting thread id if necessary
+     * 
+     * @param {object} varObj - Object containing current varaint and content
+     */
     // set thread id if no id given or newly provided id differs from current one
     if (
       varObj.variant === "ServerHint" &&

@@ -625,8 +625,8 @@ function InspectPage({ location, router }) {
           </div>
         </div>
 
-        {/* Zarr URL strip */}
-        {zarrUrl && (
+        {/* only shown zarr URL for converted URLs, not direct zarr input */}
+        {zarrUrl && !isDirectZarr && (
           <div style={styles.zarrStrip}>
             <i
               className="fas fa-link"

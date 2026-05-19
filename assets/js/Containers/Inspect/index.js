@@ -236,7 +236,6 @@ function InspectPage({ location, router }) {
         Authorization: `Bearer ${tokenData.access_token}`,
       };
 
-      const paths = Array.isArray(fn) ? fn : [fn];
       const requestBody = {
         path: paths.length === 1 ? paths[0] : paths,
         ...(aggregationConfig

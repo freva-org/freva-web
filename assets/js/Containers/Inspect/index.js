@@ -8,6 +8,7 @@ import { ZarrLoadingSteps } from "../../Components/NcdumpDialog/ZarrLoadingSteps
 import { NcDumpDialogState } from "../../Components/NcdumpDialog";
 import { useZarrStatus } from "../../Components/NcdumpDialog/useZarrStatus";
 import { useHtmlMetadata } from "../../Components/NcdumpDialog/useHtmlMetadata";
+import { detectZarrStore } from "../../Components/NcdumpDialog/detectZarrStore";
 import {
   getCookie,
   getTokenFromCookie,
@@ -115,20 +116,18 @@ function InspectPage({ location, router }) {
   });
   const [zarrUrl, setZarrUrl] = useState(null);
   const [rawZarrUrl, setRawZarrUrl] = useState(null);
+  const [isDirectZarr, setIsDirectZarr] = useState(false);
   const [currentFile, setCurrentFile] = useState(initialFilename);
   const [currentIsAgg, setCurrentIsAgg] = useState(isAggregation);
 
-  // Zarr conversion status polling
   const { statusCode, statusReason } = useZarrStatus(rawZarrUrl, {
-    enabled: true,
+    enabled: !isDirectZarr,
   });
 
-  // HTML metadata polling
-  // Only activates once the zarr job is done (statusCode === 0).
-  // Each individual fetch uses server-side timeout=1 so no single request
-  // can block the proxy; retries automatically until content arrives.
+  // Only activates once the zarr job is done (statusCode === 0),
+  // or immediately if the URL was already a zarr store.
   const { html: htmlMetadata, error: htmlError } = useHtmlMetadata(rawZarrUrl, {
-    enabled: statusCode === 0,
+    enabled: isDirectZarr || statusCode === 0,
   });
 
   const abortRef = useRef(null);
@@ -211,6 +210,20 @@ function InspectPage({ location, router }) {
       if (!tokenData?.access_token) {
         throw new Error("Authentication required. Please refresh your token.");
       }
+
+      // If fn is a remote URL already pointing to a zarr store,
+      // skip conversion
+      const path = Array.isArray(fn) ? fn[0] : fn;
+      if (path.startsWith("http")) {
+        const { isZarr } = await detectZarrStore(path);
+        if (isZarr) {
+          setIsDirectZarr(true);
+          setRawZarrUrl(path);
+          setZarrUrl(path);
+          return;
+        }
+      }
+      setIsDirectZarr(false);
 
       const headers = {
         "X-CSRFToken": getCookie("csrftoken"),

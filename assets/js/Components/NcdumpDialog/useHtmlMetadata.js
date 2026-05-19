@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 
 import { getTokenFromCookie } from "../../utils";
 
-// Zarr metadata reader
+// Zarr metadata parsers
 
 function parseDtypeStr(dtype) {
   const map = {
@@ -26,12 +26,11 @@ function parseDtypeStr(dtype) {
  * Given the flat .zmetadata map and a key prefix (e.g. "group0/" or ""),
  * we build a single { dims, coords, data_vars, attrs } dataset object.
  */
-function buildDataset(meta, prefix) {
+// V2: reads from .zmetadata flat key map
+function buildDatasetV2(meta, prefix) {
   const attrs = meta[`${prefix}.zattrs`] ?? {};
-  // Important: We collect arrays that are direct children of this prefix only.
-  // e.g. for prefix "group0/", "group0/var/.zarray" is included but
-  // "group0/sub/var/.zarray" (nested group) is skipped.
   const arrays = {};
+
   for (const [key, val] of Object.entries(meta)) {
     if (!key.startsWith(prefix)) {
       continue;
@@ -54,30 +53,144 @@ function buildDataset(meta, prefix) {
     }
   }
 
-  const dims = {};
-  for (const [, info] of Object.entries(arrays)) {
-    const za = info.zarray ?? {};
-    const dimNames = (info.zattrs ?? {})._ARRAY_DIMENSIONS ?? [];
-    dimNames.forEach((d, i) => {
-      if (!(d in dims)) {
-        dims[d] = za.shape?.[i] ?? 0;
+  return assembleDataset(arrays, attrs, (info) => ({
+    shape: info.zarray?.shape ?? [],
+    chunks: info.zarray?.chunks ?? info.zarray?.shape ?? [],
+    dtype: parseDtypeStr(info.zarray?.dtype ?? "|u1"),
+    dims: info.zattrs?._ARRAY_DIMENSIONS ?? [],
+    attrs: (({ _ARRAY_DIMENSIONS, ...rest }) => rest)(info.zattrs ?? {}),
+  }));
+}
+
+function parseV2(json) {
+  const meta = json.metadata ?? {};
+
+  const groupNames = new Set();
+  for (const key of Object.keys(meta)) {
+    if (key === ".zgroup" || key === ".zattrs") {
+      continue;
+    }
+    if (key.endsWith("/.zgroup")) {
+      const name = key.slice(0, -8);
+      if (!name.includes("/")) {
+        groupNames.add(name);
       }
-    });
+    }
   }
 
+  if (groupNames.size === 0) {
+    const ds = buildDatasetV2(meta, "");
+    if (!Object.keys({ ...ds.coords, ...ds.data_vars }).length) {
+      throw new Error("No arrays found in .zmetadata");
+    }
+    return { groups: null, ...ds };
+  }
+
+  const groups = {};
+  for (const name of [...groupNames].sort()) {
+    groups[name] = buildDatasetV2(meta, `${name}/`);
+  }
+  return { groups };
+}
+
+// V3: reads from zarr.json consolidated_metadata
+
+function buildDatasetV3(meta, prefix) {
+  const rootKey = prefix || "";
+  const attrs = (meta[rootKey] ?? {}).attributes ?? {};
+  const arrays = {};
+
+  for (const [key, val] of Object.entries(meta)) {
+    if (val.node_type !== "array") {
+      continue;
+    }
+    if (prefix) {
+      if (!key.startsWith(`${prefix}/`)) {
+        continue;
+      }
+      const rel = key.slice(prefix.length + 1);
+      if (rel.includes("/")) {
+        continue;
+      }
+      arrays[rel] = { zarray: val };
+    } else {
+      if (!key || key.includes("/")) {
+        continue;
+      }
+      arrays[key] = { zarray: val };
+    }
+  }
+
+  return assembleDataset(arrays, attrs, (info) => {
+    const v = info.zarray;
+    return {
+      shape: v.shape ?? [],
+      chunks: v.chunk_grid?.configuration?.chunk_shape ?? v.shape ?? [],
+      // v3 is human-readable
+      dtype: v.data_type ?? "float32",
+      dims: v.dimension_names ?? [],
+      attrs: v.attributes ?? {},
+    };
+  });
+}
+
+function parseV3(json) {
+  const meta = json.consolidated_metadata?.metadata ?? {};
+  if (!Object.keys(meta).length) {
+    throw new Error("zarr.json has no consolidated_metadata");
+  }
+
+  const groupNames = new Set();
+  for (const [key, val] of Object.entries(meta)) {
+    if (!key || val.node_type !== "group") {
+      continue;
+    }
+    if (!key.includes("/")) {
+      groupNames.add(key);
+    }
+  }
+
+  if (groupNames.size === 0) {
+    const ds = buildDatasetV3(meta, "");
+    if (!Object.keys({ ...ds.coords, ...ds.data_vars }).length) {
+      throw new Error("No arrays found in zarr.json");
+    }
+    return { groups: null, ...ds };
+  }
+
+  const groups = {};
+  for (const name of [...groupNames].sort()) {
+    groups[name] = buildDatasetV3(meta, name);
+  }
+  return { groups };
+}
+
+// shared assembly (V2 + V3)
+function assembleDataset(arrays, attrs, extract) {
+  const dims = {};
   const allVars = {};
+
   for (const [name, info] of Object.entries(arrays)) {
-    const za = info.zarray ?? {};
-    const { _ARRAY_DIMENSIONS, ...userAttrs } = info.zattrs ?? {};
-    const dimNames = _ARRAY_DIMENSIONS ?? [];
+    const {
+      shape,
+      chunks,
+      dtype,
+      dims: dimNames,
+      attrs: userAttrs,
+    } = extract(info);
+    dimNames.forEach((d, i) => {
+      if (!(d in dims)) {
+        dims[d] = shape[i] ?? 0;
+      }
+    });
     const isTime =
       dimNames.length === 1 &&
       dimNames[0] === name &&
       (String(userAttrs.units ?? "").includes("since") || name === "time");
     allVars[name] = {
-      shape: za.shape ?? [],
-      chunks: za.chunks ?? za.shape ?? [],
-      dtype: parseDtypeStr(za.dtype ?? "|u1"),
+      shape,
+      chunks,
+      dtype,
       dims: dimNames,
       attrs: userAttrs,
       _isTimeCoord: isTime,
@@ -107,63 +220,54 @@ function buildDataset(meta, prefix) {
   return { dims, coords, data_vars, attrs };
 }
 
+// ── entry point ───────────────────────────────────────────────────────────────
 /**
- * Fetches .zmetadata and returns either:
+ * Fetches (v2:zmetadata.sjon and v3:zarr.json) and returns either:
  *   { groups: null, ...dataset }; flat store
  *   { groups: { name -> dataset } }; multi-group store
  */
 async function openDatasetMeta(url) {
   const base = url.replace(/\/$/, "");
-  let zmeta;
+  const token = getTokenFromCookie();
+  const headers = token
+    ? { Authorization: `${token.token_type} ${token.access_token}` }
+    : {};
+  const opts = { credentials: "same-origin", headers };
+
+  // Try v2 first, then v3
+  let json = null,
+    version = 0;
+
   try {
-    const token = getTokenFromCookie();
-    const r = await fetch(`${base}/.zmetadata`, {
-      credentials: "same-origin",
-      headers: token
-        ? { Authorization: `${token.token_type} ${token.access_token}` }
-        : {},
-    });
-    if (!r.ok) {
-      throw new Error(`HTTP ${r.status}`);
+    const r = await fetch(`${base}/.zmetadata`, opts);
+    if (r.ok) {
+      json = await r.json();
+      version = 2;
     }
-    zmeta = await r.json();
-  } catch (e) {
-    throw new Error(`Could not read .zmetadata: ${e.message}`);
+  } catch {
+    /* I hope linter forgive me */
   }
 
-  const meta = zmeta.metadata ?? {};
-  // Detect top-level groups: keys like "group0/.zgroup"
-  const groupNames = new Set();
-  for (const key of Object.keys(meta)) {
-    if (key === ".zgroup" || key === ".zattrs") {
-      continue;
-    }
-    if (key.endsWith("/.zgroup")) {
-      const name = key.slice(0, -8);
-      if (!name.includes("/")) {
-        groupNames.add(name);
+  if (!json) {
+    try {
+      const r = await fetch(`${base}/zarr.json`, opts);
+      if (r.ok) {
+        json = await r.json();
+        version = 3;
       }
+    } catch {
+      /* I hope linter forgive me */
     }
   }
 
-  if (groupNames.size === 0) {
-    const ds = buildDataset(meta, "");
-    if (!Object.keys({ ...ds.coords, ...ds.data_vars }).length) {
-      throw new Error("No arrays found in .zmetadata");
-    }
-    return { groups: null, ...ds };
+  if (!json) {
+    throw new Error("Could not read zarr metadata (.zmetadata or zarr.json)");
   }
 
-  // Multi-group: build one dataset per group, sorted alphabetically
-  const groups = {};
-  for (const name of [...groupNames].sort()) {
-    groups[name] = buildDataset(meta, `${name}/`);
-  }
-  return { groups };
+  return version === 2 ? parseV2(json) : parseV3(json);
 }
 
 // xarray HTML renderer
-
 function esc(s) {
   return String(s)
     .replace(/&/g, "&amp;")
@@ -236,10 +340,8 @@ function buildChunkCube(shape) {
   const ts = `font-size:${fSize}px;fill:var(--xr-font-color2);font-family:monospace`;
 
   if (ndim < 3) {
-    // Flat rectangle for 1-D and 2-D
     const W = vis(s[ndim - 1]);
     const H = ndim === 2 ? vis(s[0]) : 12;
-    // room for left label
     const PAD_LEFT = ndim === 2 ? 42 : 2;
     const PAD_BTM = 16;
     const svgW = PAD_LEFT + W + 4;
@@ -260,7 +362,6 @@ function buildChunkCube(shape) {
     </svg>`;
   }
 
-  // 3-D cube
   const W = vis(s[2]),
     H = vis(s[1]),
     D = vis(s[0]);
@@ -389,7 +490,6 @@ function collapsibleSection(
   `;
 }
 
-// Xarray SVG icon sprites
 const XR_ICONS = `<svg style="position:absolute;width:0;height:0;overflow:hidden"><defs>
 <symbol id="icon-database" viewBox="0 0 32 32">
   <path d="M16 0c-8.837 0-16 2.239-16 5v4c0 2.761 7.163 5 16 5s16-2.239 16-5v-4c0-2.761-7.163-5-16-5z"/>
@@ -463,7 +563,6 @@ function buildXarrayRepr(result) {
   if (!result.groups) {
     return `${XR_ICONS}${renderDataset(result)}`;
   }
-  // Multi-group store
   const cards = Object.entries(result.groups)
     .map(
       ([name, ds]) => `
@@ -584,9 +683,10 @@ function injectXarrayCss() {
   document.head.appendChild(style);
 }
 
-// Hook to fetch .zmetadata and build an HTML representation
+// Hook to fetch (v2: .zmetadata, v3: zarr.json) and build an HTML representation
 // of the dataset using xarray's style.
 // it fires only after the zarr conversion job is done
+
 export function useHtmlMetadata(rawZarrUrl, { enabled = false } = {}) {
   const [html, setHtml] = useState(null);
   const [error, setError] = useState(null);

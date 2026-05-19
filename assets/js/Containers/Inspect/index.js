@@ -329,7 +329,7 @@ function InspectPage({ location, router }) {
   }
 
   function addPathInput() {
-    setPathInputs((prev) => [...prev, ""]);
+    setPathInputs((prev) => (prev.length < 10 ? [...prev, ""] : prev));
   }
 
   function removePathInput(index) {
@@ -539,9 +539,13 @@ function InspectPage({ location, router }) {
           >
             <button
               onClick={addPathInput}
-              disabled={isLoading}
+              disabled={isLoading || pathInputs.length >= 10}
               style={styles.addBtn}
-              title="Add another file path to aggregate"
+              title={
+                pathInputs.length >= 10
+                  ? "Maximum of 10 files reached"
+                  : "Add another file path to aggregate"
+              }
             >
               <i className="fas fa-plus me-2" />
               Add file

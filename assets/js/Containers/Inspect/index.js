@@ -8,6 +8,7 @@ import { ZarrLoadingSteps } from "../../Components/NcdumpDialog/ZarrLoadingSteps
 import { NcDumpDialogState } from "../../Components/NcdumpDialog";
 import { useZarrStatus } from "../../Components/NcdumpDialog/useZarrStatus";
 import { useHtmlMetadata } from "../../Components/NcdumpDialog/useHtmlMetadata";
+import { detectZarrStore } from "../../Components/NcdumpDialog/detectZarrStore";
 import {
   getCookie,
   getTokenFromCookie,
@@ -115,20 +116,18 @@ function InspectPage({ location, router }) {
   });
   const [zarrUrl, setZarrUrl] = useState(null);
   const [rawZarrUrl, setRawZarrUrl] = useState(null);
+  const [isDirectZarr, setIsDirectZarr] = useState(false);
   const [currentFile, setCurrentFile] = useState(initialFilename);
   const [currentIsAgg, setCurrentIsAgg] = useState(isAggregation);
 
-  // Zarr conversion status polling
   const { statusCode, statusReason } = useZarrStatus(rawZarrUrl, {
-    enabled: true,
+    enabled: !isDirectZarr,
   });
 
-  // HTML metadata polling
-  // Only activates once the zarr job is done (statusCode === 0).
-  // Each individual fetch uses server-side timeout=1 so no single request
-  // can block the proxy; retries automatically until content arrives.
+  // Only activates once the zarr job is done (statusCode === 0),
+  // or immediately if the URL was already a zarr store.
   const { html: htmlMetadata, error: htmlError } = useHtmlMetadata(rawZarrUrl, {
-    enabled: statusCode === 0,
+    enabled: isDirectZarr || statusCode === 0,
   });
 
   const abortRef = useRef(null);
@@ -212,13 +211,31 @@ function InspectPage({ location, router }) {
         throw new Error("Authentication required. Please refresh your token.");
       }
 
+      // Skip conversion only for a single remote zarr URL with no active
+      // aggregation parameters. Multi-file arrays and any aggregation config
+      // (time range, level, etc.) always go through the data-loader.
+      const paths = Array.isArray(fn) ? fn : [fn];
+      const hasAggConfig =
+        aggregationConfig &&
+        Object.values(aggregationConfig).some((v) => v !== null && v !== "");
+
+      if (paths.length === 1 && paths[0].startsWith("http") && !hasAggConfig) {
+        const { isZarr } = await detectZarrStore(paths[0]);
+        if (isZarr) {
+          setIsDirectZarr(true);
+          setRawZarrUrl(paths[0]);
+          setZarrUrl(paths[0]);
+          return;
+        }
+      }
+      setIsDirectZarr(false);
+
       const headers = {
         "X-CSRFToken": getCookie("csrftoken"),
         "Content-Type": "application/json",
         Authorization: `Bearer ${tokenData.access_token}`,
       };
 
-      const paths = Array.isArray(fn) ? fn : [fn];
       const requestBody = {
         path: paths.length === 1 ? paths[0] : paths,
         ...(aggregationConfig
@@ -311,7 +328,7 @@ function InspectPage({ location, router }) {
   }
 
   function addPathInput() {
-    setPathInputs((prev) => [...prev, ""]);
+    setPathInputs((prev) => (prev.length < 10 ? [...prev, ""] : prev));
   }
 
   function removePathInput(index) {
@@ -521,9 +538,13 @@ function InspectPage({ location, router }) {
           >
             <button
               onClick={addPathInput}
-              disabled={isLoading}
+              disabled={isLoading || pathInputs.length >= 10}
               style={styles.addBtn}
-              title="Add another file path to aggregate"
+              title={
+                pathInputs.length >= 10
+                  ? "Maximum of 10 files reached"
+                  : "Add another file path to aggregate"
+              }
             >
               <i className="fas fa-plus me-2" />
               Add file
@@ -604,8 +625,8 @@ function InspectPage({ location, router }) {
           </div>
         </div>
 
-        {/* Zarr URL strip */}
-        {zarrUrl && (
+        {/* only shown zarr URL for converted URLs, not direct zarr input */}
+        {zarrUrl && !isDirectZarr && (
           <div style={styles.zarrStrip}>
             <i
               className="fas fa-link"

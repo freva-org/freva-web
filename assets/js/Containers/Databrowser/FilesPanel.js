@@ -21,6 +21,7 @@ import Pagination from "../../Components/Pagination";
 
 import { useZarrStatus } from "../../Components/NcdumpDialog/useZarrStatus";
 import { useHtmlMetadata } from "../../Components/NcdumpDialog/useHtmlMetadata";
+import { detectZarrStore } from "../../Components/NcdumpDialog/detectZarrStore";
 
 import { BATCH_SIZE } from "./constants";
 
@@ -30,25 +31,21 @@ function FilesPanelImpl(props) {
   const { files, numFiles, fileLoading } = props.databrowser;
   const [showDialog, setShowDialog] = useState(false);
   const [rawZarrUrl, setRawZarrUrl] = useState(null);
+  const [isDirectZarr, setIsDirectZarr] = useState(false);
   const [ncdump, setNcDump] = useState({
     status: NcDumpDialogState.READY,
     output: null,
     error: null,
   });
 
-  // Zarr conversion status polling
-  // Polls /zarr-utils/status endpoint until the conversion job reaches a terminal state.
   const { statusCode, statusReason } = useZarrStatus(rawZarrUrl, {
-    enabled: showDialog,
+    enabled: showDialog && !isDirectZarr,
   });
 
-  // HTML metadata polling
-  // Only activates once the zarr job is done (statusCode === 0).
-  // Each fetch uses server-side timeout=1 so no single request can block the
-  // proxy; the hook retries automatically until it gets a 200 or exhausts
-  // maxAttempts.
+  // Only activates once the zarr job is done (statusCode === 0),
+  // or immediately if the URL was already a zarr store.
   const { html: htmlMetadata, error: htmlError } = useHtmlMetadata(rawZarrUrl, {
-    enabled: statusCode === 0,
+    enabled: isDirectZarr || statusCode === 0,
   });
 
   // React to zarr job failure interpretaion
@@ -174,6 +171,22 @@ function FilesPanelImpl(props) {
       };
 
       const paths = Array.isArray(fn) ? fn : [fn];
+      const hasAggConfig =
+        aggregationConfig &&
+        Object.values(aggregationConfig).some((v) => v !== null && v !== "");
+
+      // Skip conversion for a single remote zarr URL with no active
+      // aggregation parameters
+      if (paths.length === 1 && paths[0].startsWith("http") && !hasAggConfig) {
+        const { isZarr } = await detectZarrStore(paths[0]);
+        if (isZarr) {
+          setIsDirectZarr(true);
+          setRawZarrUrl(paths[0]);
+          return;
+        }
+      }
+      setIsDirectZarr(false);
+
       const requestBody = {
         path: paths.length === 1 ? paths[0] : paths,
         ...(aggregationConfig

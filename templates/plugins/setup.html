@@ -52,7 +52,8 @@
             animation: freva-modal-in 0.22s ease;
         }
         .freva-modal-header {
-            background: linear-gradient(135deg, {% settings_val 'MAIN_COLOR' %} 0%, {% settings_val 'HOVER_COLOR' %} 100%);
+            background-color: {% settings_val 'MAIN_COLOR' %};
+            background-image: linear-gradient(135deg, {% settings_val 'MAIN_COLOR' %} 0%, {% settings_val 'HOVER_COLOR' %} 100%);
             color: #fff;
             padding: 14px 20px;
             position: relative;

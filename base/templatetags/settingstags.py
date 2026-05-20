@@ -5,11 +5,15 @@ register = template.Library()
 
 
 @register.simple_tag
-def settings_val(value):
+def settings_val(value, default=""):
     """
-    Returns a variable from the settings
+    Returns a variable from the settings.
+    Falls back to ``default`` if the setting is missing or evaluates to None.
     """
-    return str(getattr(settings, value))
+    result = getattr(settings, value, None)
+    if result is None:
+        return default
+    return str(result)
 
 
 @register.simple_tag

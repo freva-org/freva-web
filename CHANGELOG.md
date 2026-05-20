@@ -1,6 +1,9 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [v2605.1.1]
+### Fixed
+- Fix the default MAIN_COLOR missing in plugin setup
 ## [v2605.1.0]
 ### Removed
 - Remove `/zarr-utils/html` endpoint and render xarray metadata client-side

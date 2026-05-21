@@ -23,10 +23,12 @@ function CodeOutputBlock({ content }) {
     if (output !== undefined && output.content.length > 1) {
       return (
         <Card.Footer className="p-0 m-0" key={`${content[1].id}-codeoutput`}>
-          <div className="bc-output-header">Terminal</div>
-          <pre className="codeoutputblock m-0">
-            <code>{formatCode("CodeOutput", output.content)[0]}</code>
-          </pre>
+          <details>
+            <summary className="bc-output-header">Output</summary>
+            <pre className="codeoutputblock m-0">
+              <code>{formatCode("CodeOutput", output.content)[0]}</code>
+            </pre>
+          </details>
         </Card.Footer>
       );
     } else {

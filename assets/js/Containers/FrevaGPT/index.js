@@ -243,7 +243,7 @@ function FrevaGPT() {
   function addToExistingVariant(varObj) {
     /**
      * Adds content to already existing variant
-     * 
+     *
      * @param {object} varObj -  Object containing current varaint and content
      */
     setDynamicAnswer(varObj.content);
@@ -253,7 +253,7 @@ function FrevaGPT() {
   function addNewVariant(varObj) {
     /**
      *  Adds old variant to conversation and starts new variant with given content
-     * 
+     *
      * @param {object} varObj - Object containing current varaint and content
      */
     dispatch(addElement(varObj));
@@ -268,7 +268,7 @@ function FrevaGPT() {
   function handleServerHint(varObj) {
     /**
      * Handle ServerHint variant setting thread id if necessary
-     * 
+     *
      * @param {object} varObj - Object containing current varaint and content
      */
     // set thread id if no id given or newly provided id differs from current one
@@ -283,6 +283,98 @@ function FrevaGPT() {
         updateUrl(`?thread_id=${varObj.content.thread_id}`);
       }
     }
+  }
+
+  function handleData(varObj, parsedData) {
+    /**
+     * Received data is handles based on a comparison of parsedData and varObj
+     *
+     * @param {object} varObj - Object containing content of last received response
+     * @param {object} parsedData - Object containing content of current received response
+     */
+    let iVarObj = varObj;
+
+    // object is not empty so compare variants
+    if (Object.keys(varObj).length !== 0) {
+      // if object has not same variant, add answer to conversation and override object
+      if (varObj.variant !== parsedData.variant) {
+        addNewVariant(iVarObj);
+        iVarObj = parsedData;
+      } else {
+        // if object has same variant, add content
+        iVarObj.content += parsedData.content;
+        addToExistingVariant(iVarObj);
+      }
+    } else {
+      // object is empty so add content
+      iVarObj = parsedData;
+      handleServerHint(iVarObj);
+    }
+
+    return iVarObj;
+  }
+
+  function extractData(data, varObj, buffer) {
+    /**
+     * Recursive function extracting data from given input and buffering incomplete objects
+     *
+     * @param {string} data - String containing received response
+     * @param {object} varObj - Object containing values from last received response
+     * @param {string} buffer - String containing buffered values
+     */
+    let iVarObj = varObj;
+    let iBuffer = buffer;
+
+    // split data by linebreaks
+    const variantArray = data.split("\n").filter((elem) => !isEmpty(elem));
+
+    for (let index = 0; index < variantArray.length; index++) {
+      try {
+        // try parsing the element of the splitted input
+        // and handle the data according to it's content
+        const parsedVariant = JSON.parse(variantArray[index]);
+        iVarObj = handleData(iVarObj, parsedVariant);
+
+        // if the given data is the same as the data of the buffer
+        // we are inside a nested run of the function
+        // if the parsing is sucessful, the buffered data was included
+        // into the conversation and can be deleted from the buffer
+        if (String(data) === String(iBuffer)) {
+          iBuffer = "";
+        }
+      } catch (err) {
+        // if the parsing fails and the input and the buffer have the same value
+        // we are inside a nested run using the buffer as input data
+        // the buffer data is only used as input data if it contains a closing }
+        // asuming a json object containing the data
+        // if the parsing fails, the received data seems to be missformated
+        if (String(data) === String(iBuffer)) {
+          dispatch(
+            addElement({
+              variant: "FrontendError",
+              content: err,
+            })
+          );
+          //eslint-disable-next-line no-console
+          console.log("Error parsing: ", iBuffer);
+        } else {
+          // on failed parsing add content to buffer so it can be merged with the next
+          // content arriving and tested to be parsed and handled like normal data
+          iBuffer += variantArray[index];
+          if (iBuffer.endsWith("}")) {
+            // if the buffer was merged and the current state ends with a } we assume
+            // that the unfinished object was completed and we now attempt to parse the data
+            // and handle its addition to the conversation calling this function recursively
+            // using the buffer as input data
+            const result = extractData(iBuffer, iVarObj, iBuffer);
+            iBuffer = result.buffer;
+            iVarObj = result.varObj;
+          }
+        }
+      }
+    }
+
+    return { varObj: iVarObj, buffer: iBuffer };
   }
 
   async function streamResponse(input) {
@@ -319,66 +411,9 @@ function FrevaGPT() {
         }
 
         const decodedValues = decoder.decode(value);
-        //eslint-disable-next-line no-console
-        //console.log(decodedValues)
-
-        const variantArray = decodedValues
-          .split(/\n(?=\{)/)
-          .filter((elem) => !isEmpty(elem));
-
-        for (let index = 0; index < variantArray.length; index++) {
-          try {
-            const parsedVariant = JSON.parse(variantArray[index]);
-
-            // object is not empty so compare variants
-            if (Object.keys(varObj).length !== 0) {
-              // if object has not same variant, add answer to conversation and override object
-              if (varObj.variant !== parsedVariant.variant) {
-                addNewVariant(varObj);
-                varObj = parsedVariant;
-              } else {
-                // if object has same variant, add content
-                varObj.content = varObj.content + parsedVariant.content;
-                addToExistingVariant(varObj);
-              }
-            } else {
-              // object is empty so add content
-              varObj = parsedVariant;
-              handleServerHint(varObj);
-            }
-          } catch (err) {
-            buffer += variantArray[index];
-            try {
-              const parsedBuffer = JSON.parse(buffer);
-
-              if (Object.keys(varObj).length !== 0) {
-                if (varObj.variant !== parsedBuffer.variant) {
-                  addNewVariant(varObj);
-                  varObj = parsedBuffer;
-                } else {
-                  varObj.content = varObj.content + parsedBuffer.content;
-                  addToExistingVariant(varObj);
-                }
-              } else {
-                varObj = parsedBuffer;
-                handleServerHint(varObj);
-              }
-              buffer = "";
-            } catch (err) {
-              // string ends with } but not parsable -> either nested elements or misformatted response
-              if (buffer.endsWith("}")) {
-                dispatch(
-                  addElement({
-                    variant: "FrontendError",
-                    content: err,
-                  })
-                );
-                //eslint-disable-next-line no-console
-                console.log("Error parsing: ", buffer);
-              }
-            }
-          }
-        }
+        const result = extractData(decodedValues, varObj, buffer);
+        varObj = result.varObj;
+        buffer = result.buffer;
       }
     } else {
       dispatch(

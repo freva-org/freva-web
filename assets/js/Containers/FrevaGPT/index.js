@@ -204,7 +204,7 @@ function FrevaGPT() {
      * @param {boolean} dispatchStopMessage - Determines if stop message should be shown
      */
     const queryObject = { thread_id: grepThreadID() };
-    if (grepThreadID()) {
+    if (grepThreadID() && loading) {
       const response = await fetchWithAuth(
         `/api/chatbot/stop?` + queryString.stringify(queryObject)
       );

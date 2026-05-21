@@ -543,6 +543,63 @@ class NcdumpDialog extends React.Component {
             </div>
           )}
 
+          {/* Early error state: convert or presign failed before a zarr URL
+              was ever returned (data-loader service unavailable, 503) */}
+          {!zarrUrl && status === NcDumpDialogState.ERROR && (
+            <div
+              style={{
+                margin: "20px",
+                borderRadius: "8px",
+                backgroundColor: "#fee2e2",
+                border: "1px solid #fecaca",
+                color: "#991b1b",
+                fontSize: "13px",
+                padding: "12px",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: "10px",
+                }}
+              >
+                <i
+                  className="fas fa-exclamation-circle"
+                  style={{
+                    fontSize: "18px",
+                    marginTop: "2px",
+                    flexShrink: 0,
+                  }}
+                ></i>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <strong style={{ display: "block", marginBottom: "6px" }}>
+                    Error loading metadata
+                  </strong>
+                  <div
+                    style={{ wordWrap: "break-word", whiteSpace: "pre-wrap" }}
+                  >
+                    {error}
+                  </div>
+                  <button
+                    className="btn btn-sm mt-2"
+                    onClick={this.handleInspect}
+                    style={{
+                      backgroundColor: "#dc2626",
+                      color: "white",
+                      border: "none",
+                      padding: "6px 12px",
+                      fontSize: "12px",
+                    }}
+                  >
+                    <i className="fas fa-redo me-1"></i>
+                    Retry
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Tabs and Content */}
           {zarrUrl &&
             (output ||

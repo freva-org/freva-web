@@ -41,10 +41,15 @@ export function useZarrStatus(
   { intervalMs = 2000, enabled = true } = {}
 ) {
   const [statusCode, setStatusCode] = useState(null);
-  const [error, setError] = useState(null);
+  const [statusReason, setStatusReason] = useState(null);
   const timerRef = useRef(null);
 
   useEffect(() => {
+    // Always reset when the URL changes so stale status from a previous
+    // job never misfires against a new rawZarrUrl.
+    setStatusCode(null);
+    setStatusReason(null);
+
     if (!zarrUrl || !enabled) {
       return () => {};
     }
@@ -67,10 +72,11 @@ export function useZarrStatus(
 
         const data = await res.json();
         const code = data.status ?? 5;
+        const reason = data.reason ?? null;
 
         if (!cancelled) {
           setStatusCode(code);
-          setError(null);
+          setStatusReason(reason);
         }
 
         // Stop polling once we reach a terminal state
@@ -78,13 +84,10 @@ export function useZarrStatus(
           clearInterval(timerRef.current);
         }
       } catch (err) {
-        if (!cancelled) {
-          setError(err.message);
-        }
+        // network error; keep polling
       }
     }
 
-    // Fire immediately, then on interval
     poll();
     timerRef.current = setInterval(poll, intervalMs);
 
@@ -94,5 +97,5 @@ export function useZarrStatus(
     };
   }, [zarrUrl, intervalMs, enabled]);
 
-  return { statusCode, error };
+  return { statusCode, statusReason };
 }

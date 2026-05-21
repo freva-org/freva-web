@@ -12,6 +12,7 @@
     id="{{ id }}"
     placeholder="{{name}}"
     name="{{name}}"
+    {% if attrs.required %}required{% endif %}
   />
 </div>
 

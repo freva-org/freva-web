@@ -40,24 +40,24 @@ setup-stacbrowser:
 	rm -rf static_root/stac-browser
 	mkdir -p static_root/stac-browser
 	@if [ ! -d "stac-browser" ]; then \
-		git clone -b v4.0.1 https://github.com/radiantearth/stac-browser.git stac-browser; \
+		git clone https://github.com/radiantearth/stac-browser.git stac-browser; \
 	fi
-	cd stac-browser && \
-	npm install && \
-	npm run build -- --historyMode="hash" --allowExternalAccess=false && \
-	cp -r dist/* ../static_root/stac-browser/
-
-	@APP_JS=$$(ls static_root/stac-browser/js/app.*.js 2>/dev/null | head -1); \
-	if [ -n "$$APP_JS" ]; then \
-		echo "Found app.js: $$APP_JS"; \
-		sed -i 's/catalogUrl:null/catalogUrl:window.STAC_CATALOG_URL/g' "$$APP_JS" 2>/dev/null || sed -i '' 's/catalogUrl:null/catalogUrl:window.STAC_CATALOG_URL/g' "$$APP_JS"; \
-		sed -i 's/showThumbnailsAsAssets:!1/showThumbnailsAsAssets:1/g' "$$APP_JS" 2>/dev/null || sed -i '' 's/showThumbnailsAsAssets:!1/showThumbnailsAsAssets:1/g' "$$APP_JS"; \
-		echo "Modified: $$APP_JS"; \
-	else \
-		echo "Error: app.js not found in static_root/stac-browser/js/"; \
-		ls -la static_root/stac-browser/js/ || echo "Directory does not exist"; \
-		exit 1; \
-	fi
+	cd stac-browser && git checkout -- src/init.js vite.config.js config.js
+	cd stac-browser && patch -p1 --forward < ../stac-browser-patches/stac-browser-init.patch
+	cd stac-browser && patch -p1 --forward < ../stac-browser-patches/stac-browser-vite.patch
+	cd stac-browser && python3 -c "\
+import pathlib; \
+p = pathlib.Path('config.js'); \
+t = p.read_text(); \
+t = t.replace('historyMode: \"history\"', 'historyMode: \"hash\"'); \
+t = t.replace('showThumbnailsAsAssets: false', 'showThumbnailsAsAssets: true'); \
+t = t.replace('pathPrefix: \"/\"', 'pathPrefix: \"/static/stac-browser/\"'); \
+t = t.replace('enforcedColorMode: \"auto\"', 'enforcedColorMode: \"light\"'); \
+p.write_text(t)"
+	cd stac-browser && npm install && npm run build
+	cp -r stac-browser/dist/. static_root/stac-browser/
+	mkdir -p static_root/stac-browser/.vite
+	cp stac-browser/dist/.vite/manifest.json static_root/stac-browser/.vite/manifest.json
 
 runserver:
 	@echo "Starting Django development server..."

@@ -12,58 +12,84 @@ import queryString from "query-string";
 import NcdumpDialog, { NcDumpDialogState } from "../../Components/NcdumpDialog";
 import CircularSpinner from "../../Components/Spinner";
 
-import { getCookie } from "../../utils";
+import {
+  getCookie,
+  getTokenFromCookie,
+  refreshTokenIfNeeded,
+} from "../../utils";
 import Pagination from "../../Components/Pagination";
 
 import { useZarrStatus } from "../../Components/NcdumpDialog/useZarrStatus";
+import { useHtmlMetadata } from "../../Components/NcdumpDialog/useHtmlMetadata";
+import { detectZarrStore } from "../../Components/NcdumpDialog/detectZarrStore";
 
-import { BATCH_SIZE, TEMP_FREVA_AUTH_TOKEN } from "./constants";
+import { BATCH_SIZE } from "./constants";
 
-const MAX_RETRIES = 20;
-const RETRY_DELAY = 2000;
 const MAX_FILE_SELECTION = 10;
-
-async function refreshTokenIfNeeded() {
-  try {
-    const response = await fetch("/api/token-health/", {
-      credentials: "same-origin",
-      method: "GET",
-    });
-    return response.ok;
-  } catch (error) {
-    return false;
-  }
-}
 
 function FilesPanelImpl(props) {
   const { files, numFiles, fileLoading } = props.databrowser;
   const [showDialog, setShowDialog] = useState(false);
   const [rawZarrUrl, setRawZarrUrl] = useState(null);
-  const { statusCode } = useZarrStatus(rawZarrUrl, { enabled: showDialog });
-
-  // Surface terminal zarr status codes as errors in the dialog
-  React.useEffect(() => {
-    if (statusCode === null) {
-      return;
-    }
-    const terminalErrors = {
-      1: "Zarr conversion failed on the server. Please retry.",
-      2: "File not found — the server could not locate this file for streaming.",
-      5: null, // handled visually inside ZarrLoadingSteps after maxGoneRetries
-    };
-    if (statusCode in terminalErrors && terminalErrors[statusCode]) {
-      setNcDump((prev) => ({
-        ...prev,
-        status: NcDumpDialogState.ERROR,
-        error: terminalErrors[statusCode],
-      }));
-    }
-  }, [statusCode]);
+  const [isDirectZarr, setIsDirectZarr] = useState(false);
   const [ncdump, setNcDump] = useState({
     status: NcDumpDialogState.READY,
     output: null,
     error: null,
   });
+
+  const { statusCode, statusReason } = useZarrStatus(rawZarrUrl, {
+    enabled: showDialog && !isDirectZarr,
+  });
+
+  // Only activates once the zarr job is done (statusCode === 0),
+  // or immediately if the URL was already a zarr store.
+  const { html: htmlMetadata, error: htmlError } = useHtmlMetadata(rawZarrUrl, {
+    enabled: isDirectZarr || statusCode === 0,
+  });
+
+  // React to zarr job failure interpretaion
+  React.useEffect(() => {
+    if (statusCode === null) {
+      return;
+    }
+    if (statusCode === 1) {
+      setNcDump({
+        status: NcDumpDialogState.ERROR,
+        output: null,
+        error:
+          statusReason || "Zarr conversion failed on the server. Please retry.",
+      });
+    }
+    if (statusCode === 2) {
+      setNcDump({
+        status: NcDumpDialogState.ERROR,
+        output: null,
+        error:
+          statusReason ||
+          "File not found — the server could not locate this file for streaming.",
+      });
+    }
+  }, [statusCode, statusReason]);
+
+  // React to HTML metadata arriving (or failing after retries)
+  React.useEffect(() => {
+    if (htmlMetadata) {
+      setNcDump({
+        status: NcDumpDialogState.READY,
+        output: htmlMetadata,
+        error: null,
+      });
+    }
+    if (htmlError) {
+      setNcDump({
+        status: NcDumpDialogState.ERROR,
+        output: null,
+        error: htmlError,
+      });
+    }
+  }, [htmlMetadata, htmlError]);
+
   const [filename, setFilename] = useState(null);
   const [zarrUrl, setZarrUrl] = useState(null);
   const [showPathInput, setShowPathInput] = useState(false);
@@ -81,32 +107,6 @@ function FilesPanelImpl(props) {
       start: (offset - 1) * BATCH_SIZE,
     });
     props.router.push(currentLocation + "?" + query);
-  }
-
-  function getTokenFromCookie() {
-    const cookies = document.cookie.split(";");
-    const authCookie = cookies.find((cookie) =>
-      cookie.trim().startsWith(TEMP_FREVA_AUTH_TOKEN)
-    );
-
-    if (!authCookie) {
-      return null;
-    }
-
-    try {
-      let cookieValue = authCookie
-        .substring(authCookie.indexOf("=") + 1)
-        .trim();
-      if (cookieValue.startsWith('"') && cookieValue.endsWith('"')) {
-        cookieValue = cookieValue.slice(1, -1);
-      }
-      return {
-        access_token: cookieValue,
-        token_type: "Bearer",
-      };
-    } catch (error) {
-      return null;
-    }
   }
 
   // Toggle file selection
@@ -136,8 +136,13 @@ function FilesPanelImpl(props) {
     setSelectedFiles([]);
   }
 
-  async function loadNcdump(fn, retryCount = 0, aggregationConfig = null) {
-    // flush any previous request
+  /**
+   * Submits the zarr conversion job and presigns the URL for sharing.
+   * Returns immediately after both fast steps; the heavy lifting (conversion
+   * + metadata fetch) is handled asynchronously by useZarrStatus and
+   * useHtmlMetadata respectively; no blocking wait here.
+   */
+  async function loadNcdump(fn, aggregationConfig = null) {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -150,6 +155,8 @@ function FilesPanelImpl(props) {
     }
 
     setNcDump({ status: NcDumpDialogState.LOADING, output: null, error: null });
+    setZarrUrl(null);
+    setRawZarrUrl(null);
 
     try {
       const tokenData = getTokenFromCookie();
@@ -159,17 +166,26 @@ function FilesPanelImpl(props) {
 
       const headers = {
         "X-CSRFToken": getCookie("csrftoken"),
-        Accept: "text/plain",
+        "Content-Type": "application/json",
         Authorization: `Bearer ${tokenData.access_token}`,
       };
 
-      // Step 1: we use convert endpoint to be able to even
-      // publush the zarr-endpoint arbitrary paths that are
-      // indexed in the search backend.
-      const isAggregation = Array.isArray(fn);
-      const paths = isAggregation ? fn : [fn];
+      const paths = Array.isArray(fn) ? fn : [fn];
+      const hasAggConfig =
+        aggregationConfig &&
+        Object.values(aggregationConfig).some((v) => v !== null && v !== "");
 
-      const convertUrl = `/api/freva-nextgen/data-portal/zarr/convert`;
+      // Skip conversion for a single remote zarr URL with no active
+      // aggregation parameters
+      if (paths.length === 1 && paths[0].startsWith("http") && !hasAggConfig) {
+        const { isZarr } = await detectZarrStore(paths[0]);
+        if (isZarr) {
+          setIsDirectZarr(true);
+          setRawZarrUrl(paths[0]);
+          return;
+        }
+      }
+      setIsDirectZarr(false);
 
       const requestBody = {
         path: paths.length === 1 ? paths[0] : paths,
@@ -182,119 +198,67 @@ function FilesPanelImpl(props) {
           : {}),
       };
 
-      const response = await fetch(convertUrl, {
-        method: "POST",
-        credentials: "same-origin",
-        headers: {
-          ...headers,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
-        signal,
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(
-          `Failed to create zarr endpoint: ${errorText || response.statusText}`
-        );
+      // Step 1: submit conversion job; worker picks this up async, returns
+      // immediately with a zarr URL. Setting rawZarrUrl starts useZarrStatus.
+      const convertRes = await fetch(
+        "/api/freva-nextgen/data-portal/zarr/convert",
+        {
+          method: "POST",
+          credentials: "same-origin",
+          headers,
+          body: JSON.stringify(requestBody),
+          signal,
+        }
+      );
+      if (!convertRes.ok) {
+        let detail = convertRes.statusText;
+        try {
+          const body = await convertRes.json();
+          detail = body.detail || body.message || detail;
+        } catch {
+          // non-JSON body; keep statusText
+        }
+        throw new Error(detail);
       }
-
-      const data = await response.json();
-      if (!data.urls || data.urls.length === 0) {
+      const { urls } = await convertRes.json();
+      if (!urls?.length) {
         throw new Error("No zarr URL returned from server");
       }
 
-      const rawzarrUrl = data.urls[0];
-      setRawZarrUrl(rawzarrUrl);
-      // Step 1.5: Create presigned URL
-      const presignResponse = await fetch(
+      const rawUrl = urls[0];
+      // starts useZarrStatus polling
+      setRawZarrUrl(rawUrl);
+
+      // Step 2: presign for sharing / GridLook.
+      const presignRes = await fetch(
         "/api/freva-nextgen/data-portal/share-zarr",
         {
           method: "POST",
           credentials: "same-origin",
-          headers: { ...headers, "Content-Type": "application/json" },
-          body: JSON.stringify({ path: rawzarrUrl, ttl_seconds: 3600 }),
+          headers,
+          body: JSON.stringify({ path: rawUrl, ttl_seconds: 3600 }),
           signal,
         }
       );
-      const presignData = await presignResponse.json();
-      const zarrUrl = presignData.url;
-      setZarrUrl(zarrUrl);
-
-      // Step 2: Get metadata with retry logic
-      const timeout = isAggregation ? aggregationConfig?.timeout || 120 : 60;
-      const htmlUrl = `/api/freva-nextgen/data-portal/zarr-utils/html?url=${encodeURIComponent(rawzarrUrl)}&timeout=${timeout}`;
-      const metadataResponse = await fetch(htmlUrl, {
-        method: "GET",
-        credentials: "same-origin",
-        headers,
-        signal,
-      });
-
-      // Handle 503
-      if (metadataResponse.status === 503) {
-        const errorText = await metadataResponse.text();
-
-        // retriable state check
-        if (
-          (errorText.includes("processing") || errorText.includes("waiting")) &&
-          retryCount < MAX_RETRIES
-        ) {
-          if (signal.aborted) {
-            return;
-          }
-
-          setNcDump({
-            status: NcDumpDialogState.LOADING,
-            output: null,
-            error: null,
-          });
-          // Wait before retrying
-          await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
-          if (signal.aborted) {
-            return;
-          }
-
-          await loadNcdump(fn, retryCount + 1, aggregationConfig);
-          return;
-        }
-        // If it's "finished, failed" or max retries reached
-        throw new Error(errorText || "Service unavailable");
+      if (presignRes.ok) {
+        setZarrUrl((await presignRes.json()).url);
       }
 
-      if (!metadataResponse.ok) {
-        const errorText = await metadataResponse.text();
-        throw new Error(errorText || "Failed to get metadata");
-      }
-      // IMPORTANT: Get the xarray HTML directly from backend,
-      // no need to be processed in frontend.
-      const htmlOutput = await metadataResponse.text();
-
-      setNcDump({
-        output: htmlOutput,
-        status: NcDumpDialogState.READY,
-        error: null,
-      });
-    } catch (error) {
-      // Ignore abort errors since it's alreadt cancelled)
-      if (error.name === "AbortError") {
+      // Step3. Done. useZarrStatus polls /status; once status=0, useHtmlMetadata
+      // polls /html with short timeouts and retries until it gets the content.
+    } catch (err) {
+      if (err.name === "AbortError") {
         return;
       }
 
-      let errorMessage = error.message;
-
-      if (error.message.includes("Authentication")) {
+      let errorMessage = err.message;
+      if (err.message.includes("Authentication")) {
         errorMessage = "Authentication error. Please refresh your token.";
-      } else if (error.message.includes("Failed to fetch")) {
+      } else if (err.message.includes("Failed to fetch")) {
         errorMessage = "Network error. Please check your connection.";
-      } else if (error.message.includes("service not able to publish")) {
+      } else if (err.message.includes("service not able to publish")) {
         errorMessage =
           "Zarr streaming service is not enabled. Please contact your administrator.";
-      } else if (error.message.includes("Failed to get zarr URL")) {
-        errorMessage = `Cannot create zarr endpoint: ${error.message.split(": ")[1] || error.message}`;
-      } else {
-        // keep errorMessage as-is
       }
 
       setNcDump({
@@ -513,21 +477,22 @@ function FilesPanelImpl(props) {
         zarrUrl={zarrUrl}
         isAggregation={Array.isArray(filename)}
         onClose={() => {
-          // Cancel any pending request when closing
           if (abortControllerRef.current) {
             abortControllerRef.current.abort();
           }
+          // Setting rawZarrUrl to null stops both useZarrStatus and
+          // useHtmlMetadata via their dependency arrays.
           setShowDialog(false);
           setZarrUrl(null);
+          setRawZarrUrl(null);
           setNcDump({
             status: NcDumpDialogState.READY,
             error: null,
             output: null,
           });
-          setRawZarrUrl(null);
         }}
         submitNcdump={(fn, aggregationConfig) =>
-          loadNcdump(fn, 0, aggregationConfig)
+          loadNcdump(fn, aggregationConfig)
         }
         status={ncdump.status}
         output={ncdump.output}

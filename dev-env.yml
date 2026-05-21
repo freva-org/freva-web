@@ -25,6 +25,7 @@ dependencies:
   - nose
   - pandoc
   - paramiko
+  - patch
   - pep8
   - pip
   - pip:

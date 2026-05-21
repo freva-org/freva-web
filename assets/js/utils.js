@@ -22,9 +22,7 @@ export const dateformatter = (isodate) => {
   const newdate = new Date(Date.parse(isodate));
   const d = newdate.getDate();
   const m = newdate.getMonth() + 1;
-  return `${d <= 9 ? "0" + d : d}.${
-    m <= 9 ? "0" + m : m
-  }.${newdate.getFullYear()}`;
+  return `${d <= 9 ? "0" + d : d}.${m <= 9 ? "0" + m : m}.${newdate.getFullYear()}`;
 };
 
 export function initCap(str) {
@@ -62,4 +60,46 @@ export function copyTextToClipboard(text, showToast) {
   navigator.clipboard.writeText(text).then(showToast, function () {
     copyTextFallback(text);
   });
+}
+
+/**
+ * Reads the freva Bearer token from cookies and returns it in the shape
+ * { access_token, token_type } that fetch callers expect, or null when the
+ * cookie is absent or malformed.
+ *
+ * Single source of truth; imported by actions.js and FilesPanel.js
+ */
+export function getTokenFromCookie() {
+  const COOKIE_PREFIX = "freva_auth_token=";
+  const cookies = document.cookie.split(";");
+  const authCookie = cookies.find((cookie) =>
+    cookie.trim().startsWith(COOKIE_PREFIX)
+  );
+
+  if (!authCookie) {
+    return null;
+  }
+
+  try {
+    let cookieValue = authCookie.substring(authCookie.indexOf("=") + 1).trim();
+    if (cookieValue.startsWith('"') && cookieValue.endsWith('"')) {
+      cookieValue = cookieValue.slice(1, -1);
+    }
+    return cookieValue
+      ? { access_token: cookieValue, token_type: "Bearer" }
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function refreshTokenIfNeeded() {
+  try {
+    const res = await fetch("/api/token-health/", {
+      credentials: "same-origin",
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
 }

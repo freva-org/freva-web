@@ -195,15 +195,12 @@ def home(request):
     messages = UIMessages.objects.order_by("-id").filter(resolved=False)
 
     login_required_param = request.GET.get("login_required", False)
-    is_guest_user = False
     if request.user.is_authenticated:
-        # Already logged in
         next_url = request.GET.get("next")
         if next_url and url_has_allowed_host_and_scheme(
             next_url, allowed_hosts={request.get_host()}
         ):
             return HttpResponseRedirect(next_url)
-        is_guest_user = not request.session.get("system_user_valid", False)
 
     return render(
         request,
@@ -211,7 +208,6 @@ def home(request):
         {
             "login_required": login_required_param,
             "messages": messages,
-            "is_guest_user": is_guest_user,
         },
     )
 
@@ -412,9 +408,9 @@ def stacbrowser(request):
     stacapi_url = request.build_absolute_uri(stacapi_endpoint)
 
     try:
-        # based on one usecase, since there are two reverse
-        # proxies in place. To ensure we have the correct URL,
-        # we fetch the STAC API metadata and extract the self link.
+        # Based on one usecase, since there are two reverse proxies in place.
+        # To ensure we have the correct URL, we fetch the STAC API metadata
+        # and extract the self link.
         response = requests.get(stacapi_url, timeout=10)
         response.raise_for_status()
         stac_data = response.json()
@@ -428,20 +424,37 @@ def stacbrowser(request):
     except Exception:
         pass  # Use fallback URL
 
-    # Find the current asset files dynamically
     static_path = os.path.join(settings.PROJECT_ROOT, 'static_root', 'stac-browser')
-    vendor_js = glob.glob(os.path.join(static_path, 'js', 'chunk-vendors.*.js'))
-    app_js = glob.glob(os.path.join(static_path, 'js', 'app.*.js'))
-    vendor_css = glob.glob(os.path.join(static_path, 'css', 'chunk-vendors.*.css'))
-    app_css = glob.glob(os.path.join(static_path, 'css', 'app.*.css'))
+
+    # Vite writes a manifest at .vite/manifest.json when `manifest: true` is
+    # set in vite.config.js.
+    # We look for the entry with `isEntry: true` rather than hardcoding the
+    # key ("src/main.js") so this stays correct across Vite versions.
+    main_js = ''
+    main_css = ''
+    try:
+        manifest_path = os.path.join(static_path, '.vite', 'manifest.json')
+        with open(manifest_path) as fh:
+            manifest = json.load(fh)
+
+        # Find the chunk marked as the entry point
+        entry = next(
+            (v for v in manifest.values() if v.get('isEntry')),
+            {}
+        )
+        main_js = entry.get('file', '')
+        main_css = (entry.get('css') or [''])[0]
+
+    except (FileNotFoundError, json.JSONDecodeError, StopIteration):
+        # stac-browser not built yet; template will log a warning
+        pass
+
     context = {
         'title': 'STAC Browser',
         'stac_api_url': stacapi_url,
         'stac_assets': {
-            'vendor_js': os.path.basename(vendor_js[0]) if vendor_js else '',
-            'app_js': os.path.basename(app_js[0]) if app_js else '',
-            'vendor_css': os.path.basename(vendor_css[0]) if vendor_css else '',
-            'app_css': os.path.basename(app_css[0]) if app_css else '',
+            'main_js': main_js,
+            'main_css': main_css,
         }
     }
     return render(request, 'stacbrowser.html', context)

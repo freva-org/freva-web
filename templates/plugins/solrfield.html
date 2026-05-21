@@ -10,6 +10,7 @@
   data-facet="{{facet}}"
   data-group="{{group}}"
   data-multiple="{{multiple}}"
+  {% if attrs.required %}data-required="true"{% endif %}
 />
 
 <script>

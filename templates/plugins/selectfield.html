@@ -10,15 +10,16 @@
 <input type="hidden"
        class="col-md-12 {{attrs.class}}"
        value="{% if value %}{{ value|safe }}{% endif %}"
-       id="{{name}}"
+       id="{{attrs.id}}"
        name="{{name}}"
+       {% if attrs.required %}data-required="true"{% endif %}
 />
 
 <script>
     $(document).ready(function() {
 
         var isMultiple = {{ multiple|yesno:"true,false" }};  // Convert Django bool to JS bool
-        $("#{{name}}").select2({
+        $("#{{attrs.id}}").select2({
             placeholder: "Select a {{ name }}",
             initSelection : function (element, callback) {
                 if(isMultiple){

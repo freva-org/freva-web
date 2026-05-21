@@ -1,6 +1,6 @@
 import fetch from "isomorphic-fetch";
 
-import { getCookie } from "../../utils";
+import { getCookie, getTokenFromCookie } from "../../utils";
 
 import * as globalStateConstants from "../App/constants";
 
@@ -41,32 +41,6 @@ const parseErrorDetail = (error) => {
     return error.detail || error.message || "An error occurred";
   } catch {
     return "An error occurred";
-  }
-};
-
-const getTokenFromCookie = () => {
-  const cookies = document.cookie.split(";");
-  const authCookie = cookies.find((cookie) =>
-    cookie.trim().startsWith(constants.TEMP_FREVA_AUTH_TOKEN)
-  );
-
-  if (!authCookie) {
-    return null;
-  }
-
-  try {
-    let cookieValue = authCookie.substring(authCookie.indexOf("=") + 1).trim();
-
-    if (cookieValue.startsWith('"') && cookieValue.endsWith('"')) {
-      cookieValue = cookieValue.slice(1, -1);
-    }
-
-    return {
-      access_token: cookieValue,
-      token_type: "Bearer",
-    };
-  } catch (error) {
-    return null;
   }
 };
 

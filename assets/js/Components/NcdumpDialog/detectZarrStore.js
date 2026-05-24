@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-import { getTokenFromCookie } from "../../utils";
+import { getTokenFromCookie, normalizeUrl } from "../../utils";
 
 /**
  * Checks whether a URL already points to a zarr store by probing
@@ -17,7 +17,10 @@ export async function detectZarrStore(url) {
     return { isZarr: false, version: null, consolidated: false };
   }
 
-  const base = url.replace(/\/$/, "");
+  // Defensive: callers should already pass a decoded URL, but if a
+  // percent-encoded one slips through, decode it here so the fetch
+  // below is not treated as a relative path by the browser.
+  const base = normalizeUrl(url).replace(/\/$/, "");
   const token = getTokenFromCookie();
   const headers = token
     ? { Authorization: `${token.token_type} ${token.access_token}` }

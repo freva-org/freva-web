@@ -15,6 +15,7 @@ import CircularSpinner from "../../Components/Spinner";
 import {
   getCookie,
   getTokenFromCookie,
+  normalizeUrl,
   refreshTokenIfNeeded,
 } from "../../utils";
 import Pagination from "../../Components/Pagination";
@@ -170,18 +171,23 @@ function FilesPanelImpl(props) {
         Authorization: `Bearer ${tokenData.access_token}`,
       };
 
-      const paths = Array.isArray(fn) ? fn : [fn];
+      const paths = (Array.isArray(fn) ? fn : [fn]).map(normalizeUrl);
       const hasAggConfig =
         aggregationConfig &&
         Object.values(aggregationConfig).some((v) => v !== null && v !== "");
 
       // Skip conversion for a single remote zarr URL with no active
       // aggregation parameters
-      if (paths.length === 1 && paths[0].startsWith("http") && !hasAggConfig) {
+      if (
+        paths.length === 1 &&
+        /^https?:\/\//i.test(paths[0]) &&
+        !hasAggConfig
+      ) {
         const { isZarr } = await detectZarrStore(paths[0]);
         if (isZarr) {
           setIsDirectZarr(true);
           setRawZarrUrl(paths[0]);
+          setZarrUrl(paths[0]);
           return;
         }
       }
@@ -375,7 +381,7 @@ function FilesPanelImpl(props) {
               onChange={(e) => setPathInput(e.target.value)}
               onKeyPress={(e) => {
                 if (e.key === "Enter" && pathInput.trim()) {
-                  setFilename(pathInput.trim());
+                  setFilename(normalizeUrl(pathInput.trim()));
                   setShowDialog(true);
                   setShowPathInput(false);
                 }
@@ -385,7 +391,7 @@ function FilesPanelImpl(props) {
               className="btn btn-sm btn-primary"
               onClick={() => {
                 if (pathInput.trim()) {
-                  setFilename(pathInput.trim());
+                  setFilename(normalizeUrl(pathInput.trim()));
                   setShowDialog(true);
                   setShowPathInput(false);
                 }

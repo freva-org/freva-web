@@ -379,6 +379,9 @@ class NcdumpDialog extends React.Component {
                       </div>
                     )}
 
+                    {/* Zarr URL strip; redundant when it's identical to
+                        what the user has in "File path:" right above */}
+                    {zarrUrl !== this.state.pathInput.trim() && (
                     <div
                       style={{
                         display: "flex",
@@ -444,6 +447,7 @@ class NcdumpDialog extends React.Component {
                         ></i>
                       </button>
                     </div>
+                    )}
                   </div>
                 )}
               </div>

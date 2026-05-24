@@ -382,71 +382,73 @@ class NcdumpDialog extends React.Component {
                     {/* Zarr URL strip; redundant when it's identical to
                         what the user has in "File path:" right above */}
                     {zarrUrl !== this.state.pathInput.trim() && (
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "6px",
-                        flex: "1 1 100%",
-                        minWidth: 0,
-                      }}
-                    >
-                      <i
-                        className="fas fa-link"
-                        style={{ color: "#6b7280", flexShrink: 0 }}
-                      ></i>
-                      <span
+                      <div
                         style={{
-                          color: "#6b7280",
-                          fontWeight: "500",
-                          flexShrink: 0,
-                        }}
-                      >
-                        Zarr:
-                      </span>
-                      <code
-                        style={{
-                          flex: 1,
-                          backgroundColor: "white",
-                          padding: "4px 8px",
-                          borderRadius: "4px",
-                          fontSize: "10px",
-                          color: "#1f2937",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                          border: "1px solid #e5e7eb",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                          flex: "1 1 100%",
                           minWidth: 0,
                         }}
                       >
-                        {zarrUrl}
-                      </code>
-                      <button
-                        onClick={() => {
-                          navigator.clipboard.writeText(zarrUrl);
-                          this.setState({ copied: true });
-                          setTimeout(
-                            () => this.setState({ copied: false }),
-                            2000
-                          );
-                        }}
-                        className="btn btn-sm"
-                        style={{
-                          padding: "4px 10px",
-                          fontSize: "11px",
-                          backgroundColor: "white",
-                          border: "1px solid #d1d5db",
-                          borderRadius: "4px",
-                          color: "#374151",
-                          flexShrink: 0,
-                        }}
-                        title={this.state.copied ? "Copied!" : "Copy Zarr URL"}
-                      >
                         <i
-                          className={`fas fa-${this.state.copied ? "check" : "copy"}`}
+                          className="fas fa-link"
+                          style={{ color: "#6b7280", flexShrink: 0 }}
                         ></i>
-                      </button>
-                    </div>
+                        <span
+                          style={{
+                            color: "#6b7280",
+                            fontWeight: "500",
+                            flexShrink: 0,
+                          }}
+                        >
+                          Zarr:
+                        </span>
+                        <code
+                          style={{
+                            flex: 1,
+                            backgroundColor: "white",
+                            padding: "4px 8px",
+                            borderRadius: "4px",
+                            fontSize: "10px",
+                            color: "#1f2937",
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                            border: "1px solid #e5e7eb",
+                            minWidth: 0,
+                          }}
+                        >
+                          {zarrUrl}
+                        </code>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(zarrUrl);
+                            this.setState({ copied: true });
+                            setTimeout(
+                              () => this.setState({ copied: false }),
+                              2000
+                            );
+                          }}
+                          className="btn btn-sm"
+                          style={{
+                            padding: "4px 10px",
+                            fontSize: "11px",
+                            backgroundColor: "white",
+                            border: "1px solid #d1d5db",
+                            borderRadius: "4px",
+                            color: "#374151",
+                            flexShrink: 0,
+                          }}
+                          title={
+                            this.state.copied ? "Copied!" : "Copy Zarr URL"
+                          }
+                        >
+                          <i
+                            className={`fas fa-${this.state.copied ? "check" : "copy"}`}
+                          ></i>
+                        </button>
+                      </div>
                     )}
                   </div>
                 )}

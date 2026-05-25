@@ -54,6 +54,49 @@ def share_zarr(request):
 
 
 @login_required()
+def zarr_convert(request):
+    """Forward POST /zarr/convert to freva-rest and rewrite each returned
+    URL from the upstream's own host to Django's host
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+    try:
+        headers = {"Content-Type": "application/json"}
+        if request.user.is_authenticated:
+            access_token = request.session.get("access_token")
+            if access_token:
+                headers["Authorization"] = f"Bearer {access_token}"
+
+        response = requests.post(
+            f"{settings.DATA_BROWSER_HOST}/api/freva-nextgen/data-portal/zarr/convert",
+            data=request.body or b"",
+            headers=headers,
+            timeout=100,
+        )
+        data = response.json()
+
+        if isinstance(data.get("urls"), list):
+            django_origin = f"{request.scheme}://{request.get_host()}"
+            rewritten = []
+            for u in data["urls"]:
+                if isinstance(u, str):
+                    parsed = urlparse(u)
+                    if parsed.scheme and parsed.netloc:
+                        u = u.replace(
+                            f"{parsed.scheme}://{parsed.netloc}",
+                            django_origin,
+                            1,
+                        )
+                rewritten.append(u)
+            data["urls"] = rewritten
+
+        return JsonResponse(data, status=response.status_code)
+    except requests.RequestException as e:
+        logging.error(f"zarr/convert proxy failed: {e}")
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+@login_required()
 def databrowser(request):
     """
     New view for plugin list

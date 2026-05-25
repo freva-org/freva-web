@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-import { getTokenFromCookie } from "../../utils";
+import { getTokenFromCookie, normalizeUrl } from "../../utils";
 
 // Zarr metadata parsers
 
@@ -227,7 +227,9 @@ function assembleDataset(arrays, attrs, extract) {
  *   { groups: { name -> dataset } }; multi-group store
  */
 async function openDatasetMeta(url) {
-  const base = url.replace(/\/$/, "");
+  // Defensive: a percent-encoded URL would be treated as a relative path
+  // by the browser. Normalize so the fetch lands at the real origin.
+  const base = normalizeUrl(url).replace(/\/$/, "");
   const token = getTokenFromCookie();
   const headers = token
     ? { Authorization: `${token.token_type} ${token.access_token}` }
@@ -669,11 +671,12 @@ function injectXarrayCss() {
     `rgb(${Math.min(255, (r * f) | 0)},${Math.min(255, (g * f) | 0)},${Math.min(255, (b * f) | 0)})`;
   const ca = (f, a) =>
     `rgba(${Math.min(255, (r * f) | 0)},${Math.min(255, (g * f) | 0)},${Math.min(255, (b * f) | 0)},${a})`;
-
+  // Inverted MAIN_COLOR for the cube edges
+  const inv = `rgb(${255 - r},${255 - g},${255 - b})`;
   const chunkVars = `
-    :root{--xr-chunk-face:${cl(0.85)};--xr-chunk-top:${cl(1.25)};--xr-chunk-side:${cl(0.55)};--xr-chunk-edge:${cl(0.25)}}
+    :root{--xr-chunk-face:${cl(0.85)};--xr-chunk-top:${cl(1.25)};--xr-chunk-side:${cl(0.55)};--xr-chunk-edge:${inv}}
     html[data-theme="dark"],body[data-theme="dark"],body.vscode-dark{
-      --xr-chunk-face:${ca(0.85, 0.65)};--xr-chunk-top:${ca(1.25, 0.65)};--xr-chunk-side:${ca(0.55, 0.65)};--xr-chunk-edge:${ca(0.25, 0.4)}
+      --xr-chunk-face:${ca(0.85, 0.65)};--xr-chunk-top:${ca(1.25, 0.65)};--xr-chunk-side:${ca(0.55, 0.65)};--xr-chunk-edge:${inv}
     }
   `;
 

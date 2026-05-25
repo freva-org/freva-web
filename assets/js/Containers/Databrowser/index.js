@@ -353,9 +353,7 @@ class Databrowser extends React.Component {
             e.preventDefault();
             // Preserve the active flavour
             const { flavour } = this.props.location.query;
-            const qs = flavour
-              ? "?" + queryString.stringify({ flavour })
-              : "";
+            const qs = flavour ? "?" + queryString.stringify({ flavour }) : "";
             this.props.router.push(this.props.location.pathname + qs);
           }}
           key={"clearall"}

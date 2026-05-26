@@ -1,6 +1,9 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [v2605.2.1]
+### Fixed
+- CI: Opt out MAMBA_USE_SHARDED_REPODATA in dockerfile until upstream micromamba fixes the regression
 ## [v2605.2.0]
 ### Fixed
 - Dataloader: percent-encoded URLs, dev-env CORS, FilesPanel parity for data-loader endpoints, metadata cube visibility

@@ -15,7 +15,7 @@ jobs:
           submodules: recursive
       - name: Create conda env
         # https://github.com/marketplace/actions/setup-micromamba
-        uses: mamba-org/setup-micromamba@v3
+        uses: mamba-org/setup-micromamba@v1
         with:
           environment-name: freva-web
           environment-file: dev-env.yml

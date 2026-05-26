@@ -4,7 +4,7 @@ import { Card } from "react-bootstrap";
 import PropTypes from "prop-types";
 import hljs from "highlight.js";
 
-import { formatCode } from "../../utils";
+import { formatCode, extractVariantFromArray } from "../../utils";
 import "highlight.js/styles/atom-one-dark.css";
 
 function CodeOutputBlock({ content }) {
@@ -17,25 +17,18 @@ function CodeOutputBlock({ content }) {
     });
   }, []);
 
-  function extractElements(content, variant) {
-    // should be only one resulting item
-    return content.filter((elem) => elem.variant === variant)[0];
-  }
-
   function renderCodeOutput(content) {
-    if (content.length > 1) {
+    const output = extractVariantFromArray("CodeOutput", content);
+
+    if (output !== undefined && output.content.length > 1) {
       return (
         <Card.Footer className="p-0 m-0" key={`${content[1].id}-codeoutput`}>
-          <pre className="codeoutputblock m-0">
-            <code className="bot-code-output">
-              {
-                formatCode(
-                  "CodeOutput",
-                  extractElements(content, "CodeOutput").content
-                )[0]
-              }
-            </code>
-          </pre>
+          <details>
+            <summary className="bc-output-header">Output</summary>
+            <pre className="codeoutputblock m-0">
+              <code>{formatCode("CodeOutput", output.content)[0]}</code>
+            </pre>
+          </details>
         </Card.Footer>
       );
     } else {

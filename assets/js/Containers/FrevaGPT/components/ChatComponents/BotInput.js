@@ -8,7 +8,7 @@ import { isEmpty } from "lodash";
 
 import PropTypes from "prop-types";
 
-import { resizeInputField } from "../../utils";
+import { resetInputField, resizeInputField } from "../../utils";
 
 function BotInput({ loading, handleSubmit, handleStop }) {
   const [userInput, setUserInput] = useState("");
@@ -28,6 +28,7 @@ function BotInput({ loading, handleSubmit, handleStop }) {
       if (!loading) {
         if (!isEmpty(e.target.value.trim())) {
           handleSubmit(e.target.value);
+          resetInputField("inputField");
           setUserInput("");
         }
       }
@@ -40,6 +41,7 @@ function BotInput({ loading, handleSubmit, handleStop }) {
       setUserInput("");
     }
     setUserInput("");
+    resetInputField("inputField");
   }
 
   return (

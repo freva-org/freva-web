@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { Card, Collapse, Button } from "react-bootstrap";
-import { FaAngleDown, FaAngleUp, FaRegCopy } from "react-icons/fa";
+import { FaAngleDown, FaAngleUp, FaRegCopy, FaPython } from "react-icons/fa";
 
 import PropTypes from "prop-types";
 import hljs from "highlight.js";
 import "highlight.js/styles/stackoverflow-light.css";
 
-import { formatCode, setGivenFeedbackValue } from "../../utils";
+import {
+  formatCode,
+  setGivenFeedbackValue,
+  extractVariantFromArray,
+} from "../../utils";
 
 import FeedbackButtons from "../Snippets/FeedbackButtons";
 import { setMessageToastContent, setShowMessageToast } from "../../actions";
@@ -35,13 +39,11 @@ function CodeBlock({ showCode, content }) {
     setLocalShowCode(!localShowCode);
   }
 
-  function extractElements(content, variant) {
-    // should be only one resulting item
-    return content.filter((elem) => elem.variant === variant)[0];
-  }
-
   function copyCode() {
-    const code = formatCode("Code", extractElements(content, "Code").content);
+    const code = formatCode(
+      "Code",
+      extractVariantFromArray("Code", content).content
+    );
     navigator.clipboard.writeText(code);
     dispatch(
       setMessageToastContent({
@@ -74,39 +76,44 @@ function CodeBlock({ showCode, content }) {
           </Button>
           <FeedbackButtons
             elementIndex={content[0].feedback_index}
-            givenValue={setGivenFeedbackValue(extractElements(content, "Code"))}
+            givenValue={setGivenFeedbackValue(
+              extractVariantFromArray("Code", content)
+            )}
           />
         </div>
 
         <Collapse in={localShowCode} className="mt-2">
           <Card className="shadow-sm">
-            <Card.Header className="bot-bg-lg">
-              <div className="d-flex justify-content-between align-items-center">
-                python
-                <Button variant="link" onClick={copyCode}>
-                  <span>
-                    <FaRegCopy className="color" />
-                  </span>
-                </Button>
-              </div>
-            </Card.Header>
-
             <Card.Body
               className="p-0 m-0 border-bottom"
               key={`${content[0].id}-code`}
             >
-              <pre className="m-0 codeblock">
-                <code className="language-python">
-                  {
-                    formatCode(
-                      "Code",
-                      extractElements(content, "Code").content
-                    )[0]
-                  }
-                </code>
-              </pre>
+              <div className="d-flex justify-content-between bc-code-header">
+                <div className="p-2 bc-code-body bc-code-header-tab">
+                  <FaPython /> main.py
+                </div>
+                <Button variant="link" onClick={copyCode}>
+                  <span>
+                    <FaRegCopy className="bc-color" />
+                  </span>
+                </Button>
+              </div>
+
+              <div className="d-flex bc-code-body">
+                <div className="bc-code-margin"></div>
+                <pre className="m-0 codeblock">
+                  <code className="language-python">
+                    {
+                      formatCode(
+                        "Code",
+                        extractVariantFromArray("Code", content).content
+                      )[0]
+                    }
+                  </code>
+                </pre>
+              </div>
+              <CodeOutputBlock content={content} />
             </Card.Body>
-            <CodeOutputBlock content={content} />
           </Card>
         </Collapse>
       </Card>

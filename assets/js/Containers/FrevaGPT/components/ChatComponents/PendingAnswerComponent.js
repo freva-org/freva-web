@@ -7,7 +7,7 @@ import "highlight.js/styles/stackoverflow-light.css";
 import { isEmpty } from "lodash";
 
 import { Col, Card, Spinner, Row, Button, Collapse } from "react-bootstrap";
-import { FaAngleDown, FaAngleUp } from "react-icons/fa";
+import { FaAngleDown, FaAngleUp, FaPython } from "react-icons/fa";
 
 import * as constants from "../../constants";
 
@@ -89,16 +89,25 @@ function PendingAnswerComponent({ content, variant }) {
 
           <Collapse in={showCode} className="mt-2">
             <Card className="shadow-sm mt-2">
-              <Card.Header>python</Card.Header>
-              <Card.Body className="p-0 m-0 bot-streaming-code">
-                <pre className="fancy-code">
-                  <code className="language-python">{fancyCode}</code>
-                </pre>
+              <Card.Body className="p-0 m-0">
+                <div className="d-flex justify-content-between bc-code-header">
+                  <div className="p-2 bc-code-body bc-code-header-tab">
+                    <FaPython /> main.py
+                  </div>
+                </div>
 
-                <p className="bot-streaming-code">{plainCode}</p>
-                <span>
-                  <Spinner className="mx-1" size="sm" />
-                </span>
+                <div className="d-flex bc-code-body">
+                  <div className="bc-code-margin"></div>
+                  <div>
+                    <pre className="fancy-code">
+                      <code className="language-python">{fancyCode}</code>
+                    </pre>
+                    <p>{plainCode}</p>
+                    <span>
+                      <Spinner className="mx-1" size="sm" />
+                    </span>
+                  </div>
+                </div>
               </Card.Body>
             </Card>
           </Collapse>

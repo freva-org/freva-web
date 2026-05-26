@@ -20,7 +20,7 @@ jobs:
           environment-name: freva-web
           environment-file: dev-env.yml
           cache-environment: false
-          ache-downloads: false
+          cache-downloads: false
           init-shell: bash
       - name: Generate self signed certs
         run: >

@@ -48,13 +48,17 @@ RUN set -eu \
     --shell /usr/sbin/nologin \
     nobody
 
-
-
 RUN  set -exu && \
      sed -i "s|\"path\": \"${BUNDLE_HOST_PATH}|\"path\": \"${FREVA_WEB_DIR}|g" \
      ${FREVA_WEB_DIR}/webpack-stats.json &&\
      mkdir -p /data/logs ./base/migrations && chmod 1777 -R /data ./base/migrations
 
+# Disable sharded repodata. micromamba 2.6.x enabled it by default; on envs
+# with a heavy transitive graph (freva pulls pandas/xarray/ffmpeg/openvino/…)
+# "Resolving Environment" goes from 25s to 3h.
+# Opt-out documented at: https://github.com/mamba-org/mamba/releases/tag/2.6.0
+# Drop once upstream micromamba fixes the regression.
+ENV MAMBA_USE_SHARDED_REPODATA=false
 RUN  set -exu && \
      micromamba env create -y -q -n freva-web -f conda-env.yml && \
      micromamba run -n freva-web python -m pip cache purge --no-input -q &&\

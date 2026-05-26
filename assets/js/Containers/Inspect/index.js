@@ -12,6 +12,7 @@ import { detectZarrStore } from "../../Components/NcdumpDialog/detectZarrStore";
 import {
   getCookie,
   getTokenFromCookie,
+  normalizeUrl,
   refreshTokenIfNeeded,
 } from "../../utils";
 
@@ -214,12 +215,16 @@ function InspectPage({ location, router }) {
       // Skip conversion only for a single remote zarr URL with no active
       // aggregation parameters. Multi-file arrays and any aggregation config
       // (time range, level, etc.) always go through the data-loader.
-      const paths = Array.isArray(fn) ? fn : [fn];
+      const paths = (Array.isArray(fn) ? fn : [fn]).map(normalizeUrl);
       const hasAggConfig =
         aggregationConfig &&
         Object.values(aggregationConfig).some((v) => v !== null && v !== "");
 
-      if (paths.length === 1 && paths[0].startsWith("http") && !hasAggConfig) {
+      if (
+        paths.length === 1 &&
+        /^https?:\/\//i.test(paths[0]) &&
+        !hasAggConfig
+      ) {
         const { isZarr } = await detectZarrStore(paths[0]);
         if (isZarr) {
           setIsDirectZarr(true);
@@ -337,10 +342,13 @@ function InspectPage({ location, router }) {
 
   // Handlers
   function handleLoad() {
-    const filled = pathInputs.map((p) => p.trim()).filter(Boolean);
+    const filled = pathInputs
+      .map((p) => normalizeUrl(p.trim()))
+      .filter(Boolean);
     if (!filled.length) {
       return;
     }
+    setPathInputs(filled);
 
     if (filled.length === 1) {
       setCurrentFile(filled[0]);
@@ -363,7 +371,9 @@ function InspectPage({ location, router }) {
   }
 
   function handleForceReload() {
-    const filled = pathInputs.map((p) => p.trim()).filter(Boolean);
+    const filled = pathInputs
+      .map((p) => normalizeUrl(p.trim()))
+      .filter(Boolean);
     if (!filled.length) {
       return;
     }

@@ -351,7 +351,10 @@ class Databrowser extends React.Component {
           className="me-2 mb-2 badge d-flex align-items-center"
           onClick={(e) => {
             e.preventDefault();
-            this.props.router.push(this.props.location.pathname);
+            // Preserve the active flavour
+            const { flavour } = this.props.location.query;
+            const qs = flavour ? "?" + queryString.stringify({ flavour }) : "";
+            this.props.router.push(this.props.location.pathname + qs);
           }}
           key={"clearall"}
         >

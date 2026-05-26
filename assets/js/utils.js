@@ -93,6 +93,30 @@ export function getTokenFromCookie() {
   }
 }
 
+/**
+ * Normalize a user-provided URL/path. If it looks percent-encoded
+ * we decode it so that downstream code can treat it as a real URL.
+ */
+export function normalizeUrl(input) {
+  if (typeof input !== "string") {
+    return input;
+  }
+  let s = input.trim();
+  // Single-encoded colon is "%3A"; double-encoded becomes "%253A"
+  while (/^https?%(25)*3a/i.test(s)) {
+    try {
+      const decoded = decodeURIComponent(s);
+      if (decoded === s) {
+        break;
+      }
+      s = decoded;
+    } catch {
+      break;
+    }
+  }
+  return s;
+}
+
 export async function refreshTokenIfNeeded() {
   try {
     const res = await fetch("/api/token-health/", {

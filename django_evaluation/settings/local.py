@@ -129,7 +129,7 @@ if not DEV:
 
 INSTITUTION_LOGO = _get_logo(web_config.get("institution_logo", ""), PROJECT_ROOT)
 FREVA_LOGO = f"{STATIC_URL}img/by_freva_transparent.png"
-MAIN_COLOR = _get_conf_key(web_config, "main_color", "Tomato", False)
+MAIN_COLOR = _get_conf_key(web_config, "main_color", "#ff6347", False)
 _set_favicon(MAIN_COLOR, Path(PROJECT_ROOT))
 BORDER_COLOR = _get_conf_key(web_config, "border_color", "#6c2e1f", False)
 HOVER_COLOR = _get_conf_key(web_config, "hover_color", "#d0513a", False)

@@ -1,26 +1,32 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
-## [v2605.1.1]
+## [v2605.2.2]
 ### Changed
 - Improved data handling of streamresponse (FrevaGPT)
 - Introduced general function to update url
 - Improved handling of stop request based on active request
 ### Removed
 - Removed function to extract linebreaks from code, wasn't necessary anymore
+## [v2605.2.1]
+### Fixed
+- CI: Opt out MAMBA_USE_SHARDED_REPODATA in dockerfile until upstream micromamba fixes the regression
+## [v2605.2.0]
+### Fixed
+- Dataloader: percent-encoded URLs, dev-env CORS, FilesPanel parity for data-loader endpoints, metadata cube visibility
 ## [v2605.1.0]
 ### Removed
-- Remove `/zarr-utils/html` endpoint and render xarray metadata client-side
+- DataBrowser: Remove `/zarr-utils/html` endpoint and render xarray metadata client-side
 ## [v2605.0.0]
 ### Removed
-- Guest user concept fully removed from auth, views, forms and templates
+- Authentication: Guest user concept fully removed from auth, views, forms and templates
 ### Changed
-- Plugin mandatory fields validated client-side before password modal, covering all widget types with red highlight and auto-scroll to first offender
-- Password/error modals unified in design across all freva-web pages
-- SSH errors now surfaced directly; 403/500 handled in JS instead of Django error templates
-- Data-loader polls smarter, respects server `Retry-After` header and no longer blocks the proxy
+- Plugin: Plugin mandatory fields validated client-side before password modal, covering all widget types with red highlight and auto-scroll to first offender
+- Plugin: Password/error modals unified in design across all freva-web pages
+- Plugin: SSH errors now surfaced directly; 403/500 handled in JS instead of Django error templates
+- Data-inspector: Data-loader polls smarter, respects server `Retry-After` header and no longer blocks the proxy
 ### Fixed
-- Upgraded embedded STAC Browser from v4 (Vue CLI/webpack) to v5 (Vue 3/Vite);
+- STAC-Browser: Upgraded embedded STAC Browser from v4 (Vue CLI/webpack) to v5 (Vue 3/Vite);
 ## [v2604.3.1]
 ### Fixed
 - Flashing of old code content on rendering new code
@@ -32,7 +38,7 @@ All notable changes to this project will be documented in this file.
 - standalone Data-Inspect page to the navbar
 ## [v2604.2.0]
 ### Add
-- A `/inspect?file=file1&file=file2` endpoint added that renders the existing File Inspector as a standalone, shareable page
+- Data-Browser: A `/inspect?file=file1&file=file2` endpoint added that renders the existing File Inspector as a standalone, shareable page
 ## [v2604.1.2]
 ### Changed
 - Displaying server message provided by requests to stop chat, delete thread, rename thread and sending feedback

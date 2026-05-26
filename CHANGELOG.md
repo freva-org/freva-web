@@ -1,6 +1,13 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [v2605.2.2]
+### Changed
+- Improved data handling of streamresponse (FrevaGPT)
+- Introduced general function to update url
+- Improved handling of stop request based on active request
+### Removed
+- Removed function to extract linebreaks from code, wasn't necessary anymore
 ## [v2605.2.1]
 ### Fixed
 - CI: Opt out MAMBA_USE_SHARDED_REPODATA in dockerfile until upstream micromamba fixes the regression

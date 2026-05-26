@@ -6,17 +6,6 @@ import { browserHistory } from "react-router";
 
 import * as constants from "./constants";
 
-export function replaceLinebreaks(data) {
-  /**
-   * Replaces oddly encoded linebreaks in given string to normal encoded linebreaks
-   *
-   * @param {string} data - String containing code with linebreaks which are encoded as "\\n"
-   * @returns {string} String containing data where "\\n" is exchanged by "\n"
-   */
-  const formattedData = data.split("\\n").join("\n");
-  return formattedData;
-}
-
 export function formatCode(mode, data) {
   /**
    * Given string of code is parsed as json and splitted by linebreak into seperate code parts
@@ -121,6 +110,13 @@ export function grepThreadID() {
   } else {
     return "";
   }
+}
+
+export function updateUrl(searchParameter) {
+  browserHistory.push({
+    pathname: "/chatbot/",
+    search: searchParameter,
+  });
 }
 
 /*-------------------------------------------------------------------------------------------------

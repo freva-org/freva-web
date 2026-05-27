@@ -2,23 +2,19 @@ import React, { useState, useMemo } from "react";
 import { useSelector } from "react-redux";
 import PropTypes from "prop-types";
 
-import { Col, Card, Modal, Button, Alert } from "react-bootstrap";
+import { Col, Modal, Button, Alert } from "react-bootstrap";
 
 import { isEmpty } from "lodash";
 
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 
 import { FaExpand } from "react-icons/fa";
 
-import { replaceLinebreaks, setGivenFeedbackValue } from "../../utils";
-
 import * as constants from "../../constants";
-
-import FeedbackButtons from "../Snippets/FeedbackButtons";
 
 import CodeBlock from "./CodeBlock";
 import UserInputBlock from "./UserInputBlock";
+import AssistantBlock from "./AssistantBlock";
 
 function ChatBlock({ onEditInput }) {
   const [showModal, setShowModal] = useState(false);
@@ -36,57 +32,45 @@ function ChatBlock({ onEditInput }) {
 
   function rearrangeCodeElements(conversation) {
     const newConv = [];
-    let original_index = 0;
-    let frontend_index = 0;
-    // integration of index because of rearrangement
-    // original index is needed for assigning user feedback and editing user input
+
+    let general = 0;
+    let user = 0;
+    let feedback = 0;
+
     for (const element of conversation) {
-      switch (element.variant) {
-        case "Code":
-        case "CodeOutput": {
-          // handling code elements
-          const existingIndex = newConv.findIndex(
-            (x) => x[0].content.length > 1 && x[0].id === element.id
-          );
-          element.original_index = original_index;
-          original_index++;
-          if (existingIndex === -1) {
-            // no code element there yet
-            newConv.push([element]);
-          } else {
-            // already existing code element with matching id
-            newConv[existingIndex].push(element);
+      if (element.variant === "CodeOutput") {
+        // rearranging code output to be added to code
+        // [{"variant": "Code", ...}, {"variant": "CodeOutput", ...}]
+        const indexOfRelatedCode = newConv.findIndex(
+          (x) => x[0].content.length > 1 && x[0].id === element.id
+        );
+        if (indexOfRelatedCode !== -1) {
+          element.index = general;
+          general++;
+          newConv[indexOfRelatedCode].push(element);
+        }
+      } else {
+        // every element gets an internal index
+        element.index = general;
+        general++;
+
+        // adding additional indexes for specific purpose
+        switch (element.variant) {
+          case "User": {
+            // backend needs specific index for user inputs for editing
+            element.user_index = user;
+            user++;
+            break;
           }
-          break;
-        }
-        case "FrontendError": {
-          // FrontendErrors are not indexed as part of the thread
-          element.original_index = `frontenderror-${frontend_index}`;
-          frontend_index++;
-          newConv.push([element]);
-          break;
-        }
-        case "ServerHint": {
-          // ServerHints containing thread_id are indexed as part of the thread
-          // ServerHints (Heartbeat) containing cpu are not indexed
-          if (typeof element.content === "object" && element.content !== null) {
-            if ("thread_id" in element.content) {
-              element.original_index = original_index;
-              original_index++;
-            }
-          } else {
-            //eslint-disable-next-line no-console
-            console.warn(element.content);
+          case "Code":
+          case "Assistant": {
+            // backend needs specific feddback index for components with feedback buttons
+            element.feedback_index = feedback;
+            feedback++;
+            break;
           }
-          newConv.push([element]);
-          break;
         }
-        default: {
-          // all remaining variants are part of the thread and are indexed
-          element.original_index = original_index;
-          original_index++;
-          newConv.push([element]);
-        }
+        newConv.push([element]);
       }
     }
     return newConv;
@@ -114,7 +98,7 @@ function ChatBlock({ onEditInput }) {
             onClick={() => enlargeImage(element.content)}
             className="d-flex align-items-center"
           >
-            <FaExpand className="color" />
+            <FaExpand color="grey" />
           </Button>
         </div>
       </div>
@@ -137,7 +121,7 @@ function ChatBlock({ onEditInput }) {
     return (
       <UserInputBlock
         content={element}
-        key={`UserInputBlock-${element.original_index}`}
+        key={`UserInputBlock-parent-${element.index}`}
         onEdit={onEditInput}
       />
     );
@@ -145,30 +129,11 @@ function ChatBlock({ onEditInput }) {
 
   function renderError(element) {
     return (
-      <Col md={12} key={`${element.original_index}-error`}>
+      <Col md={12} key={`${element.index}-error`}>
         <Alert variant="danger" className="shadow-sm mb-3">
           <span className="fw-bold">{element.variant}</span>
-          <ReactMarkdown>{replaceLinebreaks(element.content)}</ReactMarkdown>
+          <ReactMarkdown>{element.content}</ReactMarkdown>
         </Alert>
-      </Col>
-    );
-  }
-
-  function renderDefault(element) {
-    return (
-      <Col
-        md={constants.BOT_COLUMN_STYLE}
-        key={`${element.original_index}-default`}
-      >
-        <Card className="shadow-sm card-body border-0 border-bottom mb-3 bg-light">
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-            {replaceLinebreaks(element.content)}
-          </ReactMarkdown>
-          <FeedbackButtons
-            elementIndex={element.original_index}
-            givenValue={setGivenFeedbackValue(element)}
-          />
-        </Card>
       </Col>
     );
   }
@@ -199,7 +164,13 @@ function ChatBlock({ onEditInput }) {
         return renderError(element[0]);
 
       default:
-        return renderDefault(element[0]);
+        return (
+          <AssistantBlock
+            key={`${element[0].index}-default`}
+            streaming={false}
+            content={element[0]}
+          />
+        );
     }
   }
 

@@ -19,7 +19,7 @@ function Suggestions({ handleSubmit }) {
               overlay={<Tooltip>{element}</Tooltip>}
             >
               <Button
-                className="h-100 w-100"
+                className="h-100 w-100 bot-shadow br-8"
                 variant="outline-secondary"
                 onClick={() => handleSubmit(element)}
               >

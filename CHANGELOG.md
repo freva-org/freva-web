@@ -1,6 +1,82 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [v2605.2.2]
+### Changed
+- Improved data handling of streamresponse (FrevaGPT)
+- Introduced general function to update url
+- Improved handling of stop request based on active request
+### Removed
+- Removed function to extract linebreaks from code, wasn't necessary anymore
+## [v2605.2.1]
+### Fixed
+- CI: Opt out MAMBA_USE_SHARDED_REPODATA in dockerfile until upstream micromamba fixes the regression
+## [v2605.2.0]
+### Fixed
+- Dataloader: percent-encoded URLs, dev-env CORS, FilesPanel parity for data-loader endpoints, metadata cube visibility
+## [v2605.1.0]
+### Removed
+- DataBrowser: Remove `/zarr-utils/html` endpoint and render xarray metadata client-side
+## [v2605.0.0]
+### Removed
+- Authentication: Guest user concept fully removed from auth, views, forms and templates
+### Changed
+- Plugin: Plugin mandatory fields validated client-side before password modal, covering all widget types with red highlight and auto-scroll to first offender
+- Plugin: Password/error modals unified in design across all freva-web pages
+- Plugin: SSH errors now surfaced directly; 403/500 handled in JS instead of Django error templates
+- Data-inspector: Data-loader polls smarter, respects server `Retry-After` header and no longer blocks the proxy
+### Fixed
+- STAC-Browser: Upgraded embedded STAC Browser from v4 (Vue CLI/webpack) to v5 (Vue 3/Vite);
+## [v2604.3.1]
+### Fixed
+- Flashing of old code content on rendering new code
+### Changed
+- Fixed code highlighting language to python
+- Changed key combination for bot select
+## [v2604.3.0]
+### Add
+- standalone Data-Inspect page to the navbar
+## [v2604.2.0]
+### Add
+- Data-Browser: A `/inspect?file=file1&file=file2` endpoint added that renders the existing File Inspector as a standalone, shareable page
+## [v2604.1.2]
+### Changed
+- Displaying server message provided by requests to stop chat, delete thread, rename thread and sending feedback
+- Request to stop endpoint only called on running request
+- Handling of ToolCalls and display of "Search Docs"
+- Handling of differing Thread IDs
+## [v2604.1.1]
+### Changed
+- Adapted styling of side panel including chat history (FrevaGPT)
+- Changed name to `ClimateClaw`
+### Added
+- Added index for user input for optimized handling of thread editing
+- Added index for feedback
+## [v2604.0.1]
+### Fixed
+- Hiding aborted chat response in FrevaGPT
+- Reloading of thread history on opening side panel in FrevaGPT
+- Added custom hook for selecting bot model in FrevaGPT 
+## [v2604.0.0]
+### Fixed
+- Make chatbot url configurable via env variable.
+## [v2603.0.1]
+### Fixed
+- Manage one scenario when data-loader is shut down
+- when the shared link contains `next`, while user is already logged in
+## [v2603.0.0]
+### Added
+- Handling of reference links in bot answers
+### Changed
+- Improved styling of bot
+- Improved performance by switching to highlight.js (dropping react-syntax-highlighter)
+### Fixed
+- Copying code prodiuced by chatbot
+## [v2602.0.0]
+### Added
+- Zarr aggregation feature
+### CHANGED
+- support the negative search keys in data-browser
 ## [v2601.1.0]
 ### Added
 - Editing user input on Freva-GPT

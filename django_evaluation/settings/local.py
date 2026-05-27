@@ -129,7 +129,7 @@ if not DEV:
 
 INSTITUTION_LOGO = _get_logo(web_config.get("institution_logo", ""), PROJECT_ROOT)
 FREVA_LOGO = f"{STATIC_URL}img/by_freva_transparent.png"
-MAIN_COLOR = _get_conf_key(web_config, "main_color", "Tomato", False)
+MAIN_COLOR = _get_conf_key(web_config, "main_color", "#ff6347", False)
 _set_favicon(MAIN_COLOR, Path(PROJECT_ROOT))
 BORDER_COLOR = _get_conf_key(web_config, "border_color", "#6c2e1f", False)
 HOVER_COLOR = _get_conf_key(web_config, "hover_color", "#d0513a", False)
@@ -156,7 +156,9 @@ IMPRINT = web_config.get("imprint") or [
 HOMEPAGE_HEADING = web_config.get("homepage_heading") or "Lorem ipsum dolor."
 ABOUT_US_TEXT = web_config.get("about_us_text") or "Hello world, this is freva."
 CONTACTS = web_config.get("contacts") or ["freva@dkrz.de"]
-DEFAULT_FLAVOUR = web_config.get("DEFAULT_FLAVOUR") or os.getenv("DEFAULT_FLAVOUR") or "freva"
+DEFAULT_FLAVOUR = (
+    web_config.get("DEFAULT_FLAVOUR") or os.getenv("DEFAULT_FLAVOUR") or "freva"
+)
 if isinstance(CONTACTS, str):
     CONTACTS = [c for c in CONTACTS.split(",") if c.strip()]
 ##########
@@ -298,7 +300,7 @@ RESULT_BROWSER_FACETS = [
 ]
 MENU_ENTRIES = []
 
-CHAT_BOT_URL = "http://vader4-icpub.lvt.dkrz.de:8502"
+CHAT_BOT_URL = os.environ.get("CHAT_BOT_URL", "http://vader4-icpub.lvt.dkrz.de:8502")
 CHAT_BOT_AUTH_KEY = os.environ.get("CHAT_BOT_AUTH_KEY")
 CHAT_BOT_FREVA_CONFIG = os.environ.get("CHAT_BOT_FREVA_CONFIG")
 ### CHATBOT development settings
@@ -332,7 +334,9 @@ for title, url, html_id in web_config.get("menu_entries", []) or _MENU_ENTRIES:
         MENU_ENTRIES.append(
             {"name": title, "url": reverse_lazy(url), "html_id": html_id}
         )
-
+MENU_ENTRIES.append(
+    {"name": "Data-Inspect", "url": reverse_lazy("solr:inspect"), "html_id": "inspect_menu"}
+)
 if ACTIVATE_CHAT_BOT:
     MENU_ENTRIES.append(
         {
@@ -352,4 +356,3 @@ if os.getenv("STAC_BROWSER", "1") == "1":
     )
 # help menu entry has to stay at the end of the menu
 MENU_ENTRIES.sort(key=lambda m: m.get("html_id") == "doc_menu")
-

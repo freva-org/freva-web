@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import PropTypes from "prop-types";
+
 import { connect } from "react-redux";
 import { Tooltip, OverlayTrigger, Button } from "react-bootstrap";
 import { withRouter } from "react-router";
@@ -11,40 +12,93 @@ import queryString from "query-string";
 import NcdumpDialog, { NcDumpDialogState } from "../../Components/NcdumpDialog";
 import CircularSpinner from "../../Components/Spinner";
 
-import { getCookie } from "../../utils";
+import {
+  getCookie,
+  getTokenFromCookie,
+  normalizeUrl,
+  refreshTokenIfNeeded,
+} from "../../utils";
 import Pagination from "../../Components/Pagination";
 
-import { BATCH_SIZE, TEMP_FREVA_AUTH_TOKEN } from "./constants";
+import { useZarrStatus } from "../../Components/NcdumpDialog/useZarrStatus";
+import { useHtmlMetadata } from "../../Components/NcdumpDialog/useHtmlMetadata";
+import { detectZarrStore } from "../../Components/NcdumpDialog/detectZarrStore";
 
-const MAX_RETRIES = 20;
-const RETRY_DELAY = 2000;
+import { BATCH_SIZE } from "./constants";
 
-async function refreshTokenIfNeeded() {
-  try {
-    const response = await fetch("/api/token-health/", {
-      credentials: "same-origin",
-      method: "GET",
-    });
-    return response.ok;
-  } catch (error) {
-    return false;
-  }
-}
+const MAX_FILE_SELECTION = 10;
 
 function FilesPanelImpl(props) {
   const { files, numFiles, fileLoading } = props.databrowser;
   const [showDialog, setShowDialog] = useState(false);
+  const [rawZarrUrl, setRawZarrUrl] = useState(null);
+  const [isDirectZarr, setIsDirectZarr] = useState(false);
   const [ncdump, setNcDump] = useState({
     status: NcDumpDialogState.READY,
     output: null,
     error: null,
   });
+
+  const { statusCode, statusReason } = useZarrStatus(rawZarrUrl, {
+    enabled: showDialog && !isDirectZarr,
+  });
+
+  // Only activates once the zarr job is done (statusCode === 0),
+  // or immediately if the URL was already a zarr store.
+  const { html: htmlMetadata, error: htmlError } = useHtmlMetadata(rawZarrUrl, {
+    enabled: isDirectZarr || statusCode === 0,
+  });
+
+  // React to zarr job failure interpretaion
+  React.useEffect(() => {
+    if (statusCode === null) {
+      return;
+    }
+    if (statusCode === 1) {
+      setNcDump({
+        status: NcDumpDialogState.ERROR,
+        output: null,
+        error:
+          statusReason || "Zarr conversion failed on the server. Please retry.",
+      });
+    }
+    if (statusCode === 2) {
+      setNcDump({
+        status: NcDumpDialogState.ERROR,
+        output: null,
+        error:
+          statusReason ||
+          "File not found — the server could not locate this file for streaming.",
+      });
+    }
+  }, [statusCode, statusReason]);
+
+  // React to HTML metadata arriving (or failing after retries)
+  React.useEffect(() => {
+    if (htmlMetadata) {
+      setNcDump({
+        status: NcDumpDialogState.READY,
+        output: htmlMetadata,
+        error: null,
+      });
+    }
+    if (htmlError) {
+      setNcDump({
+        status: NcDumpDialogState.ERROR,
+        output: null,
+        error: htmlError,
+      });
+    }
+  }, [htmlMetadata, htmlError]);
+
   const [filename, setFilename] = useState(null);
   const [zarrUrl, setZarrUrl] = useState(null);
   const [showPathInput, setShowPathInput] = useState(false);
   const [pathInput, setPathInput] = useState("");
 
-  // handle cancellation
+  // Selection state for aggregation
+  const [selectedFiles, setSelectedFiles] = useState([]);
+
   const abortControllerRef = useRef(null);
 
   function setPageOffset(offset) {
@@ -56,34 +110,40 @@ function FilesPanelImpl(props) {
     props.router.push(currentLocation + "?" + query);
   }
 
-  function getTokenFromCookie() {
-    const cookies = document.cookie.split(";");
-    const authCookie = cookies.find((cookie) =>
-      cookie.trim().startsWith(TEMP_FREVA_AUTH_TOKEN)
-    );
-
-    if (!authCookie) {
-      return null;
-    }
-
-    try {
-      let cookieValue = authCookie
-        .substring(authCookie.indexOf("=") + 1)
-        .trim();
-      if (cookieValue.startsWith('"') && cookieValue.endsWith('"')) {
-        cookieValue = cookieValue.slice(1, -1);
+  // Toggle file selection
+  function toggleFileSelection(fn) {
+    setSelectedFiles((prev) => {
+      if (prev.includes(fn)) {
+        return prev.filter((f) => f !== fn);
       }
-      return {
-        access_token: cookieValue,
-        token_type: "Bearer",
-      };
-    } catch (error) {
-      return null;
-    }
+      if (prev.length >= MAX_FILE_SELECTION) {
+        return prev;
+      }
+      return [...prev, fn];
+    });
   }
 
-  async function loadNcdump(fn, retryCount = 0) {
-    // flush any previous request
+  // Open aggregation dialog
+  function openAggregationDialog() {
+    if (selectedFiles.length === 0) {
+      return;
+    }
+    setFilename(selectedFiles);
+    setShowDialog(true);
+  }
+
+  // Clear selection
+  function clearSelection() {
+    setSelectedFiles([]);
+  }
+
+  /**
+   * Submits the zarr conversion job and presigns the URL for sharing.
+   * Returns immediately after both fast steps; the heavy lifting (conversion
+   * + metadata fetch) is handled asynchronously by useZarrStatus and
+   * useHtmlMetadata respectively; no blocking wait here.
+   */
+  async function loadNcdump(fn, aggregationConfig = null) {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -94,7 +154,10 @@ function FilesPanelImpl(props) {
     if (signal.aborted) {
       return;
     }
+
     setNcDump({ status: NcDumpDialogState.LOADING, output: null, error: null });
+    setZarrUrl(null);
+    setRawZarrUrl(null);
 
     try {
       const tokenData = getTokenFromCookie();
@@ -104,142 +167,105 @@ function FilesPanelImpl(props) {
 
       const headers = {
         "X-CSRFToken": getCookie("csrftoken"),
-        Accept: "text/plain",
+        "Content-Type": "application/json",
         Authorization: `Bearer ${tokenData.access_token}`,
       };
 
-      // Step 1: we use convert endpoint to be able to even
-      // publush the zarr-endpoint arbitrary paths that are
-      // indexed in the search backend.
-      const convertUrl = `/api/freva-nextgen/data-portal/zarr/convert`;
+      const paths = (Array.isArray(fn) ? fn : [fn]).map(normalizeUrl);
+      const hasAggConfig =
+        aggregationConfig &&
+        Object.values(aggregationConfig).some((v) => v !== null && v !== "");
 
-      const response = await fetch(convertUrl, {
-        method: "POST",
-        credentials: "same-origin",
-        headers: {
-          ...headers,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ path: fn }),
-        signal,
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(
-          `Failed to create zarr endpoint: ${errorText || response.statusText}`
-        );
+      // Skip conversion for a single remote zarr URL with no active
+      // aggregation parameters
+      if (
+        paths.length === 1 &&
+        /^https?:\/\//i.test(paths[0]) &&
+        !hasAggConfig
+      ) {
+        const { isZarr } = await detectZarrStore(paths[0]);
+        if (isZarr) {
+          setIsDirectZarr(true);
+          setRawZarrUrl(paths[0]);
+          setZarrUrl(paths[0]);
+          return;
+        }
       }
+      setIsDirectZarr(false);
 
-      const data = await response.json();
+      const requestBody = {
+        path: paths.length === 1 ? paths[0] : paths,
+        ...(aggregationConfig
+          ? Object.fromEntries(
+              Object.entries(aggregationConfig).filter(
+                ([, v]) => v !== null && v !== ""
+              )
+            )
+          : {}),
+      };
 
-      if (!data.urls || data.urls.length === 0) {
+      // Step 1: submit conversion job; worker picks this up async, returns
+      // immediately with a zarr URL. Setting rawZarrUrl starts useZarrStatus.
+      const convertRes = await fetch(
+        "/api/freva-nextgen/data-portal/zarr/convert",
+        {
+          method: "POST",
+          credentials: "same-origin",
+          headers,
+          body: JSON.stringify(requestBody),
+          signal,
+        }
+      );
+      if (!convertRes.ok) {
+        let detail = convertRes.statusText;
+        try {
+          const body = await convertRes.json();
+          detail = body.detail || body.message || detail;
+        } catch {
+          // non-JSON body; keep statusText
+        }
+        throw new Error(detail);
+      }
+      const { urls } = await convertRes.json();
+      if (!urls?.length) {
         throw new Error("No zarr URL returned from server");
       }
 
-      const rawzarrUrl = data.urls[0];
+      const rawUrl = urls[0];
+      // starts useZarrStatus polling
+      setRawZarrUrl(rawUrl);
 
-      // const getPathFromUrl = (url) => {
-      //   try {
-      //     const urlObj = new URL(url);
-      //     return urlObj.pathname;
-      //   } catch {
-      //     return url;
-      //   }
-      // };
-
-      //const relativeZarrUrl = getPathFromUrl(zarrUrl);
-
-      // Step 1.5: Create presigned URL
-      const presignResponse = await fetch(
+      // Step 2: presign for sharing / GridLook.
+      const presignRes = await fetch(
         "/api/freva-nextgen/data-portal/share-zarr",
         {
           method: "POST",
           credentials: "same-origin",
-          headers: { ...headers, "Content-Type": "application/json" },
-          body: JSON.stringify({ path: rawzarrUrl, ttl_seconds: 3600 }),
+          headers,
+          body: JSON.stringify({ path: rawUrl, ttl_seconds: 3600 }),
           signal,
         }
       );
-      const presignData = await presignResponse.json();
-      const zarrUrl = presignData.url;
-      // const presignedUrlObj = new URL(presignedUrl);
-      // const zarrUrl = presignedUrl.replace(presignedUrlObj.origin, window.location.origin);
-      setZarrUrl(zarrUrl);
-
-      // Step 2: Get metadata with retry logic
-      const htmlUrl = `/api/freva-nextgen/data-portal/zarr-utils/html?url=${encodeURIComponent(rawzarrUrl)}&timeout=60`;
-      const metadataResponse = await fetch(htmlUrl, {
-        method: "GET",
-        credentials: "same-origin",
-        headers,
-        signal,
-      });
-
-      // Handle 503 (processing/waiting states)
-      if (metadataResponse.status === 503) {
-        const errorText = await metadataResponse.text();
-
-        // retriable state check
-        if (
-          (errorText.includes("processing") || errorText.includes("waiting")) &&
-          retryCount < MAX_RETRIES
-        ) {
-          if (signal.aborted) {
-            return;
-          }
-          setNcDump({
-            status: NcDumpDialogState.LOADING,
-            output: null,
-            error: null,
-          });
-
-          // Wait before retrying
-          await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY));
-          if (signal.aborted) {
-            return;
-          }
-          await loadNcdump(fn, retryCount + 1);
-          return;
-        }
-
-        // If it's "finished, failed" or max retries reached
-        throw new Error(errorText || "Service unavailable");
+      if (presignRes.ok) {
+        setZarrUrl((await presignRes.json()).url);
       }
 
-      if (!metadataResponse.ok) {
-        const errorText = await metadataResponse.text();
-        throw new Error(errorText || "Failed to get metadata");
-      }
-
-      // IMPORTANT: Get the xarray HTML directly from backend,
-      // no need to be processed in frontend.
-      const htmlOutput = await metadataResponse.text();
-
-      setNcDump({
-        output: htmlOutput,
-        status: NcDumpDialogState.READY,
-        error: null,
-      });
-    } catch (error) {
-      // Ignore abort errors since it's alreadt cancelled)
-      if (error.name === "AbortError") {
+      // Step3. Done. useZarrStatus polls /status; once status=0, useHtmlMetadata
+      // polls /html with short timeouts and retries until it gets the content.
+    } catch (err) {
+      if (err.name === "AbortError") {
         return;
       }
 
-      let errorMessage = error.message;
-
-      if (error.message.includes("Authentication")) {
+      let errorMessage = err.message;
+      if (err.message.includes("Authentication")) {
         errorMessage = "Authentication error. Please refresh your token.";
-      } else if (error.message.includes("Failed to fetch")) {
+      } else if (err.message.includes("Failed to fetch")) {
         errorMessage = "Network error. Please check your connection.";
-      } else if (error.message.includes("service not able to publish")) {
+      } else if (err.message.includes("service not able to publish")) {
         errorMessage =
           "Zarr streaming service is not enabled. Please contact your administrator.";
-      } else if (error.message.includes("Failed to get zarr URL")) {
-        errorMessage = `Cannot create zarr endpoint: ${error.message.split(": ")[1] || error.message}`;
       }
-      // TODO: further error message parsing regarind zarr streaming can be done here
 
       setNcDump({
         output: null,
@@ -249,9 +275,68 @@ function FilesPanelImpl(props) {
     }
   }
 
+  const hasSelection = selectedFiles.length > 0;
+
   return (
     <div className="pb-3">
-      <span className="d-flex justify-content-between">
+      {/* Action Bar */}
+      {hasSelection && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 0,
+            left: "50%",
+            transform: "translateX(-50%)",
+            maxWidth: "600px",
+            width: "calc(100% - 32px)",
+            margin: "0 16px",
+            padding: "12px 20px",
+            backgroundColor: "#e3f2fd",
+            border: "1px solid #2196f3",
+            borderRadius: "8px 8px 0 0",
+            boxShadow: "0 -4px 12px rgba(0,0,0,0.15)",
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "16px",
+          }}
+        >
+          <div className="d-flex align-items-center gap-2">
+            <button
+              className="btn btn-sm btn-link text-primary p-1"
+              onClick={clearSelection}
+              style={{ fontSize: "16px" }}
+            >
+              <i className="fas fa-times"></i>
+            </button>
+            <span style={{ fontSize: "14px", fontWeight: "500" }}>
+              {selectedFiles.length}/{MAX_FILE_SELECTION} file
+              {selectedFiles.length !== 1 ? "s" : ""} selected
+              {selectedFiles.length >= MAX_FILE_SELECTION && (
+                <span
+                  style={{
+                    color: "#f57c00",
+                    marginLeft: "6px",
+                    fontSize: "12px",
+                  }}
+                >
+                  (max reached)
+                </span>
+              )}
+            </span>
+          </div>
+          <button
+            className="btn btn-sm btn-primary"
+            onClick={openAggregationDialog}
+          >
+            <i className="fas fa-compress-arrows-alt me-2"></i>
+            Aggregate
+          </button>
+        </div>
+      )}
+
+      <span className="d-flex justify-content-between align-items-start">
         <h3 className="d-inline">
           <span>Files</span>
         </h3>
@@ -296,7 +381,7 @@ function FilesPanelImpl(props) {
               onChange={(e) => setPathInput(e.target.value)}
               onKeyPress={(e) => {
                 if (e.key === "Enter" && pathInput.trim()) {
-                  setFilename(pathInput.trim());
+                  setFilename(normalizeUrl(pathInput.trim()));
                   setShowDialog(true);
                   setShowPathInput(false);
                 }
@@ -306,7 +391,7 @@ function FilesPanelImpl(props) {
               className="btn btn-sm btn-primary"
               onClick={() => {
                 if (pathInput.trim()) {
-                  setFilename(pathInput.trim());
+                  setFilename(normalizeUrl(pathInput.trim()));
                   setShowDialog(true);
                   setShowPathInput(false);
                 }
@@ -319,57 +404,106 @@ function FilesPanelImpl(props) {
           </div>
         </div>
       )}
+
       <ul
-        className="jqueryFileTree border shadow-sm py-3 rounded"
+        className="jqueryFileTree border shadow-sm pb-3 rounded"
         style={{ maxHeight: "1000px", overflow: "auto" }}
       >
         {fileLoading ? (
           <CircularSpinner />
         ) : (
           files.map((fn) => {
+            const isSelected = selectedFiles.includes(fn);
             return (
-              <li className="ext_nc" key={fn} style={{ whiteSpace: "normal" }}>
-                <OverlayTrigger
-                  overlay={<Tooltip>Click here to inspect metadata</Tooltip>}
-                >
+              <li
+                className="ext_nc"
+                key={fn}
+                style={{
+                  whiteSpace: "normal",
+                  backgroundColor: isSelected ? "#e3f2fd" : "transparent",
+                  padding: "6px 8px",
+                  borderRadius: "4px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  transition: "background-color 0.15s ease",
+                }}
+              >
+                {/* Checkbox */}
+                <input
+                  type="checkbox"
+                  checked={isSelected}
+                  onChange={() => toggleFileSelection(fn)}
+                  disabled={
+                    !isSelected && selectedFiles.length >= MAX_FILE_SELECTION
+                  }
+                  className="form-check-input"
+                  style={{
+                    cursor:
+                      !isSelected && selectedFiles.length >= MAX_FILE_SELECTION
+                        ? "not-allowed"
+                        : "pointer",
+                    marginTop: 0,
+                    flexShrink: 0,
+                  }}
+                />
+
+                {/* Info icon */}
+                <OverlayTrigger overlay={<Tooltip>Inspect metadata</Tooltip>}>
                   <Button
                     variant="link"
-                    className="p-0 me-1"
-                    onClick={() => {
+                    className="p-0"
+                    onClick={(e) => {
+                      e.stopPropagation();
                       setFilename(fn);
                       setShowDialog(true);
                     }}
+                    style={{ flexShrink: 0 }}
                   >
                     <FaInfoCircle className="ncdump" />
                   </Button>
                 </OverlayTrigger>
-                {fn}
+
+                {/* Filename */}
+                <span
+                  style={{ flex: 1, cursor: "pointer" }}
+                  onClick={() => toggleFileSelection(fn)}
+                >
+                  {fn}
+                </span>
               </li>
             );
           })
         )}
       </ul>
+
       <NcdumpDialog
         show={showDialog}
         file={filename}
         zarrUrl={zarrUrl}
+        isAggregation={Array.isArray(filename)}
         onClose={() => {
-          // Cancel any pending request when closing
           if (abortControllerRef.current) {
             abortControllerRef.current.abort();
           }
+          // Setting rawZarrUrl to null stops both useZarrStatus and
+          // useHtmlMetadata via their dependency arrays.
           setShowDialog(false);
           setZarrUrl(null);
+          setRawZarrUrl(null);
           setNcDump({
             status: NcDumpDialogState.READY,
             error: null,
             output: null,
           });
         }}
-        submitNcdump={(fn) => loadNcdump(fn)}
+        submitNcdump={(fn, aggregationConfig) =>
+          loadNcdump(fn, aggregationConfig)
+        }
         status={ncdump.status}
         output={ncdump.output}
         error={ncdump.error}
+        zarrStatusCode={statusCode}
       />
     </div>
   );

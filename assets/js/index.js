@@ -13,6 +13,7 @@ import PluginDetail from "./Containers/PluginDetail";
 import Databrowser from "./Containers/Databrowser";
 import Resultbrowser from "./Containers/Resultbrowser";
 import FrevaGTP from "./Containers/FrevaGPT";
+import Inspect from "./Containers/Inspect";
 
 const initialState = window.INITIAL_STATE || {};
 
@@ -27,6 +28,7 @@ ReactDOM.render(
         <Route path="history/result-browser/" component={Resultbrowser} />
         <Route path="databrowser/*" component={Databrowser} />
         <Route path="plugins/:pluginName/detail/" component={PluginDetail} />
+        <Route path="inspect/" component={Inspect} />
       </Route>
     </Router>
   </Provider>,

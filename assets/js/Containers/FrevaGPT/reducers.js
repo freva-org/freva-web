@@ -5,6 +5,7 @@ const frevaGPTInitialState = {
   botModel: "",
   showCode: true,
   showMessageToast: false,
+  lastVariant: "User",
   messageToastContent: { color: "", message: "" },
 };
 
@@ -25,6 +26,8 @@ export const frevaGPTReducer = (state = frevaGPTInitialState, action) => {
       return { ...state, showMessageToast: action.payload };
     case constants.SET_MESSAGE_TOAST_CONTENT:
       return { ...state, messageToastContent: action.payload };
+    case constants.SET_LAST_VARIANT:
+      return { ...state, lastVariant: action.payload };
     default:
       return state;
   }

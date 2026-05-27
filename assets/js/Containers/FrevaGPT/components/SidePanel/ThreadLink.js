@@ -1,13 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import PropTypes from "prop-types";
 
-import { browserHistory } from "react-router";
-
 import { ListGroup, OverlayTrigger, Popover } from "react-bootstrap";
 
-import { FaPen, FaTrash, FaEllipsisH } from "react-icons/fa";
+import { FaPen, FaTrash, FaEllipsisV } from "react-icons/fa";
 
 import useHoverThread from "../../customHooks/useHoverThread";
+import useMobileStatus from "../../customHooks/useMobileStatus";
+import { grepThreadID, updateUrl } from "../../utils";
 
 import ThreadModal from "./ThreadModal";
 
@@ -15,17 +15,13 @@ function ThreadLink({ element, updateThreadList }) {
   const [showModal, setShowModal] = useState(false);
   const ref = useRef(null);
   const [hovered, setHovered] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const [showEditButton, setShowEditButton] = useState(false);
   const [mode, setMode] = useState("rename");
   const [showPopover, setShowPopover] = useState(false);
+  const [activeLink, setActiveLink] = useState(false);
+  const isMobile = useMobileStatus();
 
   useHoverThread({ hovered, setHovered, ref });
-
-  useEffect(() => {
-    const minWidth = 768; // Minimum width for desktop devices
-    setIsMobile(window.innerWidth < minWidth || screen.width < minWidth);
-  }, []);
 
   useEffect(() => {
     if (isMobile) {
@@ -35,12 +31,11 @@ function ThreadLink({ element, updateThreadList }) {
     }
   }, [isMobile, hovered]);
 
-  function changeToThread(thread) {
-    browserHistory.push({
-      pathname: "/chatbot/",
-      search: `?thread_id=${thread}`,
-    });
-  }
+  useEffect(() => {
+    if (grepThreadID() === element.thread_id) {
+      setActiveLink(true);
+    }
+  }, []);
 
   function togglePopover() {
     setShowPopover(!showPopover);
@@ -49,17 +44,17 @@ function ThreadLink({ element, updateThreadList }) {
   const threadOptions = [
     {
       title: "Rename",
-      icon: <FaPen className="color" />,
+      icon: <FaPen color="grey" />,
     },
     {
       title: "Delete",
-      icon: <FaTrash className="color" />,
+      icon: <FaTrash color="grey" />,
     },
   ];
 
   const popover = (
     <Popover className="p-2">
-      <ListGroup>
+      <ListGroup className="bot-shadow br-8">
         {threadOptions.map((element, index) => {
           const itemKey = `options-${element.title}-${index}`;
           return (
@@ -85,8 +80,10 @@ function ThreadLink({ element, updateThreadList }) {
 
   return (
     <>
-      <ListGroup.Item
-        className="px-0"
+      <div
+        className={
+          hovered | activeLink ? "p-2 br-8 bot-shadow bot-bg-lg" : "p-2 br-8"
+        }
         ref={ref}
         onMouseEnter={() => setHovered(true)}
       >
@@ -94,8 +91,8 @@ function ThreadLink({ element, updateThreadList }) {
           <div>
             <a
               href=""
-              className="forced-textwrap"
-              onClick={() => changeToThread(element.thread_id)}
+              className="forced-textwrap bot-chat-link"
+              onClick={() => updateUrl(`?thread_id=${element.thread_id}`)}
             >
               {element.topic}
             </a>
@@ -111,18 +108,18 @@ function ThreadLink({ element, updateThreadList }) {
           >
             {
               showEditButton ? (
-                <div role="button" className="align-content-center color">
-                  <FaEllipsisH />
+                <div role="button" className="align-content-center">
+                  <FaEllipsisV color="grey" />
                 </div>
               ) : (
                 <div className="align-content-center opacity-0">
-                  <FaEllipsisH />
+                  <FaEllipsisV color="grey" />
                 </div>
               ) /* invisible icon to avoid layout shift */
             }
           </OverlayTrigger>
         </div>
-      </ListGroup.Item>
+      </div>
 
       <ThreadModal
         mode={mode}

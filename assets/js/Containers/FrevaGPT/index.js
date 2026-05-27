@@ -1,11 +1,11 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
 import { Container, Row, Col, Spinner } from "react-bootstrap";
 
-import { browserHistory } from "react-router";
-
 import queryString from "query-string";
+
+import { isEmpty } from "lodash";
 
 import BotHeader from "./components/ChatComponents/BotHeader";
 import ChatBlock from "./components/ChatComponents/ChatBlock";
@@ -25,6 +25,7 @@ import {
   successfulPing,
   chatExceedsWindow,
   grepThreadID,
+  updateUrl,
 } from "./utils";
 
 import {
@@ -32,6 +33,7 @@ import {
   addElement,
   setMessageToastContent,
   setShowMessageToast,
+  setLastVariant,
 } from "./actions";
 
 function FrevaGPT() {
@@ -64,8 +66,6 @@ function FrevaGPT() {
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [showScrollButtons, setShowScrollButtons] = useState(false);
 
-  const lastVariant = useRef("User");
-
   const [showThreadHistory, setShowThreadHistory] = useState(false);
   const botModel = useSelector((state) => state.frevaGPTReducer.botModel);
 
@@ -76,28 +76,22 @@ function FrevaGPT() {
   -----------------------------------------------------------------------------------------------*/
   function createNewChat() {
     /**
-     * Creates new chat stopping running conversations before and clearing state variables
+     * Creates new chat, stopping running conversations before and clearing state variables
      *
      */
-    handleStop(false)
-      .then(() => {
-        dispatch(setConversation([]));
-        browserHistory.push({
-          pathname: "/chatbot/",
-          search: "",
-        });
-        setShowSuggestions(true);
-        setDynamicAnswer("");
-        setDynamicVariant("");
-        setReader(undefined);
-        setShowScrollButtons(false);
-        window.scrollTo(0, 0);
-        return;
-      })
-      .catch((err) => {
-        // eslint-disable-next-line no-console
-        console.error(err);
-      });
+    if (reader !== undefined) {
+      handleStop(false);
+    }
+
+    dispatch(setConversation([]));
+    updateUrl("");
+    setShowSuggestions(true);
+    setDynamicAnswer("");
+    setDynamicVariant("");
+    setReader(undefined);
+    setShowScrollButtons(false);
+    window.scrollTo(0, 0);
+    return;
   }
 
   function alertInvalidThreadID() {
@@ -131,6 +125,8 @@ function FrevaGPT() {
       if (!Array.isArray(variantArray) && "variant" in variantArray) {
         alertInvalidThreadID();
       } else {
+        //eslint-disable-next-line no-console
+        console.log("### Old thread: ", variantArray);
         dispatch(setConversation(variantArray));
       }
     } else {
@@ -143,7 +139,7 @@ function FrevaGPT() {
   -----------------------------------------------------------------------------------------------*/
   async function handleSubmit(input) {
     /**
-     * Sends request to bot ncluding the given user input
+     * Sends request to bot including the given user input
      *
      * @param {string} input - Given user input
      */
@@ -151,8 +147,22 @@ function FrevaGPT() {
     setShowSuggestions(false);
     setLoading(true);
 
+    // backend always requires a thread id to be send with streamresponse
+    // for new conversation without existing thread id -> request new thread id and set it
+    if (isEmpty(grepThreadID())) {
+      const response = await fetchWithAuth("/api/chatbot/newthread");
+
+      if (response.ok) {
+        const init_thread_id = await response.json();
+        updateUrl(`?thread_id=${init_thread_id}`);
+      } else {
+        //eslint-disable-next-line no-console
+        console.error("Could not fetch new thread id!", response.statusText);
+      }
+    }
+
     try {
-      await fetchData(input);
+      await streamResponse(input);
     } catch (err) {
       dispatch(
         addElement({
@@ -177,10 +187,7 @@ function FrevaGPT() {
     handleStop(false)
       .then(() => {
         dispatch(setConversation(chatObject.history));
-        browserHistory.push({
-          pathname: "/chatbot/",
-          search: `?thread_id=${chatObject.new_thread_id}`,
-        });
+        updateUrl(`?thread_id=${chatObject.new_thread_id}`);
         handleSubmit(newInput, chatObject.new_thread_id);
         return;
       })
@@ -196,28 +203,32 @@ function FrevaGPT() {
      *
      * @param {boolean} dispatchStopMessage - Determines if stop message should be shown
      */
-    // stop of thread only possible if a thread id is given
-    if (reader) {
-      await reader.cancel();
-    }
     const queryObject = { thread_id: grepThreadID() };
-    if (grepThreadID()) {
+    if (grepThreadID() && loading) {
       const response = await fetchWithAuth(
         `/api/chatbot/stop?` + queryString.stringify(queryObject)
       );
 
       if (!response.ok) {
+        const message = await response.json();
         dispatch(
           setMessageToastContent({
             color: "danger",
-            message: "Could not stop process",
+            message: message.detail,
           })
         );
         dispatch(setShowMessageToast(true));
       }
     }
 
+    // stop of thread only possible if a thread id is given
+    if (reader) {
+      await reader.cancel();
+    }
+
     setLoading(false);
+    setDynamicAnswer("");
+    setDynamicVariant("");
     setReader(undefined);
     if (dispatchStopMessage) {
       dispatch(
@@ -226,7 +237,147 @@ function FrevaGPT() {
     }
   }
 
-  async function fetchData(input) {
+  /*-----------------------------------------------------------------------------------------------
+  *                                           Data fetching
+  -----------------------------------------------------------------------------------------------*/
+  function addToExistingVariant(varObj) {
+    /**
+     * Adds content to already existing variant
+     *
+     * @param {object} varObj -  Object containing current varaint and content
+     */
+    setDynamicAnswer(varObj.content);
+    setDynamicVariant(varObj.variant);
+  }
+
+  function addNewVariant(varObj) {
+    /**
+     *  Adds old variant to conversation and starts new variant with given content
+     *
+     * @param {object} varObj - Object containing current varaint and content
+     */
+    dispatch(addElement(varObj));
+    dispatch(setLastVariant(varObj.variant));
+    if (chatExceedsWindow()) {
+      setShowScrollButtons(true);
+    }
+    setDynamicAnswer("");
+    setDynamicVariant("");
+  }
+
+  function handleServerHint(varObj) {
+    /**
+     * Handle ServerHint variant setting thread id if necessary
+     *
+     * @param {object} varObj - Object containing current varaint and content
+     */
+    // set thread id if no id given or newly provided id differs from current one
+    if (
+      varObj.variant === "ServerHint" &&
+      Object.keys(varObj.content).includes("thread_id")
+    ) {
+      if (
+        grepThreadID() === "" ||
+        grepThreadID() !== varObj.content.thread_id
+      ) {
+        updateUrl(`?thread_id=${varObj.content.thread_id}`);
+      }
+    }
+  }
+
+  function handleData(varObj, parsedData) {
+    /**
+     * Received data is handles based on a comparison of parsedData and varObj
+     *
+     * @param {object} varObj - Object containing content of last received response
+     * @param {object} parsedData - Object containing content of current received response
+     */
+    let iVarObj = varObj;
+
+    // object is not empty so compare variants
+    if (Object.keys(varObj).length !== 0) {
+      // if object has not same variant, add answer to conversation and override object
+      if (varObj.variant !== parsedData.variant) {
+        addNewVariant(iVarObj);
+        iVarObj = parsedData;
+      } else {
+        // if object has same variant, add content
+        iVarObj.content += parsedData.content;
+        addToExistingVariant(iVarObj);
+      }
+    } else {
+      // object is empty so add content
+      iVarObj = parsedData;
+      handleServerHint(iVarObj);
+    }
+
+    return iVarObj;
+  }
+
+  function extractData(data, varObj, buffer) {
+    /**
+     * Recursive function extracting data from given input and buffering incomplete objects
+     *
+     * @param {string} data - String containing received response
+     * @param {object} varObj - Object containing values from last received response
+     * @param {string} buffer - String containing buffered values
+     */
+    let iVarObj = varObj;
+    let iBuffer = buffer;
+
+    // split data by linebreaks
+    const variantArray = data.split("\n").filter((elem) => !isEmpty(elem));
+
+    for (let index = 0; index < variantArray.length; index++) {
+      try {
+        // try parsing the element of the splitted input
+        // and handle the data according to it's content
+        const parsedVariant = JSON.parse(variantArray[index]);
+        iVarObj = handleData(iVarObj, parsedVariant);
+
+        // if the given data is the same as the data of the buffer
+        // we are inside a nested run of the function
+        // if the parsing is sucessful, the buffered data was included
+        // into the conversation and can be deleted from the buffer
+        if (String(data) === String(iBuffer)) {
+          iBuffer = "";
+        }
+      } catch (err) {
+        // if the parsing fails and the input and the buffer have the same value
+        // we are inside a nested run using the buffer as input data
+        // the buffer data is only used as input data if it contains a closing }
+        // asuming a json object containing the data
+        // if the parsing fails, the received data seems to be missformated
+        if (String(data) === String(iBuffer)) {
+          dispatch(
+            addElement({
+              variant: "FrontendError",
+              content: err,
+            })
+          );
+          //eslint-disable-next-line no-console
+          console.log("Error parsing: ", iBuffer);
+        } else {
+          // on failed parsing add content to buffer so it can be merged with the next
+          // content arriving and tested to be parsed and handled like normal data
+          iBuffer += variantArray[index];
+          if (iBuffer.endsWith("}")) {
+            // if the buffer was merged and the current state ends with a } we assume
+            // that the unfinished object was completed and we now attempt to parse the data
+            // and handle its addition to the conversation calling this function recursively
+            // using the buffer as input data
+            const result = extractData(iBuffer, iVarObj, iBuffer);
+            iBuffer = result.buffer;
+            iVarObj = result.varObj;
+          }
+        }
+      }
+    }
+
+    return { varObj: iVarObj, buffer: iBuffer };
+  }
+
+  async function streamResponse(input) {
     /**
      * Fetches stream response from bot answering the given input adding it to the already existing conversation
      *
@@ -248,8 +399,8 @@ function FrevaGPT() {
       setReader(localReader);
       const decoder = new TextDecoder("utf-8");
 
-      let buffer = "";
       let varObj = {};
+      let buffer = "";
 
       // eslint-disable-next-line no-constant-condition
       while (true) {
@@ -260,83 +411,9 @@ function FrevaGPT() {
         }
 
         const decodedValues = decoder.decode(value);
-        buffer = buffer + decodedValues;
-
-        let foundSomething = true;
-
-        while (foundSomething) {
-          foundSomething = false;
-
-          for (
-            let bufferIndex = 0;
-            bufferIndex < buffer.length;
-            bufferIndex++
-          ) {
-            if (buffer[bufferIndex] !== "}") {
-              continue;
-            }
-            const subBuffer = buffer.slice(0, bufferIndex + 1);
-
-            try {
-              const jsonBuffer = JSON.parse(subBuffer);
-              buffer = buffer.slice(bufferIndex + 1); // shorten string by already evaluated string
-
-              // object is not empty so compare variants
-              if (Object.keys(varObj).length !== 0) {
-                // if object has not same variant, add answer to conversation and override object
-                if (varObj.variant !== jsonBuffer.variant) {
-                  dispatch(addElement(varObj));
-                  lastVariant.current = varObj.variant;
-                  if (chatExceedsWindow()) {
-                    setShowScrollButtons(true);
-                  }
-                  setDynamicAnswer("");
-                  setDynamicVariant("");
-                  varObj = jsonBuffer;
-                } else {
-                  // if object has same variant, add content
-                  varObj.content = varObj.content + jsonBuffer.content;
-                  setDynamicAnswer(varObj.content);
-                  setDynamicVariant(varObj.variant);
-                }
-              } else {
-                // object is empty so add content
-                varObj = jsonBuffer;
-
-                // set thread id
-                if (grepThreadID() === "" && varObj.variant === "ServerHint") {
-                  try {
-                    const currentThreadId = varObj.content.thread_id;
-                    browserHistory.push({
-                      pathname: "/chatbot/",
-                      search: `?thread_id=${currentThreadId}`,
-                    });
-                  } catch (err) {
-                    // handle warning
-                  }
-                }
-              }
-
-              foundSomething = true;
-              break;
-            } catch (err) {
-              // ServerHints and CodeBlocks include nested JSON Objects
-              if (
-                !subBuffer.includes("ServerHint") &&
-                !subBuffer.includes("Code")
-              ) {
-                dispatch(
-                  addElement({
-                    variant: "FrontendError",
-                    content: "Incomplete message received.",
-                  })
-                );
-                // eslint-disable-next-line no-console
-                console.log(err);
-              }
-            }
-          }
-        }
+        const result = extractData(decodedValues, varObj, buffer);
+        varObj = result.varObj;
+        buffer = result.buffer;
       }
     } else {
       dispatch(
@@ -388,13 +465,11 @@ function FrevaGPT() {
               <PendingAnswerComponent
                 content={dynamicAnswer}
                 variant={dynamicVariant}
-                ref={{ lastVariant }}
               />
 
               <BotLoadingSpinner
                 loading={loading}
                 dynamicAnswer={dynamicAnswer}
-                ref={{ lastVariant }}
               />
               {loading ? <div style={{ height: emptyDivHeight }}></div> : null}
             </Col>

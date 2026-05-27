@@ -27,12 +27,12 @@ function UserInputBlock({ content, onEdit }) {
       <>
         <FormControl
           as="textarea"
-          id={`UserInputField-${content.original_index}`}
+          id={`UserInputField-${content.user_index}`}
           className="mb-2"
           defaultValue={content.content}
           onChange={(e) => {
             handleEdit(e);
-            resizeInputField(`UserInputField-${content.original_index}`);
+            resizeInputField(`UserInputField-${content.user_index}`);
           }}
         />
 
@@ -41,6 +41,7 @@ function UserInputBlock({ content, onEdit }) {
             variant="secondary"
             className="me-1"
             onClick={() => {
+              setEditedInput("");
               setRenderInput(false);
             }}
           >
@@ -49,7 +50,7 @@ function UserInputBlock({ content, onEdit }) {
           <Button
             variant="info"
             onClick={() => {
-              startEditedChat(editedInput, content.original_index);
+              startEditedChat(editedInput, content.user_index);
               setRenderInput(false);
             }}
           >
@@ -61,11 +62,8 @@ function UserInputBlock({ content, onEdit }) {
   }
 
   return (
-    <Col md={USER_INPUT_STYLE} key={`${content.original_index}-user`}>
-      <Card
-        className="shadow-sm card-body border-0 border-bottom"
-        style={{ backgroundColor: "#eee" }}
-      >
+    <Col md={USER_INPUT_STYLE} key={`${content.user_index}-user`}>
+      <Card className="bot-shadow br-8 card-body border-0 border-bottom bot-bg-lg">
         {renderInput
           ? renderInputComponent()
           : editedInput
@@ -77,7 +75,8 @@ function UserInputBlock({ content, onEdit }) {
         <FaEdit
           onClick={() => setRenderInput(true)}
           role="button"
-          className="color mt-2"
+          className="mt-2"
+          color="grey"
         />
       </div>
     </Col>

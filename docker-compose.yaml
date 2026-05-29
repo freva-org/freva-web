@@ -1,4 +1,5 @@
-version: "3.9"
+---
+name: freva-dev
 services:
   db:
     image: mariadb:11.3
@@ -11,12 +12,10 @@ services:
       - "3306:3306"
     volumes:
       - ./docker/config/mysql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql:ro
-    depends_on:
-      - solr
   solr:
     networks:
-      - freva-web
-    image: solr:9.10.1
+      - freva-rest
+    image: solr:latest
     environment:
       CORE: files
     ports:
@@ -28,7 +27,7 @@ services:
     hostname: solr
   redis:
     networks:
-      - freva-web
+      - freva-rest
     image: redis:latest
     ports:
       - "6379:6379"
@@ -45,7 +44,7 @@ services:
     command: /usr/local/bin/redis-cmd
   keycloak:
     networks:
-      - freva-web
+      - freva-rest
     image: quay.io/keycloak/keycloak
     environment:
       KEYCLOAK_ADMIN: keycloak
@@ -79,11 +78,11 @@ services:
       KEYCLOAK_HOST: keycloak:8080
     entrypoint: ["sh", "/create-user.sh"]
     networks:
-      - freva-web
+      - freva-rest
   mongodb:
     image: mongo:latest
     networks:
-      - freva-web
+      - freva-rest
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongo
       MONGO_INITDB_ROOT_PASSWORD: secret
@@ -92,5 +91,5 @@ services:
       - "27017:27017"
     hostname: mongodb
 networks:
-  freva-web:
+  freva-rest:
     driver: bridge

@@ -1,10 +1,8 @@
-import base64
-import glob
 import json
 import logging
 import os
 import time
-from urllib.parse import urlencode, urlparse, urlunparse
+from urllib.parse import urlencode, urlparse
 
 import requests
 from django.conf import settings
@@ -24,33 +22,39 @@ from django_evaluation.monitor import _restart
 
 logger = logging.getLogger(__name__)
 
+
 # Since the endpoints of auth are managing via Freva-rest API and always constant, we define the URLs here instead of settings.py
 # shared variables for OIDC endpoints
-def ensure_url_scheme(url, default_scheme='http'):
+def ensure_url_scheme(url, default_scheme="http"):
     parsed = urlparse(url)
     if not parsed.scheme:
         return f"{default_scheme}://{url}"
     return url
 
-TOKEN_URL = ensure_url_scheme(settings.FREVA_REST_URL).rstrip('/') + '/api/freva-nextgen/auth/v2/token'
-LOGIN_URL = '/api/freva-nextgen/auth/v2/login'
-DEFAULT_SCOPES = getattr(settings, 'OIDC_DEFAULT_SCOPES', 'openid profile email')
+
+TOKEN_URL = (
+    ensure_url_scheme(settings.FREVA_REST_URL).rstrip("/")
+    + "/api/freva-nextgen/auth/v2/token"
+)
+LOGIN_URL = "/api/freva-nextgen/auth/v2/login"
+
 
 def set_token_cookie(response, token_data):
     """
     Set secure token cookies;
     - Separate cookie for access token (JavaScript accessible).
     """
-    max_age = token_data['expires'] - int(time.time())
+    max_age = token_data["expires"] - int(time.time())
     response.set_cookie(
-        'freva_auth_token',
-        token_data['access_token'],
+        "freva_auth_token",
+        token_data["access_token"],
         max_age=max_age,
         httponly=False,
         secure=True,
-        samesite='Strict'
+        samesite="Strict",
     )
     return response
+
 
 class OIDCLoginView(View):
     """
@@ -61,17 +65,16 @@ class OIDCLoginView(View):
         """
         Redirect to freva-rest login endpoint to start OAuth2 flow.
         """
-        next_url = request.GET.get('next', '/')
+        next_url = request.GET.get("next", "/")
         # Store next URL in session for callback
-        request.session['login_next'] = next_url
+        request.session["login_next"] = next_url
 
         # TODO: we might need to build the callback URL dynamically
-        callback_url = request.build_absolute_uri('/callback')
+        callback_url = request.build_absolute_uri("/callback")
 
         params = {
-            'redirect_uri': callback_url,
-            'prompt': 'none',
-            'scope': DEFAULT_SCOPES
+            "redirect_uri": callback_url,
+            "prompt": "none",
         }
 
         proxy_path = f"/api/freva-nextgen/auth/v2/login?{urlencode(params)}"
@@ -81,52 +84,60 @@ class OIDCLoginView(View):
 
 class OIDCCallbackView(View):
     """callback view handling the OAuth2 response from freva-rest"""
-    def get(self, request):
-        code = request.GET.get('code')
-        state = request.GET.get('state')
 
-        is_offline_request = 'request_offline_token' in request.session
+    def get(self, request):
+        code = request.GET.get("code")
+        state = request.GET.get("state")
+
+        is_offline_request = "request_offline_token" in request.session
 
         if not code or not state:
             logger.error("No authorization code or state received in callback")
             if is_offline_request:
-                return HttpResponse('<script>window.close();</script>')
+                return HttpResponse("<script>window.close();</script>")
             else:
-                return render(request, 'base/home.html', {
-                    'login_failed': True,
-                    'error_message': 'Authentication failed - no code or state.'
-                })
+                return render(
+                    request,
+                    "base/home.html",
+                    {
+                        "login_failed": True,
+                        "error_message": "Authentication failed - no code or state.",
+                    },
+                )
 
         try:
             callback_endpoint = f"{ensure_url_scheme(settings.FREVA_REST_URL).rstrip('/')}/api/freva-nextgen/auth/v2/callback"
-            params = {'code': code, 'state': state}
+            params = {"code": code, "state": state}
             response = requests.get(callback_endpoint, params=params, timeout=10)
-            
+
             if response.status_code == 200:
                 token_data = response.json()
                 # Helmholtz doesn't provide refresh_expires_in
                 # Refresh tokens from Helmholtz don't expire (or expire very far in future)
                 now = int(time.time())
-                if 'expires' not in token_data and 'expires_in' in token_data:
-                    token_data['expires'] = now + token_data['expires_in']
-                elif 'expires' not in token_data:
-                    token_data['expires'] = now + 3600
-                if 'refresh_expires' not in token_data:
-                    token_data['refresh_expires'] = now + (365 * 24 * 3600)
+                if "expires" not in token_data and "expires_in" in token_data:
+                    token_data["expires"] = now + token_data["expires_in"]
+                elif "expires" not in token_data:
+                    token_data["expires"] = now + 3600
+                if "refresh_expires" not in token_data:
+                    token_data["refresh_expires"] = now + (365 * 24 * 3600)
                 # OFFLINE TOKEN FLOW
                 if is_offline_request:
                     # Clean up session
-                    request.session.pop('request_offline_token', None)
+                    request.session.pop("request_offline_token", None)
                     formatted_token = {
-                        "access_token": token_data.get('access_token'),
-                        "refresh_token": token_data.get('refresh_token'),
-                        "token_type": token_data.get('token_type', 'Bearer'),
-                        "expires": token_data.get('expires'),
-                        "refresh_expires": token_data.get('refresh_expires'),
-                        "scope": token_data.get('scope', DEFAULT_SCOPES or 'openid profile offline_access email')
+                        "access_token": token_data.get("access_token"),
+                        "refresh_token": token_data.get("refresh_token"),
+                        "token_type": token_data.get("token_type", "Bearer"),
+                        "expires": token_data.get("expires"),
+                        "refresh_expires": token_data.get("refresh_expires"),
+                        "scope": token_data.get(
+                            "scope",
+                            "openid profile offline_access email",
+                        ),
                     }
 
-                    return HttpResponse(f'''
+                    return HttpResponse(f"""
                     <!DOCTYPE html>
                     <html>
                     <head><title>Token Retrieved</title></head>
@@ -143,52 +154,79 @@ class OIDCCallbackView(View):
                         </script>
                     </body>
                     </html>
-                    ''')
+                    """)
 
                 # REGULAR LOGIN FLOW
                 else:
-                    request.session['access_token'] = token_data['access_token']
-                    request.session['refresh_token'] = token_data.get('refresh_token', '')
-                    request.session['token_expires'] = token_data['expires']
-                    request.session['refresh_expires'] = token_data.get('refresh_expires', 0)
+                    request.session["access_token"] = token_data["access_token"]
+                    request.session["refresh_token"] = token_data.get(
+                        "refresh_token", ""
+                    )
+                    request.session["token_expires"] = token_data["expires"]
+                    request.session["refresh_expires"] = token_data.get(
+                        "refresh_expires", 0
+                    )
 
-                    user = authenticate(request=request, access_token=token_data['access_token'])
+                    user = authenticate(
+                        request=request, access_token=token_data["access_token"]
+                    )
                     if user:
                         login(request, user)
-                        next_url = request.session.pop('login_next', '/')
+                        next_url = request.session.pop("login_next", "/")
 
-                        if url_has_allowed_host_and_scheme(next_url, allowed_hosts=request.get_host()):
+                        if url_has_allowed_host_and_scheme(
+                            next_url, allowed_hosts=request.get_host()
+                        ):
                             response = HttpResponseRedirect(next_url)
                         else:
-                            response = HttpResponseRedirect('/')
+                            response = HttpResponseRedirect("/")
 
                         response = set_token_cookie(response, token_data)
                         return response
                     else:
                         logger.error("User authentication failed despite valid token")
-                        return render(request, 'base/home.html', {
-                            'login_failed': True,
-                            'error_message': 'Authentication failed - could not authenticate user.'
-                        })
+                        return render(
+                            request,
+                            "base/home.html",
+                            {
+                                "login_failed": True,
+                                "error_message": "Authentication failed - could not authenticate user.",
+                            },
+                        )
             else:
-                logger.error(f"Token exchange failed: {response.status_code} - {response.text}")
+                logger.error(
+                    f"Token exchange failed: {response.status_code} - {response.text}"
+                )
                 if is_offline_request:
-                    return JsonResponse({'success': False, 'error': 'Token exchange failed'})
+                    return JsonResponse(
+                        {"success": False, "error": "Token exchange failed"}
+                    )
                 else:
-                    return render(request, 'base/home.html', {
-                        'login_failed': True,
-                        'error_message': 'Authentication failed - token exchange failed.'
-                    })
+                    return render(
+                        request,
+                        "base/home.html",
+                        {
+                            "login_failed": True,
+                            "error_message": "Authentication failed - token exchange failed.",
+                        },
+                    )
 
         except Exception as e:
             logger.exception(f"Callback processing failed: {e}")
             if is_offline_request:
-                return JsonResponse({'success': False, 'error': 'Authentication failed'})
+                return JsonResponse(
+                    {"success": False, "error": "Authentication failed"}
+                )
             else:
-                return render(request, 'base/home.html', {
-                    'login_failed': True,
-                    'error_message': 'Authentication failed - please try again.'
-                })
+                return render(
+                    request,
+                    "base/home.html",
+                    {
+                        "login_failed": True,
+                        "error_message": "Authentication failed - please try again.",
+                    },
+                )
+
 
 def home(request):
     """Default view for the root - authorization through session."""
@@ -216,19 +254,19 @@ def logout_view(request):
     """
     Logout view - clear Django session AND OIDC session.
     """
-    
+
     request.session.flush()
     auth_logout(request)
-    
+
     logout_url = "/api/freva-nextgen/auth/v2/logout"
-    post_logout_redirect = request.build_absolute_uri('/')
-    
-    params = {'post_logout_redirect_uri': post_logout_redirect}
+    post_logout_redirect = request.build_absolute_uri("/")
+
+    params = {"post_logout_redirect_uri": post_logout_redirect}
 
     response = HttpResponseRedirect(f"{logout_url}?{urlencode(params)}")
-    response.delete_cookie('freva_auth_token', path='/', samesite='Strict')
-    response.delete_cookie('freva_refresh_token', path='/', samesite='Strict')
-    
+    response.delete_cookie("freva_auth_token", path="/", samesite="Strict")
+    response.delete_cookie("freva_refresh_token", path="/", samesite="Strict")
+
     return response
 
 
@@ -239,34 +277,31 @@ def request_offline_token(request):
     Since offline token is accessible only via login
     OIDC flow, we redirect to the login endpoint
     """
-    if request.method != 'POST':
-        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
 
     if not request.user.is_authenticated:
-        return JsonResponse({'error': 'Not authenticated'}, status=401)
+        return JsonResponse({"error": "Not authenticated"}, status=401)
 
     try:
         # Set session flag for offline token request
-        request.session['request_offline_token'] = True
+        request.session["request_offline_token"] = True
         request.session.modified = True
-        callback_url = request.build_absolute_uri('/callback')
+        callback_url = request.build_absolute_uri("/callback")
         params = {
-            'redirect_uri': callback_url,
-            'offline_access': 'true',
-            'prompt': 'none'
+            "redirect_uri": callback_url,
+            "offline_access": "true",
+            "prompt": "none",
         }
 
         proxy_path = f"/api/freva-nextgen/auth/v2/login?{urlencode(params)}"
         auth_url = request.build_absolute_uri(proxy_path)
 
-        return JsonResponse({
-            'success': True,
-            'auth_url': auth_url
-        })
+        return JsonResponse({"success": True, "auth_url": auth_url})
 
     except Exception as e:
         logger.exception(f"Offline token request failed: {e}")
-        return JsonResponse({'error': 'Internal server error'}, status=500)
+        return JsonResponse({"error": "Internal server error"}, status=500)
 
 
 @csrf_exempt
@@ -277,38 +312,36 @@ def collect_current_token(request):
     token from the session which might have been refreshed
     by the middleware or manually.
     """
-    if request.method != 'GET':
-        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    if request.method != "GET":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
 
     if not request.user.is_authenticated:
-        return JsonResponse({'error': 'Not authenticated'}, status=401)
+        return JsonResponse({"error": "Not authenticated"}, status=401)
 
     # collect current session token data
-    access_token = request.session.get('access_token')
-    refresh_token = request.session.get('refresh_token')
-    expires = request.session.get('token_expires')
-    refresh_expires = request.session.get('refresh_expires')
-    scope = request.session.get('token_scope', DEFAULT_SCOPES)
+    access_token = request.session.get("access_token")
+    refresh_token = request.session.get("refresh_token")
+    expires = request.session.get("token_expires")
+    refresh_expires = request.session.get("refresh_expires")
 
     if access_token:
         token_data = {
-            'access_token': access_token,
-            'refresh_token': refresh_token,
-            'expires': expires,
-            'refresh_expires': refresh_expires,
-            'token_type': "Bearer",
-            'scope': scope
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "expires": expires,
+            "refresh_expires": refresh_expires,
+            "token_type": "Bearer",
         }
 
-        return JsonResponse({
-            'success': True,
-            'token_data': token_data
-        })
+        return JsonResponse({"success": True, "token_data": token_data})
     else:
-        return JsonResponse({
-            'success': False,
-            'error': 'No token available in session. It seems you need to re-login'
-        }, status=400)
+        return JsonResponse(
+            {
+                "success": False,
+                "error": "No token available in session. It seems you need to re-login",
+            },
+            status=400,
+        )
 
 
 def dynamic_css(request):
@@ -348,9 +381,7 @@ def shell_in_a_box(request):
     else:
         shell_url = "/shell/"
 
-    return render(
-        request, "base/shell-in-a-box.html", {"shell_url": shell_url}
-    )
+    return render(request, "base/shell-in-a-box.html", {"shell_url": shell_url})
 
 
 @login_required()
@@ -392,6 +423,7 @@ def restart(request):
 
     return render(request, "base/home.html")
 
+
 @login_required()
 def token_health_check(request):
     """
@@ -399,12 +431,13 @@ def token_health_check(request):
     Returns only success status, instead of making the
     token data available to JS.
     """
-    return JsonResponse({'status': 'ok'})
+    return JsonResponse({"status": "ok"})
+
 
 @login_required()
 def stacbrowser(request):
-    """STAC Browser view """
-    stacapi_endpoint = f"/api/freva-nextgen/stacapi/"
+    """STAC Browser view"""
+    stacapi_endpoint = "/api/freva-nextgen/stacapi/"
     stacapi_url = request.build_absolute_uri(stacapi_endpoint)
 
     try:
@@ -415,46 +448,43 @@ def stacbrowser(request):
         response.raise_for_status()
         stac_data = response.json()
 
-        if 'links' in stac_data:
-            for link in stac_data['links']:
-                if link.get('rel') == 'self':
-                    stacapi_url = link.get('href').rstrip('/') + '/'
+        if "links" in stac_data:
+            for link in stac_data["links"]:
+                if link.get("rel") == "self":
+                    stacapi_url = link.get("href").rstrip("/") + "/"
                     break
 
     except Exception:
         pass  # Use fallback URL
 
-    static_path = os.path.join(settings.PROJECT_ROOT, 'static_root', 'stac-browser')
+    static_path = os.path.join(settings.PROJECT_ROOT, "static_root", "stac-browser")
 
     # Vite writes a manifest at .vite/manifest.json when `manifest: true` is
     # set in vite.config.js.
     # We look for the entry with `isEntry: true` rather than hardcoding the
     # key ("src/main.js") so this stays correct across Vite versions.
-    main_js = ''
-    main_css = ''
+    main_js = ""
+    main_css = ""
     try:
-        manifest_path = os.path.join(static_path, '.vite', 'manifest.json')
+        manifest_path = os.path.join(static_path, ".vite", "manifest.json")
         with open(manifest_path) as fh:
             manifest = json.load(fh)
 
         # Find the chunk marked as the entry point
-        entry = next(
-            (v for v in manifest.values() if v.get('isEntry')),
-            {}
-        )
-        main_js = entry.get('file', '')
-        main_css = (entry.get('css') or [''])[0]
+        entry = next((v for v in manifest.values() if v.get("isEntry")), {})
+        main_js = entry.get("file", "")
+        main_css = (entry.get("css") or [""])[0]
 
     except (FileNotFoundError, json.JSONDecodeError, StopIteration):
         # stac-browser not built yet; template will log a warning
         pass
 
     context = {
-        'title': 'STAC Browser',
-        'stac_api_url': stacapi_url,
-        'stac_assets': {
-            'main_js': main_js,
-            'main_css': main_css,
-        }
+        "title": "STAC Browser",
+        "stac_api_url": stacapi_url,
+        "stac_assets": {
+            "main_js": main_js,
+            "main_css": main_css,
+        },
     }
-    return render(request, 'stacbrowser.html', context)
+    return render(request, "stacbrowser.html", context)

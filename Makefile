@@ -50,7 +50,7 @@ setup-stacbrowser:
 	@if [ ! -d "stac-browser" ]; then \
 		git clone https://github.com/radiantearth/stac-browser.git stac-browser; \
 	fi
-	cd stac-browser && git checkout -- src/init.js config.js
+	cd stac-browser && git fetch origin && git reset --hard origin/main && git clean -fd
 	cd stac-browser && patch -p1 --forward < ../stac-browser-patches/stac-browser-init.patch
 	cd stac-browser && patch -p1 --forward < ../stac-browser-patches/stac-browser-vite.patch
 	cd stac-browser && python3 -c "\
@@ -121,8 +121,7 @@ stopfrontend:
 stop: stopserver stopfrontend stoprest
 	@echo "All services have been stopped."
 
-#setup: setup-rest setup-stacbrowser setup-node setup-django dummy-data
-setup: setup-rest setup-node setup-django dummy-data
+setup: setup-rest setup-stacbrowser setup-node setup-django dummy-data
 
 run: runrest runfrontend runserver
 

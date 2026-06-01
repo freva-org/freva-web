@@ -15,7 +15,7 @@ services:
   solr:
     networks:
       - freva-rest
-    image: solr:latest
+    image: docker.io/solr:latest
     environment:
       CORE: files
     ports:
@@ -29,20 +29,18 @@ services:
   redis:
     networks:
       - freva-rest
-    image: redis:latest
+    image: ghcr.io/freva-org/freva-redis:latest
     ports:
       - "6379:6379"
     environment:
-      REDIS_USERNAME: ${REDIS_USER}
-      REDIS_PASSWORD: ${REDIS_PASSWD}
+      REDIS_USERNAME: redis
+      REDIS_PASSWORD: secret
       REDIS_LOGLEVEL: debug
       REDIS_SSL_CERTFILE: ${REDIS_CONTAINER_CERTFILE}
       REDIS_SSL_KEYFILE: ${REDIS_CONTAINER_KEYFILE}
     hostname: redis
     volumes:
-      - ./docker/config/redis/redis-cmd.sh:/usr/local/bin/redis-cmd
       - ./docker/config/certs:/certs
-    command: /usr/local/bin/redis-cmd
   keycloak:
     networks:
       - freva-rest
@@ -72,6 +70,7 @@ services:
       - keycloak
     volumes:
       - ./docker/create-user.sh:/create-user.sh:ro
+    restart: "no"
     environment:
       USER: ${USER}
       KEYCLOAK_ADMIN: keycloak
@@ -80,17 +79,20 @@ services:
     entrypoint: ["sh", "/create-user.sh"]
     networks:
       - freva-rest
+
   mongodb:
-    image: mongo:latest
     networks:
       - freva-rest
+    image: mongo:latest
     environment:
       MONGO_INITDB_ROOT_USERNAME: mongo
       MONGO_INITDB_ROOT_PASSWORD: secret
       MONGO_INITDB_DATABASE: search_stats
+    hostname: mongodb
     ports:
       - "27017:27017"
-    hostname: mongodb
+
+
 networks:
   freva-rest:
     driver: bridge

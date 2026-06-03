@@ -1,4 +1,5 @@
 {% extends "_layouts/menu.html" %}
+{% load homepage_text %}
 
 {% block page_title %}Evaluation System{% endblock %}
 {% block page_class %}home-page{% endblock %}
@@ -96,22 +97,24 @@
     <div class="container mb-3">
         <!-- Service starts -->
         <div class="row services-container">
-            <!-- Service #1 -->
             <div class="services-item card shadow p-3 my-3 bg-light">
-                <h5>{% settings_val 'HOMEPAGE_HEADING'%}</h5>
+                {% settings_val 'HOMEPAGE_HEADING' as homepage_heading %}
+                {% settings_val 'HOMEPAGE_TEXT' as homepage_text %}
+                <h5>{{ homepage_heading }}</h5>
                 <hr class="border-dark"/>
-                <p align="justify">{% settings_val 'HOMEPAGE_TEXT'%}</p>
+                <div class="homepage-text" style="text-align: justify;">
+                    {{ homepage_text|render_homepage_text }}
+                </div>
             </div>
             <!-- Service #2 -->
             <div class="services-item card shadow p-3 my-3 bg-light">
                 <h5>Freva - Free Evaluation System Framework</h5>
                 <hr class="border-dark"/>
                 <p align="justify">
-                    The Climate Informatics and Technologies research group provides a standardized data and evaluation system -
-                    developed at the DKRZ and FUB in Germany. Freva provides efficient and
+                The Data Analysis Infrastructure team at <a href=https://www.dkrz.de/>DKRZ</a>
+                provides a standardized data and evaluation system - developed at the DKRZ and FUB in Germany. Freva provides efficient and
                     comprehensive access to the model data base as well as to evaluation data sets.
-                    The application system is developed as an easy to use
-                    low-end application minimizing technical requirements for users and tool developers.
+                    The application system is developed as an easy to use low-end application minimizing technical requirements for users and tool developers.
                 </p>
             </div>
         </div>

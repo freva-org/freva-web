@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 ## [v2606.0.0]
+### Added
+- Support for Markdown based blurbs
+
+## [v2606.0.0]
 ### Changed
 - Do not request oidc scopes from token endpoints
 

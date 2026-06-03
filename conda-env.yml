@@ -12,6 +12,7 @@ dependencies:
   - freva
   - git
   - gunicorn
+  - markdown
   - mysql-client <9
   - mysqlclient
   - paramiko
@@ -28,4 +29,3 @@ dependencies:
       - django-bootstrap-v5
       - django-model-utils
       - djproxy
-

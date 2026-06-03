@@ -1,7 +1,7 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
-## [v2606.0.0]
+## [v2606.0.1]
 ### Added
 - Support for Markdown based blurbs
 

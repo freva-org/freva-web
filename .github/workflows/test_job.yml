@@ -52,7 +52,7 @@ jobs:
 
       - name: Build node code
         run: |
-          npm install
+          npm ci
           npm run build-production
 
       - name: Build freva-web image for

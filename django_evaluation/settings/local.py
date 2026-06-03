@@ -133,17 +133,17 @@ _set_favicon(MAIN_COLOR, Path(PROJECT_ROOT))
 BORDER_COLOR = _get_conf_key(web_config, "border_color", "#6c2e1f", False)
 HOVER_COLOR = _get_conf_key(web_config, "hover_color", "#d0513a", False)
 HOMEPAGE_TEXT = web_config.get("homepage_text") or (
-    "Lorem ipsum dolor sit amet"
+    "[*Lorem ipsum*](https://www.lipsum.com) dolor sit amet"
     ", consectetur adipiscing elit"
     ", sed do eiusmod tempor incididunt ut"
     "labore et dolore magna aliqua. Ut enim"
     "ad minim veniam, quis nostrud exercitation"
     "ullamco laboris nisi ut aliquip ex ea commodo"
-    "consequat. Duis aute irure dolor in reprehenderit"
+    "consequat.\n\n Duis aute irure dolor in reprehenderit"
     "in voluptate velit esse cillum dolore eu fugiat"
     "nulla pariatur. Excepteur sint occaecat cupidatat"
     "non proident, sunt in culpa qui officia deserunt"
-    "mollit anim id est laborum."
+    "mollit anim **id est laborum**."
 )
 IMPRINT = web_config.get("imprint") or [
     "ANAIS - RegIKlim",
@@ -152,7 +152,7 @@ IMPRINT = web_config.get("imprint") or [
     "20146 Hamburg",
     "Germany",
 ]
-HOMEPAGE_HEADING = web_config.get("homepage_heading") or "Lorem ipsum dolor."
+HOMEPAGE_HEADING = web_config.get("homepage_heading") or "Lorem ipsum dolor"
 ABOUT_US_TEXT = web_config.get("about_us_text") or "Hello world, this is freva."
 CONTACTS = web_config.get("contacts") or ["freva@dkrz.de"]
 DEFAULT_FLAVOUR = (
@@ -334,12 +334,16 @@ for title, url, html_id in web_config.get("menu_entries", []) or _MENU_ENTRIES:
             {"name": title, "url": reverse_lazy(url), "html_id": html_id}
         )
 MENU_ENTRIES.append(
-    {"name": "Data-Inspect", "url": reverse_lazy("solr:inspect"), "html_id": "inspect_menu"}
+    {
+        "name": "Data-Viewer",
+        "url": reverse_lazy("solr:inspect"),
+        "html_id": "inspect_menu",
+    }
 )
 if ACTIVATE_CHAT_BOT:
     MENU_ENTRIES.append(
         {
-            "name": "FrevaGPT",
+            "name": "Climate-Claw",
             "url": reverse_lazy("bot:chatbot"),
             "html_id": "chatbot_menu",
         }

@@ -2,12 +2,17 @@
 
 export EVALUATION_SYSTEM_CONFIG_FILE := $(PWD)/docker/local-eval-system.conf
 export EVALUATION_SYSTEM_DRS_CONFIG_FILE := $(PWD)/docker/drs_config.toml
-export OIDC_DISCOVERY_URL ?= http://localhost:8080/realms/freva/.well-known/openid-configuration
+export API_OIDC_DISCOVERY_URL ?= http://localhost:8080/realms/freva/.well-known/openid-configuration
+export API_OIDC_CLIENT_ID ?= freva
+export API_OIDC_CLIENT_SECRET ?=
+export API_OIDC_SCOPES ?= profile
+export DOCKER_DIR := $(PWD)/docker
 export DJANGO_SUPERUSER_PASSWORD := secret
 export DEV_MODE := 1
 export CHAT_BOT := 1
 export COLUMNS=250
 export DOCKER_ENV_FILE ?= .env
+export API_USE_TTY = 0
 include $(DOCKER_ENV_FILE)
 export
 
@@ -18,7 +23,7 @@ all: setup runserver runfrontend
 	@echo "All services are running in the background."
 
 dummy-data:
-	docker/dummy_plugin_runs.sh
+	sh $(DOCKER_DIR)/dummy_plugin_runs.sh
 
 setup-django:
 	python manage.py makemigrations base
@@ -27,10 +32,13 @@ setup-django:
 	python manage.py createsuperuser --noinput --username admin --email foo@bar.com.au || echo
 
 setup-rest:
-	TEMP_DIR=$$(mktemp -d) && \
-	git clone https://github.com/freva-org/freva-nextgen.git $$TEMP_DIR &&\
-	python -m pip install $$TEMP_DIR/freva-rest $$TEMP_DIR/freva-data-portal-worker &&\
-	rm -rf $$TEMP_DIR
+	@if [ ! -d ../freva-nextgen ]; then \
+		git clone --recursive https://github.com/freva-org/freva-nextgen.git ../freva-nextgen; \
+	else \
+		git -C ../freva-nextgen submodule update --init --recursive; \
+	fi
+	python -m pip install -e ../freva-nextgen/freva-rest ../freva-nextgen/freva-data-portal-worker
+
 
 setup-node:
 	npm install
@@ -42,7 +50,7 @@ setup-stacbrowser:
 	@if [ ! -d "stac-browser" ]; then \
 		git clone https://github.com/radiantearth/stac-browser.git stac-browser; \
 	fi
-	cd stac-browser && git checkout -- src/init.js vite.config.js config.js
+	cd stac-browser && git fetch origin && git reset --hard origin/main && git clean -fd
 	cd stac-browser && patch -p1 --forward < ../stac-browser-patches/stac-browser-init.patch
 	cd stac-browser && patch -p1 --forward < ../stac-browser-patches/stac-browser-vite.patch
 	cd stac-browser && python3 -c "\
@@ -66,15 +74,25 @@ runserver:
 	@echo "To watch the Django server logs, run 'tail -f runserver.log'"
 
 runrest:
+	branch=$$(git -C ../freva-nextgen branch --show-current); \
+	if [ "$$branch" = "main" ]; then \
+		echo "Updating ../freva-nextgen from origin/main"; \
+		git -C ../freva-nextgen pull --ff-only origin main; \
+	else \
+		echo "Not pulling ../freva-nextgen because current branch is '$$branch'"; \
+	fi
 	@echo "Starting up freva-rest api"
-	python docker/config/dev-utils.py redis-config .data-portal-cluster-config.json \
+	python ../freva-nextgen/dev-env/config/dev-utils.py redis-config .data-portal-cluster-config.json \
 		--user $(REDIS_USER) \
 		--passwd $(REDIS_PASSWD) \
 		--cert-file $(REDIS_SSL_CERTFILE) \
 		--key-file $(REDIS_SSL_KEYFILE)
-	python -m data_portal_worker -c .data-portal-cluster-config.json > data-loader.log 2>&1 &
-	python docker/config/dev-utils.py oidc $(OIDC_DISCOVERY_URL)
-	python -m freva_rest.cli -p 7777 --services zarr-stream stacapi --oidc-discovery-url $(OIDC_DISCOVERY_URL) --redis-ssl-keyfile $(REDIS_SSL_KEYFILE) --redis-ssl-certfile $(REDIS_SSL_CERTFILE) --oidc-client-id freva --debug --dev >> rest.log 2>&1 &
+	python -m data_portal_worker -c .data-portal-cluster-config.json --dev > data-loader.log 2>&1 &
+	python ../freva-nextgen/dev-env/config/dev-utils.py oidc $(API_OIDC_DISCOVERY_URL)
+	python -m freva_rest.cli -p 7777 --services zarr-stream stacapi \
+		--redis-ssl-keyfile $(REDIS_SSL_KEYFILE) \
+		--redis-ssl-certfile $(REDIS_SSL_CERTFILE) \
+		--debug --dev --reload >> rest.log 2>&1 &
 	@echo "To watch the freva-rest logs, run 'tail -f rest.log'"
 
 runfrontend:

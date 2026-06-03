@@ -1,6 +1,10 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [v2606.0.0]
+### Changed
+- Do not request oidc scopes from token endpoints
+
 ## [v2605.2.2]
 ### Changed
 - Improved data handling of streamresponse (FrevaGPT)
@@ -56,7 +60,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - Hiding aborted chat response in FrevaGPT
 - Reloading of thread history on opening side panel in FrevaGPT
-- Added custom hook for selecting bot model in FrevaGPT 
+- Added custom hook for selecting bot model in FrevaGPT
 ## [v2604.0.0]
 ### Fixed
 - Make chatbot url configurable via env variable.

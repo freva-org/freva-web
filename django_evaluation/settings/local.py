@@ -335,7 +335,7 @@ for title, url, html_id in web_config.get("menu_entries", []) or _MENU_ENTRIES:
         )
 MENU_ENTRIES.append(
     {
-        "name": "Data-Inspect",
+        "name": "Data-Viewer",
         "url": reverse_lazy("solr:inspect"),
         "html_id": "inspect_menu",
     }
@@ -343,7 +343,7 @@ MENU_ENTRIES.append(
 if ACTIVATE_CHAT_BOT:
     MENU_ENTRIES.append(
         {
-            "name": "FrevaGPT",
+            "name": "Climate-Claw",
             "url": reverse_lazy("bot:chatbot"),
             "html_id": "chatbot_menu",
         }

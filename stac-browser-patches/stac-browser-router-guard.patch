@@ -1,0 +1,10 @@
+--- a/src/router/index.js
++++ b/src/router/index.js
+@@ -1,6 +1,6 @@
+ function catchAllString(route) {
+   const pathMatch = route.params.pathMatch;
+-  return Array.isArray(pathMatch) ? pathMatch.join("/") : pathMatch;
++  return Array.isArray(pathMatch) ? pathMatch.join("/") : (pathMatch ?? "");
+ }
+ 
+ function getPath(route, config) {

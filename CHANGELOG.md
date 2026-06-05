@@ -1,6 +1,9 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [v2606.0.2]
+### Added
+- STAC-Browser: Fix `startsWith` on undefined route param via new router guard patch
 ## [v2606.0.1]
 ### Added
 - Support for Markdown based blurbs

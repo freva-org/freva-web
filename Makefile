@@ -53,7 +53,6 @@ setup-stacbrowser:
 	cd stac-browser && git fetch origin && git reset --hard origin/main && git clean -fd
 	cd stac-browser && patch -p1 --forward < ../stac-browser-patches/stac-browser-init.patch
 	cd stac-browser && patch -p1 --forward < ../stac-browser-patches/stac-browser-vite.patch
-	cd stac-browser && patch -p1 --forward < ../stac-browser-patches/stac-browser-router-guard.patch
 	cd stac-browser && python3 -c "\
 import pathlib; \
 p = pathlib.Path('config.js'); \

@@ -169,7 +169,7 @@ jobs:
           author: "freva-bot[bot] <freva-bot@users.noreply.github.com>"
           title: "chore(stac-browser): bump pin to upstream main (${{ steps.resolve.outputs.new }})"
           body-path: ${{ steps.body.outputs.path }}
-          reviewers: ${{ vars.STAC_BROWSER_REVIEWERS }}
+          reviewers: "tropicrainforest"
           labels: |
             automated
             stac-browser
@@ -199,7 +199,7 @@ jobs:
           author: "freva-bot[bot] <freva-bot@users.noreply.github.com>"
           title: "⚠️ STAC Browser bump needs a fix (${{ steps.resolve.outputs.new }})"
           body-path: ${{ steps.body.outputs.path }}
-          reviewers: ${{ vars.STAC_BROWSER_REVIEWERS }}
+          reviewers: "tropicrainforest"
           labels: |
             automated
             stac-browser

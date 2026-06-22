@@ -110,7 +110,11 @@ jobs:
           git -C "$SCB" fetch origin "$OLD" 2>/dev/null || true
           {
             short() { git -C "$SCB" rev-parse --short "$1" 2>/dev/null || echo "$1"; }
-            echo "**Upstream bump:** \`$(short "$OLD")\` to \`$(short "$NEW")\`"
+            SHORT_NEW=$(short "$NEW"); SHORT_OLD=$(short "$OLD")
+            SUBJECT=$(git -C "$SCB" log -1 --format='%s' "$NEW" 2>/dev/null || echo "")
+            echo "Bumps the pinned [STAC Browser](https://github.com/radiantearth/stac-browser) commit that \`make setup-stacbrowser\` builds."
+            echo ""
+            echo "**Upstream bump:** \`$SHORT_OLD\` to \`$SHORT_NEW\`"
             echo ""
             if git -C "$SCB" rev-parse -q --verify "$OLD^{commit}" >/dev/null 2>&1; then
               N=$(git -C "$SCB" log --no-merges --oneline "$OLD..$NEW" | wc -l | tr -d ' ')
@@ -141,7 +145,7 @@ jobs:
               echo "---"
               echo "### 🫤🥊 Build failed at the new upstream commit"
               echo ""
-              echo "\`main\` still pins the last green commit (\`$OLD\`). This **draft** PR pins the new commit so maintainer can fix it forward"
+              echo "\`main\` still pins the last green commit (\`$SHORT_OLD\`). This **draft** PR pins the new commit so a maintainer can fix it forward"
               echo ""
               echo "<details><summary>Last lines of the build log</summary>"
               echo ""
@@ -153,6 +157,9 @@ jobs:
             fi
           } > pr-body.md
           echo "path=pr-body.md" >> "$GITHUB_OUTPUT"
+          echo "short_new=$SHORT_NEW" >> "$GITHUB_OUTPUT"
+          echo "subject=$SUBJECT" >> "$GITHUB_OUTPUT"
+          echo "count=${N:-?}" >> "$GITHUB_OUTPUT"
 
       - name: Open / update green PR
         id: green-pr
@@ -167,7 +174,7 @@ jobs:
           commit-message: "chore(stac-browser): bump pin to ${{ steps.resolve.outputs.new }}"
           committer: "freva-bot[bot] <freva-bot@users.noreply.github.com>"
           author: "freva-bot[bot] <freva-bot@users.noreply.github.com>"
-          title: "chore(stac-browser): bump pin to upstream main (${{ steps.resolve.outputs.new }})"
+          title: "chore(stac-browser): bump to ${{ steps.body.outputs.short_new }} — ${{ steps.body.outputs.subject }}"
           body-path: ${{ steps.body.outputs.path }}
           reviewers: "tropicrainforest"
           labels: |
@@ -197,7 +204,7 @@ jobs:
           commit-message: "chore(stac-browser): candidate pin ${{ steps.resolve.outputs.new }} (build red)"
           committer: "freva-bot[bot] <freva-bot@users.noreply.github.com>"
           author: "freva-bot[bot] <freva-bot@users.noreply.github.com>"
-          title: "⚠️ STAC Browser bump needs a fix (${{ steps.resolve.outputs.new }})"
+          title: "🚨 fix(stac-browser): build broke bumping to ${{ steps.body.outputs.short_new }}"
           body-path: ${{ steps.body.outputs.path }}
           reviewers: "tropicrainforest"
           labels: |

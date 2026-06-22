@@ -178,7 +178,6 @@ jobs:
           body-path: ${{ steps.body.outputs.path }}
           reviewers: "tropicrainforest"
           labels: |
-            automated
             stac-browser
 
       - name: Enable auto-merge on the green PR
@@ -208,6 +207,4 @@ jobs:
           body-path: ${{ steps.body.outputs.path }}
           reviewers: "tropicrainforest"
           labels: |
-            automated
             stac-browser
-            needs-attention

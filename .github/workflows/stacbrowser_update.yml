@@ -171,10 +171,10 @@ jobs:
           branch: bump-stac-browser
           delete-branch: true
           base: main
-          commit-message: "chore(stac-browser): bump pin to ${{ steps.resolve.outputs.new }}"
-          committer: "freva-bot[bot] <freva-bot@users.noreply.github.com>"
-          author: "freva-bot[bot] <freva-bot@users.noreply.github.com>"
-          title: "chore(stac-browser): bump to ${{ steps.body.outputs.short_new }} — ${{ steps.body.outputs.subject }}"
+          commit-message: "stac-browser: bump pin to ${{ steps.resolve.outputs.new }}"
+          committer: "freva-bot <freva-bot@users.noreply.github.com>"
+          author: "freva-bot <freva-bot@users.noreply.github.com>"
+          title: "⬆️ Bump STAC Browser to ${{ steps.body.outputs.short_new }}: ${{ steps.body.outputs.subject }}"
           body-path: ${{ steps.body.outputs.path }}
           reviewers: "tropicrainforest"
           labels: |
@@ -200,10 +200,10 @@ jobs:
           delete-branch: false
           base: main
           draft: true
-          commit-message: "chore(stac-browser): candidate pin ${{ steps.resolve.outputs.new }} (build red)"
-          committer: "freva-bot[bot] <freva-bot@users.noreply.github.com>"
-          author: "freva-bot[bot] <freva-bot@users.noreply.github.com>"
-          title: "🚨 fix(stac-browser): build broke bumping to ${{ steps.body.outputs.short_new }}"
+          commit-message: "stac-browser: candidate pin ${{ steps.resolve.outputs.new }} (build red)"
+          committer: "freva-bot <freva-bot@users.noreply.github.com>"
+          author: "freva-bot <freva-bot@users.noreply.github.com>"
+          title: "🚨 STAC Browser Build failed: Can't bump to ${{ steps.body.outputs.short_new }}"
           body-path: ${{ steps.body.outputs.path }}
           reviewers: "tropicrainforest"
           labels: |

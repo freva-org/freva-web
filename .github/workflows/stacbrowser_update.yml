@@ -1,0 +1,210 @@
+name: Check STAC Browser main branch
+
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch: {}
+  pull_request:
+    branches:
+      - "stac-browser-candidate/**"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: stac-browser
+  cancel-in-progress: true
+
+jobs:
+  candidate-check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build STAC Browser at the pinned commit
+        run: |
+          touch .env
+          make setup-stacbrowser
+  reconcile:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Create freva-bot app token
+        id: app-token
+        if: ${{ vars.FREVA_BOT_APP_ID != '' }}
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.FREVA_BOT_APP_ID }}
+          private-key: ${{ secrets.FREVA_BOT_PRIVATE_KEY }}
+
+      - name: Pick token
+        id: tok
+        run: |
+          if [ -n "${{ steps.app-token.outputs.token }}" ]; then
+            echo "token=${{ steps.app-token.outputs.token }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "token=${{ secrets.GITHUB_TOKEN }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Resolve current pin and upstream HEAD
+        id: resolve
+        run: |
+          OLD=$(head -n1 stac-browser-patches/stac-browser.commit | xargs)
+          NEW=$(git ls-remote https://github.com/radiantearth/stac-browser.git refs/heads/main | cut -f1)
+          echo "old=$OLD" >> "$GITHUB_OUTPUT"
+          echo "new=$NEW" >> "$GITHUB_OUTPUT"
+          if [ "$OLD" = "$NEW" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Already pinned to upstream HEAD ($NEW); nothing to do."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "Pin $OLD -> upstream HEAD $NEW"
+          fi
+
+      - name: Try to build at the new upstream commit
+        id: build
+        if: steps.resolve.outputs.changed == 'true'
+        run: |
+          touch .env
+          set -o pipefail
+          if STAC_BROWSER_REF="${{ steps.resolve.outputs.new }}" \
+               make setup-stacbrowser 2>&1 | tee build.log; then
+            echo "green=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "green=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update the pin file
+        if: steps.resolve.outputs.changed == 'true'
+        run: echo "${{ steps.resolve.outputs.new }}" > stac-browser-patches/stac-browser.commit
+
+      - name: Build the PR body
+        id: body
+        if: steps.resolve.outputs.changed == 'true'
+        run: |
+          OLD='${{ steps.resolve.outputs.old }}'
+          NEW='${{ steps.resolve.outputs.new }}'
+          SCB=stac-browser
+          git -C "$SCB" fetch origin "$OLD" 2>/dev/null || true
+          {
+            short() { git -C "$SCB" rev-parse --short "$1" 2>/dev/null || echo "$1"; }
+            SHORT_NEW=$(short "$NEW"); SHORT_OLD=$(short "$OLD")
+            SUBJECT=$(git -C "$SCB" log -1 --format='%s' "$NEW" 2>/dev/null || echo "")
+            echo "Bumps the pinned [STAC Browser](https://github.com/radiantearth/stac-browser) commit that \`make setup-stacbrowser\` builds."
+            echo ""
+            echo "**Upstream bump:** \`$SHORT_OLD\` to \`$SHORT_NEW\`"
+            echo ""
+            if git -C "$SCB" rev-parse -q --verify "$OLD^{commit}" >/dev/null 2>&1; then
+              N=$(git -C "$SCB" log --no-merges --oneline "$OLD..$NEW" | wc -l | tr -d ' ')
+              echo "**$N upstream commit(s):**"
+              echo ""
+              git -C "$SCB" log --no-merges --date=short \
+                --pretty='- `%h` %s _(%cd)_' "$OLD..$NEW" | head -50
+              echo ""
+              # Flag changes to files our patches / config-rewrite depend on.
+              HITS=$(git -C "$SCB" diff --name-only "$OLD..$NEW" \
+                | grep -E '^(src/init\.js|src/router/index\.js|vite\.config\.js|config\.js)$' || true)
+              if [ -n "$HITS" ]; then
+                echo "> ⚠️ **Touches files our patches depend on:**"
+                echo "$HITS" | sed 's/^/> - `/; s/$/`/'
+                echo ">"
+                echo "> IMPORTANT: The build passed, so the patches still applied"
+              else
+                echo "_None of the patched files changed in this range._"
+              fi
+            else
+              echo "_Previous pin \`$OLD\` isn't reachable in upstream history (force-push?); commit list unavailable._"
+            fi
+            echo ""
+            if [ "${{ steps.build.outputs.green }}" = "true" ]; then
+              echo "---"
+              echo "🕊️ \`make setup-stacbrowser\` built cleanly at the new commit; this lands once CI is green."
+            else
+              echo "---"
+              echo "### 🫤🥊 Build failed at the new upstream commit"
+              echo ""
+              echo "\`main\` still pins the last green commit (\`$SHORT_OLD\`). This **draft** PR pins the new commit so a maintainer can fix it forward"
+              echo ""
+              echo "<details><summary>Last lines of the build log</summary>"
+              echo ""
+              echo '```'
+              tail -n 60 build.log
+              echo '```'
+              echo ""
+              echo "</details>"
+            fi
+          } > pr-body.md
+          echo "path=pr-body.md" >> "$GITHUB_OUTPUT"
+          echo "short_new=$SHORT_NEW" >> "$GITHUB_OUTPUT"
+          echo "subject=$SUBJECT" >> "$GITHUB_OUTPUT"
+          echo "count=${N:-?}" >> "$GITHUB_OUTPUT"
+
+      - name: Open / update green PR
+        id: green-pr
+        if: steps.resolve.outputs.changed == 'true' && steps.build.outputs.green == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ steps.tok.outputs.token }}
+          add-paths: stac-browser-patches/stac-browser.commit
+          branch: bump-stac-browser
+          delete-branch: true
+          base: main
+          commit-message: "stac-browser: bump pin to ${{ steps.resolve.outputs.new }}"
+          committer: "freva-bot <freva-bot@users.noreply.github.com>"
+          author: "freva-bot <freva-bot@users.noreply.github.com>"
+          title: "⬆️ Bump STAC Browser to ${{ steps.body.outputs.short_new }}: ${{ steps.body.outputs.subject }}"
+          body-path: ${{ steps.body.outputs.path }}
+          reviewers: "tropicrainforest"
+          labels: |
+            stac-browser
+
+      - name: Enable auto-merge on the green PR
+        if: steps.green-pr.outputs.pull-request-number
+        env:
+          GH_TOKEN: ${{ steps.tok.outputs.token }}
+        run: |
+          gh pr merge --auto --squash \
+            "${{ steps.green-pr.outputs.pull-request-number }}" || \
+            echo "::warning::could not enable auto-merge (check branch protection / repo settings)"
+
+      - name: Open / update red draft PR
+        id: red-pr
+        if: steps.resolve.outputs.changed == 'true' && steps.build.outputs.green == 'false'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ steps.tok.outputs.token }}
+          add-paths: stac-browser-patches/stac-browser.commit
+          branch: stac-browser-candidate/${{ steps.resolve.outputs.new }}
+          delete-branch: false
+          base: main
+          draft: true
+          commit-message: "stac-browser: candidate pin ${{ steps.resolve.outputs.new }} (build red)"
+          committer: "freva-bot <freva-bot@users.noreply.github.com>"
+          author: "freva-bot <freva-bot@users.noreply.github.com>"
+          title: "🚨 STAC Browser Build failed: Can't bump to ${{ steps.body.outputs.short_new }}"
+          body-path: ${{ steps.body.outputs.path }}
+          reviewers: "tropicrainforest"
+          labels: |
+            stac-browser

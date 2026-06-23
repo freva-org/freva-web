@@ -43,16 +43,46 @@ setup-rest:
 setup-node:
 	npm install
 
+STAC_BROWSER_REPO ?= https://github.com/radiantearth/stac-browser.git
+STAC_BROWSER_PIN := stac-browser-patches/stac-browser.commit
+
 setup-stacbrowser:
 	@echo "Setting up STAC Browser..."
 	rm -rf static_root/stac-browser
 	mkdir -p static_root/stac-browser
-	@if [ ! -d "stac-browser" ]; then \
-		git clone https://github.com/radiantearth/stac-browser.git stac-browser; \
+	@if [ ! -e stac-browser ]; then \
+		git clone $(STAC_BROWSER_REPO) stac-browser; \
+	elif [ ! -d stac-browser/.git ]; then \
+		echo "stac-browser exists but is not a git repo - re-cloning"; \
+		rm -rf stac-browser && git clone $(STAC_BROWSER_REPO) stac-browser; \
 	fi
-	cd stac-browser && git fetch origin && git reset --hard origin/main && git clean -fd
-	cd stac-browser && patch -p1 --forward < ../stac-browser-patches/stac-browser-init.patch
-	cd stac-browser && patch -p1 --forward < ../stac-browser-patches/stac-browser-vite.patch
+	@ref="$${STAC_BROWSER_REF}"; \
+	if [ -z "$$ref" ] && [ -f "$(STAC_BROWSER_PIN)" ]; then \
+		ref=$$(cat "$(STAC_BROWSER_PIN)"); \
+	fi; \
+	if [ -z "$$ref" ]; then \
+		echo "::warning::no STAC_BROWSER_REF and no pin file;falling back to origin/main"; \
+		ref="origin/main"; \
+	fi; \
+	url=$$(git -C stac-browser remote get-url origin 2>/dev/null || echo ""); \
+	if [ "$$url" != "$(STAC_BROWSER_REPO)" ]; then \
+		echo "pointing 'origin' at $(STAC_BROWSER_REPO)"; \
+		git -C stac-browser remote set-url origin "$(STAC_BROWSER_REPO)" 2>/dev/null \
+			|| git -C stac-browser remote add origin "$(STAC_BROWSER_REPO)"; \
+	fi; \
+	echo "Building STAC Browser at: $$ref"; \
+	case "$$ref" in \
+		origin/*) git -C stac-browser fetch origin "$${ref#origin/}" ;; \
+		*)        git -C stac-browser fetch origin "$$ref" 2>/dev/null \
+					|| git -C stac-browser fetch origin ;; \
+	esac; \
+	git -C stac-browser reset --hard "$$ref" && git -C stac-browser clean -fd
+	@# Apply patches
+	@for p in stac-browser-patches/*.patch; do \
+		echo "applying $$p"; \
+		( cd stac-browser && patch -p1 --forward < "../$$p" ) || \
+			{ echo "::error::failed to apply $$p"; exit 1; }; \
+	done
 	cd stac-browser && python3 -c "\
 import pathlib; \
 p = pathlib.Path('config.js'); \

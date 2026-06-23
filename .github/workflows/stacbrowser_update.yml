@@ -168,7 +168,7 @@ jobs:
         with:
           token: ${{ steps.tok.outputs.token }}
           add-paths: stac-browser-patches/stac-browser.commit
-          branch: bump-stac-browser
+          branch: bump-stac-browser/${{ steps.resolve.outputs.new }}
           delete-branch: true
           base: main
           commit-message: "stac-browser: bump pin to ${{ steps.resolve.outputs.new }}"

@@ -1,6 +1,9 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+##[v2606.0.4]
+### Changed
+- Adapted shortcut to toggle bot model select
 ## [v2606.0.3]
 ### Added
 - STAC-Browser: add a nightly upstream-tracking bot

@@ -230,7 +230,18 @@ async function openDatasetMeta(url) {
   // Defensive: a percent-encoded URL would be treated as a relative path
   // by the browser. Normalize so the fetch lands at the real origin.
   const base = normalizeUrl(url).replace(/\/$/, "");
-  const token = getTokenFromCookie();
+  // only send the Freva token to same-origin Freva API endpoints.
+  // Sending it to an external S3/minio store makes that store 403 the
+  // otherwise-anonymous request, so the client-side metadata render
+  // fails and we get bounced to the data-loader.
+  let sameOrigin = true;
+  try {
+    sameOrigin =
+      new URL(base, window.location.origin).origin === window.location.origin;
+  } catch {
+    sameOrigin = true;
+  }
+  const token = sameOrigin ? getTokenFromCookie() : null;
   const headers = token
     ? { Authorization: `${token.token_type} ${token.access_token}` }
     : {};

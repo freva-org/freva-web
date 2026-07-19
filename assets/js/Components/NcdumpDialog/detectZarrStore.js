@@ -3,6 +3,22 @@ import { useState, useEffect } from "react";
 import { getTokenFromCookie, normalizeUrl } from "../../utils";
 
 /**
+ * True when `base` resolves to the same origin as the running app.
+ * Relative paths (Freva API) are same-origin; absolute external store
+ * URLs (S3/minio) are not.
+ */
+function isSameOrigin(base) {
+  try {
+    return (
+      new URL(base, window.location.origin).origin === window.location.origin
+    );
+  } catch {
+    // If it does not parse as a URL, treat it as a relative/same-origin path.
+    return true;
+  }
+}
+
+/**
  * Checks whether a URL already points to a zarr store by probing
  * .zmetadata (v2 consolidated) and zarr.json (v2/v3).
  *
@@ -21,7 +37,11 @@ export async function detectZarrStore(url) {
   // percent-encoded one slips through, decode it here so the fetch
   // below is not treated as a relative path by the browser.
   const base = normalizeUrl(url).replace(/\/$/, "");
-  const token = getTokenFromCookie();
+  // Only attach the Freva auth token for same-origin Freva API requests.
+  // External object stores (e.g. the S3/minio buckets)
+  // interpret an unexpected `Authorization` header as an AWS credential and
+  // reject the request with 403
+  const token = isSameOrigin(base) ? getTokenFromCookie() : null;
   const headers = token
     ? { Authorization: `${token.token_type} ${token.access_token}` }
     : {};

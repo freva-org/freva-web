@@ -9,7 +9,9 @@ import { getTokenFromCookie, normalizeUrl } from "../../utils";
  */
 function isSameOrigin(base) {
   try {
-    return new URL(base, window.location.origin).origin === window.location.origin;
+    return (
+      new URL(base, window.location.origin).origin === window.location.origin
+    );
   } catch {
     // If it does not parse as a URL, treat it as a relative/same-origin path.
     return true;

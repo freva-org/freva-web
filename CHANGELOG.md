@@ -1,6 +1,9 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+##[v2607.0.0]
+### Fixed
+- Inspector: Don't send Freva token when probing external zarr stores
 ##[v2606.0.4]
 ### Changed
 - Adapted shortcut to toggle bot model select

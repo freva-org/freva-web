@@ -2,6 +2,7 @@ import * as constants from "./constants";
 
 const frevaGPTInitialState = {
   conversation: [],
+  errorLogs: [],
   botModel: "",
   showCode: true,
   showMessageToast: false,
@@ -28,6 +29,11 @@ export const frevaGPTReducer = (state = frevaGPTInitialState, action) => {
       return { ...state, messageToastContent: action.payload };
     case constants.SET_LAST_VARIANT:
       return { ...state, lastVariant: action.payload };
+    case constants.ADD_ERROR_MESSAGE:
+      return {
+        ...state,
+        errorLogs: [...state.errors, action.payload],
+      };
     default:
       return state;
   }

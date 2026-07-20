@@ -5,6 +5,7 @@ export const TOGGLE_SHOW_CODE = "TOGGLE_SHOW_CODE";
 export const SET_SHOW_MESSAGE_TOAST = "SET_SHOW_MESSAGE_TOAST";
 export const SET_MESSAGE_TOAST_CONTENT = "SET_MESSAGE_TOAST_CONTENT";
 export const SET_LAST_VARIANT = "SET_LAST_VARIANT";
+export const ADD_ERROR_MESSAGE = "ADD_ERROR_MESSAGE";
 
 export const BOT_COLUMN_STYLE = { span: 11, offset: 0 };
 export const USER_INPUT_STYLE = { span: 10, offset: 2 };

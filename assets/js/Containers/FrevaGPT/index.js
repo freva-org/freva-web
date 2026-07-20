@@ -34,6 +34,7 @@ import {
   setMessageToastContent,
   setShowMessageToast,
   setLastVariant,
+  addErrorMessage,
 } from "./actions";
 
 function FrevaGPT() {
@@ -68,6 +69,9 @@ function FrevaGPT() {
 
   const [showThreadHistory, setShowThreadHistory] = useState(false);
   const botModel = useSelector((state) => state.frevaGPTReducer.botModel);
+  const errorLogs = useSelector((state) => state.frevaGPTReducer.errorLogs);
+
+  const [newLogs, setNewLogs] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -134,6 +138,23 @@ function FrevaGPT() {
     }
   }
 
+  async function sendErrorLogs() {
+    if (errorLogs.length > 0 && newLogs) {
+      const queryObject = {
+        logs: errorLogs,
+        thread_id: grepThreadID(),
+      };
+
+      const response = await fetchWithAuth(
+        `/api/chatbot/?` + queryString.stringify(queryObject)
+      );
+
+      if (response.ok) {
+        setNewLogs(false);
+      }
+    }
+  }
+
   /*-----------------------------------------------------------------------------------------------
   *                                       User interaction methods
   -----------------------------------------------------------------------------------------------*/
@@ -173,6 +194,8 @@ function FrevaGPT() {
       // eslint-disable-next-line no-console
       console.error(err);
     }
+    // sending error logs to backend if logs not empty or new content was added
+    sendErrorLogs();
     setLoading(false);
   }
 
@@ -355,6 +378,13 @@ function FrevaGPT() {
               content: err,
             })
           );
+          dispatch(
+            addErrorMessage({
+              message: err,
+              data: iBuffer,
+            })
+          );
+          setNewLogs(true);
           //eslint-disable-next-line no-console
           console.log("Error parsing: ", iBuffer);
         } else {

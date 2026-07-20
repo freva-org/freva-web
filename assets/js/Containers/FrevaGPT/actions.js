@@ -48,3 +48,10 @@ export function setLastVariant(variant) {
     payload: variant,
   };
 }
+
+export function addErrorMessage(errorMessage) {
+  return {
+    type: constants.ADD_ERROR_MESSAGE,
+    payload: errorMessage,
+  };
+}

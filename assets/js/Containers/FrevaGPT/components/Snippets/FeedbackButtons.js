@@ -2,8 +2,6 @@ import React, { useState, useRef } from "react";
 import { useDispatch } from "react-redux";
 import PropTypes from "prop-types";
 
-import queryString from "query-string";
-
 import { Col } from "react-bootstrap";
 
 import { IconContext } from "react-icons";
@@ -46,15 +44,14 @@ function FeedbackButtons({ elementIndex, givenValue }) {
       setThumb("");
     }
 
-    const queryObject = {
-      thread_id: grepThreadID(),
-      feedback_index: elementIndex,
-      feedback: thumbRef.current,
-    };
-
-    const response = await fetchWithAuth(
-      `/api/chatbot/userfeedback?` + queryString.stringify(queryObject)
-    );
+    const response = await fetchWithAuth(`/api/chatbot/userfeedback`, {
+      method: "POST",
+      body: JSON.stringify({
+        thread_id: grepThreadID(),
+        feedback_index: elementIndex,
+        feedback: thumbRef.current,
+      }),
+    });
 
     const message = await response.json();
     const toastContent = { color: "", message: message.detail };

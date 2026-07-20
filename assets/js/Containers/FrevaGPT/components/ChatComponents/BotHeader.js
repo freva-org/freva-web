@@ -20,7 +20,7 @@ function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
   useEffect(() => {
     async function fetchBotModels() {
       const getBotModels = async () => {
-        const response = await fetchWithAuth(`/api/chatbot/availablechatbots?`);
+        const response = await fetchWithAuth(`/api/chatbot/availablechatbots`);
         if (response.ok) {
           setBotModelList(await response.json());
         } else {

@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import PropTypes from "prop-types";
 
-import queryString from "query-string";
-
 import { browserHistory } from "react-router";
 import { isEmpty } from "lodash";
 
@@ -42,14 +40,13 @@ function ThreadModal({
 
   async function renameThread() {
     if (!isEmpty(newTopic) && newTopic !== element.topic) {
-      const queryParameter = {
-        thread_id: element.thread_id,
-        topic: newTopic,
-      };
-
-      const response = await fetchWithAuth(
-        `/api/chatbot/setthreadtopic?` + queryString.stringify(queryParameter)
-      );
+      const response = await fetchWithAuth(`/api/chatbot/setthreadtopic`, {
+        method: "POST",
+        body: JSON.stringify({
+          thread_id: element.thread_id,
+          topic: newTopic,
+        }),
+      });
 
       if (response.ok) {
         const newElement = {
@@ -70,13 +67,12 @@ function ThreadModal({
   }
 
   async function deleteThread() {
-    const queryParameter = {
-      thread_id: element.thread_id,
-    };
-
-    const response = await fetchWithAuth(
-      `/api/chatbot/deletethread?` + queryString.stringify(queryParameter)
-    );
+    const response = await fetchWithAuth(`/api/chatbot/deletethread`, {
+      method: "POST",
+      body: JSON.stringify({
+        thread_id: element.thread_id,
+      }),
+    });
 
     if (response.ok) {
       toastContent.color = "success";

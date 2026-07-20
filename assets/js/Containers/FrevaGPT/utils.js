@@ -1,5 +1,3 @@
-import queryString from "query-string";
-
 import { isEmpty } from "lodash";
 
 import { browserHistory } from "react-router";
@@ -186,18 +184,16 @@ export async function requestUserThreads(page, query) {
    * if there are more threads available
    */
   const returnValues = { threads: [], hasMore: false };
-  const queryParameter = {
-    num_threads: constants.THREAD_NUMBER,
-    page,
-  };
 
   const endpoint = query ? "searchthreads" : "getuserthreads";
-  if (query) {
-    queryParameter.query = query;
-  }
-  const response = await fetchWithAuth(
-    `/api/chatbot/${endpoint}?` + queryString.stringify(queryParameter)
-  );
+  const response = await fetchWithAuth(`/api/chatbot/${endpoint}`, {
+    method: "POST",
+    body: JSON.stringify({
+      num_threads: constants.THREAD_NUMBER,
+      page: page,
+      query: query ? query : "",
+    }),
+  });
 
   if (response.ok) {
     const values = await response.json();
@@ -245,18 +241,18 @@ export async function requestEditEndpoint(index) {
    * @param {number} index - Integer value of changed user input within conversation
    * @returns {object} Object containing conversation history until changed user input and new thread id
    */
-  const queryObject = {
-    source_thread_id: grepThreadID(),
-    user_index: index,
-  };
 
   let results = { history: [], new_thread_id: "" };
   // if index == 0 the first element is changed which is equal to starting a new chat
   // so we don't need a history and therefore skip requesting and setting it via the editthread endpoint
   if (index !== 0) {
-    const response = await fetchWithAuth(
-      `/api/chatbot/editthread?` + queryString.stringify(queryObject)
-    );
+    const response = await fetchWithAuth(`/api/chatbot/editthread`, {
+      method: "POST",
+      body: JSON.stringify({
+        source_thread_id: grepThreadID(),
+        user_index: index,
+      }),
+    });
 
     // as soon as this request is finished and we got the answers
     if (response.ok) {

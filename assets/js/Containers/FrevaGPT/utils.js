@@ -190,7 +190,7 @@ export async function requestUserThreads(page, query) {
     method: "POST",
     body: JSON.stringify({
       num_threads: constants.THREAD_NUMBER,
-      page: page,
+      page,
       query: query ? query : "",
     }),
   });

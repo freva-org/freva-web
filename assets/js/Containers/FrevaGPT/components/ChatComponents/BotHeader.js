@@ -5,7 +5,13 @@ import { Button, Form, Row, Col, Container } from "react-bootstrap";
 
 import PropTypes from "prop-types";
 
-import { FaRegCommentAlt, FaHistory, FaCode } from "react-icons/fa";
+import {
+  FaRegCommentAlt,
+  FaHistory,
+  FaCode,
+  FaHome,
+  FaGlobe,
+} from "react-icons/fa";
 
 import { setBotModel, toggleShowCode } from "../../actions";
 
@@ -40,6 +46,7 @@ function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
   const [botOkay, setBotOkay] = useState(undefined);
   const [botModelList, setBotModelList] = useState([]);
   const [hideBotModelList, setHideBotModelList] = useState(true);
+  const [localBot, setLocalBot] = useState(false);
 
   useBotSelect(hideBotModelList, setHideBotModelList, hideBotModelList);
 
@@ -47,10 +54,20 @@ function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
     setShowThreadHistory(!showThreadHistory);
   }
 
+  function toggleLocalModel() {
+    const newValue = !localBot;
+    setLocalBot(newValue);
+    if (newValue) {
+      dispatch(setBotModel("local"));
+    } else {
+      dispatch(setBotModel(""));
+    }
+  }
+
   return (
     <Container className="mb-2">
       <Row>
-        <Col md={5}>
+        <Col md={4}>
           <h2>ClimateClaw</h2>
         </Col>
 
@@ -72,9 +89,25 @@ function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
           ) : null}
         </Col>
 
-        <Col md={5}>
+        <Col md={7}>
           {botOkay ? (
             <Row>
+              <Col>
+                <Button
+                  variant={localBot ? "outline-secondary" : "secondary"}
+                  onClick={toggleLocalModel}
+                  className="me-1 bot-shadow br-8 w-100"
+                >
+                  {localBot ? (
+                    <FaHome className="me-1" />
+                  ) : (
+                    <FaGlobe className="me-1" />
+                  )}
+                  <span className="d-none d-sm-inline">
+                    {localBot ? "Local model" : "Global model"}
+                  </span>
+                </Button>
+              </Col>
               <Col>
                 <Button
                   variant={showCode ? "outline-secondary" : "secondary"}

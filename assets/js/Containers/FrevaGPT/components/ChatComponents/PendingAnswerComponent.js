@@ -77,7 +77,7 @@ function PendingAnswerComponent({ content, variant }) {
               setShowCode(!showCode);
             }}
           >
-            <span className="color">Analyzing...</span>
+            <span className="color">Code</span>
             <span>
               {showCode ? (
                 <FaAngleUp className="color" />

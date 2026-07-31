@@ -7,16 +7,38 @@ import PropTypes from "prop-types";
 import hljs from "highlight.js";
 import "highlight.js/styles/stackoverflow-light.css";
 
-import { formatCode, setGivenFeedbackValue } from "../../utils";
+import { isEmpty, has } from "lodash";
+
+import {
+  formatCode,
+  setGivenFeedbackValue,
+  extractElements,
+} from "../../utils";
 
 import FeedbackButtons from "../Snippets/FeedbackButtons";
 import { setMessageToastContent, setShowMessageToast } from "../../actions";
 
 import CodeOutputBlock from "./CodeOutputBlock";
+import FilePreview from "./FilePreview";
 
 function CodeBlock({ showCode, content }) {
   const [localShowCode, setLocalShowCode] = useState();
   const dispatch = useDispatch();
+
+  const codeContent = extractElements(content, "Code");
+  const codeOutput = extractElements(content, "CodeOutput");
+  let fileOutput = [];
+
+  if (!isEmpty(codeOutput)) {
+    try {
+      const parsedOutputContent = JSON.parse(codeOutput.content);
+      if (has(parsedOutputContent, "created_files")) {
+        fileOutput = parsedOutputContent.created_files;
+      }
+    } catch (err) {
+      //pass
+    }
+  }
 
   useEffect(() => {
     setLocalShowCode(showCode);
@@ -33,11 +55,6 @@ function CodeBlock({ showCode, content }) {
 
   function localToggleShowCode() {
     setLocalShowCode(!localShowCode);
-  }
-
-  function extractElements(content, variant) {
-    // should be only one resulting item
-    return content.filter((elem) => elem.variant === variant)[0];
   }
 
   function copyCode() {
@@ -79,35 +96,33 @@ function CodeBlock({ showCode, content }) {
         </div>
 
         <Collapse in={localShowCode} className="mt-2">
-          <Card className="shadow-sm">
-            <Card.Header className="bot-bg-lg">
-              <div className="d-flex justify-content-between align-items-center">
-                python
-                <Button variant="link" onClick={copyCode}>
-                  <span>
-                    <FaRegCopy className="color" />
-                  </span>
-                </Button>
-              </div>
-            </Card.Header>
+          <div>
+            <Card className="shadow-sm">
+              <Card.Header className="bot-bg-lg">
+                <div className="d-flex justify-content-between align-items-center">
+                  python
+                  <Button variant="link" onClick={copyCode}>
+                    <span>
+                      <FaRegCopy className="color" />
+                    </span>
+                  </Button>
+                </div>
+              </Card.Header>
 
-            <Card.Body
-              className="p-0 m-0 border-bottom"
-              key={`${content[0].id}-code`}
-            >
-              <pre className="m-0 codeblock">
-                <code className="language-python">
-                  {
-                    formatCode(
-                      "Code",
-                      extractElements(content, "Code").content
-                    )[0]
-                  }
-                </code>
-              </pre>
-            </Card.Body>
-            <CodeOutputBlock content={content} />
-          </Card>
+              <Card.Body
+                className="p-0 m-0 border-bottom"
+                key={`${content[0].id}-code`}
+              >
+                <pre className="m-0 codeblock">
+                  <code className="language-python">
+                    {formatCode("Code", codeContent.content)}
+                  </code>
+                </pre>
+              </Card.Body>
+              <CodeOutputBlock content={codeOutput} />
+            </Card>
+            <FilePreview content={fileOutput} />
+          </div>
         </Collapse>
       </Card>
     </>

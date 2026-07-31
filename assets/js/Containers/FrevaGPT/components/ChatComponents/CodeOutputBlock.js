@@ -1,6 +1,8 @@
 import React, { useEffect } from "react";
 import { Card } from "react-bootstrap";
 
+import { isEmpty } from "lodash";
+
 import PropTypes from "prop-types";
 import hljs from "highlight.js";
 
@@ -17,23 +19,13 @@ function CodeOutputBlock({ content }) {
     });
   }, []);
 
-  function extractElements(content, variant) {
-    // should be only one resulting item
-    return content.filter((elem) => elem.variant === variant)[0];
-  }
-
   function renderCodeOutput(content) {
-    if (content.length > 1) {
+    if (!isEmpty(content)) {
       return (
-        <Card.Footer className="p-0 m-0" key={`${content[1].id}-codeoutput`}>
+        <Card.Footer className="p-0 m-0" key={`${content.id}-codeoutput`}>
           <pre className="codeoutputblock m-0">
             <code className="bot-code-output">
-              {
-                formatCode(
-                  "CodeOutput",
-                  extractElements(content, "CodeOutput").content
-                )[0]
-              }
+              {formatCode("CodeOutput", content.content)}
             </code>
           </pre>
         </Card.Footer>
@@ -43,11 +35,11 @@ function CodeOutputBlock({ content }) {
     }
   }
 
-  return <>{renderCodeOutput(content)}</>;
+  return renderCodeOutput(content);
 }
 
 CodeOutputBlock.propTypes = {
-  content: PropTypes.array,
+  content: PropTypes.object,
 };
 
 export default CodeOutputBlock;

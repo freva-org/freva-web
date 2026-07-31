@@ -122,19 +122,6 @@ function PendingAnswerComponent({ content, variant }) {
     );
   }
 
-  function renderImage() {
-    return (
-      <Row className="mb-3">
-        <Col md={3}>
-          <Card className="bot-shadown br-8 card-body border-0 border-bottom mb-3 bg-light d-flex flex-row align-items-center">
-            <Spinner size="sm" />
-            <span className="ms-2">Plotting image...</span>
-          </Card>
-        </Col>
-      </Row>
-    );
-  }
-
   function renderAnswer() {
     switch (variant) {
       case "Assistant":
@@ -149,8 +136,6 @@ function PendingAnswerComponent({ content, variant }) {
         return renderCode();
       case "ServerHint":
         return renderServerHint();
-      case "Image":
-        return renderImage();
       default:
         return null;
     }

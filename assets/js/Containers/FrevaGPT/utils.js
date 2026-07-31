@@ -119,6 +119,11 @@ export function updateUrl(searchParameter) {
   });
 }
 
+export function extractElements(content, variant) {
+  // should be only one resulting item
+  return content.filter((elem) => elem.variant === variant)[0];
+}
+
 /*-------------------------------------------------------------------------------------------------
  *                                  Authentication related functions
 -------------------------------------------------------------------------------------------------*/

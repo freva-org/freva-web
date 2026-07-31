@@ -5,13 +5,7 @@ import { Button, Form, Row, Col, Container } from "react-bootstrap";
 
 import PropTypes from "prop-types";
 
-import {
-  FaRegCommentAlt,
-  FaHistory,
-  FaCode,
-  FaHome,
-  FaGlobe,
-} from "react-icons/fa";
+import { FaRegCommentAlt, FaHistory } from "react-icons/fa";
 
 import { setBotModel, toggleShowCode } from "../../actions";
 
@@ -67,7 +61,7 @@ function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
   return (
     <Container className="mb-2">
       <Row>
-        <Col md={4}>
+        <Col md={2}>
           <h2>ClimateClaw</h2>
         </Col>
 
@@ -92,33 +86,21 @@ function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
         <Col md={7}>
           {botOkay ? (
             <Row>
-              <Col>
-                <Button
-                  variant={localBot ? "outline-secondary" : "secondary"}
+              <Col className="align-content-center">
+                <Form.Switch
+                  type="switch"
+                  id="model-switch"
+                  label="Local model"
                   onClick={toggleLocalModel}
-                  className="me-1 bot-shadow br-8 w-100"
-                >
-                  {localBot ? (
-                    <FaHome className="me-1" />
-                  ) : (
-                    <FaGlobe className="me-1" />
-                  )}
-                  <span className="d-none d-sm-inline">
-                    {localBot ? "Local model" : "Global model"}
-                  </span>
-                </Button>
+                />
               </Col>
-              <Col>
-                <Button
-                  variant={showCode ? "outline-secondary" : "secondary"}
+              <Col className="align-content-center">
+                <Form.Switch
+                  type="switch"
+                  id="code-switch"
+                  label="Hide code"
                   onClick={() => dispatch(toggleShowCode(showCode))}
-                  className="me-1 bot-shadow br-8 w-100"
-                >
-                  <FaCode className="me-1" />
-                  <span className="d-none d-sm-inline">
-                    {showCode ? "Hide Code" : "Show Code"}
-                  </span>
-                </Button>
+                />
               </Col>
               <Col>
                 <Button

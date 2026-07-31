@@ -1,8 +1,9 @@
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
 
 import { Col, FormControl, InputGroup, Button } from "react-bootstrap";
 
-import { FaStop, FaPlay } from "react-icons/fa";
+import { FaStop, FaPlay, FaGlobe, FaHome } from "react-icons/fa";
 
 import { isEmpty } from "lodash";
 
@@ -12,6 +13,7 @@ import { resizeInputField } from "../../utils";
 
 function BotInput({ loading, handleSubmit, handleStop }) {
   const [userInput, setUserInput] = useState("");
+  const botModel = useSelector((state) => state.frevaGPTReducer.botModel);
 
   function handleUserInput(e) {
     setUserInput(e.target.value);
@@ -45,6 +47,13 @@ function BotInput({ loading, handleSubmit, handleStop }) {
   return (
     <Col id="botInput">
       <InputGroup className="mb-2 pb-2">
+        <InputGroup.Text className="bot-shadow bg-white">
+          {botModel === "local" ? (
+            <FaHome color="grey" />
+          ) : (
+            <FaGlobe color="grey" />
+          )}
+        </InputGroup.Text>
         <FormControl
           as="textarea"
           id="inputField"

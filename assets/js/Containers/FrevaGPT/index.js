@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 
 import { Container, Row, Col, Spinner } from "react-bootstrap";
@@ -70,6 +70,12 @@ function FrevaGPT() {
   const botModel = useSelector((state) => state.frevaGPTReducer.botModel);
 
   const dispatch = useDispatch();
+  const handleEditChatRef = useRef();
+  const stableHandleEditChat = useCallback(
+    (...args) => handleEditChatRef.current(...args),
+    []
+  );
+  handleEditChatRef.current = handleEditChat;
 
   /*-----------------------------------------------------------------------------------------------
   *
@@ -460,7 +466,7 @@ function FrevaGPT() {
         >
           <Row className="overflow-auto position-relative" id="chatContainer">
             <Col md={12}>
-              <ChatBlock onEditInput={handleEditChat} />
+              <ChatBlock onEditInput={stableHandleEditChat} />
 
               <PendingAnswerComponent
                 content={dynamicAnswer}

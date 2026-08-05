@@ -18,7 +18,7 @@ import {
 import { fetchWithAuth, grepThreadID } from "../../utils";
 import { setMessageToastContent, setShowMessageToast } from "../../actions";
 
-function FeedbackButtons({ elementIndex, givenValue }) {
+function FeedbackButtons({ elementIndex, givenValue, defaultColor }) {
   const [thumb, setThumb] = useState(givenValue);
   const thumbRef = useRef(givenValue);
 
@@ -74,14 +74,14 @@ function FeedbackButtons({ elementIndex, givenValue }) {
       <IconContext.Provider value={thumbValues.thumbsUp}>
         <ThumbsUpIcon
           onClick={() => handleFeedback("up")}
-          color={thumb === "up" ? "green" : "grey"}
+          color={thumb === "up" ? "green" : defaultColor}
           role="button"
         />
       </IconContext.Provider>
       <IconContext.Provider value={thumbValues.thumbsDown}>
         <ThumbsDownIcon
           onClick={() => handleFeedback("down")}
-          color={thumb === "down" ? "red" : "grey"}
+          color={thumb === "down" ? "red" : defaultColor}
           role="button"
         />
       </IconContext.Provider>
@@ -92,6 +92,7 @@ function FeedbackButtons({ elementIndex, givenValue }) {
 FeedbackButtons.propTypes = {
   elementIndex: PropTypes.number,
   givenValue: PropTypes.string,
+  defaultColor: PropTypes.string,
 };
 
 export default FeedbackButtons;

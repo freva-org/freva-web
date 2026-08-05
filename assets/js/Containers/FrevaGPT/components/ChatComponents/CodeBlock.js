@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { Card, Collapse, Button } from "react-bootstrap";
+import { Collapse, Button } from "react-bootstrap";
 import { FaAngleDown, FaAngleUp, FaRegCopy } from "react-icons/fa";
 
 import PropTypes from "prop-types";
@@ -31,10 +31,6 @@ function CodeBlock({ showCode, content }) {
     });
   }, []);
 
-  function localToggleShowCode() {
-    setLocalShowCode(!localShowCode);
-  }
-
   function extractElements(content, variant) {
     // should be only one resulting item
     return content.filter((elem) => elem.variant === variant)[0];
@@ -52,65 +48,62 @@ function CodeBlock({ showCode, content }) {
     dispatch(setShowMessageToast(true));
   }
 
+  function renderCodeOptions() {
+    return (
+      <div className="d-flex align-items-center me-2">
+        <Button variant="link" onClick={copyCode}>
+          <span>
+            <FaRegCopy className="bc-color" size="20" />
+          </span>
+        </Button>
+        <FeedbackButtons
+          elementIndex={content[0].feedback_index}
+          givenValue={setGivenFeedbackValue(extractElements(content, "Code"))}
+          defaultColor="#abb2bf"
+        />
+      </div>
+    );
+  }
+
   return (
-    <>
-      <Card className="bot-shadow br-8 card-body border-0 border-bottom mb-3 bg-light">
-        <div className="d-flex justify-content-between">
-          <Button
-            variant="link"
-            className="m-0 p-0 d-inline-flex text-decoration-none"
-            onClick={() => {
-              localToggleShowCode();
-            }}
-          >
-            <strong className="color">Analyzed</strong>
-            <span>
-              {localShowCode ? (
-                <FaAngleUp className="color" />
-              ) : (
-                <FaAngleDown className="color" />
-              )}
-            </span>
-          </Button>
-          <FeedbackButtons
-            elementIndex={content[0].feedback_index}
-            givenValue={setGivenFeedbackValue(extractElements(content, "Code"))}
-          />
+    <div className="br-8 mb-3">
+      <div className="d-flex justify-content-between bc-code-header align-items-center">
+        <div
+          className={
+            localShowCode
+              ? "p-2 bc-code-body bc-code-header-tab"
+              : "p-2 bc-code-body"
+          }
+          role="button"
+          onClick={() => {
+            setLocalShowCode(!localShowCode);
+          }}
+        >
+          Code {localShowCode ? <FaAngleUp /> : <FaAngleDown />}
         </div>
+        {localShowCode ? renderCodeOptions() : null}
+      </div>
 
-        <Collapse in={localShowCode} className="mt-2">
-          <Card className="shadow-sm">
-            <Card.Header className="bot-bg-lg">
-              <div className="d-flex justify-content-between align-items-center">
-                python
-                <Button variant="link" onClick={copyCode}>
-                  <span>
-                    <FaRegCopy className="color" />
-                  </span>
-                </Button>
-              </div>
-            </Card.Header>
+      <Collapse in={localShowCode} className="bn">
+        <div className="p-0 m-0 border-bottom" key={`${content[0].id}-code`}>
+          <div className="d-flex bc-code-body">
+            <div className="bc-code-margin"></div>
+            <pre className="m-0 codeblock">
+              <code className="language-python">
+                {
+                  formatCode(
+                    "Code",
+                    extractElements(content, "Code").content
+                  )[0]
+                }
+              </code>
+            </pre>
+          </div>
 
-            <Card.Body
-              className="p-0 m-0 border-bottom"
-              key={`${content[0].id}-code`}
-            >
-              <pre className="m-0 codeblock">
-                <code className="language-python">
-                  {
-                    formatCode(
-                      "Code",
-                      extractElements(content, "Code").content
-                    )[0]
-                  }
-                </code>
-              </pre>
-            </Card.Body>
-            <CodeOutputBlock content={content} />
-          </Card>
-        </Collapse>
-      </Card>
-    </>
+          <CodeOutputBlock content={content} />
+        </div>
+      </Collapse>
+    </div>
   );
 }
 

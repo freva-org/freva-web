@@ -6,10 +6,8 @@ import "highlight.js/styles/stackoverflow-light.css";
 
 import { isEmpty } from "lodash";
 
-import { Col, Card, Spinner, Row, Button, Collapse } from "react-bootstrap";
+import { Col, Card, Spinner, Row, Collapse } from "react-bootstrap";
 import { FaAngleDown, FaAngleUp } from "react-icons/fa";
-
-import * as constants from "../../constants";
 
 import AssistantBlock from "./AssistantBlock";
 
@@ -68,42 +66,40 @@ function PendingAnswerComponent({ content, variant }) {
 
   function renderCode() {
     return (
-      <Col md={constants.BOT_COLUMN_STYLE}>
-        <Card className="bot-shadow br-8 card-body border-0 border-bottom mb-3 bg-light">
-          <Button
-            variant="link"
-            className="m-0 p-0 d-inline-flex text-decoration-none"
+      <div className="br-8 mb-3">
+        <div className="d-flex justify-content-between bc-code-header align-items-center">
+          <div
+            className={
+              showCode
+                ? "p-2 bc-code-body bc-code-header-tab"
+                : "p-2 bc-code-body"
+            }
+            role="button"
             onClick={() => {
               setShowCode(!showCode);
             }}
           >
-            <span className="color">Analyzing...</span>
-            <span>
-              {showCode ? (
-                <FaAngleUp className="color" />
-              ) : (
-                <FaAngleDown className="color" />
-              )}
-            </span>
-          </Button>
+            Code {showCode ? <FaAngleUp /> : <FaAngleDown />}
+          </div>
+        </div>
 
-          <Collapse in={showCode} className="mt-2">
-            <Card className="shadow-sm mt-2">
-              <Card.Header>python</Card.Header>
-              <Card.Body className="p-0 m-0 bot-streaming-code">
-                <pre className="fancy-code">
+        <Collapse in={showCode} className="bn">
+          <div className="p-0 m-0 border-bottom">
+            <div className="d-flex bc-code-body">
+              <div className="bc-code-margin"></div>
+              <div>
+                <pre className="m-0 fancy-code w-100">
                   <code className="language-python">{fancyCode}</code>
                 </pre>
-
-                <p className="bot-streaming-code">{plainCode}</p>
+                <div className="bot-streaming-code">{plainCode}</div>
                 <span>
                   <Spinner className="mx-1" size="sm" />
                 </span>
-              </Card.Body>
-            </Card>
-          </Collapse>
-        </Card>
-      </Col>
+              </div>
+            </div>
+          </div>
+        </Collapse>
+      </div>
     );
   }
 

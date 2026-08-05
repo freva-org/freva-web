@@ -83,14 +83,14 @@ function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
           ) : null}
         </Col>
 
-        <Col md={7}>
+        <Col md={8}>
           {botOkay ? (
             <Row>
               <Col className="align-content-center">
                 <Form.Switch
                   type="switch"
                   id="model-switch"
-                  label="Local model"
+                  label="Self-hosted model"
                   onClick={toggleLocalModel}
                 />
               </Col>

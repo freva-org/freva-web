@@ -62,6 +62,13 @@ export function resizeInputField(id) {
   style.height = `${inputField.scrollHeight}px`;
 }
 
+export function resetInputField(id) {
+  const inputField = document.getElementById(id);
+  const style = inputField.style;
+
+  style.height = "calc(1.5em + .75rem + 2px)";
+}
+
 function isLastPage(totalNumber, currentPageNumber) {
   /**
    * Checks if given page is last page by calculating the number of pages

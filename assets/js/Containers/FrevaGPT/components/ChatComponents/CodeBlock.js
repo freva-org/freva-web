@@ -31,9 +31,8 @@ function CodeBlock({ showCode, content }) {
 
   if (!isEmpty(codeOutput)) {
     try {
-      const parsedOutputContent = JSON.parse(codeOutput.content);
-      if (has(parsedOutputContent, "created_files")) {
-        fileOutput = parsedOutputContent.created_files;
+      if (has(codeOutput.content, "created_files")) {
+        fileOutput = codeOutput.content.created_files;
       }
     } catch (err) {
       //pass

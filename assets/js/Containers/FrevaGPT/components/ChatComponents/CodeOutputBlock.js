@@ -6,8 +6,8 @@ import { isEmpty } from "lodash";
 import PropTypes from "prop-types";
 import hljs from "highlight.js";
 
-import { formatCode } from "../../utils";
 import "highlight.js/styles/atom-one-dark.css";
+import { formatCode } from "../../utils";
 
 function CodeOutputBlock({ content }) {
   useEffect(() => {
@@ -25,7 +25,9 @@ function CodeOutputBlock({ content }) {
         <Card.Footer className="p-0 m-0" key={`${content.id}-codeoutput`}>
           <pre className="codeoutputblock m-0">
             <code className="bot-code-output">
-              {formatCode("CodeOutput", content.content)}
+              {typeof content.content === String
+                ? formatCode("CodeOutput", content.content)
+                : JSON.stringify(content.content)}
             </code>
           </pre>
         </Card.Footer>

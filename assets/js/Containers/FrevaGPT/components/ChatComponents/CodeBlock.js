@@ -63,7 +63,7 @@ function CodeBlock({ showCode, content }) {
               localToggleShowCode();
             }}
           >
-            <strong className="color">Analyzed</strong>
+            <strong className="color">Code</strong>
             <span>
               {localShowCode ? (
                 <FaAngleUp className="color" />

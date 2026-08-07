@@ -160,8 +160,8 @@ export function extractOutput(content) {
   let output = "";
 
   if (!isEmpty(content)) {
-    if (typeof content.content === String) {
-      output = formatCode("CodeOutput", content.content);
+    if (typeof content.content === "string") {
+      output = content.content;
     } else {
       const valid_keys = ["stdout", "stderr", "error", "result_repr"];
 

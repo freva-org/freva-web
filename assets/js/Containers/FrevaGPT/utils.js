@@ -2,6 +2,8 @@ import { isEmpty } from "lodash";
 
 import { browserHistory } from "react-router";
 
+import { getCookie } from "../../utils";
+
 import * as constants from "./constants";
 
 export function formatCode(mode, data) {
@@ -151,10 +153,18 @@ export async function fetchWithAuth(url, options = {}) {
    * @returns {function} Fetch call including the given parameters as well as authentication headers
    */
   const token = await getAuthToken();
+  const csrfToken = getCookie("csrftoken");
+
   const headers = { ...options.headers };
+
   if (token) {
     headers["X-Freva-User-Token"] = token;
   }
+
+  if (csrfToken) {
+    headers["X-CSRFToken"] = csrfToken;
+  }
+
   return fetch(url, { ...options, headers });
 }
 
@@ -170,7 +180,7 @@ export async function successfulPing() {
   let pingSuccessful = false;
 
   try {
-    const response = await fetchWithAuth("/api/chatbot/ping");
+    const response = await fetchWithAuth("/api/chatbot/ping/");
     if (response.ok) {
       pingSuccessful = true;
     }
@@ -193,7 +203,7 @@ export async function requestUserThreads(page, query) {
   const returnValues = { threads: [], hasMore: false };
 
   const endpoint = query ? "searchthreads" : "getuserthreads";
-  const response = await fetchWithAuth(`/api/chatbot/${endpoint}`, {
+  const response = await fetchWithAuth(`/api/chatbot/${endpoint}/`, {
     method: "POST",
     body: JSON.stringify({
       num_threads: constants.THREAD_NUMBER,
@@ -253,7 +263,7 @@ export async function requestEditEndpoint(index) {
   // if index == 0 the first element is changed which is equal to starting a new chat
   // so we don't need a history and therefore skip requesting and setting it via the editthread endpoint
   if (index !== 0) {
-    const response = await fetchWithAuth(`/api/chatbot/editthread`, {
+    const response = await fetchWithAuth(`/api/chatbot/editthread/`, {
       method: "POST",
       body: JSON.stringify({
         source_thread_id: grepThreadID(),

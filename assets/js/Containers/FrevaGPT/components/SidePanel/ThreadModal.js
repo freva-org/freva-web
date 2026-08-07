@@ -40,7 +40,7 @@ function ThreadModal({
 
   async function renameThread() {
     if (!isEmpty(newTopic) && newTopic !== element.topic) {
-      const response = await fetchWithAuth(`/api/chatbot/setthreadtopic`, {
+      const response = await fetchWithAuth(`/api/chatbot/setthreadtopic/`, {
         method: "POST",
         body: JSON.stringify({
           thread_id: element.thread_id,
@@ -67,7 +67,7 @@ function ThreadModal({
   }
 
   async function deleteThread() {
-    const response = await fetchWithAuth(`/api/chatbot/deletethread`, {
+    const response = await fetchWithAuth(`/api/chatbot/deletethread/`, {
       method: "POST",
       body: JSON.stringify({
         thread_id: element.thread_id,

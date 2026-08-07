@@ -113,7 +113,7 @@ function FrevaGPT() {
      *
      * @param {string} threadID - ThreadID of conversation which should be loaded
      */
-    const response = await fetchWithAuth(`/api/chatbot/getthread`, {
+    const response = await fetchWithAuth(`/api/chatbot/getthread/`, {
       method: "POST",
       body: JSON.stringify({
         thread_id: threadID,
@@ -150,7 +150,7 @@ function FrevaGPT() {
     // backend always requires a thread id to be send with streamresponse
     // for new conversation without existing thread id -> request new thread id and set it
     if (isEmpty(grepThreadID())) {
-      const response = await fetchWithAuth("/api/chatbot/newthread");
+      const response = await fetchWithAuth("/api/chatbot/newthread/");
 
       if (response.ok) {
         const init_thread_id = await response.json();
@@ -204,7 +204,7 @@ function FrevaGPT() {
      * @param {boolean} dispatchStopMessage - Determines if stop message should be shown
      */
     if (grepThreadID() && loading) {
-      const response = await fetchWithAuth(`/api/chatbot/stop`, {
+      const response = await fetchWithAuth(`/api/chatbot/stop/`, {
         method: "POST",
         body: JSON.stringify({
           thread_id: grepThreadID(),
@@ -386,7 +386,7 @@ function FrevaGPT() {
      * @param {string} input - User input
      */
     // response of a new bot request is streamed
-    const response = await fetchWithAuth(`/api/chatbot/streamresponse`, {
+    const response = await fetchWithAuth(`/api/chatbot/streamresponse/`, {
       method: "POST",
       body: JSON.stringify({
         input,

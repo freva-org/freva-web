@@ -205,6 +205,11 @@ export async function requestUserThreads(page, query) {
   const endpoint = query ? "searchthreads" : "getuserthreads";
   const response = await fetchWithAuth(`/api/chatbot/${endpoint}/`, {
     method: "POST",
+    credentials: "same-origin",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({
       num_threads: constants.THREAD_NUMBER,
       page,
@@ -265,6 +270,11 @@ export async function requestEditEndpoint(index) {
   if (index !== 0) {
     const response = await fetchWithAuth(`/api/chatbot/editthread/`, {
       method: "POST",
+      credentials: "same-origin",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         source_thread_id: grepThreadID(),
         user_index: index,

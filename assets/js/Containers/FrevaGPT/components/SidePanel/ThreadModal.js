@@ -42,6 +42,11 @@ function ThreadModal({
     if (!isEmpty(newTopic) && newTopic !== element.topic) {
       const response = await fetchWithAuth(`/api/chatbot/setthreadtopic/`, {
         method: "POST",
+        credentials: "same-origin",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           thread_id: element.thread_id,
           topic: newTopic,
@@ -69,6 +74,11 @@ function ThreadModal({
   async function deleteThread() {
     const response = await fetchWithAuth(`/api/chatbot/deletethread/`, {
       method: "POST",
+      credentials: "same-origin",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         thread_id: element.thread_id,
       }),

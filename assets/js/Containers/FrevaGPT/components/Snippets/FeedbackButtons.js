@@ -46,6 +46,11 @@ function FeedbackButtons({ elementIndex, givenValue }) {
 
     const response = await fetchWithAuth(`/api/chatbot/userfeedback/`, {
       method: "POST",
+      credentials: "same-origin",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         thread_id: grepThreadID(),
         feedback_index: elementIndex,

@@ -115,6 +115,11 @@ function FrevaGPT() {
      */
     const response = await fetchWithAuth(`/api/chatbot/getthread/`, {
       method: "POST",
+      credentials: "same-origin",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         thread_id: threadID,
       }),
@@ -206,6 +211,11 @@ function FrevaGPT() {
     if (grepThreadID() && loading) {
       const response = await fetchWithAuth(`/api/chatbot/stop/`, {
         method: "POST",
+        credentials: "same-origin",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           thread_id: grepThreadID(),
         }),
@@ -388,6 +398,11 @@ function FrevaGPT() {
     // response of a new bot request is streamed
     const response = await fetchWithAuth(`/api/chatbot/streamresponse/`, {
       method: "POST",
+      credentials: "same-origin",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         input,
         thread_id: grepThreadID(),

@@ -101,4 +101,4 @@ SidePanel.propTypes = {
   setShowThreadHistory: PropTypes.func,
 };
 
-export default SidePanel;
+export default React.memo(SidePanel);

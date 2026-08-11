@@ -1,3 +1,4 @@
+import json
 from urllib.parse import urljoin
 
 import requests
@@ -8,11 +9,17 @@ from django.views import View
 
 class ChatBotProxy(View):
     """ A view to proxy requests to the chatbot API."""
-    def get(self, request, *args, **kwargs):
-        """ Handle GET requests to the chatbot proxy."""
+
+    def extract_params(self, request):
+        """ Extracts url, headers and parameters for request """
         path = request.path
         base_url = urljoin(settings.CHAT_BOT_URL, path)
-        params = request.GET.dict()
+
+        if request.method == "GET":
+            params = request.GET.dict()
+        else:
+            params = json.loads(request.body)
+
         access_token = request.session.get("access_token", ""),
         headers = {
             "X-Freva-User-Token": f"Bearer {access_token[0]}",
@@ -25,11 +32,53 @@ class ChatBotProxy(View):
         params["auth_key"] = settings.CHAT_BOT_AUTH_KEY
         params["freva_config"] = settings.CHAT_BOT_FREVA_CONFIG
 
+        return base_url, headers, params
+
+
+    def get(self, request, *args, **kwrags):
+        """ Handle POST requests to the chatbot proxy."""
+        base_url, headers, params = self.extract_params(request)
+
         try:
             upstream_response = requests.get(
                 base_url[:-1],
                 headers=headers,
                 params=params,
+                stream=True
+            )
+            upstream_response.raise_for_status()
+        except requests.RequestException as e:
+            return StreamingHttpResponse(
+                f"Error while connecting to the external API: {str(e)}",
+                status=502,
+            )
+
+        # Stream the content of the external API to the Django response
+        def stream():
+            """Generator to stream the content."""
+            for chunk in upstream_response.iter_content(chunk_size=8192):
+                if chunk:
+                    yield chunk
+
+        response = StreamingHttpResponse(
+            stream(), content_type=upstream_response.headers.get("Content-Type")
+        )
+        response["Content-Disposition"] = upstream_response.headers.get(
+            "Content-Disposition", "inline"
+        )
+
+        return response
+
+
+    def post(self, request, *args, **kwargs):
+        """ Handle POST requests to the chatbot proxy."""
+        base_url, headers, params = self.extract_params(request)
+
+        try:
+            upstream_response = requests.post(
+                base_url[:-1],
+                headers=headers,
+                json=params,
                 stream=True
             )
             upstream_response.raise_for_status()

@@ -3,8 +3,6 @@ import { useSelector, useDispatch } from "react-redux";
 
 import { Container, Row, Col, Spinner } from "react-bootstrap";
 
-import queryString from "query-string";
-
 import { isEmpty } from "lodash";
 
 import BotHeader from "./components/ChatComponents/BotHeader";
@@ -115,10 +113,17 @@ function FrevaGPT() {
      *
      * @param {string} threadID - ThreadID of conversation which should be loaded
      */
-    const queryObject = { thread_id: threadID };
-    const response = await fetchWithAuth(
-      `/api/chatbot/getthread?` + queryString.stringify(queryObject)
-    );
+    const response = await fetchWithAuth(`/api/chatbot/getthread/`, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        thread_id: threadID,
+      }),
+    });
 
     if (response.ok) {
       const variantArray = await response.json();
@@ -150,7 +155,7 @@ function FrevaGPT() {
     // backend always requires a thread id to be send with streamresponse
     // for new conversation without existing thread id -> request new thread id and set it
     if (isEmpty(grepThreadID())) {
-      const response = await fetchWithAuth("/api/chatbot/newthread");
+      const response = await fetchWithAuth("/api/chatbot/newthread/");
 
       if (response.ok) {
         const init_thread_id = await response.json();
@@ -203,11 +208,18 @@ function FrevaGPT() {
      *
      * @param {boolean} dispatchStopMessage - Determines if stop message should be shown
      */
-    const queryObject = { thread_id: grepThreadID() };
     if (grepThreadID() && loading) {
-      const response = await fetchWithAuth(
-        `/api/chatbot/stop?` + queryString.stringify(queryObject)
-      );
+      const response = await fetchWithAuth(`/api/chatbot/stop/`, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          thread_id: grepThreadID(),
+        }),
+      });
 
       if (!response.ok) {
         const message = await response.json();
@@ -383,16 +395,20 @@ function FrevaGPT() {
      *
      * @param {string} input - User input
      */
-    const queryObject = {
-      input,
-      thread_id: grepThreadID(),
-      chatbot: botModel,
-    };
-
     // response of a new bot request is streamed
-    const response = await fetchWithAuth(
-      `/api/chatbot/streamresponse?` + queryString.stringify(queryObject)
-    ); //, signal);
+    const response = await fetchWithAuth(`/api/chatbot/streamresponse/`, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        input,
+        thread_id: grepThreadID(),
+        chatbot: botModel,
+      }),
+    });
 
     if (response.ok) {
       const localReader = response.body.getReader();

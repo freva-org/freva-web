@@ -17,7 +17,6 @@ function FileItem({ content }) {
           className="bot-shadow"
           role="button"
           onClick={() => setShowImageModal(true)}
-          style={{ maxHeight: "100px", maxWidth: "200px" }}
           src={content.preview_url}
           thumbnail
         />

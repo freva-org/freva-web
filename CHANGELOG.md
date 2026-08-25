@@ -1,6 +1,9 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+##[v2608.0.0]
+### Changed
+- Adapted chatbot requests sending a parameter to POST requests
 ##[v2607.0.0]
 ### Fixed
 - Inspector: Don't send Freva token when probing external zarr stores

@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect } from "react";
 import { Card } from "react-bootstrap";
 
 import { isEmpty } from "lodash";
@@ -10,7 +10,7 @@ import "highlight.js/styles/atom-one-dark.css";
 import { extractOutput } from "../../utils";
 
 function CodeOutputBlock({ content }) {
-  const output = useCallback(extractOutput(content), []);
+  const output = extractOutput(content);
 
   useEffect(() => {
     // hilights all code elements

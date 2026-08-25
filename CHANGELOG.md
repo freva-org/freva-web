@@ -1,6 +1,11 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+##[v2608.1.0]
+### Added
+- Added new components for handling file items send by bot
+### Changed
+-  Adapted CodeOutput to handle CodeOutput as object containing preview urls 
 ##[v2608.0.0]
 ### Changed
 - Adapted chatbot requests sending a parameter to POST requests

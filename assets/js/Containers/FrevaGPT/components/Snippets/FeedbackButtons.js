@@ -44,7 +44,7 @@ function FeedbackButtons({ elementIndex, givenValue }) {
       setThumb("");
     }
 
-    const response = await fetchWithAuth(`/api/chatbot/userfeedback/`, {
+    const response = await fetchWithAuth(`/api/chatbot/userfeedback`, {
       method: "POST",
       credentials: "same-origin",
       headers: {

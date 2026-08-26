@@ -180,7 +180,7 @@ export async function successfulPing() {
   let pingSuccessful = false;
 
   try {
-    const response = await fetchWithAuth("/api/chatbot/ping/");
+    const response = await fetchWithAuth("/api/chatbot/ping");
     if (response.ok) {
       pingSuccessful = true;
     }
@@ -203,7 +203,7 @@ export async function requestUserThreads(page, query) {
   const returnValues = { threads: [], hasMore: false };
 
   const endpoint = query ? "searchthreads" : "getuserthreads";
-  const response = await fetchWithAuth(`/api/chatbot/${endpoint}/`, {
+  const response = await fetchWithAuth(`/api/chatbot/${endpoint}`, {
     method: "POST",
     credentials: "same-origin",
     headers: {
@@ -268,7 +268,7 @@ export async function requestEditEndpoint(index) {
   // if index == 0 the first element is changed which is equal to starting a new chat
   // so we don't need a history and therefore skip requesting and setting it via the editthread endpoint
   if (index !== 0) {
-    const response = await fetchWithAuth(`/api/chatbot/editthread/`, {
+    const response = await fetchWithAuth(`/api/chatbot/editthread`, {
       method: "POST",
       credentials: "same-origin",
       headers: {

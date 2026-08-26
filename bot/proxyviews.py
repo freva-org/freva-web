@@ -13,7 +13,7 @@ class ChatBotProxy(View):
     def extract_params(self, request):
         """ Extracts url, headers and parameters for request """
         path = request.path
-        base_url = urljoin(settings.CHAT_BOT_URL, path)
+        base_url = urljoin(settings.CHAT_BOT_URL, path, "/")
 
         if request.method == "GET":
             params = request.GET.dict()

@@ -274,6 +274,7 @@ export async function requestEditEndpoint(index) {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
+        "X-Freva-Thread-Id": grepThreadID(),
       },
       body: JSON.stringify({
         source_thread_id: grepThreadID(),

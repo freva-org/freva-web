@@ -50,6 +50,7 @@ function FeedbackButtons({ elementIndex, givenValue }) {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
+        "X-Freva-Thread-Id": grepThreadID(),
       },
       body: JSON.stringify({
         thread_id: grepThreadID(),

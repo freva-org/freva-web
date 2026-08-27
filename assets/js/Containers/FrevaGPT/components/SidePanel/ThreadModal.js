@@ -46,6 +46,7 @@ function ThreadModal({
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
+          "X-Freva-Thread-Id": element.thread_id,
         },
         body: JSON.stringify({
           thread_id: element.thread_id,
@@ -78,6 +79,7 @@ function ThreadModal({
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
+        "X-Freva-Thread-Id": element.thread_id,
       },
       body: JSON.stringify({
         thread_id: element.thread_id,

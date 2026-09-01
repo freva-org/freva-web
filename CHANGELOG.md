@@ -1,7 +1,7 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
-##[v2608.1.0]
+##[v2609.0.0]
 ### Added
 - Added new components for handling file items send by bot
 ### Changed

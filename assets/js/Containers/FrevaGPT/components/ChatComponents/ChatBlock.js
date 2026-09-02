@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import PropTypes from "prop-types";
 
@@ -19,7 +19,6 @@ import AssistantBlock from "./AssistantBlock";
 function ChatBlock({ onEditInput }) {
   const [showModal, setShowModal] = useState(false);
   const [image, setImage] = useState("");
-
   const conversation = useSelector(
     (state) => state.frevaGPTReducer.conversation
   );
@@ -145,6 +144,7 @@ function ChatBlock({ onEditInput }) {
       case "ToolCall":
       case "ToolOutput":
         return null;
+
       case "Image":
         return renderImage(element[0]);
 
@@ -182,7 +182,6 @@ function ChatBlock({ onEditInput }) {
             return renderChatComponents(element);
           })}
         </Col>
-
         <Modal
           size="xl"
           aria-labelledby="contained-modal-title-vcenter"

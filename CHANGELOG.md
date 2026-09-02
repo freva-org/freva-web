@@ -1,6 +1,11 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+##[v2609.1.0]
+### Added
+- Toast showing when previous code within old conversations is re-executed
+### Fixed
+- ServerHints now handled properly and saved as individual objects
 ##[v2609.0.0]
 ### Added
 - Added new components for handling file items send by bot

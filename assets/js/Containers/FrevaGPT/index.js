@@ -466,6 +466,9 @@ function FrevaGPT() {
         })
       );
     }
+    // if errors occur on the backend and no further serverHint with execution info is send
+    // the toast will be hidden when the stream ends
+    setExecutionRunning(false);
   }
 
   /*-----------------------------------------------------------------------------------------------

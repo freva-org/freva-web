@@ -17,6 +17,7 @@ import BotLoadingSpinner from "./components/Snippets/BotLoadingSpinner";
 import ScrollButtons from "./components/Snippets/ScrollButtons";
 import BotUnavailableAlert from "./components/Snippets/BotUnavailableAlert";
 import MessageToast from "./components/Snippets/MessageToast";
+import ExecutionToast from "./components/Snippets/ExecutionToast";
 
 import {
   fetchWithAuth,
@@ -63,6 +64,7 @@ function FrevaGPT() {
   const [botOkay, setBotOkay] = useState(undefined);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [showScrollButtons, setShowScrollButtons] = useState(false);
+  const [executionRunning, setExecutionRunning] = useState();
 
   const [showThreadHistory, setShowThreadHistory] = useState(false);
   const botModel = useSelector((state) => state.frevaGPTReducer.botModel);
@@ -291,16 +293,26 @@ function FrevaGPT() {
      *
      * @param {object} varObj - Object containing current varaint and content
      */
-    // set thread id if no id given or newly provided id differs from current one
-    if (
-      varObj.variant === "ServerHint" &&
-      Object.keys(varObj.content).includes("thread_id")
-    ) {
-      if (
-        grepThreadID() === "" ||
-        grepThreadID() !== varObj.content.thread_id
-      ) {
-        updateUrl(`?thread_id=${varObj.content.thread_id}`);
+    // possible content of ServerHint:
+    // - details regarding stream status
+    // - heartbeat with details of cpu usage
+    // - thread_id
+    // - status of code execution (of old conversation to refresh context)
+
+    if (varObj.variant === "ServerHint") {
+      // handle thread_id
+      if (Object.keys(varObj.content).includes("thread_id")) {
+        if (
+          grepThreadID() === "" ||
+          grepThreadID() !== varObj.content.thread_id
+        ) {
+          updateUrl(`?thread_id=${varObj.content.thread_id}`);
+        }
+      }
+
+      // handle code execution status
+      if (Object.keys(varObj.content).includes("busy")) {
+        setExecutionRunning(varObj.content.busy);
       }
     }
   }
@@ -319,11 +331,20 @@ function FrevaGPT() {
       // if object has not same variant, add answer to conversation and override object
       if (varObj.variant !== parsedData.variant) {
         addNewVariant(iVarObj);
+        handleServerHint(parsedData);
         iVarObj = parsedData;
       } else {
         // if object has same variant, add content
-        iVarObj.content += parsedData.content;
-        addToExistingVariant(iVarObj);
+        // eslint-disable-next-line no-lonely-if
+        if (parsedData.variant === "ServerHint") {
+          // handling multiple ServerHints (e.g. Heartbeat) to be saved as separated objects
+          addNewVariant(iVarObj);
+          handleServerHint(parsedData);
+          iVarObj = parsedData;
+        } else {
+          iVarObj.content += parsedData.content;
+          addToExistingVariant(iVarObj);
+        }
       }
     } else {
       // object is empty so add content
@@ -451,6 +472,9 @@ function FrevaGPT() {
         })
       );
     }
+    // if errors occur on the backend and no further serverHint with execution info is send
+    // the toast will be hidden when the stream ends
+    setExecutionRunning(false);
   }
 
   /*-----------------------------------------------------------------------------------------------
@@ -508,6 +532,8 @@ function FrevaGPT() {
             {showSuggestions ? (
               <Suggestions handleSubmit={handleSubmit} />
             ) : null}
+
+            <ExecutionToast showToast={executionRunning} />
             <BotInput
               loading={loading}
               handleSubmit={handleSubmit}

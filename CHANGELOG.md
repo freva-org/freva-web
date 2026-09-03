@@ -1,6 +1,9 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+##[v2609.1.1]
+### Changed
+- Unified color, size and positioning of icons for chatbot
 ##[v2609.1.0]
 ### Added
 - Toast showing when previous code within old conversations is re-executed

@@ -218,15 +218,7 @@ export async function fetchWithAuth(url, options = {}) {
     headers["X-CSRFToken"] = csrfToken;
   }
 
-  // adding trailing slash for development environment
-  let updated_url = "";
-  if (process.env.NODE_ENV && process.env.NODE_ENV === "development") {
-    updated_url = `${url}/`;
-  } else {
-    updated_url = url;
-  }
-
-  return fetch(updated_url, { ...options, headers });
+  return fetch(url, { ...options, headers });
 }
 
 /*-------------------------------------------------------------------------------------------------

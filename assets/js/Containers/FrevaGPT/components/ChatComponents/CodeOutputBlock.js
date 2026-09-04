@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from "react";
 
+import { isEmpty } from "lodash";
+
 import PropTypes from "prop-types";
 import hljs from "highlight.js";
 
 import { Collapse } from "react-bootstrap";
 import { FaAngleDown, FaAngleUp } from "react-icons/fa";
 
-import { formatCode } from "../../utils";
 import "highlight.js/styles/atom-one-dark.css";
+import { extractOutput } from "../../utils";
 
 function CodeOutputBlock({ content }) {
   const [showOutput, setShowOutput] = useState(false);
+  const output = extractOutput(content);
 
   useEffect(() => {
     // hilights all code elements
@@ -21,15 +24,10 @@ function CodeOutputBlock({ content }) {
     });
   }, []);
 
-  function extractElements(content, variant) {
-    // should be only one resulting item
-    return content.filter((elem) => elem.variant === variant)[0];
-  }
-
   function renderCodeOutput(content) {
-    if (content.length > 1) {
+    if (!isEmpty(output)) {
       return (
-        <div className="p-0 m-0" key={`${content[1].id}-codeoutput`}>
+        <div className="p-0 m-0" key={`${content.id}-codeoutput`}>
           <div
             className="bc-output-header"
             role="button"
@@ -40,10 +38,7 @@ function CodeOutputBlock({ content }) {
           <Collapse in={showOutput}>
             <pre className="codeoutputblock m-0">
               <code>
-                {formatCode(
-                  "CodeOutput",
-                  extractElements(content, "CodeOutput").content[0]
-                )}
+                {output}
               </code>
             </pre>
           </Collapse>
@@ -54,11 +49,11 @@ function CodeOutputBlock({ content }) {
     }
   }
 
-  return <>{renderCodeOutput(content)}</>;
+  return renderCodeOutput(content);
 }
 
 CodeOutputBlock.propTypes = {
-  content: PropTypes.array,
+  content: PropTypes.object,
 };
 
 export default CodeOutputBlock;

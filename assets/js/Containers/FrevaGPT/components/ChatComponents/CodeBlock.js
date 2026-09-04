@@ -7,16 +7,37 @@ import PropTypes from "prop-types";
 import hljs from "highlight.js";
 import "highlight.js/styles/stackoverflow-light.css";
 
-import { formatCode, setGivenFeedbackValue } from "../../utils";
+import { isEmpty, has } from "lodash";
+
+import {
+  formatCode,
+  setGivenFeedbackValue,
+  extractElements,
+} from "../../utils";
 
 import FeedbackButtons from "../Snippets/FeedbackButtons";
 import { setMessageToastContent, setShowMessageToast } from "../../actions";
 
 import CodeOutputBlock from "./CodeOutputBlock";
+import FilePreview from "./FilePreview";
 
 function CodeBlock({ showCode, content }) {
   const [localShowCode, setLocalShowCode] = useState();
   const dispatch = useDispatch();
+
+  const codeContent = extractElements(content, "Code");
+  const codeOutput = extractElements(content, "CodeOutput");
+  let fileOutput = [];
+
+  if (!isEmpty(codeOutput)) {
+    try {
+      if (has(codeOutput.content, "created_files")) {
+        fileOutput = codeOutput.content.created_files;
+      }
+    } catch (err) {
+      //pass
+    }
+  }
 
   useEffect(() => {
     setLocalShowCode(showCode);
@@ -30,11 +51,6 @@ function CodeBlock({ showCode, content }) {
       }
     });
   }, []);
-
-  function extractElements(content, variant) {
-    // should be only one resulting item
-    return content.filter((elem) => elem.variant === variant)[0];
-  }
 
   function copyCode() {
     const code = formatCode("Code", extractElements(content, "Code").content);
@@ -90,19 +106,14 @@ function CodeBlock({ showCode, content }) {
             <div className="bc-code-margin"></div>
             <pre className="m-0 codeblock">
               <code className="language-python">
-                {
-                  formatCode(
-                    "Code",
-                    extractElements(content, "Code").content
-                  )[0]
-                }
+                {formatCode("Code", codeContent.content)}
               </code>
             </pre>
           </div>
-
-          <CodeOutputBlock content={content} />
+          <CodeOutputBlock content={codeOutput} />
         </div>
       </Collapse>
+      <FilePreview content={fileOutput} />
     </div>
   );
 }
@@ -113,3 +124,6 @@ CodeBlock.propTypes = {
 };
 
 export default CodeBlock;
+
+//       <FilePreview content={fileOutput} />           <CodeOutputBlock content={codeOutput} />
+

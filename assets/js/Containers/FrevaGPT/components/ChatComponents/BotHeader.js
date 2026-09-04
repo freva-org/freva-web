@@ -5,7 +5,7 @@ import { Button, Form, Row, Col, Container } from "react-bootstrap";
 
 import PropTypes from "prop-types";
 
-import { FaRegCommentAlt, FaHistory, FaCode } from "react-icons/fa";
+import { FaRegCommentAlt, FaHistory } from "react-icons/fa";
 
 import { setBotModel, toggleShowCode } from "../../actions";
 
@@ -20,7 +20,7 @@ function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
   useEffect(() => {
     async function fetchBotModels() {
       const getBotModels = async () => {
-        const response = await fetchWithAuth(`/api/chatbot/availablechatbots?`);
+        const response = await fetchWithAuth(`/api/chatbot/availablechatbots/`);
         if (response.ok) {
           setBotModelList(await response.json());
         } else {
@@ -40,6 +40,7 @@ function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
   const [botOkay, setBotOkay] = useState(undefined);
   const [botModelList, setBotModelList] = useState([]);
   const [hideBotModelList, setHideBotModelList] = useState(true);
+  const [localBot, setLocalBot] = useState(false);
 
   useBotSelect(hideBotModelList, setHideBotModelList, hideBotModelList);
 
@@ -47,10 +48,20 @@ function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
     setShowThreadHistory(!showThreadHistory);
   }
 
+  function toggleLocalModel() {
+    const newValue = !localBot;
+    setLocalBot(newValue);
+    if (newValue) {
+      dispatch(setBotModel("local"));
+    } else {
+      dispatch(setBotModel(""));
+    }
+  }
+
   return (
     <Container className="mb-2">
       <Row>
-        <Col md={5}>
+        <Col md={2}>
           <h2>ClimateClaw</h2>
         </Col>
 
@@ -72,20 +83,24 @@ function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
           ) : null}
         </Col>
 
-        <Col md={5}>
+        <Col md={8}>
           {botOkay ? (
             <Row>
-              <Col>
-                <Button
-                  variant={showCode ? "outline-secondary" : "secondary"}
+              <Col className="align-content-center">
+                <Form.Switch
+                  type="switch"
+                  id="model-switch"
+                  label="Self-hosted model"
+                  onClick={toggleLocalModel}
+                />
+              </Col>
+              <Col className="align-content-center">
+                <Form.Switch
+                  type="switch"
+                  id="code-switch"
+                  label="Hide code"
                   onClick={() => dispatch(toggleShowCode(showCode))}
-                  className="me-1 bot-shadow br-8 w-100"
-                >
-                  <FaCode className="me-1" />
-                  <span className="d-none d-sm-inline">
-                    {showCode ? "Hide Code" : "Show Code"}
-                  </span>
-                </Button>
+                />
               </Col>
               <Col>
                 <Button

@@ -1,8 +1,8 @@
-import queryString from "query-string";
-
 import { isEmpty } from "lodash";
 
 import { browserHistory } from "react-router";
+
+import { getCookie } from "../../utils";
 
 import * as constants from "./constants";
 
@@ -53,6 +53,8 @@ export function truncate(value) {
 export function resizeInputField(id) {
   /**
    * Resizes textarea
+   *
+   * @param {string} id - Name of input field
    */
   const inputField = document.getElementById(id);
   const style = inputField.style;
@@ -62,6 +64,18 @@ export function resizeInputField(id) {
   style.height = `${inputField.scrollHeight}px`;
 }
 
+export function resetInputField(id) {
+  /**
+   * Resizes input field to singulat height
+   *
+   * @param {string} id - Id of input field
+   */
+  const inputField = document.getElementById(id);
+  const style = inputField.style;
+
+  style.height = "calc(1.5em + .75rem + 2px)";
+}
+
 function isLastPage(totalNumber, currentPageNumber) {
   /**
    * Checks if given page is last page by calculating the number of pages
@@ -69,7 +83,7 @@ function isLastPage(totalNumber, currentPageNumber) {
    *
    * @param {number} totalNumber - Total number of threads
    * @param {number} currentPageNumber - Current page number to compare to total number of pages
-   * @return {boolean} Boolean indicating if current page is last page
+   * @returns {boolean} Boolean indicating if current page is last page
    */
   if (totalNumber === 0) {
     return true;
@@ -84,7 +98,7 @@ export function setGivenFeedbackValue(variantObject) {
    * Returns feedback value if feedback in given variantObject
    *
    * @param {object} variantObject - Object containing chat variant and content (optionally also feedback)
-   * @return {string} String containing feedback value ("up" or "down")
+   * @returns {string} String containing feedback value ("up" or "down")
    */
   let feedbackValue = "";
 
@@ -99,7 +113,7 @@ export function grepThreadID() {
   /**
    * Extracts thread id from current URL
    *
-   * @return {string} String containing extracted thread id or nothing
+   * @returns {string} String containing extracted thread id or nothing
    */
   const givenQueryParams = browserHistory.getCurrentLocation().query;
   if (
@@ -113,10 +127,56 @@ export function grepThreadID() {
 }
 
 export function updateUrl(searchParameter) {
+  /**
+   * Updates url with given search parameters
+   *
+   * @param {object} searchParameter - Object of serach parameters
+   */
   browserHistory.push({
     pathname: "/chatbot/",
     search: searchParameter,
   });
+}
+
+export function extractElements(content, variant) {
+  /**
+   * Extracts element from given object based on given variant
+   *
+   * @param {object} content - Object containing bot results
+   * @param {string} variant - String containing variant name
+   * @returns {object} - Object containing filtered results
+   */
+  // should be only one resulting item
+  return content.filter((elem) => elem.variant === variant)[0];
+}
+
+export function extractOutput(content) {
+  /***
+   * Extracts CodeOutput based on given content type
+   *
+   * @param {object} content - Object containing output details
+   * @returns {string} - String containing formatted output
+   */
+  let output = "";
+
+  if (!isEmpty(content)) {
+    if (typeof content.content === "string") {
+      output = content.content;
+    } else {
+      const valid_keys = ["stdout", "stderr", "error", "result_repr"];
+
+      for (const [key, value] of Object.entries(content.content)) {
+        if (valid_keys.includes(key) && value !== "") {
+          if (output === "") {
+            output += value;
+          } else {
+            output += "\n" + value;
+          }
+        }
+      }
+    }
+  }
+  return output;
 }
 
 /*-------------------------------------------------------------------------------------------------
@@ -146,10 +206,18 @@ export async function fetchWithAuth(url, options = {}) {
    * @returns {function} Fetch call including the given parameters as well as authentication headers
    */
   const token = await getAuthToken();
+  const csrfToken = getCookie("csrftoken");
+
   const headers = { ...options.headers };
+
   if (token) {
     headers["X-Freva-User-Token"] = token;
   }
+
+  if (csrfToken) {
+    headers["X-CSRFToken"] = csrfToken;
+  }
+
   return fetch(url, { ...options, headers });
 }
 
@@ -165,7 +233,7 @@ export async function successfulPing() {
   let pingSuccessful = false;
 
   try {
-    const response = await fetchWithAuth("/api/chatbot/ping");
+    const response = await fetchWithAuth("/api/chatbot/ping/");
     if (response.ok) {
       pingSuccessful = true;
     }
@@ -186,18 +254,21 @@ export async function requestUserThreads(page, query) {
    * if there are more threads available
    */
   const returnValues = { threads: [], hasMore: false };
-  const queryParameter = {
-    num_threads: constants.THREAD_NUMBER,
-    page,
-  };
 
   const endpoint = query ? "searchthreads" : "getuserthreads";
-  if (query) {
-    queryParameter.query = query;
-  }
-  const response = await fetchWithAuth(
-    `/api/chatbot/${endpoint}?` + queryString.stringify(queryParameter)
-  );
+  const response = await fetchWithAuth(`/api/chatbot/${endpoint}/`, {
+    method: "POST",
+    credentials: "same-origin",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      num_threads: constants.THREAD_NUMBER,
+      page,
+      query: query ? query : "",
+    }),
+  });
 
   if (response.ok) {
     const values = await response.json();
@@ -245,18 +316,23 @@ export async function requestEditEndpoint(index) {
    * @param {number} index - Integer value of changed user input within conversation
    * @returns {object} Object containing conversation history until changed user input and new thread id
    */
-  const queryObject = {
-    source_thread_id: grepThreadID(),
-    user_index: index,
-  };
 
   let results = { history: [], new_thread_id: "" };
   // if index == 0 the first element is changed which is equal to starting a new chat
   // so we don't need a history and therefore skip requesting and setting it via the editthread endpoint
   if (index !== 0) {
-    const response = await fetchWithAuth(
-      `/api/chatbot/editthread?` + queryString.stringify(queryObject)
-    );
+    const response = await fetchWithAuth(`/api/chatbot/editthread/`, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        source_thread_id: grepThreadID(),
+        user_index: index,
+      }),
+    });
 
     // as soon as this request is finished and we got the answers
     if (response.ok) {

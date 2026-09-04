@@ -8,6 +8,8 @@ jobs:
     defaults:
       run:
         shell: bash -l {0}
+    env:
+        MAMBA_USE_SHARDED_REPODATA: "false"
     steps:
       - name: Checkout
         uses: actions/checkout@v4

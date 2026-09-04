@@ -1,6 +1,22 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+##[v2609.1.1]
+### Changed
+- Unified color, size and positioning of icons for chatbot
+##[v2609.1.0]
+### Added
+- Toast showing when previous code within old conversations is re-executed
+### Fixed
+- ServerHints now handled properly and saved as individual objects
+##[v2609.0.0]
+### Added
+- Added new components for handling file items send by bot
+### Changed
+-  Adapted CodeOutput to handle CodeOutput as object containing preview urls 
+##[v2608.0.0]
+### Changed
+- Adapted chatbot requests sending a parameter to POST requests
 ##[v2607.0.0]
 ### Fixed
 - Inspector: Don't send Freva token when probing external zarr stores

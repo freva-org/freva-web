@@ -226,6 +226,22 @@ footer h4 {
   border-radius: 8px;
 }
 
+.br-8-l {
+  border-radius: 8px 0 0 8px;
+}
+
+.br-8-t {
+  border-radius: 8px 8px 0 0;
+}
+
+.br-8-tl {
+  border-radius: 8px 0 0 0;
+}
+
+.br-8-b {
+  border-radius: 0 0 8px 8px;
+}
+
 .bot-hb-l {
   width: 8rem;
 }

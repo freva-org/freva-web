@@ -29,17 +29,17 @@ function CodeOutputBlock({ content }) {
       return (
         <div className="p-0 m-0" key={`${content.id}-codeoutput`}>
           <div
-            className="bc-output-header"
+            className={`bc-output-header ${showOutput ? "" : "br-8-b"}`}
             role="button"
             onClick={() => setShowOutput(!showOutput)}
           >
             Output {showOutput ? <FaAngleUp /> : <FaAngleDown />}
           </div>
           <Collapse in={showOutput}>
-            <pre className="codeoutputblock m-0">
-              <code>
-                {output}
-              </code>
+            <pre
+              className={`codeoutputblock m-0 ${showOutput ? "br-8-b" : ""}`}
+            >
+              <code>{output}</code>
             </pre>
           </Collapse>
         </div>

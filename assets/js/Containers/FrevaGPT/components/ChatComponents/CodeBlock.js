@@ -82,14 +82,12 @@ function CodeBlock({ showCode, content }) {
   }
 
   return (
-    <div className="br-8 mb-3">
-      <div className="d-flex justify-content-between bc-code-header align-items-center">
+    <div className="mb-3">
+      <div
+        className={`d-flex justify-content-between bc-code-header align-items-center ${localShowCode ? "br-8-t" : "br-8"}`}
+      >
         <div
-          className={
-            localShowCode
-              ? "p-2 bc-code-body bc-code-header-tab"
-              : "p-2 bc-code-body"
-          }
+          className={`p-2 bc-code-body ${localShowCode ? "bc-code-header-tab br-8-tl" : "br-8-l"}`}
           role="button"
           onClick={() => {
             setLocalShowCode(!localShowCode);
@@ -102,7 +100,9 @@ function CodeBlock({ showCode, content }) {
 
       <Collapse in={localShowCode} className="bn mb-3">
         <div className="p-0 m-0 border-bottom" key={`${content[0].id}-code`}>
-          <div className="d-flex bc-code-body">
+          <div
+            className={`d-flex bc-code-body ${isEmpty(codeOutput.content) ? "br-8-b" : ""}`}
+          >
             <div className="bc-code-margin"></div>
             <pre className="m-0 codeblock">
               <code className="language-python">

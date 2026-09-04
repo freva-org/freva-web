@@ -100,7 +100,7 @@ function CodeBlock({ showCode, content }) {
         {localShowCode ? renderCodeOptions() : null}
       </div>
 
-      <Collapse in={localShowCode} className="bn">
+      <Collapse in={localShowCode} className="bn mb-3">
         <div className="p-0 m-0 border-bottom" key={`${content[0].id}-code`}>
           <div className="d-flex bc-code-body">
             <div className="bc-code-margin"></div>
@@ -124,6 +124,3 @@ CodeBlock.propTypes = {
 };
 
 export default CodeBlock;
-
-//       <FilePreview content={fileOutput} />           <CodeOutputBlock content={codeOutput} />
-

@@ -101,7 +101,7 @@ function CodeBlock({ showCode, content }) {
       <Collapse in={localShowCode} className="bn mb-3">
         <div className="p-0 m-0 border-bottom" key={`${content[0].id}-code`}>
           <div
-            className={`d-flex bc-code-body ${(codeOutput && isEmpty(codeOutput.content)) ? "br-8-b bot-shadow" : ""}`}
+            className={`d-flex bc-code-body ${codeOutput && isEmpty(codeOutput.content) ? "br-8-b bot-shadow" : ""}`}
           >
             <div className="bc-code-margin"></div>
             <pre className="m-0 codeblock">

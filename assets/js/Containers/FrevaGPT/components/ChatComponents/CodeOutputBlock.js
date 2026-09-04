@@ -29,7 +29,7 @@ function CodeOutputBlock({ content }) {
       return (
         <div className="p-0 m-0" key={`${content.id}-codeoutput`}>
           <div
-            className={`bc-output-header ${showOutput ? "" : "br-8-b"}`}
+            className={`bc-output-header ${showOutput ? "" : "br-8-b bot-shadow"}`}
             role="button"
             onClick={() => setShowOutput(!showOutput)}
           >
@@ -37,7 +37,7 @@ function CodeOutputBlock({ content }) {
           </div>
           <Collapse in={showOutput}>
             <pre
-              className={`codeoutputblock m-0 ${showOutput ? "br-8-b" : ""}`}
+              className={`codeoutputblock m-0 ${showOutput ? "br-8-b bot-shadow" : ""}`}
             >
               <code>{output}</code>
             </pre>

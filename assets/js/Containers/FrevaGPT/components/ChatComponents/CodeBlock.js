@@ -84,7 +84,7 @@ function CodeBlock({ showCode, content }) {
   return (
     <div className="mb-3">
       <div
-        className={`d-flex justify-content-between bc-code-header align-items-center ${localShowCode ? "br-8-t" : "br-8"}`}
+        className={`d-flex justify-content-between bc-code-header align-items-center ${localShowCode ? "br-8-t" : "br-8 bot-shadow"}`}
       >
         <div
           className={`p-2 bc-code-body ${localShowCode ? "bc-code-header-tab br-8-tl" : "br-8-l"}`}
@@ -101,7 +101,7 @@ function CodeBlock({ showCode, content }) {
       <Collapse in={localShowCode} className="bn mb-3">
         <div className="p-0 m-0 border-bottom" key={`${content[0].id}-code`}>
           <div
-            className={`d-flex bc-code-body ${isEmpty(codeOutput.content) ? "br-8-b" : ""}`}
+            className={`d-flex bc-code-body ${isEmpty(codeOutput.content) ? "br-8-b bot-shadow" : ""}`}
           >
             <div className="bc-code-margin"></div>
             <pre className="m-0 codeblock">

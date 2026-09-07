@@ -64,7 +64,10 @@ function FrevaGPT() {
   const [botOkay, setBotOkay] = useState(undefined);
   const [showSuggestions, setShowSuggestions] = useState(true);
   const [showScrollButtons, setShowScrollButtons] = useState(false);
-  const [executionRunning, setExecutionRunning] = useState();
+  const [executionRunning, setExecutionRunning] = useState({
+    status: false,
+    message: "",
+  });
 
   const [showThreadHistory, setShowThreadHistory] = useState(false);
   const botModel = useSelector((state) => state.frevaGPTReducer.botModel);
@@ -310,7 +313,10 @@ function FrevaGPT() {
 
       // handle code execution status
       if (Object.keys(varObj.content).includes("busy")) {
-        setExecutionRunning(varObj.content.busy);
+        setExecutionRunning({
+          status: varObj.content.busy,
+          message: varObj.content.detail,
+        });
       }
     }
   }
@@ -468,7 +474,7 @@ function FrevaGPT() {
     }
     // if errors occur on the backend and no further serverHint with execution info is send
     // the toast will be hidden when the stream ends
-    setExecutionRunning(false);
+    setExecutionRunning({ status: false, message: "" });
   }
 
   /*-----------------------------------------------------------------------------------------------
@@ -527,7 +533,7 @@ function FrevaGPT() {
               <Suggestions handleSubmit={handleSubmit} />
             ) : null}
 
-            <ExecutionToast showToast={executionRunning} />
+            <ExecutionToast details={executionRunning} />
             <BotInput
               loading={loading}
               handleSubmit={handleSubmit}

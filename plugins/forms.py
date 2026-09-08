@@ -163,7 +163,9 @@ class PluginForm(forms.Form):
         self._workdir = Path(pm.config.get("base_dir_location"))
 
         super(PluginForm, self).__init__(*args, **kwargs)
-
+        # shallow copy to avoid modifying the wrapper's configuration when
+        # formatting initial values
+        self.initial = self.initial.copy()
         # set the password field
         self.fields["password_hidden"] = PasswordField(uid=uid, request=request)
 
@@ -233,6 +235,12 @@ class PluginForm(forms.Form):
                     ),
                 )
             else:
+                value = self.initial.get(key)
+                # note: String with enabled max_items means List in freva_legacy.
+                # So serialize multi-value parameters for the text input in case 
+                # you see any number more than max_items=1
+                if param.max_items > 1 and isinstance(value, list):
+                    self.initial[key] = param.to_str(value)
                 self.fields[key] = forms.CharField(
                     required=required, help_text=help_str
                 )

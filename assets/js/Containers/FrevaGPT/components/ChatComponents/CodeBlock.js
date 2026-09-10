@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { Collapse, Button } from "react-bootstrap";
-import { FaAngleDown, FaAngleUp, FaRegCopy } from "react-icons/fa";
+import { FaAngleDown, FaAngleUp, FaPython, FaRegCopy } from "react-icons/fa";
 
 import PropTypes from "prop-types";
 import hljs from "highlight.js";
@@ -93,7 +93,7 @@ function CodeBlock({ showCode, content }) {
             setLocalShowCode(!localShowCode);
           }}
         >
-          Code {localShowCode ? <FaAngleUp /> : <FaAngleDown />}
+          <FaPython /> Code {localShowCode ? <FaAngleUp /> : <FaAngleDown />}
         </div>
         {localShowCode ? renderCodeOptions() : null}
       </div>

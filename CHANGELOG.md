@@ -1,6 +1,9 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+##[v2609.1.2]
+### Fixed
+- Plugin: serialize multi-value text parameters in plugin forms
 ##[v2609.1.1]
 ### Changed
 - Unified color, size and positioning of icons for chatbot

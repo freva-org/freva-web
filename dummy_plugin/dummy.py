@@ -49,6 +49,13 @@ class DummyPlugin(PluginAbstract):
             mandatory=True,
             help="A mandatory string with a default",
         ),
+        # List (string + max_item>1)
+        String(
+            name="selmon",
+            max_items=12,
+            default="all",
+            help="Select month from XCES.",
+        ),
         # Float
         Float(
             name="other",

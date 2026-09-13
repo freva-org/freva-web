@@ -158,7 +158,7 @@ run: runrest runfrontend runserver
 lint: setup-node
 	npm run lint-format
 	npm run lint
-	isort -c --profile black -t py312 .
+	isort -c --profile black -t py312 --extend-skip docker/config .
 
 tests: setup-node
 	npm run build-production

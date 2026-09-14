@@ -1,9 +1,12 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
-##[v20609.2.0]
+##[v2609.2.0]
 ### Added
 - Added additional headers to provide thread_id and bot model to backend
+##[v2609.1.1]
+### Changed
+- Unified color, size and positioning of icons for chatbot
 ##[v2609.1.0]
 ### Added
 - Toast showing when previous code within old conversations is re-executed

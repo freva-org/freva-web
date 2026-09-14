@@ -62,23 +62,27 @@ function UserInputBlock({ content, onEdit }) {
   }
 
   return (
-    <Col md={USER_INPUT_STYLE} key={`${content.user_index}-user`}>
+    <Col
+      md={USER_INPUT_STYLE}
+      key={`${content.user_index}-user`}
+      className="mb-3"
+    >
       <Card className="bot-shadow br-8 card-body border-0 border-bottom bot-bg-lg">
         {renderInput
           ? renderInputComponent()
           : editedInput
             ? editedInput
             : content.content}
+        <Col className="d-flex justify-content-end">
+          <FaEdit
+            onClick={() => setRenderInput(true)}
+            role="button"
+            size="20"
+            className="mt-2"
+            color="grey"
+          />
+        </Col>
       </Card>
-
-      <div className="w-100 d-flex justify-content-end p-0 h-5">
-        <FaEdit
-          onClick={() => setRenderInput(true)}
-          role="button"
-          className="mt-2"
-          color="grey"
-        />
-      </div>
     </Col>
   );
 }

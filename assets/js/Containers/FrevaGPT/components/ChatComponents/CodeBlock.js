@@ -79,12 +79,12 @@ function CodeBlock({ showCode, content }) {
               localToggleShowCode();
             }}
           >
-            <strong className="color">Code</strong>
+            <strong className="text-secondary">Code</strong>
             <span>
               {localShowCode ? (
-                <FaAngleUp className="color" />
+                <FaAngleUp color="grey" size="20" />
               ) : (
-                <FaAngleDown className="color" />
+                <FaAngleDown color="grey" size="20" />
               )}
             </span>
           </Button>
@@ -102,7 +102,7 @@ function CodeBlock({ showCode, content }) {
                   python
                   <Button variant="link" onClick={copyCode}>
                     <span>
-                      <FaRegCopy className="color" />
+                      <FaRegCopy color="grey" size="20" />
                     </span>
                   </Button>
                 </div>

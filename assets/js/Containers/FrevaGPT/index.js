@@ -431,7 +431,7 @@ function FrevaGPT() {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
-        "x-Freva-Thread-Id": grepThreadID(),
+        "X-Freva-Thread-Id": grepThreadID(),
         "X-Freva-Bot-Model": botModel,
       },
       body: JSON.stringify({

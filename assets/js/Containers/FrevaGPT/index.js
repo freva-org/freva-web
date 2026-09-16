@@ -458,8 +458,6 @@ function FrevaGPT() {
         }
 
         const decodedValues = decoder.decode(value);
-        //eslint-disable-next-line no-console
-        console.log(decodedValues);
         const result = extractData(decodedValues, varObj, buffer);
         varObj = result.varObj;
         buffer = result.buffer;

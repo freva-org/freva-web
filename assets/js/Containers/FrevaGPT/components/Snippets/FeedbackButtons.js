@@ -44,12 +44,13 @@ function FeedbackButtons({ elementIndex, givenValue }) {
       setThumb("");
     }
 
-    const response = await fetchWithAuth(`/api/chatbot/userfeedback/`, {
+    const response = await fetchWithAuth(`/api/chatbot/userfeedback`, {
       method: "POST",
       credentials: "same-origin",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
+        "X-Freva-Thread-Id": grepThreadID(),
       },
       body: JSON.stringify({
         thread_id: grepThreadID(),

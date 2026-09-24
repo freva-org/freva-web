@@ -54,8 +54,6 @@ services:
       <<: *healthcheck
       test: ["CMD", "healthchecks", "-s", "mysql"]
     restart: unless-stopped
-    ports:
-      - 3306:3306
 
   cache:
     image: ghcr.io/freva-org/freva-redis:latest

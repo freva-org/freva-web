@@ -66,6 +66,7 @@ migrate: _wait-for-db
     python manage.py createsuperuser --noinput --username admin --email admin@example.com 2>/dev/null \
       || echo "superuser 'admin' already exists"
     python manage.py shell -c 'from django.contrib.sites.models import Site; Site.objects.update_or_create(id=1, defaults={"domain": "localhost", "name": "localhost"})'
+    python manage.py migrate --run-syncdb
 
 # Install node packages when package-lock.json changed since the last run
 [group('setup')]
@@ -90,7 +91,7 @@ stac-browser:
 # Record a few dummy plugin runs so history and results have content
 [group('setup')]
 dummy-data:
-    sh docker/dummy_plugin_runs.sh
+    su -s /bin/sh ${DEV_USER:-root} docker/dummy_plugin_runs.sh
 
 [private]
 _wait-for-db:

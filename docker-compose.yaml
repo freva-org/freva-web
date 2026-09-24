@@ -54,6 +54,8 @@ services:
       <<: *healthcheck
       test: ["CMD", "healthchecks", "-s", "mysql"]
     restart: unless-stopped
+    ports:
+      - 3306:3306
 
   cache:
     image: ghcr.io/freva-org/freva-redis:latest
@@ -168,6 +170,13 @@ services:
       mongo: {condition: service_healthy}
       solr: {condition: service_healthy}
       keycloak: {condition: service_started}
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD",
+             "python",
+             "-c",
+             "import requests; requests.get('http://keycloak:8080/realms/freva/.well-known/openid-configuration').raise_for_status()"
+      ]
     command: ["just", "rest"]
 
   data-loader:
@@ -212,6 +221,9 @@ services:
         EXTRA_PACKAGES: >-
           nodejs patch pytest pytest-env pytest-cov requests-mock mock isort black
         WORKDIR: /opt/freva_web
+        DEV_USER: ${USER:-freva}
+        DEV_UID: ${DEV_UID:-1000}
+        DEV_GID: ${DEV_GID:-1000}
     volumes: &web-volumes
       - .:/opt/freva_web
       - ./docker/dev/container.just:/opt/dev/container.just:ro
@@ -243,9 +255,11 @@ services:
       STAC_BROWSER: 1
       CHAT_BOT: ${CHAT_BOT:-0}
       COLUMNS: 140
+      DEV_USER: ${USER:-freva}
     depends_on:
       db: {condition: service_healthy}
       cache: {condition: service_healthy}
+      freva-rest: {condition: service_healthy}
     command: ["just", "web"]
 
   frontend:

@@ -24,15 +24,18 @@ jobs:
           cache-environment: false
           cache-downloads: false
           init-shell: bash
-      - name: Generate self signed certs
-        run: >
-          micromamba run -n freva-web python docker/config/dev-utils.py gen-certs
       - name: Set up services
-        run: docker compose up -d --remove-orphans
+        run: >
+          docker compose -f docker-compose.yaml -f docker/dev/ci.compose.yaml
+          up -d --wait db solr
       - name: Lint js code and python
-        run: micromamba run -n freva-web make lint
+        run: micromamba run -n freva-web just -f docker/dev/container.just -d . lint
       - name: Run build checks for js and python smoke tests
-        run: micromamba run -n freva-web make tests
+        run: micromamba run -n freva-web just -f docker/dev/container.just -d . test
+        env:
+          EVALUATION_SYSTEM_CONFIG_FILE: ${{ github.workspace }}/docker/local-eval-system.conf
+          EVALUATION_SYSTEM_DRS_CONFIG_FILE: ${{ github.workspace }}/docker/drs_config.toml
+          DEV_MODE: "1"
 
   build-docker-image:
     runs-on: ubuntu-latest

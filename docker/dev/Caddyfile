@@ -1,0 +1,122 @@
+# Development reverse proxy, the counterpart of production's
+# /etc/nginx/conf.d/01-freva-rest.conf. Keep the two in step: every route
+# below mirrors a `location` there, in the same order, and the places where
+# dev deliberately differs are marked DIVERGES.
+#
+# Everything is same-origin on http://localhost:8000, as in production:
+#   /api/freva-nextgen/...  freva-rest     (plus the legacy aliases below)
+#   /api/chatbot/...        ClimateClaw, if one is running
+#   /static/preview/...     plugin previews, straight from the volume
+#   /assets/bundles/, /ws   webpack dev server (dev only)
+#   everything else         Django
+{
+	# Plain HTTP on :80 inside the container; compose publishes it as :8000.
+	auto_https off
+	admin off
+}
+
+:80 {
+	# nginx: proxy_intercept_errors + error_page 502 503 504 =503.
+	# Only fires when an upstream is unreachable, e.g. while freva-rest
+	# restarts after an edit; errors Django or freva-rest return pass through.
+	handle_errors 502 503 504 {
+		respond "{err.status_code}: this service is starting or restarting. Try again in a moment." 503
+	}
+
+	# nginx: location /api/freva-nextgen/
+	handle /api/freva-nextgen/* {
+		header Access-Control-Allow-Origin "*"
+		header Access-Control-Allow-Methods "GET, POST, HEAD, OPTIONS"
+		header Access-Control-Allow-Headers "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization"
+
+		@preflight method OPTIONS
+		handle @preflight {
+			header Access-Control-Allow-Credentials "true"
+			header Access-Control-Max-Age "57542400"
+			header Content-Type "text/plain charset=UTF-8"
+			respond 204
+		}
+		handle {
+			reverse_proxy freva-rest:7777
+		}
+	}
+
+	# nginx: the legacy locations, rewritten onto /api/freva-nextgen/.
+	handle_path /api/databrowser/metadata_search/* {
+		rewrite * /api/freva-nextgen/databrowser/metadata-search{path}
+		reverse_proxy freva-rest:7777
+	}
+	handle_path /api/databrowser/data_search/* {
+		rewrite * /api/freva-nextgen/databrowser/data-search{path}
+		reverse_proxy freva-rest:7777
+	}
+	handle_path /api/freva-data-portal/* {
+		rewrite * /api/freva-nextgen/data-portal{path}
+		reverse_proxy freva-rest:7777
+	}
+	handle_path /api/auth/* {
+		rewrite * /api/freva-nextgen/auth{path}
+		reverse_proxy freva-rest:7777
+	}
+
+	# nginx: location /api/chatbot/
+	# The upstream is not part of this stack. Point CHATBOT_UPSTREAM at a
+	# running ClimateClaw (host:port) to use it; otherwise this route
+	# answers with the 503 above.
+	handle /api/chatbot/* {
+		header Access-Control-Allow-Origin "*"
+		header Access-Control-Allow-Methods "GET, POST, HEAD, OPTIONS"
+		header Access-Control-Allow-Headers "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization,X-Request-Id,X-Freva-Thread-Id"
+		header Access-Control-Expose-Headers "X-Request-Id"
+
+		@preflight method OPTIONS
+		handle @preflight {
+			header Access-Control-Allow-Credentials "true"
+			header Access-Control-Max-Age "57542400"
+			header Content-Type "text/plain charset=UTF-8"
+			respond 204
+		}
+		handle {
+			reverse_proxy {$CHATBOT_UPSTREAM:climateclaw:8000} {
+				header_up X-Freva-Project {$FREVA_PROJECT:freva-dev}
+				header_up X-Freva-Rest-URL http://freva-rest:7777
+				header_up X-Freva-Config-Path {$FREVA_CONFIG_PATH:/opt/freva_web/docker/dev/evaluation_system.conf}
+				header_up X-Request-Id {http.request.uuid}
+				# proxy_buffering off: stream tokens as they arrive.
+				flush_interval -1
+				transport http {
+					read_timeout 900s
+					write_timeout 900s
+				}
+			}
+		}
+	}
+
+	# nginx: location ^~ /static/preview/
+	handle_path /static/preview/* {
+		root * /srv/preview
+		header Cache-Control "no-store"
+		file_server
+	}
+
+	# DIVERGES: webpack dev server. Django's templates load the bundles from
+	# /assets/bundles/ and the hot-reload client connects to /ws, both
+	# same-origin, so HMR works through this proxy. Production serves
+	# prebuilt bundles from /static/ instead.
+	handle /assets/bundles/* {
+		reverse_proxy frontend:8086
+	}
+	handle /ws {
+		reverse_proxy frontend:8086
+	}
+
+	# DIVERGES: nginx serves /static/ (and /robots.txt, /favicon.svg) from
+	# the collectstatic output with long cache lifetimes. Here those fall
+	# through to Django's runserver, which serves them from the source tree
+	# so an edit shows up without a collectstatic run.
+
+	# nginx: location /
+	handle {
+		reverse_proxy web:8000
+	}
+}

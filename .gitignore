@@ -30,3 +30,8 @@ base/migrations/*
 stac-browser/
 !.github
 !.github/**
+
+# Dev stack: the freva-nextgen checkout `just setup` clones next to the
+# dev images, and the STAC Browser build output.
+/docker/freva-nextgen/
+/static_root/stac-browser/

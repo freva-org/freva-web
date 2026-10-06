@@ -1,0 +1,12 @@
+# CI runs lint and tests on the runner, not in the dev containers, and the
+# tests expect MySQL and Solr on localhost (docker/local-eval-system.conf).
+# Only CI publishes them, so the dev stack never fights a local install for
+# the ports:
+#
+#   docker compose -f docker-compose.yaml -f docker/dev/ci.compose.yaml \
+#     up -d --wait db solr
+services:
+  db:
+    ports: ["127.0.0.1:3306:3306"]
+  solr:
+    ports: ["127.0.0.1:8983:8983"]

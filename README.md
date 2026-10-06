@@ -19,63 +19,64 @@ services.
 python docker/config/dev-utils.py gen-certs
 ```
 
-## Installation of the required packages and infrastructure
 
-The web ui is being deployed in a dedicated anaconda environment. Hence
-you need [anaconda](https://www.anaconda.com/products/distribution) to be
-installed on you computer. Once anaconda is set up the installation of all
-required packages is quite simple:
+## The development stack
 
-```console
-conda env create -f dev-env.yml
-source .envrc
-```
+The web app needs several components to run: the node.js frontend, the
+Django backend, the freva-rest API with its data-loader, and the databases
+behind them. The development stack runs all of them in containers, with the
+code bind-mounted so every part reloads when you edit it. The only things to
+install are [just](https://just.systems) and either docker or podman with
+compose.
 
-> ``📝`` If conda has issues solving dependencies you can install and use
-         [mamba](https://mamba.readthedocs.io/en/latest/user_guide/mamba.html)
-         instead of anaconda. This is recommended because the dependency solvers
-         that ship with mamba are usually much faster than those conda uses.
+- Once per clone, fetch freva-nextgen into `docker/` and build the dev images:
+    ```console
+    just setup
+    ```
+- Start everything (Ctrl-C stops it), or the same in the background:
+    ```console
+    just dev
+    just up
+    ```
+- Open <http://localhost:8000> and log in with your user name and the
+  password `secret`. Django's admin is `admin` / `secret`, Keycloak's admin
+  console is on <http://localhost:8080> (`keycloak` / `secret`).
 
-### Additional services running on docker
+After `just setup`, a plain `docker compose up` (or `podman-compose up`)
+starts the same stack. With podman, `COMPOSE=podman-compose just dev` makes
+the recipes use it.
 
-The web ui will need a connection to a solr,
-[freva-databrowser](https://github.com/freva-org/freva-nextgen/) and
-mariadb service. This services can be deployed using
-[`docker-compose`](https://docs.docker.com/compose/install/).
-
-```console
-USER=$(whoami) docker compose up -d
-```
-
-When finished, tear down the environment with
-
-```console
-docker compose down
-```
-
-
-You can also use podman (`python -m pip install podman-compose`):
+Run `just` on its own to list every recipe. The ones you will use most:
 
 ```console
-USER=$(whoami) pomand-compose up -d
+just logs web freva-rest   # follow some services' logs
+just shell                 # a shell in the web container
+just manage shell          # any Django management command
+just restart freva-rest    # e.g. after changing freva-rest's dependencies
+just update-nextgen        # fast-forward docker/freva-nextgen if it is on main
+just lint                  # the same checks CI runs
+just test
+just nuke                  # delete all databases and start over
 ```
+
+Everything is served same-origin through a Caddy proxy whose routes mirror
+the production nginx configuration (`docker/dev/Caddyfile`). freva-nextgen is
+cloned into `docker/freva-nextgen`: check out a branch there to develop the
+web app against it. The recipes that run inside the containers are in
+`docker/dev/container.just`.
+
+
+Admin user name. `just` evaluates environment variables and will define the user
+name stored in the `$USER` environment variable as standard admin user. You can
+override this user name by explicitly setting the  `USER` environment variable.
 
 ```console
-podman-compose down
+USER=my-user just rebuild up
 ```
 
-By default the compose command will evaluate environment variables defined in
-the `.evn` file. If you want to override these variables, for example to disable
-using self signed certificates you can create another environment file and
-pass the `--env-file` variable. The following setup would disable certificates:
+`just` will choose the current user name by default. You will be able to login
+via the dev keycloak instance with that username, password: `secret`.
 
-```console
-cat .env.dev
-REDIS_USER=redis
-REDIS_PASSWD=secret
-
-USER=$(whoami) docker compose --env-file .env.dev up -d
-```
 
 ### Chatbot Configuration
 
@@ -100,7 +101,7 @@ Choose one of running Freva instances and get the values from there and set via 
 | ---------- | ------------------------------------------------------------------------------- |
 | `CHAT_BOT` | Set to `"1"` to activate the chatbot, `"0"` to disable it (default is disabled) |
 
-> [!NOTE]  
+> [!NOTE]
 > When setting these environment variables, ensure you use the same well-known configuration (especially OIDC_DISCOVERY_URL) that the running Freva instance is using. This ensures both the chatbot and development environment use consistent authentication and configuration settings, allowing them to "speak the same auth language" and integrate seamlessly with the existing Freva infrastructure.
 
 ### Running tests
@@ -116,49 +117,6 @@ python -m pytest -vv tests
 ```
 
 
-
-## Using GNU `make`:
-Currently the web app needs multiple components to run. These are:
-
-- A java script front end via node.js
-- The freva restAPI.
-- The django web backend.
-
-Future development aims at replacing the django backend by the freva restAPI.
-Until this this is done the two components have to be deployed together.
-
-We have created a Makefile that sets up a development version of the web. You
-can use:
-
-- To *setup* / *initialise* the nodejs, freva restAPI and django servers use:
-    ```console
-    make setup
-    ```
-- To *run* node, freva restAPI and django servers use:
-    ```console
-    make run
-    ```
-- To use both `setup` and `run` command use just use make:
-    ```console
-    make
-    ```
-- To stop the servers use:
-    ```console
-    make stop
-    ```
-
-
-> ``📝`` If you have created a custom environment file when starting the docker
-> containers you can export the path the custom environment file by
-> using the `DOCKER_ENV_FILE` environment variable:
-> `DOCKER_ENV_FILE=.env.dev make run`
-
-
-The django and npm development servers will write output into `runserver.log` and
-`npm.log`. You can observe the output of the processes using `tail -f` or something
-similar.
-
-> ``📝`` You need a Node version of at least 16.5 along a npm version of 8.19
 
 # The Production container
 This section only briefly describes the docker image that is automatically
@@ -245,7 +203,7 @@ it to the registry. To do so please follow the following steps.
 - After you have pushed the version changes to the main branch you can trigger
   the release procedure:
     ```console
-    make release
+    just release
     ```
 This will check the current version of the `main` branch and trigger
 a GitHub continuous integration pipeline to create the new release. The procedure

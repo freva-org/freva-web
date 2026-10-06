@@ -34,7 +34,7 @@ jobs:
       - name: Build STAC Browser at the pinned commit
         run: |
           touch .env
-          make setup-stacbrowser
+          bash docker/build-stac-browser.sh
   reconcile:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
@@ -90,7 +90,7 @@ jobs:
           touch .env
           set -o pipefail
           if STAC_BROWSER_REF="${{ steps.resolve.outputs.new }}" \
-               make setup-stacbrowser 2>&1 | tee build.log; then
+               bash docker/build-stac-browser.sh 2>&1 | tee build.log; then
             echo "green=true" >> "$GITHUB_OUTPUT"
           else
             echo "green=false" >> "$GITHUB_OUTPUT"
@@ -112,7 +112,7 @@ jobs:
             short() { git -C "$SCB" rev-parse --short "$1" 2>/dev/null || echo "$1"; }
             SHORT_NEW=$(short "$NEW"); SHORT_OLD=$(short "$OLD")
             SUBJECT=$(git -C "$SCB" log -1 --format='%s' "$NEW" 2>/dev/null || echo "")
-            echo "Bumps the pinned [STAC Browser](https://github.com/radiantearth/stac-browser) commit that \`make setup-stacbrowser\` builds."
+            echo "Bumps the pinned [STAC Browser](https://github.com/radiantearth/stac-browser) commit that \`bash docker/build-stac-browser.sh\` builds."
             echo ""
             echo "**Upstream bump:** \`$SHORT_OLD\` to \`$SHORT_NEW\`"
             echo ""
@@ -140,7 +140,7 @@ jobs:
             echo ""
             if [ "${{ steps.build.outputs.green }}" = "true" ]; then
               echo "---"
-              echo "🕊️ \`make setup-stacbrowser\` built cleanly at the new commit; this lands once CI is green."
+              echo "🕊️ \`bash docker/build-stac-browser.sh\` built cleanly at the new commit; this lands once CI is green."
             else
               echo "---"
               echo "### 🫤🥊 Build failed at the new upstream commit"

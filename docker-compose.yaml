@@ -1,98 +1,295 @@
----
+# Freva web development stack.
+#
+#   just setup      once: clones freva-nextgen, builds the dev images
+#   just dev        everything, foreground (or: docker compose up)
+#
+# Then open http://localhost:8000 (Keycloak admin: http://localhost:8080).
+# Works the same with podman-compose.
+#
+# Code is bind-mounted, never baked in: Django, webpack, freva-rest and the
+# data-loader all reload on edits. Each app service runs one recipe from
+# docker/dev/container.just; the backing services are the production
+# freva-service-config images. Everything the containers write lives in
+# named volumes, apart from the STAC Browser build and webpack-stats.json.
+#
+# The credentials are throwaway dev values, shared via the anchors below.
 name: freva-dev
+
+x-redis-env: &redis-env
+  API_REDIS_HOST: redis://cache:6379
+  API_REDIS_USER: freva
+  API_REDIS_PASSWORD: secret
+
+x-mongo-env: &mongo-env
+  API_MONGO_HOST: mongo:27017
+  API_MONGO_USER: freva
+  API_MONGO_PASSWORD: secret
+  API_MONGO_DB: search_stats
+
+x-healthcheck: &healthcheck
+  interval: 10s
+  timeout: 5s
+  retries: 12
+  start_period: 20s
+
+x-dev-app: &dev-app
+  networks: [freva-dev]
+  init: true
+  restart: unless-stopped
+
 services:
+  # --- backing services -----------------------------------------------------
+
   db:
-    image: mariadb:11.3
+    image: ghcr.io/freva-org/freva-mysql:latest
+    networks: [freva-dev]
     environment:
       MYSQL_USER: freva
       MYSQL_PASSWORD: T3st
       MYSQL_DATABASE: freva
-      MYSQL_ROOT_PASSWORD: test_password_please_ignore
-    ports:
-      - "3306:3306"
+      MYSQL_ROOT_PASSWORD: secret
     volumes:
-      - ./docker/config/mysql/create_tables.sql:/docker-entrypoint-initdb.d/create_tables.sql:ro
-  solr:
-    networks:
-      - freva-rest
-    image: docker.io/solr:latest
-    environment:
-      CORE: files
-    ports:
-      - "8983:8983"
-    volumes:
-      - ./docker/config/solr/managed-schema.xml:/opt/solr/managed-schema.xml:ro
-      - ./docker/config/solr/create_cores.sh:/docker-entrypoint-initdb.d/create_cores.sh:ro
-      - ./docker/config/solr/synonyms.txt:/opt/solr/synonyms.txt:ro
-    hostname: solr
-    command: ["solr-foreground", "--user-managed"]
-  redis:
-    networks:
-      - freva-rest
+      - db-data:/data/db
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "healthchecks", "-s", "mysql"]
+    restart: unless-stopped
+
+  cache:
     image: ghcr.io/freva-org/freva-redis:latest
-    ports:
-      - "6379:6379"
+    networks: [freva-dev]
     environment:
-      REDIS_USERNAME: redis
+      REDIS_USERNAME: freva
       REDIS_PASSWORD: secret
-      REDIS_LOGLEVEL: debug
-      REDIS_SSL_CERTFILE: ${REDIS_CONTAINER_CERTFILE}
-      REDIS_SSL_KEYFILE: ${REDIS_CONTAINER_KEYFILE}
-    hostname: redis
-    volumes:
-      - ./docker/config/certs:/certs
-  keycloak:
-    networks:
-      - freva-rest
-    image: quay.io/keycloak/keycloak
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "healthchecks", "-s", "redis"]
+    restart: unless-stopped
+
+  mongo:
+    image: ghcr.io/freva-org/freva-mongo:latest
+    networks: [freva-dev]
     environment:
-      KEYCLOAK_ADMIN: keycloak
-      KEYCLOAK_ADMIN_PASSWORD: secret
-      KC_HEALTH_ENABLED: "true"
-      KC_METRICS_ENABLED: "true"
-      JAVA_OPTS_APPEND: "-Djava.net.preferIPv4Stack=true"
-    hostname: keycloak
+      <<: *mongo-env
+      API_MONGO_HOST: localhost:27017
     volumes:
-      - ./docker/config/certs:/certs
-      - ./docker/config/keycloak/import:/opt/keycloak/data/import:z
+      - mongo-data:/data/db
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "healthchecks", "-s", "mongo"]
+    restart: unless-stopped
+
+  solr:
+    image: ghcr.io/freva-org/freva-solr:latest
+    networks: [freva-dev]
+    environment:
+      API_SOLR_PORT: 8983
+      API_SOLR_CORE: files
+      API_SOLR_HEAP: 1g
+    volumes:
+      - solr-data:/data/db
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD", "healthchecks", "-s", "solr"]
+    restart: unless-stopped
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:latest
+    networks: [freva-dev]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: keycloak
+      KC_BOOTSTRAP_ADMIN_PASSWORD: secret
+      KC_HEALTH_ENABLED: "true"
+      JAVA_OPTS_APPEND: "-Djava.net.preferIPv4Stack=true"
+    volumes:
+      - ./docker/config/keycloak/import:/opt/keycloak/data/import:ro
     ports:
       - "8080:8080"
-      - "8443:8443"
-    command: |
-         start-dev
-         --hostname-strict=false
-         --import-realm
-         -Dkeycloak.migration.strategy=OVERWRITE_EXISTING
+    # The browser reaches Keycloak as localhost:8080, the containers as
+    # keycloak:8080. A fixed frontend hostname plus a dynamic backchannel
+    # gives both the same token issuer, so logins validate on either side.
+    command:
+      - start-dev
+      - --import-realm
+      - --hostname=http://localhost:8080
+      - --hostname-backchannel-dynamic=true
+    restart: unless-stopped
 
+  # Creates a Keycloak user named after you ($USER, password "secret").
   keycloak-bootstrap:
     image: docker.io/badouralix/curl-jq
-    depends_on:
-      - keycloak
+    networks: [freva-dev]
+    depends_on: [keycloak]
     volumes:
       - ./docker/create-user.sh:/create-user.sh:ro
-    restart: "no"
     environment:
-      USER: ${USER}
+      USER: ${USER:-freva}
       KEYCLOAK_ADMIN: keycloak
       KEYCLOAK_ADMIN_PASSWORD: secret
       KEYCLOAK_HOST: keycloak:8080
     entrypoint: ["sh", "/create-user.sh"]
-    networks:
-      - freva-rest
+    restart: "no"
 
-  mongodb:
-    networks:
-      - freva-rest
-    image: mongo:latest
+  # --- the code under development ---------------------------------------------
+
+  freva-rest:
+    <<: *dev-app
+    image: localhost/freva-dev/rest:latest
+    build:
+      context: ./docker/dev
+      dockerfile: Containerfile
+      args:
+        BASE_IMAGE: ghcr.io/freva-org/freva-rest-api:2607.0.0
+        CONDA_ENV: base
+        ENV_PREFIX: /opt/conda
+        # The editable install skips build isolation, so the build
+        # requirements of the freva-nextgen packages have to be present.
+        EXTRA_PACKAGES: flit-core appdirs
+        WORKDIR: /opt/freva-rest-server
+    volumes:
+      - ./docker/freva-nextgen:/src/freva-nextgen
+      - ./docker/dev/container.just:/opt/dev/container.just:ro
     environment:
-      MONGO_INITDB_ROOT_USERNAME: mongo
-      MONGO_INITDB_ROOT_PASSWORD: secret
-      MONGO_INITDB_DATABASE: search_stats
-    hostname: mongodb
-    ports:
-      - "27017:27017"
+      <<: [*redis-env, *mongo-env]
+      API_PORT: 7777
+      API_PROXY: http://localhost:8000
+      API_CONFIG: /src/freva-nextgen/freva-rest/src/freva_rest/api_config.toml
+      API_SOLR_HOST: solr:8983
+      API_SOLR_CORE: files
+      API_SERVICES: databrowser,stacapi,zarr-stream
+      API_OIDC_DISCOVERY_URL: http://keycloak:8080/realms/freva/.well-known/openid-configuration
+      API_OIDC_CLIENT_ID: freva
+      API_OIDC_CLIENT_SECRET: ""
+      API_OIDC_SCOPES: profile email
+      API_ADMIN_TOKEN_CLAIMS: resource_access.realm-management.roles:admin
+      COLUMNS: 140
+    depends_on:
+      cache: {condition: service_healthy}
+      mongo: {condition: service_healthy}
+      solr: {condition: service_healthy}
+      keycloak: {condition: service_started}
+    healthcheck:
+      <<: *healthcheck
+      test: ["CMD",
+             "python",
+             "-c",
+             "import requests; requests.get('http://keycloak:8080/realms/freva/.well-known/openid-configuration').raise_for_status()"
+      ]
+    command: ["just", "rest"]
 
+  data-loader:
+    <<: *dev-app
+    image: localhost/freva-dev/loader:latest
+    user: root
+    build:
+      context: ./docker/dev
+      dockerfile: Containerfile
+      args:
+        BASE_IMAGE: ghcr.io/freva-org/freva-data-loader:latest
+        CONDA_ENV: base
+        ENV_PREFIX: /opt/conda
+        EXTRA_PACKAGES: flit-core appdirs
+        WORKDIR: /opt/data-loader-worker
+        DEV_USER: ${USER:-freva}
+        DEV_UID: ${DEV_UID:-1000}
+        DEV_GID: ${DEV_GID:-1000}
+    volumes:
+      # Same path as in freva-rest: the mock data freva-rest indexes carries
+      # absolute paths, and the loader has to open those files.
+      - ./docker/freva-nextgen:/src/freva-nextgen
+      - ./docker/dev/container.just:/opt/dev/container.just:ro
+    environment:
+      <<: *redis-env
+      API_LOGLEVEL: DEBUG
+    depends_on:
+      cache: {condition: service_healthy}
+    command: ["just", "loader"]
+    userns_mode: keep-id
+
+  web:
+    <<: *dev-app
+    image: localhost/freva-dev/web:latest
+    build:
+      context: ./docker/dev
+      dockerfile: Containerfile
+      args:
+        BASE_IMAGE: ghcr.io/freva-org/freva-web:latest
+        CONDA_ENV: freva-web
+        ENV_PREFIX: /opt/conda/envs/freva-web
+        EXTRA_PACKAGES: >-
+          nodejs patch pytest pytest-env pytest-cov requests-mock mock isort black
+        WORKDIR: /opt/freva_web
+        DEV_USER: ${USER:-freva}
+        DEV_UID: ${DEV_UID:-1000}
+        DEV_GID: ${DEV_GID:-1000}
+    volumes: &web-volumes
+      - .:/opt/freva_web
+      - ./docker/dev/container.just:/opt/dev/container.just:ro
+      # Written by the containers, kept out of the checkout:
+      - node-modules:/opt/freva_web/node_modules
+      - django-migrations:/opt/freva_web/base/migrations
+      - preview:/data/preview
+      - ./docker/local-eval-system.conf:/opt/freva/evaluation_system.conf:ro
+    environment: &web-env
+      JUST_WORKING_DIRECTORY: /opt/freva_web
+      DEBUG_TOOLBAR_ANY_IP: 1
+      DEV_MODE: 1
+      EVALUATION_SYSTEM_CONFIG_FILE: /opt/freva/evaluation_system.conf
+      EVALUATION_SYSTEM_DRS_CONFIG_FILE: /opt/freva_web/docker/drs_config.toml
+      EVALUATION_SYSTEM_PLUGINS: /opt/freva_web/dummy_plugin,dummy
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: freva
+      DB_PASSWD: T3st
+      DB_NAME: freva
+      REDIS_HOST: cache
+      REDIS_PORT: 6379
+      REDIS_USER: freva
+      REDIS_PASSWD: secret
+      FREVA_REST_URL: http://freva-rest:7777
+      ALLOWED_HOSTS: localhost,127.0.0.1,web
+      CSRF_TRUSTED_ORIGINS: http://localhost:8000,http://127.0.0.1:8000
+      DJANGO_SUPERUSER_PASSWORD: secret
+      STAC_BROWSER: 1
+      CHAT_BOT: ${CHAT_BOT:-0}
+      COLUMNS: 140
+      DEV_USER: ${USER:-freva}
+    depends_on:
+      db: {condition: service_healthy}
+      cache: {condition: service_healthy}
+      freva-rest: {condition: service_healthy}
+    command: ["just", "web"]
+
+  frontend:
+    <<: *dev-app
+    image: localhost/freva-dev/web:latest
+    volumes: *web-volumes
+    environment:
+      <<: *web-env
+      # Bundles and the hot-reload socket go through the proxy, same-origin.
+      WEBPACK_DEV_HOST: 0.0.0.0
+      WEBPACK_DEV_PUBLIC_URL: ""
+    command: ["just", "frontend"]
+
+  proxy:
+    image: docker.io/library/caddy:2-alpine
+    networks: [freva-dev]
+    ports:
+      - "8000:80"
+    environment:
+      CHATBOT_UPSTREAM: ${CHATBOT_UPSTREAM:-climateclaw:8000}
+    volumes:
+      - ./docker/dev/Caddyfile:/etc/caddy/Caddyfile:ro
+      - preview:/srv/preview:ro
+    restart: unless-stopped
+
+volumes:
+  db-data:
+  mongo-data:
+  solr-data:
+  node-modules:
+  django-migrations:
+  preview:
 
 networks:
-  freva-rest:
-    driver: bridge
+  freva-dev:

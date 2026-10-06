@@ -126,6 +126,9 @@ STATIC_URL = "/static/"
 if not DEV:
     STATIC_ROOT = str(Path(PROJECT_ROOT) / "static")
 
+if DEBUG and os.environ.get("DEBUG_TOOLBAR_ANY_IP", "0") == "1":
+    DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": lambda request: True}
+
 INSTITUTION_LOGO = _get_logo(web_config.get("institution_logo", ""), PROJECT_ROOT)
 FREVA_LOGO = f"{STATIC_URL}img/by_freva_transparent.png"
 MAIN_COLOR = _get_conf_key(web_config, "main_color", "#ff6347", False)

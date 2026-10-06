@@ -94,7 +94,7 @@ jobs:
           sha256sum freva-web-bundle.tar.gz > freva-web-bundle.tar.gz.sha256
 
       - name: Upload bundle to tagged release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.repository.outputs.tag }}
           files: |
@@ -104,7 +104,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Upload bundle to latest release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: latest
           files: |

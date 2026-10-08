@@ -20,7 +20,7 @@ static/*
 static/preview/*
 static_root/img/favicon.svg
 tail/*
-Makefile
+justfile
 dummy_plugin
 tests
 docker-compose.yaml

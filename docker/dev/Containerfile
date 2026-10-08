@@ -1,0 +1,50 @@
+# One development image recipe for all three app services. docker-compose.yaml
+# builds it three times with different build args:
+#
+#   BASE_IMAGE      the released image to extend (web, rest-api, data-loader)
+#   CONDA_ENV       the micromamba env that image runs in (freva-web or base)
+#   ENV_PREFIX      that env's prefix, for PATH
+#   EXTRA_PACKAGES  conda-forge packages the service needs on top of just
+#   WORKDIR         where the service starts
+#
+# The source is never copied in: compose bind-mounts it, and the web
+# container runs it straight from the checkout while freva-rest and the
+# data-loader install theirs in editable mode on start (container.just).
+ARG BASE_IMAGE=ghcr.io/freva-org/freva-web:latest
+FROM ${BASE_IMAGE}
+
+ARG CONDA_ENV=freva-web
+ARG ENV_PREFIX=/opt/conda/envs/freva-web
+ARG EXTRA_PACKAGES=""
+ARG WORKDIR=/opt/freva_web
+ARG DEV_USER=""
+ARG DEV_UID=1000
+ARG DEV_GID=1000
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PATH=${ENV_PREFIX}/bin:/opt/conda/bin:$PATH \
+    JUST_JUSTFILE=/opt/dev/container.just \
+    USER=root \
+    # The bind-mounted checkouts belong to the host user; without this git
+    # refuses to touch them. Set via env so it needs no git binary at build.
+    GIT_CONFIG_COUNT=1 \
+    GIT_CONFIG_KEY_0=safe.directory \
+    GIT_CONFIG_VALUE_0=*
+
+RUN set -eux && \
+    micromamba install -y -q -n "${CONDA_ENV}" -c conda-forge --override-channels \
+        just ${EXTRA_PACKAGES} && \
+    micromamba clean -y -a
+
+WORKDIR ${WORKDIR}
+RUN set -eu; \
+    if [ -n "${DEV_USER}" ] && ! id -u "${DEV_USER}" >/dev/null 2>&1; then \
+        getent group "${DEV_GID}" >/dev/null || groupadd -g "${DEV_GID}" "${DEV_USER}"; \
+        useradd --no-create-home --shell /bin/sh -o -u "${DEV_UID}" -g "${DEV_GID}" "${DEV_USER}"; \
+    fi
+# Bypass the images' entrypoints: PATH above is all they set up anyway, and
+# a plain exec keeps `docker compose exec` and `run` behaving alike.
+ENTRYPOINT []
+CMD ["just"]

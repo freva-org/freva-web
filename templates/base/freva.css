@@ -226,6 +226,22 @@ footer h4 {
   border-radius: 8px;
 }
 
+.br-8-l {
+  border-radius: 8px 0 0 8px;
+}
+
+.br-8-t {
+  border-radius: 8px 8px 0 0;
+}
+
+.br-8-tl {
+  border-radius: 8px 0 0 0;
+}
+
+.br-8-b {
+  border-radius: 0 0 8px 8px;
+}
+
 .bot-hb-l {
   width: 8rem;
 }
@@ -256,9 +272,6 @@ footer h4 {
 }
 
 .bot-streaming-code {
-  background-color: #f6f6f6;
-  color: #2f3337;
-  font-size: 14px;
   padding: 1rem;
 }
 
@@ -269,4 +282,35 @@ footer h4 {
 .bot-chat-link {
   color: black !important;
   text-decoration: none !important;
+}
+
+/*------------------------ Bot code related stylings --------------------------*/
+.bc-color {
+  color: #abb2bf;
+}
+
+.bc-output-header {
+  padding: 5px 5px 5px 10px;
+  border-bottom: .1em solid #555;
+  color: #abb2bf;
+  background-color: #353A43;
+}
+
+.bc-code-header-tab {
+  border-bottom: .2em solid #ccc;
+}
+
+.bc-code-header {
+  background-color: #353A43;
+  border-bottom: .1em solid #555;
+}
+
+.bc-code-body {
+  color: #abb2bf;
+  background-color: #282c34;
+}
+
+.bc-code-margin {
+  width: 50px;
+  border-right: .1em solid #555;
 }

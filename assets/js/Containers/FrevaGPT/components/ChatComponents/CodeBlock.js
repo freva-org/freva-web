@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { Card, Collapse, Button } from "react-bootstrap";
-import { FaAngleDown, FaAngleUp, FaRegCopy } from "react-icons/fa";
+import { Collapse, Button } from "react-bootstrap";
+import { FaAngleDown, FaAngleUp, FaPython, FaRegCopy } from "react-icons/fa";
 
 import PropTypes from "prop-types";
 import hljs from "highlight.js";
@@ -52,10 +52,6 @@ function CodeBlock({ showCode, content }) {
     });
   }, []);
 
-  function localToggleShowCode() {
-    setLocalShowCode(!localShowCode);
-  }
-
   function copyCode() {
     const code = formatCode("Code", extractElements(content, "Code").content);
     navigator.clipboard.writeText(code);
@@ -68,63 +64,57 @@ function CodeBlock({ showCode, content }) {
     dispatch(setShowMessageToast(true));
   }
 
+  function renderCodeOptions() {
+    return (
+      <div className="d-flex align-items-center me-2">
+        <Button variant="link" onClick={copyCode}>
+          <span>
+            <FaRegCopy className="bc-color" size="20" />
+          </span>
+        </Button>
+        <FeedbackButtons
+          elementIndex={content[0].feedback_index}
+          givenValue={setGivenFeedbackValue(extractElements(content, "Code"))}
+          defaultColor="#abb2bf"
+        />
+      </div>
+    );
+  }
+
   return (
-    <>
-      <Card className="bot-shadow br-8 card-body border-0 border-bottom mb-3 bg-light">
-        <div className="d-flex justify-content-between">
-          <Button
-            variant="link"
-            className="m-0 p-0 d-inline-flex text-decoration-none"
-            onClick={() => {
-              localToggleShowCode();
-            }}
-          >
-            <strong className="text-secondary">Code</strong>
-            <span>
-              {localShowCode ? (
-                <FaAngleUp color="grey" size="20" />
-              ) : (
-                <FaAngleDown color="grey" size="20" />
-              )}
-            </span>
-          </Button>
-          <FeedbackButtons
-            elementIndex={content[0].feedback_index}
-            givenValue={setGivenFeedbackValue(extractElements(content, "Code"))}
-          />
+    <div className="mb-3">
+      <div
+        className={`d-flex justify-content-between bc-code-header align-items-center ${localShowCode ? "br-8-t" : "br-8 bot-shadow"}`}
+      >
+        <div
+          className={`p-2 bc-code-body ${localShowCode ? "bc-code-header-tab br-8-tl" : "br-8-l"}`}
+          role="button"
+          onClick={() => {
+            setLocalShowCode(!localShowCode);
+          }}
+        >
+          <FaPython /> Code {localShowCode ? <FaAngleUp /> : <FaAngleDown />}
         </div>
+        {localShowCode ? renderCodeOptions() : null}
+      </div>
 
-        <Collapse in={localShowCode} className="mt-2">
-          <div>
-            <Card className="shadow-sm">
-              <Card.Header className="bot-bg-lg">
-                <div className="d-flex justify-content-between align-items-center">
-                  python
-                  <Button variant="link" onClick={copyCode}>
-                    <span>
-                      <FaRegCopy color="grey" size="20" />
-                    </span>
-                  </Button>
-                </div>
-              </Card.Header>
-
-              <Card.Body
-                className="p-0 m-0 border-bottom"
-                key={`${content[0].id}-code`}
-              >
-                <pre className="m-0 codeblock">
-                  <code className="language-python">
-                    {formatCode("Code", codeContent.content)}
-                  </code>
-                </pre>
-              </Card.Body>
-              <CodeOutputBlock content={codeOutput} />
-            </Card>
-            <FilePreview content={fileOutput} />
+      <Collapse in={localShowCode} className="bn mb-3">
+        <div className="p-0 m-0 border-bottom" key={`${content[0].id}-code`}>
+          <div
+            className={`d-flex bc-code-body ${codeOutput && isEmpty(codeOutput.content) ? "br-8-b bot-shadow" : ""}`}
+          >
+            <div className="bc-code-margin"></div>
+            <pre className="m-0 codeblock">
+              <code className="language-python">
+                {formatCode("Code", codeContent.content)}
+              </code>
+            </pre>
           </div>
-        </Collapse>
-      </Card>
-    </>
+          <CodeOutputBlock content={codeOutput} />
+        </div>
+      </Collapse>
+      <FilePreview content={fileOutput} />
+    </div>
   );
 }
 

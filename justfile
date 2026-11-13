@@ -87,6 +87,16 @@ up: _check
 down:
     {{ compose }} down
 
+# Starting together with bot
+[group('stack')]
+botup: _check
+    {{compose}} -f docker-compose.bot.yaml build climateclaw-base
+    {{compose}} -f docker-compose.bot.yaml up -d
+
+[group('stack')]
+botdown: _check
+    {{compose}} -f docker-compose.bot.yaml down
+
 # Show what is running
 [group('stack')]
 ps:

@@ -1,0 +1,146 @@
+include:
+  - docker-compose.yaml
+
+x-bot-app-env: &bot-env
+  CLIMATECLAW_DEV: 1
+  CLIMATECLAW_DEBUG: 0
+  CLIMATECLAW_MONGODB_HOST: mongo
+  CLIMATECLAW_MONGODB_PORT: 27017
+  #API_MONGO_DB: search_stats
+  CLIMATECLAW_MONGODB_DATABASE_NAME: chatbot # The name of the MongoDB database to use for the storage of threads
+  CLIMATECLAW_MONGODB_COLLECTION_NAME: threads # The name of the MongoDB collection to use for the storage of threads
+  CLIMATECLAW_MONGODB_USER: freva
+  CLIMATECLAW_MONGODB_PASSWORD: secret
+
+services:
+  climateclaw-base:
+    build:
+      context: ../climateclaw/
+      dockerfile: ../climateclaw/docker/Dockerfile.base
+    image: ghcr.io/freva-org/climateclaw-base:latest
+    profiles:
+      - build-only
+
+  climateclaw:
+    image: climateclaw-dev
+    build:
+      context: ../climateclaw/
+      dockerfile: ../climateclaw/docker/climateclaw/Dockerfile
+    env_file: ../climateclaw/.env
+    environment:
+      <<: *bot-env
+    hostname: climateclaw-dev
+    ports:
+      - 8502:8502 # If either is unset, the default value will be used.
+      - 8600:8502 # localhost:8600/docs give FastAPI docs
+      - 5678:5678 # Port for debugpy
+    volumes:
+      - ../climateclaw/cache/:/app/cache
+      - ../climateclaw/logs/:/app/logs
+    networks:
+      - freva-dev
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8502/healthz')\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    depends_on:
+      mongo:
+        condition: service_healthy
+      litellm:
+        condition: service_healthy
+
+  rag-server:
+    image: rag-server-dev
+    build:
+      context: ../climateclaw/
+      dockerfile: ../climateclaw/docker/rag-server/Dockerfile
+    env_file: ../climateclaw/.env
+    hostname: rag-server-dev
+    environment:
+      <<: *bot-env
+      CLIMATECLAW_MCP_HOST: 0.0.0.0
+      CLIMATECLAW_MCP_PORT: 8050
+    volumes:
+      - ../climateclaw/resources:/app/resources:ro
+      - ../climateclaw/logs/:/app/logs
+    networks:
+      - freva-dev
+
+  code-server:
+    image: code-server-dev
+    build:
+      context: ../climateclaw/
+      dockerfile: ../climateclaw/docker/code-server/Dockerfile
+    env_file: ../climateclaw/.env
+    hostname: code-server-dev
+    environment:
+      <<: *bot-env
+      CLIMATECLAW_MCP_HOST: 0.0.0.0
+      CLIMATECLAW_MCP_PORT: 8051
+    ports:
+      - 8051:8051
+    cpus: 4
+    volumes:
+      - ../climateclaw/cache/:/app/cache
+      - ../climateclaw/logs/:/app/logs
+    networks:
+      - freva-dev
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8051/healthz')\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  web-search-server:
+    image: web-search-server-dev
+    build:
+      context: ../climateclaw/
+      dockerfile: ../climateclaw/docker/web-search-server/Dockerfile
+    env_file: ../climateclaw/.env
+    hostname: web-search-server-frv
+    environment:
+      <<: *bot-env
+      CLIMATECLAW_MCP_HOST: 0.0.0.0
+      CLIMATECLAW_MCP_PORT: 8052
+    ports:
+      - 8052:8052
+    networks:
+      - freva-dev
+    volumes:
+      - ../climateclaw/logs/:/app/logs
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8052/healthz')\""]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  litellm:
+    image: ghcr.io/berriai/litellm:v1.102.0
+    hostname: litellm-dev
+    volumes:
+      - ../climateclaw/litellm_config.dev.yaml:/app/config.yaml # Development config excludes the deployment-only vLLM model
+      - ../climateclaw/logs/:/app/logs
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - >
+        litellm
+        --config=/app/config.yaml
+        --port=4000
+        --num_workers=8
+        --run_gunicorn
+        2>&1 | tee -a /app/logs/litellm.log
+    env_file: ../climateclaw/.env
+    ports:
+      - "4000:4000" # Expose LiteLLM port to the host machine for direct access if needed, e.g. local dev
+    networks:
+      - freva-dev
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:4000/health/liveliness')\""]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

@@ -164,7 +164,7 @@ jobs:
       - name: Open / update green PR
         id: green-pr
         if: steps.resolve.outputs.changed == 'true' && steps.build.outputs.green == 'true'
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ steps.tok.outputs.token }}
           add-paths: stac-browser-patches/stac-browser.commit
@@ -192,7 +192,7 @@ jobs:
       - name: Open / update red draft PR
         id: red-pr
         if: steps.resolve.outputs.changed == 'true' && steps.build.outputs.green == 'false'
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ steps.tok.outputs.token }}
           add-paths: stac-browser-patches/stac-browser.commit

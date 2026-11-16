@@ -11,6 +11,7 @@ x-bot-app-env: &bot-env
   CLIMATECLAW_MONGODB_COLLECTION_NAME: threads # The name of the MongoDB collection to use for the storage of threads
   CLIMATECLAW_MONGODB_USER: freva
   CLIMATECLAW_MONGODB_PASSWORD: secret
+  CLIMATECLAW_VLLM_LITELLM_MODEL: "hosted_vllm/deepseek-v4.1-flash"
 
 services:
   climateclaw-base:
@@ -144,3 +145,5 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    environment:
+      <<: *bot-env

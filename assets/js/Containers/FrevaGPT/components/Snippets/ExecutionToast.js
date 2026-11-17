@@ -6,10 +6,10 @@ import { FaInfoCircle } from "react-icons/fa";
 
 import PropTypes from "prop-types";
 
-function ExecutionToast({ showToast }) {
+function ExecutionToast({ details }) {
   return (
     <>
-      {showToast ? (
+      {details.status ? (
         <div
           aria-live="polite"
           aria-atomic="true"
@@ -21,9 +21,9 @@ function ExecutionToast({ showToast }) {
             style={{ zIndex: 1 }}
           >
             <Toast className="bot-shadow br-8">
-              <Toast.Body>
+              <Toast.Body className="d-flex align-items-center">
                 <FaInfoCircle color="grey" size="20" className="me-2" />
-                Executing previous code blocks...
+                <div>{details.message}</div>
               </Toast.Body>
             </Toast>
           </ToastContainer>
@@ -34,7 +34,7 @@ function ExecutionToast({ showToast }) {
 }
 
 ExecutionToast.propTypes = {
-  showToast: PropTypes.bool,
+  details: PropTypes.object,
 };
 
 export default ExecutionToast;

@@ -22,10 +22,11 @@ def run_cmd(inp: str) -> int:
 
 def test_migrations():
     """Test migrations."""
-    assert run_cmd("makemigrations base") == 0
-    assert run_cmd("migrate --fake-initial --noinput") == 0
+    assert run_cmd("makemigrations base --skip-checks") == 0
+    assert run_cmd("migrate --fake-initial --noinput --skip-checks") == 0
     assert run_cmd("migrate --fake contenttypes") == 0
     assert run_cmd("collectstatic --noinput") == 0
+    assert run_cmd("migrate --run-syncdb") == 0
 
 
 def test_chek():
@@ -42,8 +43,7 @@ def test_createsuperuser(random_admin):
     """The the python manage.py createsuperuser command."""
     assert (
         run_cmd(
-            f"createsuperuser --username {random_admin} "
-            "--email test@bla.com --noinput"
+            f"createsuperuser --username {random_admin} --email test@bla.com --noinput"
         )
         == 0
     )

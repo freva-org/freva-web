@@ -296,6 +296,10 @@ footer h4 {
   background-color: #353A43;
 }
 
+.bc-output-tabs {
+  padding: 5px 5px 5px 10px;
+}
+
 .bc-code-header-tab {
   border-bottom: .2em solid #ccc;
 }
@@ -313,4 +317,8 @@ footer h4 {
 .bc-code-margin {
   width: 50px;
   border-right: .1em solid #555;
+}
+
+.left {
+  margin-left: auto;
 }

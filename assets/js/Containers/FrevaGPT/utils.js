@@ -150,11 +150,12 @@ export function extractElements(content, variant) {
   return content.filter((elem) => elem.variant === variant)[0];
 }
 
-export function extractOutput(content) {
+export function extractOutput(content, mode) {
   /***
    * Extracts CodeOutput based on given content type
    *
    * @param {object} content - Object containing output details
+   * @param {string} mode - Either "output" or "error"
    * @returns {string} - String containing formatted output
    */
   let output = "";
@@ -163,7 +164,12 @@ export function extractOutput(content) {
     if (typeof content.content === "string") {
       output = content.content;
     } else {
-      const valid_keys = ["stdout", "stderr", "error", "result_repr"];
+      let valid_keys = [];
+      if (mode === "output") {
+        valid_keys = ["stdout", "result_repr"];
+      } else {
+        valid_keys = ["stderr", "error"];
+      }
 
       for (const [key, value] of Object.entries(content.content)) {
         if (valid_keys.includes(key) && value !== "") {

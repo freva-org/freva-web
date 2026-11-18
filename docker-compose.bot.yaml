@@ -4,6 +4,8 @@ include:
 x-bot-app-env: &bot-env
   CLIMATECLAW_DEV: 1
   CLIMATECLAW_DEBUG: 0
+
+x-bot-mongodb-env: &bot-mongodb-env
   CLIMATECLAW_MONGODB_HOST: mongo
   CLIMATECLAW_MONGODB_PORT: 27017
   #API_MONGO_DB: search_stats
@@ -11,7 +13,6 @@ x-bot-app-env: &bot-env
   CLIMATECLAW_MONGODB_COLLECTION_NAME: threads # The name of the MongoDB collection to use for the storage of threads
   CLIMATECLAW_MONGODB_USER: freva
   CLIMATECLAW_MONGODB_PASSWORD: secret
-  CLIMATECLAW_VLLM_LITELLM_MODEL: "hosted_vllm/deepseek-v4.1-flash"
 
 services:
   climateclaw-base:
@@ -29,7 +30,7 @@ services:
       dockerfile: ../climateclaw/docker/climateclaw/Dockerfile
     env_file: ../climateclaw/.env
     environment:
-      <<: *bot-env
+      <<: [*bot-env, *bot-mongodb-env]
     hostname: climateclaw-dev
     ports:
       - 8502:8502 # If either is unset, the default value will be used.
@@ -146,4 +147,4 @@ services:
       retries: 3
       start_period: 40s
     environment:
-      <<: *bot-env
+      CLIMATECLAW_VLLM_LITELLM_MODEL: "hosted_vllm/deepseek-v4.1-flash"

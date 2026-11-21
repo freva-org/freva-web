@@ -1,16 +1,21 @@
-import React, { useEffect } from "react";
-import { Card } from "react-bootstrap";
+import React, { useEffect, useState } from "react";
 
 import { isEmpty } from "lodash";
 
 import PropTypes from "prop-types";
 import hljs from "highlight.js";
 
+import { Collapse, Button } from "react-bootstrap";
+import { FaAngleDown, FaAngleUp } from "react-icons/fa";
+
 import "highlight.js/styles/atom-one-dark.css";
 import { extractOutput } from "../../utils";
 
 function CodeOutputBlock({ content }) {
-  const output = extractOutput(content);
+  const [showOutput, setShowOutput] = useState(true);
+  const [showError, setShowError] = useState(false);
+  const output = (extractOutput(content, "output") ?? "").trim() || "No output";
+  const error = extractOutput(content, "error");
 
   useEffect(() => {
     // hilights all code elements
@@ -22,13 +27,48 @@ function CodeOutputBlock({ content }) {
   }, []);
 
   function renderCodeOutput(content) {
-    if (!isEmpty(output)) {
+    if (!isEmpty(output) || !isEmpty(error)) {
       return (
-        <Card.Footer className="p-0 m-0" key={`${content.id}-codeoutput`}>
-          <pre className="codeoutputblock m-0">
-            <code className="bot-code-output">{output}</code>
-          </pre>
-        </Card.Footer>
+        <div
+          className={`bc-output-header p-0 ${showOutput ? "" : "br-8-b bot-shadow"}`}
+          key={`${content.id}-codeoutput`}
+          
+        >
+          <div className="d-flex">
+              <div 
+                className={`bc-output-tabs bc-color ${(!showError && showOutput) ? "bc-code-header-tab" : ""}`}
+                role="button"
+                onClick={() => setShowError(false)}
+              >
+                Output
+              </div>
+              {error ? 
+                <div
+                  className={`bc-output-tabs text-danger ${(showError && showOutput) ? "bc-code-header-tab" : ""}`}
+                  role="button"
+                  onClick={() => setShowError(true)}
+                >
+                  Problems
+                </div> : null}
+              
+
+              <div className="left d-flex align-items-center me-2">
+                <Button variant="link" onClick={() => setShowOutput(!showOutput)}>
+                  <span>
+                    {showOutput ? <FaAngleUp className="bc-color" /> : <FaAngleDown className="bc-color" />}
+                  </span>
+                </Button>
+              </div>
+          </div>
+          
+          <Collapse in={showOutput}>
+            <pre
+              className={`codeoutputblock m-0 ${showOutput ? "br-8-b bot-shadow" : ""}`}
+            >
+              <code>{showError ? error : output}</code>
+            </pre>
+          </Collapse>
+        </div>
       );
     } else {
       return null;
@@ -43,3 +83,6 @@ CodeOutputBlock.propTypes = {
 };
 
 export default CodeOutputBlock;
+
+//{showOutput ? <FaAngleUp /> : <FaAngleDown />}
+//className={`bc-output-header ${showOutput ? "" : "br-8-b bot-shadow"}`}

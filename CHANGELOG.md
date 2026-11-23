@@ -1,8 +1,13 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+##[v2611.0.0]
+### Changed
+- Chatbot: Adapted justfile to start frontend and bot components
+### Added
+- Chatbot: Compose file for starting bot services
 ##[v2609.1.2]
-### Chnaged
+### Changed
 - Utilizing message details from server for execution toast
 ##[v2609.1.1]
 ### Changed

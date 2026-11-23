@@ -47,6 +47,7 @@ function AssistantBlock({ content, streaming }) {
           <FeedbackButtons
             elementIndex={content.feedback_index}
             givenValue={setGivenFeedbackValue(content)}
+            defaultColor="grey"
           />
         ) : null}
       </Card>

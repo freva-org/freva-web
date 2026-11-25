@@ -40,7 +40,7 @@ function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
   const [botOkay, setBotOkay] = useState(undefined);
   const [botModelList, setBotModelList] = useState([]);
   const [hideBotModelList, setHideBotModelList] = useState(true);
-  const [localBot, setLocalBot] = useState(false);
+  //const [localBot, setLocalBot] = useState(false);
 
   useBotSelect(hideBotModelList, setHideBotModelList, hideBotModelList);
 
@@ -48,7 +48,7 @@ function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
     setShowThreadHistory(!showThreadHistory);
   }
 
-  function toggleLocalModel() {
+  /*  function toggleLocalModel() {
     const newValue = !localBot;
     setLocalBot(newValue);
     if (newValue) {
@@ -56,7 +56,7 @@ function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
     } else {
       dispatch(setBotModel(""));
     }
-  }
+  }*/
 
   return (
     <Container className="mb-2">
@@ -87,12 +87,12 @@ function BotHeader({ createNewChat, showThreadHistory, setShowThreadHistory }) {
           {botOkay ? (
             <Row>
               <Col className="align-content-center">
-                <Form.Switch
+                {/*<Form.Switch
                   type="switch"
                   id="model-switch"
                   label="Self-hosted model"
                   onClick={toggleLocalModel}
-                />
+                />*/}
               </Col>
               <Col className="align-content-center">
                 <Form.Switch

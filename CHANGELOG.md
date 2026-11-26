@@ -1,6 +1,9 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+##[v2611.1.0]
+### Added
+- Chatbot: Added feature to show all file types and download them on click
 ##[v2611.0.0]
 ### Changed
 - Chatbot: Adapted justfile to start frontend and bot components

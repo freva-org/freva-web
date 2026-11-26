@@ -50,7 +50,11 @@ function BotInput({ loading, handleSubmit, handleStop }) {
     <Col id="botInput">
       <InputGroup className="mb-2 pb-2">
         <InputGroup.Text className="bot-shadow bg-white">
-          {botModel === "" ? <FaHome color="grey" /> : <FaGlobe color="grey" />}
+          {botModel === "local" ? (
+            <FaHome color="grey" />
+          ) : (
+            <FaGlobe color="grey" />
+          )}
         </InputGroup.Text>
         <FormControl
           as="textarea"

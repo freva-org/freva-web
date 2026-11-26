@@ -2,7 +2,7 @@ import * as constants from "./constants";
 
 const frevaGPTInitialState = {
   conversation: [],
-  botModel: "",
+  botModel: "local",
   showCode: true,
   showMessageToast: false,
   lastVariant: "User",

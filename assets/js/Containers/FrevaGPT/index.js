@@ -317,6 +317,7 @@ function FrevaGPT() {
         setExecutionRunning({
           status: varObj.content.busy,
           message: varObj.content.detail,
+          progress: varObj.content.progress,
         });
       }
     }

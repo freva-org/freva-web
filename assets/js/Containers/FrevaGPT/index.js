@@ -67,6 +67,7 @@ function FrevaGPT() {
   const [executionRunning, setExecutionRunning] = useState({
     status: false,
     message: "",
+    progress: { current: 0, total: 0 },
   });
 
   const [showThreadHistory, setShowThreadHistory] = useState(false);

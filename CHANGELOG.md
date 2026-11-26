@@ -1,6 +1,11 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+##[v2611.1.1]
+### Removed
+- Chatbot: Removed model switch
+### Changed
+- Chatbot: Set default bot model as "local"
 ##[v2611.1.0]
 ### Added
 - Chatbot: Added feature to show all file types and download them on click

@@ -1,6 +1,11 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## [v2611.1.2]
+### Changed
+- Chatbot: Adapted message below downloadable files to be less alarming
+### Fixed
+- Chatbot: Excluded ServerHint from Variant setiing to re-enable prober loading texts
 ##[v2611.1.1]
 ### Removed
 - Chatbot: Removed model switch

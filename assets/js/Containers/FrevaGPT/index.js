@@ -280,7 +280,9 @@ function FrevaGPT() {
      * @param {object} varObj - Object containing current varaint and content
      */
     dispatch(addElement(varObj));
-    dispatch(setLastVariant(varObj.variant));
+    if (varObj.variant !== "ServerHint") {
+      dispatch(setLastVariant(varObj.variant));
+    }
     if (chatExceedsWindow()) {
       setShowScrollButtons(true);
     }

@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 
 import { isEmpty } from "lodash";
 
-import { FaExclamationTriangle } from "react-icons/fa";
+import { FaInfoCircle } from "react-icons/fa";
 
 import FileItem from "../Snippets/FileItem";
 
@@ -31,10 +31,9 @@ function FilePreview({ content }) {
             ))}
           </ul>
           {!isEmpty(otherFiles) ? (
-            <span className="text-danger">
-              <FaExclamationTriangle className="me-2" />
-              Please be aware that the generated files could contain faulty or
-              malicious content.
+            <span className="text-secondary">
+              <FaInfoCircle className="me-2" />
+              Always check generated content
             </span>
           ) : null}
         </>
